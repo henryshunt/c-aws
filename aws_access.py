@@ -93,8 +93,7 @@ def page_now():
             Rain_Phr = str(round(Rain_Phr_record["Rain"], 2)) + " mm"
 
     return flask.render_template("index.html",
-                                 caws_name = config.caws_name,
-                                 caws_location = config.caws_location,
+                                 aws_location = config.aws_location,
                                  AirT = AirT, ExpT = ExpT, RelH = RelH,
                                  DewP = DewP, WSpd = WSpd, WDir = WDir,
                                  WGst = WGst, SunD = SunD, Rain = Rain,
