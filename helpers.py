@@ -42,10 +42,10 @@ def remaining_space(directory):
 
 def utc_to_local(config, utc):
     localised = pytz.utc.localize(utc.replace(tzinfo = None))
-    return localised.astimezone(config.caws_time_zone).replace(tzinfo = None)
+    return localised.astimezone(config.aws_time_zone).replace(tzinfo = None)
 
 def local_to_utc(config, local):
-    localised = config.caws_time_zone.localize(local.replace(tzinfo = None))
+    localised = config.aws_time_zone.localize(local.replace(tzinfo = None))
     return localised.astimezone(pytz.utc).replace(tzinfo = None)
 
 def day_bounds_utc(config, local, inclusive):
