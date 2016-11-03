@@ -85,7 +85,9 @@ if config.camera_logging == True:
 current_dir = os.path.dirname(os.path.realpath(__file__))
 
 try:
-    pass
+##    subprocess.Popen(["lxterminal", "-e", "python3",
+##                      os.path.join(current_dir, "aws_data.py")],
+##                     shell = True)
 except: helpers.init_exit("11")
 
 if (config.reports_uploading == True or
@@ -94,10 +96,15 @@ if (config.reports_uploading == True or
     config.camera_uploading == True):
 
     try:
-        pass
+##        subprocess.Popen(["lxterminal", "-e", "python3",
+##                          os.path.join(current_dir, "aws_support.py")],
+##                         shell = True)
     except: helpers.init_exit("12")
 
 if config.local_network_server == True:
     try:
-        pass
+##        subprocess.Popen(["lxterminal", "-e", "python3",
+##                          os.path.join(current_dir, "aws_access.py"),
+##                          start_time.strftime("%Y-%m-%dT%H:%M:%S")],
+##                         shell = True)
     except: helpers.init_exit("13")
