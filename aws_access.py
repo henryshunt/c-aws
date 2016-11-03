@@ -388,18 +388,17 @@ def page_camera():
 def page_about():
     startup_time = "no data"; EncT = "no data"; CPUT = "no data"
     internal_space = "no data"; camera_space = "no data"
-    backup_space = "no data"
 
     utc = datetime.utcnow(); utc_second = utc.second
     utc = utc.replace(second = 0, microsecond = 0)
-    caws_elevation = str(config.aws_elevation) + " m asl."
+    aws_elevation = str(config.aws_elevation) + " m asl."
 
-    # Format software startup time
+    # Format software environment startup time
     if start_time != None:
         startup_time = (helpers.utc_to_local(config, start_time)
                         .strftime("%d/%m/%Y at %H:%M:%S"))
 
-    # Get computer environment data
+    # Get hardware environment data
     record = analysis.record_for_time(config, utc, DbTable.UTCENVIRON)
 
     # Try previous minute if no record for current minute
@@ -409,7 +408,7 @@ def page_about():
 
         # Return to current minute if no record for previous minute
         if record == False or record == None:
-              utc += timedelta(minutes = 1)
+            utc += timedelta(minutes = 1)
             
     data_time = helpers.utc_to_local(config, utc).strftime("%H:%M")
 
@@ -433,16 +432,15 @@ def page_about():
             camera_space = str(round(_camera_space, 2)) + " gb"
     
     return flask.render_template("about.html",
-                                 caws_location = config.aws_location,
-                                 caws_time_zone = config.aws_time_zone,
-                                 caws_latitude = config.aws_latitude,
-                                 caws_longitude = config.aws_longitude,
-                                 caws_elevation = aws_elevation,
-                                 startup_time = startup_time,
+                                 aws_location = config.aws_location,
+                                 aws_time_zone = config.aws_time_zone,
+                                 aws_latitude = config.aws_latitude,
+                                 aws_longitude = config.aws_longitude,
+                                 aws_elevation = aws_elevation,
+                                 start_time = startup_time,
                                  EncT = EncT, CPUT = CPUT,
                                  internal_space = internal_space,
                                  camera_space = camera_space,
-                                 backup_space = backup_space,
                                  data_time = data_time)
 
 def data_camera(file_name):
@@ -533,12 +531,13 @@ def data_command(command):
 
 
 # ENTRY POINT ==================================================================
-config = ConfigData().load()
+config.load()
 
 # -- PROCESS ARGS ---------------------------------------------------------------
 if len(sys.argv) == 2:
     start_time = datetime.strptime(sys.argv[1], "%Y-%m-%dT%H:%M:%S")
 else: start_time = datetime.utcnow()
+print(start_time)
 
 # -- CREATE SERVER -------------------------------------------------------------
 server = flask.Flask(__name__, static_folder = "server",
