@@ -21,6 +21,7 @@ config = ConfigData()
 
 if __name__ == "__main__":
     rem_space = helpers.remaining_space("/")
+    print(rem_space)
     if rem_space == None or rem_space < 500: sys.exit(1)
 
     # Cannot start ICAWS software without a configuration profile
