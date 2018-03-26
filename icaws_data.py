@@ -93,10 +93,7 @@ if __name__ == "__main__":
         if free_space == None or free_space < 5: sys.exit(1)
 
     # Check graph directory if configuration modifier is active
-    if config.day_graph_generation == True or
-            config.month_graph_generation == True or
-            config.year_graph_generation == True:
-
+    if config.is_generates_graphs() == True:
         if not os.path.isdir(config.graph_directory):
             try:
                 os.makedirs(config.graph_directory)
@@ -105,18 +102,7 @@ if __name__ == "__main__":
     # Start data support and data access subprocesses
     current_dir = os.path.dirname(os.path.realpath(__file__))
 
-    if (config.today_graph_generation == True or
-            config.month_graph_generation == True or
-            config.year_graph_generation == True or
-            config.report_uploading == True or
-            config.statistic_uploading == True or
-            config.camera_uploading == True or
-            config.today_graph_uploading == True or
-            config.month_graph_uploading == True or
-            config.year_graph_uploading == True or
-            config.integrity_checks == True or
-            config.backups == True):
-            
+    if config.is_needs_support() == True:
         subprocess.Popen(["lxterminal -e python3 "
             + current_dir + "icaws_support.py"], shell = True)
     
