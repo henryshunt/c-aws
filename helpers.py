@@ -4,6 +4,5 @@ def remaining_space(directory):
     """ Returns the amount of remaining space for non-root users in gigabytes
     """
     disk = os.statvfs(directory)
-
     non_root_space = float(disk.f_bsize * disk.f_bavail)
-    return totalAvailSpaceNonRoot / 1024 / 1024 / 1024
+    return non_root_space / 1024 / 1024 / 1024
