@@ -4,6 +4,7 @@
 
 import sys
 import os
+import time
 
 import sqlite3
 
@@ -14,6 +15,7 @@ import helpers
 print("          ICAWS Data Acquisition Software, Version 4 - 2018, Henry Hunt         ")
 print("********************************************************************************\n")
 print("                          DO NOT TERMINATE THIS PROGRAM                         ")
+time.sleep(2.5)
 
 
 config = ConfigData()
