@@ -68,3 +68,11 @@ if __name__ == "__main__":
                                 ")")
                 database.commit()
         except: sys.exit(1)
+
+    # Verify camera drive if modifier is activated
+    if config.camera_logging == True:
+        if config.camera_drive == None: sys.exit(1)
+        if not os.path.isdir(config.camera_drive): sys.exit(1)
+
+        free_space = helpers.remaining_space(config.camera_drive)
+        if free_space == None or free_space < 1: sys.exit(1)
