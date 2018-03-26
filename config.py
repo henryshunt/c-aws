@@ -11,11 +11,11 @@ class ConfigData():
     def load(self):
         """ Loads the data from the config.ini file in the current directory
         """
-        if not os.path.isfile("config.ini"):
-            return False
+        if not os.path.isfile("config.ini"): return None
 
-        parser = configparser.ConfigParser()
-        parser.read("config.ini")
+        try:
+            parser = configparser.ConfigParser()
+            parser.read("config.ini")
 
-        self.database_path = parser.get("DataStores", "DatabasePath")
-        return True
+            self.database_path = parser.get("DataStores", "DatabasePath")
+        except: return None
