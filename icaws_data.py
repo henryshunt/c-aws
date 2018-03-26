@@ -1,6 +1,7 @@
-# ICAWS Data Acquisition Program
-#  responsible for measuring and logging data parameters, and for generating
-#  statistics. This is the entry point for the ICAWS software
+""" ICAWS Data Acquisition Program
+      Responsible for measuring and logging data parameters, and for generating
+      statistics. This is the entry point for the ICAWS software
+"""
 
 import sys
 import os
@@ -23,7 +24,7 @@ config = ConfigData()
 
 if __name__ == "__main__":
     free_space = helpers.remaining_space("/")
-    if free_space == None or free_space < 0.5: sys.exit(1)
+    if free_space == None or free_space < 1: sys.exit(1)
 
     # Cannot start ICAWS software without a configuration profile
     config_load = config.load()
@@ -69,10 +70,20 @@ if __name__ == "__main__":
                 database.commit()
         except: sys.exit(1)
 
-    # Verify camera drive if modifier is activated
+    # Verify camera drive if modifier is activated    
     if config.camera_logging == True:
         if config.camera_drive == None: sys.exit(1)
         if not os.path.isdir(config.camera_drive): sys.exit(1)
 
         free_space = helpers.remaining_space(config.camera_drive)
-        if free_space == None or free_space < 1: sys.exit(1)
+        if free_space == None or free_space < 5: sys.exit(1)
+
+        # TODO: #1
+    
+    # Verify backup drive if modifier is activated    
+    if config.backups == True:
+        if config.backup_drive == None: sys.exit(1)
+        if not os.path.isdir(config.backup_drive): sys.exit(1)
+
+        free_space = helpers.remaining_space(config.backup_drive)
+        if free_space == None or free_space < 5: sys.exit(1)

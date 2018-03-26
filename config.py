@@ -10,6 +10,7 @@ class ConfigData():
         self.camera_drive = None
         self.backup_drive = None
         self.camera_logging = None
+        self.backups = None
 
     def load(self):
         """ Loads the data from the config.ini file in the current directory
@@ -25,6 +26,7 @@ class ConfigData():
             self.backup_drive = parser.get("DataStores", "BackupDrive")
             self.camera_logging = (parser
                 .getboolean("ModeSwitches", "CameraLogging"))
+            self.backups = (parser.getboolean("ModeSwitches", "Backups"))
         except: return None
 
         return True
