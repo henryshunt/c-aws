@@ -5,7 +5,7 @@ class ConfigData():
     database_path = None
 
     # Loads the config.ini file from the current directory
-    def load():
+    def load(self):
         if not os.path.isfile("config.ini"):
             return False
 
