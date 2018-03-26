@@ -104,7 +104,7 @@ if __name__ == "__main__":
     # Wait for next minute to begin to ensure proper average calculations
     while True:
         if datetime.now().second != 0:
-            time.sleep(0.5)
+            time.sleep(0.1)
         else: break
 
     # Start data logging and record start time
