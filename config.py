@@ -10,6 +10,7 @@ class ConfigData():
         self.camera_drive = None
         self.backup_drive = None
         self.camera_logging = None
+        self.local_network_server = None
         self.backups = None
 
     def load(self):
@@ -25,8 +26,10 @@ class ConfigData():
             self.camera_drive = parser.get("DataStores", "CameraDrive")
             self.backup_drive = parser.get("DataStores", "BackupDrive")
             self.camera_logging = (parser
-                .getboolean("ModeSwitches", "CameraLogging"))
-            self.backups = (parser.getboolean("ModeSwitches", "Backups"))
+                .getboolean("ConfigModifiers", "CameraLogging"))
+            self.local_network_server = (parser
+                .getboolean("ConfigModifiers", "LocalNetworkServer"))
+            self.backups = (parser.getboolean("ConfigModifiers", "Backups"))
         except: return None
 
         return True

@@ -4,7 +4,9 @@
 """
 
 import sys
+import subprocess
 import os
+from datetime import datetime, timedelta
 import time
 
 import sqlite3
@@ -13,13 +15,14 @@ from config import ConfigData
 import helpers
 
 
-print("          ICAWS Data Acquisition Software, Version 4 - 2018, Henry Hunt         ")
-print("********************************************************************************\n")
-print("                          DO NOT TERMINATE THIS PROGRAM                         ")
+print("          ICAWS Data Acquisition Software, Version 4 - 2018, Henry Hunt"
+    + "\n*********************************************************************"
+    + "***********\n\n                          DO NOT TERMINATE THIS PROGRAM")
 time.sleep(2.5)
 
 
 config = ConfigData()
+data_start_time = None
 
 
 if __name__ == "__main__":
@@ -33,7 +36,7 @@ if __name__ == "__main__":
     if config.database_path == None: sys.exit(1)
     if not os.path.isdir(os.path.dirname(config.database_path)): sys.exit(1)
 
-    # Create new database if one doesn't exist
+    # Create a new database if one doesn't exist already
     if not os.path.isfile(config.database_path):
         try:
             with sqlite3.connect(config.database_path) as database:
@@ -70,7 +73,7 @@ if __name__ == "__main__":
                 database.commit()
         except: sys.exit(1)
 
-    # Verify camera drive if modifier is activated    
+    # Check camera drive if configuration modifier is active
     if config.camera_logging == True:
         if config.camera_drive == None: sys.exit(1)
         if not os.path.isdir(config.camera_drive): sys.exit(1)
@@ -78,12 +81,32 @@ if __name__ == "__main__":
         free_space = helpers.remaining_space(config.camera_drive)
         if free_space == None or free_space < 5: sys.exit(1)
 
+        # Check camera is connected to system
         # TODO: #1
     
-    # Verify backup drive if modifier is activated    
+    # Check backup drive if configuration modifier is active
     if config.backups == True:
         if config.backup_drive == None: sys.exit(1)
         if not os.path.isdir(config.backup_drive): sys.exit(1)
 
         free_space = helpers.remaining_space(config.backup_drive)
         if free_space == None or free_space < 5: sys.exit(1)
+
+    # Start data support and data access subprocesses
+    current_dir = os.path.dirname(os.path.realpath(__file__))
+    subprocess.Popen(["lxterminal -e python3 "
+        + current_dir + "icaws_support.py"], shell = True)
+    
+    if config.local_network_server == True:
+        subprocess.Popen(["lxterminal -e python3 "
+            + current_dir + "icaws_access.py"], shell = True)
+
+    # Wait for next minute to begin to ensure proper average calculations
+    while True:
+        if datetime.now().second != 0:
+            time.sleep(0.5)
+        else: break
+
+    # Start data logging and record start time
+    data_start_time = datetime.now().replace(second = 0, microsecond = 0)
+    print("active")
