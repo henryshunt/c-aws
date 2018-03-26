@@ -23,3 +23,5 @@ class ConfigData():
             self.camera_drive = parser.get("DataStores", "CameraDrive")
             self.backup_drive = parser.get("DataStores", "BackupDrive")
         except: return None
+
+        return True
