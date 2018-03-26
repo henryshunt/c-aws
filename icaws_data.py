@@ -104,11 +104,11 @@ if __name__ == "__main__":
 
     if config.is_needs_support() == True:
         subprocess.Popen(["lxterminal -e python3 "
-            + current_dir + "icaws_support.py"], shell = True)
+                          + current_dir + "icaws_support.py"], shell = True)
     
     if config.local_network_server == True:
         subprocess.Popen(["lxterminal -e python3 "
-            + current_dir + "icaws_access.py"], shell = True)
+                          + current_dir + "icaws_access.py"], shell = True)
 
     # Wait for next minute to begin to ensure proper average calculations
     while True:
