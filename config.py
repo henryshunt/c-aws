@@ -4,10 +4,13 @@ import configparser
 class ConfigData():
     
     def __init__(self):
+        """ Initialises instance variables for each config.ini parameter
+        """
         self.database_path = None
 
-    # Loads the config.ini file from the current directory
     def load(self):
+        """ Loads the data from the config.ini file in the current directory
+        """
         if not os.path.isfile("config.ini"):
             return False
 
