@@ -28,6 +28,8 @@ if __name__ == "__main__":
     
     if config_load == False: sys.exit(1)
     if config.database_path == None: sys.exit(1)
+    print(os.path.dirname(config.database_path))
+    if not os.path.exists(os.path.dirname(config.database_path)): sys.exit(1)
 
     # Make new database if one doesn't exist
     if not os.path.isfile(config.database_path):
