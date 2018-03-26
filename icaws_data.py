@@ -31,10 +31,12 @@ if __name__ == "__main__":
 
     # Cannot start ICAWS software without a configuration profile
     config_load = config.load()
-    
     if config_load == None: sys.exit(1)
-    if config.database_path == "": sys.exit(1)
-    if not os.path.isdir(os.path.dirname(config.database_path)): sys.exit(1)
+
+    if not os.path.isdir(os.path.dirname(config.database_path)):
+        try:
+            os.makedirs(os.path.dirname(config.database_path))
+        except: sys.exit(1)
 
     # Create a new database if one doesn't exist already
     if not os.path.isfile(config.database_path):
@@ -42,40 +44,39 @@ if __name__ == "__main__":
             with sqlite3.connect(config.database_path) as database:
                 cursor = database.cursor()
                 cursor.execute("CREATE TABLE utcReports (" +
-                                    "Time TEXT PRIMARY KEY NOT NULL," +
-                                    "AirT REAL, ExpT REAL, RelH REAL," +
-                                    "DewP REAL, WSpd REAL, WDir REAL," +
-                                    "WGst REAL, SunD REAL, Rain REAL," +
-                                    "StaP REAL, PTen REAL, MSLP REAL," +
-                                    "ST10 REAL, ST30 REAL, ST00 REAL" +
-                                ")")
+                                   "Time TEXT PRIMARY KEY NOT NULL," +
+                                   "AirT REAL, ExpT REAL, RelH REAL," +
+                                   "DewP REAL, WSpd REAL, WDir REAL," +
+                                   "WGst REAL, SunD REAL, Rain REAL," +
+                                   "StaP REAL, PTen REAL, MSLP REAL," +
+                                   "ST10 REAL, ST30 REAL, ST00 REAL" +
+                               ")")
                 cursor.execute("CREATE TABLE utcEnviron (" +
-                                    "Time TEXT PRIMARY KEY NOT NULL," +
-                                    "EncT REAL, CPUT REAL" +
-                                ")")
+                                   "Time TEXT PRIMARY KEY NOT NULL," +
+                                   "EncT REAL, CPUT REAL" +
+                               ")")
                 cursor.execute("CREATE TABLE localStats (" +
-                                    "Date TEXT PRIMARY KEY NOT NULL," +
-                                    "AirT_Min REAL, AirT_Max REAL," +
-                                    "AirT_Avg REAL, RelH_Min REAL," +
-                                    "RelH_Max REAL, RelH_Avg REAL," +
-                                    "DewP_Min REAL, DewP_Max REAL," +
-                                    "DewP_Avg REAL, WSpd_Max REAL," +
-                                    "WSpd_Avg REAL, WDir_Avg REAL," +
-                                    "WGst_Max REAL, WGst_Avg REAL," +
-                                    "SunD_Ttl REAL, Rain_Ttl REAL," +
-                                    "MSLP_Min REAL, MSLP_Max REAL," +
-                                    "MSLP_Avg REAL, TS10_Min REAL," +
-                                    "TS10_Max REAL, TS10_Avg REAL," +
-                                    "TS30_Min REAL, TS30_Max REAL," +
-                                    "TS30_Avg REAL, TS00_Min REAL," +
-                                    "TS00_Max REAL, TS00_Avg REAL" +
-                                ")")
+                                   "Date TEXT PRIMARY KEY NOT NULL," +
+                                   "AirT_Min REAL, AirT_Max REAL," +
+                                   "AirT_Avg REAL, RelH_Min REAL," +
+                                   "RelH_Max REAL, RelH_Avg REAL," +
+                                   "DewP_Min REAL, DewP_Max REAL," +
+                                   "DewP_Avg REAL, WSpd_Max REAL," +
+                                   "WSpd_Avg REAL, WDir_Avg REAL," +
+                                   "WGst_Max REAL, WGst_Avg REAL," +
+                                   "SunD_Ttl REAL, Rain_Ttl REAL," +
+                                   "MSLP_Min REAL, MSLP_Max REAL," +
+                                   "MSLP_Avg REAL, TS10_Min REAL," +
+                                   "TS10_Max REAL, TS10_Avg REAL," +
+                                   "TS30_Min REAL, TS30_Max REAL," +
+                                   "TS30_Avg REAL, TS00_Min REAL," +
+                                   "TS00_Max REAL, TS00_Avg REAL" +
+                               ")")
                 database.commit()
         except: sys.exit(1)
 
     # Check camera drive if configuration modifier is active
     if config.camera_logging == True:
-        if config.camera_drive == None: sys.exit(1)
         if not os.path.isdir(config.camera_drive): sys.exit(1)
 
         free_space = helpers.remaining_space(config.camera_drive)
@@ -86,28 +87,20 @@ if __name__ == "__main__":
     
     # Check backup drive if configuration modifier is active
     if config.backups == True:
-        if config.backup_drive == None: sys.exit(1)
         if not os.path.isdir(config.backup_drive): sys.exit(1)
 
         free_space = helpers.remaining_space(config.backup_drive)
         if free_space == None or free_space < 5: sys.exit(1)
 
-    # Check server image directory if configuration midifier is active
+    # Check graph directory if configuration modifier is active
+    if config.day_graph_generation == True or
+            config.month_graph_generation == True or
+            config.year_graph_generation == True:
 
-    # Check endpoints if configuration modifiers are active
-    if config.report_uploading == True or config.statistic_uploading == True:
-        if config.remote_sql_server == "": sys.exit(1)
-
-    if config.today_graph_uploading == True or
-            config.month_graph_uploading == True or
-            config.year_graph_uploading == True or
-            camera_uploading ==  True:
-
-        if config.remote_ftp_server == "" or
-                config.remote_ftp_username == "" or
-                config.remote_ftp_password == "":
-
-            sys.exit(1)
+        if not os.path.isdir(config.graph_directory):
+            try:
+                os.makedirs(config.graph_directory)
+            except: sys.exit(1)
 
     # Start data support and data access subprocesses
     current_dir = os.path.dirname(os.path.realpath(__file__))
