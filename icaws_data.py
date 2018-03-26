@@ -33,7 +33,7 @@ if __name__ == "__main__":
     config_load = config.load()
     
     if config_load == None: sys.exit(1)
-    if config.database_path == None: sys.exit(1)
+    if config.database_path == "": sys.exit(1)
     if not os.path.isdir(os.path.dirname(config.database_path)): sys.exit(1)
 
     # Create a new database if one doesn't exist already
@@ -92,10 +92,40 @@ if __name__ == "__main__":
         free_space = helpers.remaining_space(config.backup_drive)
         if free_space == None or free_space < 5: sys.exit(1)
 
+    # Check server image directory if configuration midifier is active
+
+    # Check endpoints if configuration modifiers are active
+    if config.report_uploading == True or config.statistic_uploading == True:
+        if config.remote_sql_server == "": sys.exit(1)
+
+    if config.today_graph_uploading == True or
+            config.month_graph_uploading == True or
+            config.year_graph_uploading == True or
+            camera_uploading ==  True:
+
+        if config.remote_ftp_server == "" or
+                config.remote_ftp_username == "" or
+                config.remote_ftp_password == "":
+
+            sys.exit(1)
+
     # Start data support and data access subprocesses
     current_dir = os.path.dirname(os.path.realpath(__file__))
-    subprocess.Popen(["lxterminal -e python3 "
-        + current_dir + "icaws_support.py"], shell = True)
+
+    if (config.today_graph_generation == True or
+            config.month_graph_generation == True or
+            config.year_graph_generation == True or
+            config.report_uploading == True or
+            config.statistic_uploading == True or
+            config.camera_uploading == True or
+            config.today_graph_uploading == True or
+            config.month_graph_uploading == True or
+            config.year_graph_uploading == True or
+            config.integrity_checks == True or
+            config.backups == True):
+            
+        subprocess.Popen(["lxterminal -e python3 "
+            + current_dir + "icaws_support.py"], shell = True)
     
     if config.local_network_server == True:
         subprocess.Popen(["lxterminal -e python3 "
