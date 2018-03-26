@@ -39,7 +39,7 @@ if __name__ == "__main__":
                                 "DewP REAL, WSpd REAL, WDir REAL," +
                                 "WGst REAL, SunD REAL, Rain REAL," +
                                 "StaP REAL, PTen REAL, MSLP REAL," +
-                                "ST10 REAL, ST30 REAL, ST01 REAL," +
+                                "ST10 REAL, ST30 REAL, ST00 REAL" +
                             ")")
             cursor.execute("CREATE TABLE utcEnviron (" +
                                 "Time TEXT PRIMARY KEY NOT NULL," +
@@ -60,6 +60,6 @@ if __name__ == "__main__":
                                 "TS10_Max REAL, TS10_Avg REAL," +
                                 "TS30_Min REAL, TS30_Max REAL," +
                                 "TS30_Avg REAL, TS00_Min REAL," +
-                                "TS00_Max REAL, TS00_Avg REAL," +
+                                "TS00_Max REAL, TS00_Avg REAL" +
                             ")")
             database.commit()
