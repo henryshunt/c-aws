@@ -8,7 +8,7 @@ import os
 import sqlite3
 
 from config import ConfigData
-#import helpers
+import helpers
 
 
 print("          ICAWS Data Acquisition Software, Version 4 - 2018, Henry Hunt         ")
@@ -20,8 +20,8 @@ config = ConfigData()
 
 
 if __name__ == "__main__":
-    #rem_space = helpers.remaining_space("/")
-    #if rem_space == None or rem_space < 500: sys.exit(1)
+    rem_space = helpers.remaining_space("/")
+    if rem_space == None or rem_space < 500: sys.exit(1)
 
     # Cannot start ICAWS software without a configuration profile
     config_load = config.load()
@@ -30,7 +30,7 @@ if __name__ == "__main__":
     if config.database_path == None: sys.exit(1)
     if not os.path.exists(os.path.dirname(config.database_path)): sys.exit(1)
 
-    # Make new database if one doesn't exist
+    # Create new database if one doesn't exist
     if not os.path.isfile(config.database_path):
         with sqlite3.connect(config.database_path) as database:
             cursor = database.cursor()
