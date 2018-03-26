@@ -2,12 +2,13 @@
 #  responsible for measuring and logging data parameters, and for generating
 #  statistics. This is the entry point for the ICAWS software
 
+import sys
 import os
 
 import sqlite3
 
 from config import ConfigData
-import helpers
+#import helpers
 
 
 print("          ICAWS Data Acquisition Software, Version 4 - 2018, Henry Hunt         ")
@@ -19,8 +20,8 @@ config = ConfigData()
 
 
 if __name__ == "__main__":
-    rem_space = helpers.remaining_space("/")
-    if rem_space == None or rem_space < 500: sys.exit(1)
+    #rem_space = helpers.remaining_space("/")
+    #if rem_space == None or rem_space < 500: sys.exit(1)
 
     # Cannot start ICAWS software without a configuration profile
     config_load = config.load()

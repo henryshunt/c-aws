@@ -10,7 +10,7 @@ class ConfigData():
             return False
 
         parser = configparser.ConfigParser()
-        config.read("config.ini")
+        parser.read("config.ini")
 
-        database_path = config.get("DataStores", "DatabasePath")
+        database_path = parser.get("DataStores", "DatabasePath")
         return True
