@@ -23,7 +23,6 @@ print("          ICAWS Data Acquisition Software, Version 4 - 2018, Henry Hunt"
     + "***********\n\n                          DO NOT TERMINATE THIS PROGRAM")
 time.sleep(5)
 
-
 config = ConfigData()
 data_start_time = None
 
@@ -33,10 +32,13 @@ def every_minute():
         activate the camera and generate statistics
     """
     time.sleep(0.1)
-    gpio.output(18, gpio.HIGH)
+    gpio.output(24, gpio.HIGH)
+
+
     time.sleep(0.5)
-    gpio.output(18, gpio.LOW)
-    pass
+
+
+    gpio.output(24, gpio.LOW)
 
 def every_second():
     """ Triggered every second to read sensor values into a list for averaging
@@ -49,22 +51,22 @@ if __name__ == "__main__":
         gpio.setwarnings(False); gpio.setmode(gpio.BCM)
 
         # Setup error and data LED indicators on GPIO header
-        gpio.setup(17, gpio.OUT)
-        gpio.setup(18, gpio.OUT)
+        gpio.setup(23, gpio.OUT)
+        gpio.setup(24, gpio.OUT)
     except: helpers.exit_no_light("00")
 
     free_space = helpers.remaining_space("/")
-    if free_space == None or free_space < 1: helpers.exit("00")
+    if free_space == None or free_space < 1: helpers.exit("01")
 
     config_load = config.load()
-    if config_load == None: helpers.exit("01")
+    if config_load == None: helpers.exit("02")
 
     # Check data directory and create if doesn't exist
-    if config.data_directory == None: helpers.exit("02")
+    if config.data_directory == None: helpers.exit("03")
     if not os.path.isdir(config.data_directory):
         try:
             os.makedirs(config.data_directory)
-        except: helpers.exit("03")
+        except: helpers.exit("04")
 
     # Create a new database if one doesn't exist already
     if not os.path.isfile(config.database_path):
@@ -101,29 +103,28 @@ if __name__ == "__main__":
                                    "TS00_Max REAL, TS00_Avg REAL" +
                                ")")
                 database.commit()
-        except: helpers.exit("04")
+        except: helpers.exit("05")
 
     # Check camera drive if configuration modifier is active
     if config.camera_logging == True:
-        if config.camera_drive == None: helpers.exit("05")
-        if not os.path.isdir(config.camera_drive): helpers.exit("06")
+        if config.camera_drive == None: helpers.exit("06")
+        if not os.path.isdir(config.camera_drive): helpers.exit("07")
 
         free_space = helpers.remaining_space(config.camera_drive)
-        if free_space == None or free_space < 5: helpers.exit("07")
+        if free_space == None or free_space < 5: helpers.exit("08")
 
         # Check camera is connected to system
-        # TODO: #1 exit code 08
         try:
             with picamera.PiCamera() as camera: pass
-        except: helpers.exit("08")
+        except: helpers.exit("09")
     
     # Check backup drive if configuration modifier is active
     if config.backups == True:
-        if config.backup_drive == None: helpers.exit("09")
-        if not os.path.isdir(config.backup_drive): helpers.exit("10")
+        if config.backup_drive == None: helpers.exit("10")
+        if not os.path.isdir(config.backup_drive): helpers.exit("11")
 
         free_space = helpers.remaining_space(config.backup_drive)
-        if free_space == None or free_space < 5: helpers.exit("11")
+        if free_space == None or free_space < 5: helpers.exit("12")
 
     # Check graph directory if configuration modifier is active
     if (config.day_graph_generation == True or
@@ -133,13 +134,14 @@ if __name__ == "__main__":
         if not os.path.isdir(config.graph_directory):
             try:
                 os.makedirs(config.graph_directory)
-            except: helpers.exit("12")
+            except: helpers.exit("13")
 
     # Check endpoints if configuration modifiers are active
     if (config.report_uploading == True or
+        config.environment_uploading == True or
         config.statistic_uploading == True):
 
-        if config.remote_sql_server == None: helpers.exit("13")
+        if config.remote_sql_server == None: helpers.exit("14")
 
     if (config.camera_uploading == True or
         config.day_graph_uploading == True or
@@ -150,7 +152,7 @@ if __name__ == "__main__":
             config.remote_ftp_username == None or
             config.remote_ftp_password == None):
 
-            helpers.exit("14")
+            helpers.exit("15")
 
 
     # Start data support and data access subprocesses
@@ -160,6 +162,7 @@ if __name__ == "__main__":
         config.month_graph_generation == True or
         config.year_graph_generation == True or
         config.report_uploading == True or
+        config.environment_uploading == True or
         config.statistic_uploading == True or
         config.camera_uploading == True or
         config.day_graph_uploading == True or
@@ -176,17 +179,17 @@ if __name__ == "__main__":
                           + current_dir + "icaws_access.py"], shell = True)
 
     # Wait for next minute to begin to ensure proper averaging
-    gpio.output(18, gpio.HIGH)
+    gpio.output(24, gpio.HIGH)
     
     while True:
         if datetime.now().second != 0:
-            gpio.output(17, gpio.HIGH)
+            gpio.output(23, gpio.HIGH)
             time.sleep(0.1)
-            gpio.output(17, gpio.LOW)
+            gpio.output(23, gpio.LOW)
             time.sleep(0.1)
         else: break
 
-    gpio.output(18, gpio.LOW)
+    gpio.output(24, gpio.LOW)
 
     # Initialise GPIOs, start data logging and record start time
     data_start_time = datetime.now().replace(second = 0, microsecond = 0)
