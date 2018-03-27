@@ -23,3 +23,13 @@ def exit(code):
             sys.exit(1)
             
     except: sys.exit(1)
+
+def exit_without_indicator(code):
+    try:
+        with open("exit.txt", "w+") as file:
+            file.write("initialisation failure at {} with exit code {}"
+                       .format(datetime.now()
+                               .strftime("%Y-%m-%d %H:%M:%S"), code))
+            sys.exit(1)
+            
+    except: sys.exit(1)

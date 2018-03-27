@@ -9,6 +9,7 @@ import os
 from datetime import datetime, timedelta
 import time
 import picamera
+import RPi.GPIO as gpio
 
 import sqlite3
 from apscheduler.schedulers.blocking import BlockingScheduler
@@ -31,6 +32,7 @@ def every_minute():
     """ Triggered every minute to generate a report, add it to the database,
         activate the camera and generate statistics
     """
+    time.sleep(0.1)
     pass
 
 def every_second():
@@ -40,10 +42,19 @@ def every_second():
 
 
 if __name__ == "__main__":
+    try:
+        gpio.setwarnings(False)
+
+        # Initialise GPIO and LED for software error indication
+        gpio.setmode(gpio.BCM)
+        gpio.setup(11, gpio.OUT)
+        gpio.setup(12, gpio.out)
+    except: helpers.exit_without_indicator("00")
+
+
     free_space = helpers.remaining_space("/")
     if free_space == None or free_space < 1: helpers.exit("00")
 
-    # Cannot start ICAWS software without a configuration profile
     config_load = config.load()
     if config_load == None: helpers.exit("01")
 
