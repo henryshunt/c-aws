@@ -105,7 +105,7 @@ if __name__ == "__main__":
         config.month_graph_generation == True or
         config.year_graph_generation == True):
 
-        if not os.path.isdir(graph_directory):
+        if not os.path.isdir(config.graph_directory):
             try:
                 os.makedirs(config.graph_directory)
             except: helpers.exit("12")
