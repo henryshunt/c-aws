@@ -17,9 +17,9 @@ def remaining_space(directory):
 def exit(code):
     try:
         with open("exit.txt", "w+") as file:
-            file.write("at {}, ICAWS software terminated during "
-                + "initialisation with exit code {}".format(
-                    datetime.now(), code))
+            file.write("initialisation failure at {} with exit code {}"
+                       .format(datetime.now()
+                               .strftime("%Y-%m-%d %H:%M:%S"), code))
             sys.exit(1)
             
     except: sys.exit(1)
