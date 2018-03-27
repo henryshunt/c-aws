@@ -27,16 +27,17 @@ data_start_time = None
 
 if __name__ == "__main__":
     free_space = helpers.remaining_space("/")
-    if free_space == None or free_space < 1: sys.exit(1)
+    if free_space == None or free_space < 1: helpers.exit("01")
 
     # Cannot start ICAWS software without a configuration profile
     config_load = config.load()
-    if config_load == None: sys.exit(1)
+    if config_load == None: helpers.exit("02")
 
+    if config.database_path == None: helpers.exit("03")
     if not os.path.isdir(os.path.dirname(config.database_path)):
         try:
             os.makedirs(os.path.dirname(config.database_path))
-        except: sys.exit(1)
+        except: helpers.exit("04")
 
     # Create a new database if one doesn't exist already
     if not os.path.isfile(config.database_path):
@@ -73,36 +74,70 @@ if __name__ == "__main__":
                                    "TS00_Max REAL, TS00_Avg REAL" +
                                ")")
                 database.commit()
-        except: sys.exit(1)
+        except: helpers.exit("05")
 
     # Check camera drive if configuration modifier is active
     if config.camera_logging == True:
-        if not os.path.isdir(config.camera_drive): sys.exit(1)
+        if config.camera_drive == None: helpers.exit("06")
+        if not os.path.isdir(config.camera_drive): helpers.exit("07")
 
         free_space = helpers.remaining_space(config.camera_drive)
-        if free_space == None or free_space < 5: sys.exit(1)
+        if free_space == None or free_space < 5: helpers.exit("08")
 
         # Check camera is connected to system
-        # TODO: #1
+        # TODO: #1 exit code 09
     
     # Check backup drive if configuration modifier is active
     if config.backups == True:
-        if not os.path.isdir(config.backup_drive): sys.exit(1)
+        if config.backup_drive == None: helpers.exit("10")
+        if not os.path.isdir(config.backup_drive): helpers.exit("11")
 
         free_space = helpers.remaining_space(config.backup_drive)
-        if free_space == None or free_space < 5: sys.exit(1)
+        if free_space == None or free_space < 5: helpers.exit("12")
 
     # Check graph directory if configuration modifier is active
-    if config.is_generates_graphs() == True:
+    if (config.day_graph_generation == True or
+        config.month_graph_generation == True or
+        config.year_graph_generation == True):
+
+        if config.graph_directory == None: helpers.exit("13")
         if not os.path.isdir(config.graph_directory):
             try:
                 os.makedirs(config.graph_directory)
-            except: sys.exit(1)
+            except: helpers.exit("14")
+
+    # Check endpoints if configuration modifiers are active
+    if (config.report_uploading == True or
+        config.statistic_uploading == True):
+
+        if config.remote_sql_server == None: helpers.exit("15")
+
+    if (config.camera_uploading == True or
+        config.day_graph_uploading == True or
+        config.month_graph_uploading == True or
+        config.year_graph_uploading == True):
+
+        if (config.remote_ftp_server == None or
+            config.remote_ftp_username == None or
+            config.remote_ftp_password == None):
+
+            helpers.exit("15")
 
     # Start data support and data access subprocesses
     current_dir = os.path.dirname(os.path.realpath(__file__))
 
-    if config.is_needs_support() == True:
+    if (config.day_graph_generation == True or
+        config.month_graph_generation == True or
+        config.year_graph_generation == True or
+        config.report_uploading == True or
+        config.statistic_uploading == True or
+        config.camera_uploading == True or
+        config.day_graph_uploading == True or
+        config.month_graph_uploading == True or
+        config.year_graph_uploading == True or
+        config.integrity_checks == True or
+        config.backups == True):
+
         subprocess.Popen(["lxterminal -e python3 "
                           + current_dir + "icaws_support.py"], shell = True)
     
@@ -110,7 +145,7 @@ if __name__ == "__main__":
         subprocess.Popen(["lxterminal -e python3 "
                           + current_dir + "icaws_access.py"], shell = True)
 
-    # Wait for next minute to begin to ensure proper average calculations
+    # Wait for next minute to begin to ensure proper averaging
     while True:
         if datetime.now().second != 0:
             time.sleep(0.1)
