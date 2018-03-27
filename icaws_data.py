@@ -11,6 +11,7 @@ import time
 import picamera
 
 import sqlite3
+from apscheduler.schedulers.blocking import BlockingScheduler
 
 from config import ConfigData
 import helpers
@@ -24,6 +25,18 @@ time.sleep(2.5)
 
 config = ConfigData()
 data_start_time = None
+
+
+def every_minute():
+    """ Triggered every minute to generate a report, add it to the database,
+        activate the camera and generate statistics
+    """
+    pass
+
+def every_second():
+    """ Triggered every second to read sensor values into a list for averaging
+    """
+    pass
 
 
 if __name__ == "__main__":
@@ -156,6 +169,12 @@ if __name__ == "__main__":
             time.sleep(0.1)
         else: break
 
-    # Start data logging and record start time
+    # Initialise GPIOs, start data logging and record start time
     data_start_time = datetime.now().replace(second = 0, microsecond = 0)
+
+    event_scheduler = BlockingScheduler()
+    event_scheduler.add_job(every_minute, "cron", minute = "0-59")
+    event_scheduler.add_job(every_second, "cron", second = "0-59")
+    event_scheduler.start()
+
     print("active")
