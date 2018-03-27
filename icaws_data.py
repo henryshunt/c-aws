@@ -46,14 +46,12 @@ def every_second():
 
 if __name__ == "__main__":
     try:
-        gpio.setwarnings(False)
+        gpio.setwarnings(False); gpio.setmode(gpio.BCM)
 
-        # Initialise GPIO and LED for software error indication
-        gpio.setmode(gpio.BCM)
+        # Setup error and data LED indicators on GPIO header
         gpio.setup(17, gpio.OUT)
         gpio.setup(18, gpio.OUT)
-    except: helpers.exit_without_indicator("00")
-
+    except: helpers.exit_no_light("00")
 
     free_space = helpers.remaining_space("/")
     if free_space == None or free_space < 1: helpers.exit("00")
@@ -65,7 +63,7 @@ if __name__ == "__main__":
     if config.data_directory == None: helpers.exit("02")
     if not os.path.isdir(config.data_directory):
         try:
-            os.makedirs(comfig.data_directory)
+            os.makedirs(config.data_directory)
         except: helpers.exit("03")
 
     # Create a new database if one doesn't exist already

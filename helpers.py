@@ -27,7 +27,7 @@ def exit(code):
             
     except: sys.exit(1)
 
-def exit_without_indicator(code):
+def exit_no_light(code):
     try:
         with open("exit.txt", "w+") as file:
             file.write("initialisation failure at {} with exit code {}"
