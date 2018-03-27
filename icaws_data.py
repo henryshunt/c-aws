@@ -165,9 +165,6 @@ if __name__ == "__main__":
         config.environment_uploading == True or
         config.statistic_uploading == True or
         config.camera_uploading == True or
-        config.day_graph_uploading == True or
-        config.month_graph_uploading == True or
-        config.year_graph_uploading == True or
         config.integrity_checks == True or
         config.backups == True):
 
