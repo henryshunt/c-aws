@@ -6,10 +6,12 @@ class ConfigData():
     def __init__(self):
         """ Initialises instance variables for each config.ini parameter
         """
+        self.data_directory = None
         self.database_path = None
+        self.graph_directory = None
+        self.integrity_path = None
         self.camera_drive = None
         self.backup_drive = None
-        self.graph_directory = None
 
         self.environment_logging = None
         self.camera_logging = None
@@ -49,8 +51,20 @@ class ConfigData():
             parser = configparser.ConfigParser()
             parser.read("config.ini")
 
-            self.database_path = parser.get("DataStores", "DatabasePath")
-            if self.database_path == "NULL": self.database_path = None
+            self.data_directory = parser.get("DataStores", "DataDirectory")
+            
+            if self.data_directory == "NULL":
+                self.data_directory = None
+                self.database_path = None
+                self.graph_directory = None
+                self.integrity_path = None
+            else:
+                self.database_path = os.path.join(self.data_directory,
+                                                  "silo.db3")
+                self.graph_directory = os.path.join(self.data_directory,
+                                                    "graphs")
+                self.integrity_path = os.path.join(self.data_directory,
+                                                   "integrity.xml")
             
             self.camera_drive = parser.get("DataStores", "CameraDrive")
             if self.camera_drive == "NULL": self.camera_drive = None
