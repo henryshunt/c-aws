@@ -8,6 +8,7 @@ import subprocess
 import os
 from datetime import datetime, timedelta
 import time
+import picamera
 
 import sqlite3
 
@@ -33,6 +34,7 @@ if __name__ == "__main__":
     config_load = config.load()
     if config_load == None: helpers.exit("01")
 
+    # Check data directory and create if doesn't exist
     if config.data_directory == None: helpers.exit("02")
     if not os.path.isdir(config.data_directory):
         try:
@@ -86,6 +88,9 @@ if __name__ == "__main__":
 
         # Check camera is connected to system
         # TODO: #1 exit code 08
+        try:
+            with picamera.PiCamera() as camera: pass
+        except: helpers.exit("08")
     
     # Check backup drive if configuration modifier is active
     if config.backups == True:
