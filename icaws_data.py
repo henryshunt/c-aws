@@ -21,7 +21,7 @@ import helpers
 print("          ICAWS Data Acquisition Software, Version 4 - 2018, Henry Hunt"
     + "\n*********************************************************************"
     + "***********\n\n                          DO NOT TERMINATE THIS PROGRAM")
-time.sleep(5)
+time.sleep(3)
 
 config = ConfigData()
 data_start_time = None
