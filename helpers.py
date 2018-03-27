@@ -1,6 +1,7 @@
 import sys
 import os
 from datetime import datetime
+import RPi.GPIO as gpio
 
 def remaining_space(directory):
     """ Returns the amount of remaining space in gigabytes, for non-root users,
@@ -20,6 +21,8 @@ def exit(code):
             file.write("initialisation failure at {} with exit code {}"
                        .format(datetime.now()
                                .strftime("%Y-%m-%d %H:%M:%S"), code))
+
+            gpio.output(17, gpio.HIGH)
             sys.exit(1)
             
     except: sys.exit(1)

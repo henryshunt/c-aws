@@ -21,7 +21,7 @@ import helpers
 print("          ICAWS Data Acquisition Software, Version 4 - 2018, Henry Hunt"
     + "\n*********************************************************************"
     + "***********\n\n                          DO NOT TERMINATE THIS PROGRAM")
-time.sleep(2.5)
+time.sleep(5)
 
 
 config = ConfigData()
@@ -33,6 +33,9 @@ def every_minute():
         activate the camera and generate statistics
     """
     time.sleep(0.1)
+    gpio.output(18, gpio.HIGH)
+    time.sleep(0.5)
+    gpio.output(18, gpio.LOW)
     pass
 
 def every_second():
@@ -47,8 +50,8 @@ if __name__ == "__main__":
 
         # Initialise GPIO and LED for software error indication
         gpio.setmode(gpio.BCM)
-        gpio.setup(11, gpio.OUT)
-        gpio.setup(12, gpio.out)
+        gpio.setup(17, gpio.OUT)
+        gpio.setup(18, gpio.OUT)
     except: helpers.exit_without_indicator("00")
 
 
@@ -175,10 +178,17 @@ if __name__ == "__main__":
                           + current_dir + "icaws_access.py"], shell = True)
 
     # Wait for next minute to begin to ensure proper averaging
+    gpio.output(18, gpio.HIGH)
+    
     while True:
         if datetime.now().second != 0:
+            gpio.output(17, gpio.HIGH)
+            time.sleep(0.1)
+            gpio.output(17, gpio.LOW)
             time.sleep(0.1)
         else: break
+
+    gpio.output(18, gpio.LOW)
 
     # Initialise GPIOs, start data logging and record start time
     data_start_time = datetime.now().replace(second = 0, microsecond = 0)
@@ -187,5 +197,3 @@ if __name__ == "__main__":
     event_scheduler.add_job(every_minute, "cron", minute = "0-59")
     event_scheduler.add_job(every_second, "cron", second = "0-59")
     event_scheduler.start()
-
-    print("active")
