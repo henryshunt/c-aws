@@ -132,27 +132,3 @@ class ConfigData():
         except: return None
 
         return True
-
-    def is_generates_graphs(self):
-        if (self.day_graph_generation == True or
-            self.month_graph_generation == True or
-            self.year_graph_generation == True):
-
-            return True
-        else: return False
-
-    def is_needs_support(self):
-        if (self.day_graph_generation == True or
-            self.month_graph_generation == True or
-            self.year_graph_generation == True or
-            self.report_uploading == True or
-            self.statistic_uploading == True or
-            self.camera_uploading == True or
-            self.day_graph_uploading == True or
-            self.month_graph_uploading == True or
-            self.year_graph_uploading == True or
-            self.integrity_checks == True or
-            self.backups == True):
-
-            return True
-        else: return False
