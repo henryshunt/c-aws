@@ -27,17 +27,17 @@ data_start_time = None
 
 if __name__ == "__main__":
     free_space = helpers.remaining_space("/")
-    if free_space == None or free_space < 1: helpers.exit("01")
+    if free_space == None or free_space < 1: helpers.exit("00")
 
     # Cannot start ICAWS software without a configuration profile
     config_load = config.load()
-    if config_load == None: helpers.exit("02")
+    if config_load == None: helpers.exit("01")
 
-    if config.database_path == None: helpers.exit("03")
-    if not os.path.isdir(os.path.dirname(config.database_path)):
+    if config.data_directory == None: helpers.exit("02")
+    if not os.path.isdir(config.data_directory):
         try:
-            os.makedirs(os.path.dirname(config.database_path))
-        except: helpers.exit("04")
+            os.makedirs(comfig.data_directory)
+        except: helpers.exit("03")
 
     # Create a new database if one doesn't exist already
     if not os.path.isfile(config.database_path):
@@ -74,43 +74,42 @@ if __name__ == "__main__":
                                    "TS00_Max REAL, TS00_Avg REAL" +
                                ")")
                 database.commit()
-        except: helpers.exit("05")
+        except: helpers.exit("04")
 
     # Check camera drive if configuration modifier is active
     if config.camera_logging == True:
-        if config.camera_drive == None: helpers.exit("06")
-        if not os.path.isdir(config.camera_drive): helpers.exit("07")
+        if config.camera_drive == None: helpers.exit("05")
+        if not os.path.isdir(config.camera_drive): helpers.exit("06")
 
         free_space = helpers.remaining_space(config.camera_drive)
-        if free_space == None or free_space < 5: helpers.exit("08")
+        if free_space == None or free_space < 5: helpers.exit("07")
 
         # Check camera is connected to system
-        # TODO: #1 exit code 09
+        # TODO: #1 exit code 08
     
     # Check backup drive if configuration modifier is active
     if config.backups == True:
-        if config.backup_drive == None: helpers.exit("10")
-        if not os.path.isdir(config.backup_drive): helpers.exit("11")
+        if config.backup_drive == None: helpers.exit("09")
+        if not os.path.isdir(config.backup_drive): helpers.exit("10")
 
         free_space = helpers.remaining_space(config.backup_drive)
-        if free_space == None or free_space < 5: helpers.exit("12")
+        if free_space == None or free_space < 5: helpers.exit("11")
 
     # Check graph directory if configuration modifier is active
     if (config.day_graph_generation == True or
         config.month_graph_generation == True or
         config.year_graph_generation == True):
 
-        if config.graph_directory == None: helpers.exit("13")
-        if not os.path.isdir(config.graph_directory):
+        if not os.path.isdir(graph_directory):
             try:
                 os.makedirs(config.graph_directory)
-            except: helpers.exit("14")
+            except: helpers.exit("12")
 
     # Check endpoints if configuration modifiers are active
     if (config.report_uploading == True or
         config.statistic_uploading == True):
 
-        if config.remote_sql_server == None: helpers.exit("15")
+        if config.remote_sql_server == None: helpers.exit("13")
 
     if (config.camera_uploading == True or
         config.day_graph_uploading == True or
@@ -121,7 +120,8 @@ if __name__ == "__main__":
             config.remote_ftp_username == None or
             config.remote_ftp_password == None):
 
-            helpers.exit("15")
+            helpers.exit("14")
+
 
     # Start data support and data access subprocesses
     current_dir = os.path.dirname(os.path.realpath(__file__))
