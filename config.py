@@ -60,7 +60,7 @@ class ConfigData():
                 self.integrity_path = None
             else:
                 self.database_path = os.path.join(self.data_directory,
-                                                  "silo.db3")
+                                                  "records.sq3")
                 self.graph_directory = os.path.join(self.data_directory,
                                                     "graphs")
                 self.integrity_path = os.path.join(self.data_directory,
