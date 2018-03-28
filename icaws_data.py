@@ -79,12 +79,14 @@ def do_log_camera():
                 image_dir = os.path.join(config.camera_drive,
                                          datetime.now().strftime("%Y/%m/%d/"))
                 if not os.path.exists(image_dir): os.makedirs(image_dir)
-                image_name = datetime.now().strftime("%Y-%m-%dT%H-%M-%S") + ".jpg"
+                image_name = (datetime.now().strftime("%Y-%m-%dT%H-%M-%S")
+                              + ".jpg")
             
                 # Set image annotation and capture image
                 local_time = helpers.utc_to_local(datetime.now(),
                                                   config.icaws_time_zone)
-                annotation = ("ICAWS Camera 1 " + local_time.strftime("on %d/%m/%Y at %H:%M:%S"))
+                annotation = ("ICAWS Camera 1 " + local_time.strftime(
+                    "on %d/%m/%Y at %H:%M:%S"))
                 camera.annotate_text = annotation
                 camera.capture(os.path.join(image_dir, image_name))
             except: return
