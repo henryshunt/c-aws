@@ -311,7 +311,7 @@ if config.local_network_server == True:
     except: helpers.exit("25")
 
 # -- WAIT FOR MINUTE -----------------------------------------------------------
-he5
+helpers.init_success()
 gpio.output(24, gpio.HIGH)
 
 while True:
