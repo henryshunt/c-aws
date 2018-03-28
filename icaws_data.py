@@ -22,13 +22,28 @@ import helpers
 print("          ICAWS Data Acquisition Software, Version 4 - 2018, Henry Hunt"
     + "\n*********************************************************************"
     + "***********\n\n                          DO NOT TERMINATE THIS PROGRAM")
-time.sleep(3)
+time.sleep(2.5)
 
 config = ConfigData()
-data_start_time = None
+start_time = None
+disable_interrupts = False
+
+wspd_ticks = []
+past_wspd_ticks = []
+wdir_samples = []
+past_wdir_samples = []
+rain_ticks = 0
+sund_ticks = 0
+
+tair_temp_value = None
+expt_temp_value = None
+st10_temp_value = None
+st30_temp_value = None
+st00_temp_value = None
+enct_temp_value = None
 
 # HELPERS ----------------------------------------------------------------------
-def read_temp(address):
+def do_read_temp(probe):
     pass
 
 # OPERATIONS -------------------------------------------------------------------
@@ -44,7 +59,7 @@ def do_log_camera():
 def do_generate_stats():
     pass
 
-# SCHEDULES --------------------------------------------------------------------
+# SCHEDULED FUNCTIONS ----------------------------------------------------------
 def every_minute():
     """ Triggered every minute to generate a report, add it to the database,
         activate the camera and generate statistics
@@ -52,9 +67,11 @@ def every_minute():
     time.sleep(0.1)
     gpio.output(24, gpio.HIGH)
 
-
+    do_log_report()
+    if config.environment_logging == True: do_log_environment()
+    if config.camera_logging == True: do_log_camera()
+    if config.statistic_generation == True: do_generate_stats()
     time.sleep(0.5)
-
 
     gpio.output(24, gpio.LOW)
 
@@ -63,8 +80,15 @@ def every_second():
     """
     pass
 
+# INTERRUPT SERVICE ------------------------------------------------------------
+def do_trigger_wspd():
+    pass
 
-# ENTRY POINT ------------------------------------------------------------------
+def do_trigger_rain():
+    pass
+
+
+# ENTRY POINT ==================================================================
 # -- INIT GPIO AND LEDS --------------------------------------------------------
 try:
     gpio.setwarnings(False); gpio.setmode(gpio.BCM)
@@ -188,14 +212,14 @@ if (config.day_graph_generation == True or
     config.backups == True):
 
     try:
-        subprocess.Popen(["lxterminal -e python3 "
-                          + current_dir + "icaws_support.py"], shell = True)
+        subprocess.Popen(["lxterminal -e python3 " + current_dir
+                          + "icaws_support.py"], shell = True)
     except: helpers.exit("16")
 
 if config.local_network_server == True:
     try:
-        subprocess.Popen(["lxterminal -e python3 "
-                          + current_dir + "icaws_access.py"], shell = True)
+        subprocess.Popen(["lxterminal -e python3 " + current_dir
+                          + "icaws_access.py"], shell = True)
     except: helpers.exit("17")
 
 # -- WAIT FOR MINUTE -----------------------------------------------------------
@@ -212,7 +236,14 @@ while True:
 gpio.output(24, gpio.LOW)
 
 # -- START DATA LOGGING --------------------------------------------------------
-data_start_time = datetime.now().replace(second = 0, microsecond = 0)
+start_time = datetime.now().replace(second = 0, microsecond = 0)
+GPIO.setup(17, GPIO.IN, pull_up_down = GPIO.PUD_DOWN)
+GPIO.add_event_detect(17, GPIO.FALLING, callback = do_trigger_wspd,
+                      bouncetime = 1)
+GPIO.setup(27, GPIO.IN, pull_up_down = GPIO.PUD_DOWN)
+GPIO.add_event_detect(27, GPIO.FALLING, callback = do_trigger_rain,
+                      bouncetime = 150)
+GPIO.setup(22, GPIO.IN, pull_up_down = GPIO.PUD_DOWN)
 
 event_scheduler = BlockingScheduler()
 event_scheduler.add_job(every_minute, "cron", minute = "0-59")
