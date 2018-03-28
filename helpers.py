@@ -22,7 +22,7 @@ def exit(code):
                        .format(datetime.now()
                                .strftime("%Y-%m-%d %H:%M:%S"), code))
 
-            gpio.output(17, gpio.HIGH)
+            gpio.output(23, gpio.HIGH)
             sys.exit(1)
             
     except: sys.exit(1)

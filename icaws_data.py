@@ -169,6 +169,13 @@ if config.backups == True:
     free_space = helpers.remaining_space(config.backup_drive)
     if free_space == None or free_space < 5: helpers.exit("12")
 
+# -- CHECK GRAPHERS ------------------------------------------------------------
+if (config.statistic_generation == False and
+    (config.month_graph_generation == True or
+     config.year_graph_generation == True)):
+
+    helpers.exit("13")
+    
 # -- CHECK GRAPH DIRECTORY -----------------------------------------------------
 if (config.day_graph_generation == True or
     config.month_graph_generation == True or
@@ -177,30 +184,30 @@ if (config.day_graph_generation == True or
     if not os.path.isdir(config.graph_directory):
         try:
             os.makedirs(config.graph_directory)
-        except: helpers.exit("13")
+        except: helpers.exit("14")
 
 # -- CHECK UPLOADERS -----------------------------------------------------------
 if ((config.environment_logging == False and
-    config.environment_uploading == True) or
+     config.environment_uploading == True) or
     (config.camera_logging == False and
-    config.camera_uploading == True) or
+     config.camera_uploading == True) or
     (config.statistic_generation == False and
-    config.statistic_uploading == True) or
+     config.statistic_uploading == True) or
     (config.day_graph_generation == False and
-    config.day_graph_uploading == True) or
+     config.day_graph_uploading == True) or
     (config.month_graph_generation == False and
-    config.month_graph_uploading == True) or
+     config.month_graph_uploading == True) or
     (config.year_graph_generation == False and
-    config.year_graph_uploading == True)):
+     config.year_graph_uploading == True)):
 
-    helpers.exit("14")
+    helpers.exit("15")
 
 # -- CHECK UPLOAD ENDPOINTS ----------------------------------------------------
 if (config.report_uploading == True or
     config.environment_uploading == True or
     config.statistic_uploading == True):
 
-    if config.remote_sql_server == None: helpers.exit("15")
+    if config.remote_sql_server == None: helpers.exit("16")
 
 if (config.camera_uploading == True or
     config.day_graph_uploading == True or
@@ -211,7 +218,7 @@ if (config.camera_uploading == True or
         config.remote_ftp_username == None or
         config.remote_ftp_password == None):
 
-        helpers.exit("16")
+        helpers.exit("17")
 
 
 # -- RUN SUBPROCESSES ----------------------------------------------------------
@@ -230,13 +237,13 @@ if (config.day_graph_generation == True or
     try:
         subprocess.Popen(["lxterminal -e python3 " + current_dir
                           + "icaws_support.py"], shell = True)
-    except: helpers.exit("17")
+    except: helpers.exit("18")
 
 if config.local_network_server == True:
     try:
         subprocess.Popen(["lxterminal -e python3 " + current_dir
                           + "icaws_access.py"], shell = True)
-    except: helpers.exit("18")
+    except: helpers.exit("19")
 
 # -- WAIT FOR MINUTE -----------------------------------------------------------
 helpers.init_success()
