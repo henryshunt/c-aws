@@ -61,16 +61,16 @@ def do_log_camera():
     # Only run every five minutes
     if cur_minute.endswith("0") or cur_minute.endswith("5"):
         location = astral.Location(("", "", float(config.icaws_latitude),
-                                    float(sonfig.icaws_longitude), "UTC",
+                                    float(config.icaws_longitude), "UTC",
                                     config.icaws_elevation))
         sun = location.sun(date = datetime.utcnow(), local = True)
         
-        set_threshold = sun["sunset"] + timedelta(minutes = 60)
-        rise_threshold = sun["sunrise"] - timedelta(minutes = 60)
+        sunset_threshold = sun["sunset"] + timedelta(minutes = 60)
+        sunrise_threshold = sun["sunrise"] - timedelta(minutes = 60)
 
         # Only take images between sunrise and sunset
-        if (datetime.now(pytz.utc) >= rise_threshold and
-            datetime.now(pytz.utc) <= set_threshold):
+        if (datetime.now(pytz.utc) >= sunrise_threshold and
+            datetime.now(pytz.utc) <= sunset_threshold):
 
             if not os.path.isdir(config.camera_drive): return
             free_space = helpers.remaining_space(config.camera_drive)
@@ -79,16 +79,15 @@ def do_log_camera():
             try:
                 image_dir = os.path.join(
                     config.camera_drive, datetime.utcnow()
-                    .strftime("%Y/%m/%d/"))
+                    .strftime("%Y/%m/%d"))
                 if not os.path.exists(image_dir): os.makedirs(image_dir)
                 image_name = (datetime.utcnow().strftime("%Y-%m-%dT%H-%M-%S")
                               + ".jpg")
             
                 # Set image annotation and capture image
                 local_time = datetime.now(pytz.timezone(config.icaws_time_zone))
-                annotation = ("ICAWS Camera 1 " + local_time.strftime(
+                camera.annotate_text = ("ICAWS Camera" + local_time.strftime(
                     "on %d/%m/%Y at %H:%M:%S"))
-                camera.annotate_text = annotation
                 camera.capture(os.path.join(image_dir, image_name))
             except: return
 
@@ -222,7 +221,7 @@ if config.camera_logging == True:
         elevation = float(config.icaws_elevation)
     except: helpers.exit("14")
 
-    # Check camera is connected
+    # Check camera module is connected
     try:
         with picamera.PiCamera() as camera: pass
     except: helpers.exit("15")
@@ -312,7 +311,7 @@ if config.local_network_server == True:
     except: helpers.exit("25")
 
 # -- WAIT FOR MINUTE -----------------------------------------------------------
-helpers.init_success()
+he5
 gpio.output(24, gpio.HIGH)
 
 while True:
