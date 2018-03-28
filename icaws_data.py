@@ -62,7 +62,7 @@ def do_log_camera():
     if cur_minute.endswith("0") or cur_minute.endswith("5"):
         location = astral.Location(("", "", float(config.icaws_latitude),
                                     float(sonfig.icaws_longitude), "UTC", 0))
-        sun = location.sun(date = datetime.now(pytz.utc), local = True)
+        sun = location.sun(date = datetime.utcnow(), local = True)
         
         set_threshold = sun["sunset"] + timedelta(minutes = 60)
         rise_threshold = sun["sunrise"] - timedelta(minutes = 60)
@@ -76,14 +76,15 @@ def do_log_camera():
             if free_space == None or free_space < 5: return
 
             try:
-                image_dir = os.path.join(config.camera_drive,
-                                         datetime.utcnow().strftime("%Y/%m/%d/"))
+                image_dir = os.path.join(
+                    config.camera_drive, datetime.utcnow()
+                    .strftime("%Y/%m/%d/"))
                 if not os.path.exists(image_dir): os.makedirs(image_dir)
                 image_name = (datetime.utcnow().strftime("%Y-%m-%dT%H-%M-%S")
                               + ".jpg")
             
                 # Set image annotation and capture image
-                local_time = datetime.now(pytz.timezone(config.icaws_time_zone)).replace(tzinfo = None)
+                local_time = datetime.now(pytz.timezone(config.icaws_time_zone))
                 annotation = ("ICAWS Camera 1 " + local_time.strftime(
                     "on %d/%m/%Y at %H:%M:%S"))
                 camera.annotate_text = annotation
