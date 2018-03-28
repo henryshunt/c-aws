@@ -56,7 +56,7 @@ def do_log_environment():
     pass
 
 def do_log_camera():
-    cur_minute = str(datetime.now().minute)
+    cur_minute = str(datetime.utcnow().minute)
 
     # Only run every five minutes
     if cur_minute.endswith("0") or cur_minute.endswith("5"):
@@ -77,14 +77,13 @@ def do_log_camera():
 
             try:
                 image_dir = os.path.join(config.camera_drive,
-                                         datetime.now().strftime("%Y/%m/%d/"))
+                                         datetime.utcnow().strftime("%Y/%m/%d/"))
                 if not os.path.exists(image_dir): os.makedirs(image_dir)
-                image_name = (datetime.now().strftime("%Y-%m-%dT%H-%M-%S")
+                image_name = (datetime.utcnow().strftime("%Y-%m-%dT%H-%M-%S")
                               + ".jpg")
             
                 # Set image annotation and capture image
-                local_time = helpers.utc_to_local(datetime.now(),
-                                                  config.icaws_time_zone)
+                local_time = datetime.now(pytz.timezone(config.icaws_time_zone)).replace(tzinfo = None)
                 annotation = ("ICAWS Camera 1 " + local_time.strftime(
                     "on %d/%m/%Y at %H:%M:%S"))
                 camera.annotate_text = annotation
@@ -307,7 +306,7 @@ helpers.init_success()
 gpio.output(24, gpio.HIGH)
 
 while True:
-    if datetime.now().second != 0:
+    if datetime.utcnow().second != 0:
         gpio.output(23, gpio.HIGH)
         time.sleep(0.1)
         gpio.output(23, gpio.LOW)
@@ -317,7 +316,7 @@ while True:
 gpio.output(24, gpio.LOW)
 
 # -- START DATA LOGGING --------------------------------------------------------
-start_time = datetime.now().replace(second = 0, microsecond = 0)
+start_time = datetime.utcnow().replace(second = 0, microsecond = 0)
 gpio.setup(17, gpio.IN, pull_up_down = gpio.PUD_DOWN)
 gpio.add_event_detect(17, gpio.FALLING, callback = do_trigger_wspd,
                       bouncetime = 1)
