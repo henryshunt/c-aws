@@ -52,8 +52,10 @@ pass
 # ENTRY POINT ------------------------------------------------------------------
 # -- INIT GPIO AND LEDS --------------------------------------------------------
 try:
-    gpio.setwarnings(False); gpio.setmode(gpio.BCM); gpio.cleanup()
-    gpio.setup(23, gpio.OUT); gpio.setup(24, gpio.OUT)
+    gpio.setwarnings(False); gpio.setmode(gpio.BCM)
+    
+    gpio.setup(23, gpio.OUT); gpio.output(23, gpio.LOW)
+    gpio.setup(24, gpio.OUT); gpio.output(24, gpio.LOW)
 except: helpers.exit_no_light("00")
 
 # -- CHECK INTERNAL STORAGE ----------------------------------------------------
