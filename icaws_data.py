@@ -237,13 +237,13 @@ gpio.output(24, gpio.LOW)
 
 # -- START DATA LOGGING --------------------------------------------------------
 start_time = datetime.now().replace(second = 0, microsecond = 0)
-GPIO.setup(17, GPIO.IN, pull_up_down = GPIO.PUD_DOWN)
-GPIO.add_event_detect(17, GPIO.FALLING, callback = do_trigger_wspd,
+gpio.setup(17, gpio.IN, pull_up_down = gpio.PUD_DOWN)
+gpio.add_event_detect(17, gpio.FALLING, callback = do_trigger_wspd,
                       bouncetime = 1)
-GPIO.setup(27, GPIO.IN, pull_up_down = GPIO.PUD_DOWN)
-GPIO.add_event_detect(27, GPIO.FALLING, callback = do_trigger_rain,
+gpio.setup(27, gpio.IN, pull_up_down = gpio.PUD_DOWN)
+gpio.add_event_detect(27, gpio.FALLING, callback = do_trigger_rain,
                       bouncetime = 150)
-GPIO.setup(22, GPIO.IN, pull_up_down = GPIO.PUD_DOWN)
+gpio.setup(22, gpio.IN, pull_up_down = gpio.PUD_DOWN)
 
 event_scheduler = BlockingScheduler()
 event_scheduler.add_job(every_minute, "cron", minute = "0-59")
