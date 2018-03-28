@@ -179,12 +179,28 @@ if (config.day_graph_generation == True or
             os.makedirs(config.graph_directory)
         except: helpers.exit("13")
 
+# -- CHECK UPLOADERS -----------------------------------------------------------
+if ((config.environment_logging == False and
+    config.environment_uploading == True) or
+    (config.camera_logging == False and
+    config.camera_uploading == True) or
+    (config.statistic_generation == False and
+    config.statistic_uploading == True) or
+    (config.day_graph_generation == False and
+    config.day_graph_uploading == True) or
+    (config.month_graph_generation == False and
+    config.month_graph_uploading == True) or
+    (config.year_graph_generation == False and
+    config.year_graph_uploading == True)):
+
+    helpers.exit("14")
+
 # -- CHECK UPLOAD ENDPOINTS ----------------------------------------------------
 if (config.report_uploading == True or
     config.environment_uploading == True or
     config.statistic_uploading == True):
 
-    if config.remote_sql_server == None: helpers.exit("14")
+    if config.remote_sql_server == None: helpers.exit("15")
 
 if (config.camera_uploading == True or
     config.day_graph_uploading == True or
@@ -195,7 +211,7 @@ if (config.camera_uploading == True or
         config.remote_ftp_username == None or
         config.remote_ftp_password == None):
 
-        helpers.exit("15")
+        helpers.exit("16")
 
 
 # -- RUN SUBPROCESSES ----------------------------------------------------------
@@ -214,13 +230,13 @@ if (config.day_graph_generation == True or
     try:
         subprocess.Popen(["lxterminal -e python3 " + current_dir
                           + "icaws_support.py"], shell = True)
-    except: helpers.exit("16")
+    except: helpers.exit("17")
 
 if config.local_network_server == True:
     try:
         subprocess.Popen(["lxterminal -e python3 " + current_dir
                           + "icaws_access.py"], shell = True)
-    except: helpers.exit("17")
+    except: helpers.exit("18")
 
 # -- WAIT FOR MINUTE -----------------------------------------------------------
 helpers.init_success()
