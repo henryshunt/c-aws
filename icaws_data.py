@@ -27,6 +27,23 @@ time.sleep(3)
 config = ConfigData()
 data_start_time = None
 
+# HELPERS ----------------------------------------------------------------------
+def read_temp(address):
+    pass
+
+# OPERATIONS -------------------------------------------------------------------
+def do_log_report():
+    pass
+
+def do_log_environment():
+    pass
+
+def do_log_camera():
+    pass
+
+def do_generate_stats():
+    pass
+
 # SCHEDULES --------------------------------------------------------------------
 def every_minute():
     """ Triggered every minute to generate a report, add it to the database,
@@ -46,14 +63,12 @@ def every_second():
     """
     pass
 
-# OTHER FUNCTIONS --------------------------------------------------------------
-pass
 
 # ENTRY POINT ------------------------------------------------------------------
 # -- INIT GPIO AND LEDS --------------------------------------------------------
 try:
     gpio.setwarnings(False); gpio.setmode(gpio.BCM)
-    
+
     gpio.setup(23, gpio.OUT); gpio.output(23, gpio.LOW)
     gpio.setup(24, gpio.OUT); gpio.output(24, gpio.LOW)
 except: helpers.exit_no_light("00")
@@ -172,12 +187,16 @@ if (config.day_graph_generation == True or
     config.integrity_checks == True or
     config.backups == True):
 
-    subprocess.Popen(["lxterminal -e python3 "
-                        + current_dir + "icaws_support.py"], shell = True)
+    try:
+        subprocess.Popen(["lxterminal -e python3 "
+                          + current_dir + "icaws_support.py"], shell = True)
+    except: helpers.exit("16")
 
 if config.local_network_server == True:
-    subprocess.Popen(["lxterminal -e python3 "
-                        + current_dir + "icaws_access.py"], shell = True)
+    try:
+        subprocess.Popen(["lxterminal -e python3 "
+                          + current_dir + "icaws_access.py"], shell = True)
+    except: helpers.exit("17")
 
 # -- WAIT FOR MINUTE -----------------------------------------------------------
 gpio.output(24, gpio.HIGH)
