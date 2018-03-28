@@ -11,9 +11,11 @@ from datetime import datetime, timedelta
 import time
 import picamera
 import RPi.GPIO as gpio
+import pytz
 
 import sqlite3
 from apscheduler.schedulers.blocking import BlockingScheduler
+import astral
 
 from config import ConfigData
 import helpers
@@ -54,7 +56,38 @@ def do_log_environment():
     pass
 
 def do_log_camera():
-    pass
+    cur_minute = str(datetime.now().minute)
+
+    # Only run every five minutes
+    if cur_minute.endswith("0") or cur_minute.endswith("5"):
+        location = astral.Location(("", "", float(config.icaws_latitude),
+                                    float(sonfig.icaws_longitude), "UTC", 0))
+        sun = location.sun(date = datetime.now(pytz.utc), local = True)
+        
+        set_threshold = sun["sunset"] + timedelta(minutes = 60)
+        rise_threshold = sun["sunrise"] - timedelta(minutes = 60)
+
+        # Only take images between sunrise and sunset
+        if (datetime.now(pytz.utc) >= rise_threshold and
+            datetime.now(pytz.utc) <= set_threshold):
+
+            if not os.path.isdir(config.camera_drive): return
+            free_space = helpers.remaining_space(config.camera_drive)
+            if free_space == None or free_space < 5: return
+
+            try:
+                image_dir = os.path.join(config.camera_drive,
+                                         datetime.now().strftime("%Y/%m/%d/"))
+                if not os.path.exists(image_dir): os.makedirs(image_dir)
+                image_name = datetime.now().strftime("%Y-%m-%dT%H-%M-%S") + ".jpg"
+            
+                # Set image annotation and capture image
+                local_time = helpers.utc_to_local(datetime.now(),
+                                                  config.icaws_time_zone)
+                annotation = ("ICAWS Camera 1 " + local_time.strftime("on %d/%m/%Y at %H:%M:%S"))
+                camera.annotate_text = annotation
+                camera.capture(os.path.join(image_dir, image_name))
+            except: return
 
 def do_generate_stats():
     pass
@@ -148,33 +181,55 @@ if not os.path.isfile(config.database_path):
             database.commit()
     except: helpers.exit("05")
 
+# -- CHECK TIME ZONE -----------------------------------------------------------
+if (config.camera_logging == True or
+    config.statistic_generation == True or
+    config.day_graph_generation == True or
+    config.month_graph_generation == True or
+    config.year_graph_generation == True or
+    config.integrity_checks == True or
+    config.local_network_server == True or
+    config.backups == True):
+
+    if config.icaws_time_zone == None: helpers.exit("06")
+    if not config.icaws_time_zone in pytz.all_timezones: helpers.exit("07")
+
 # -- CHECK CAMERA DRIVE --------------------------------------------------------
 if config.camera_logging == True:
-    if config.camera_drive == None: helpers.exit("06")
-    if not os.path.isdir(config.camera_drive): helpers.exit("07")
+    if config.camera_drive == None: helpers.exit("08")
+    if not os.path.isdir(config.camera_drive): helpers.exit("09")
 
     free_space = helpers.remaining_space(config.camera_drive)
-    if free_space == None or free_space < 5: helpers.exit("08")
+    if free_space == None or free_space < 5: helpers.exit("10")
+
+    # Check latitude and longitude are correctly supplied
+    if config.icaws_latitude == None or config.icaws_longitude == None:
+        helpers.exit("11")
+
+    try:
+        latitude = float(config.icaws_latitude)
+        longitude = float(config.icaws_longitude)
+    except: helpers.exit("12")
 
     # Check camera is connected
     try:
         with picamera.PiCamera() as camera: pass
-    except: helpers.exit("09")
+    except: helpers.exit("13")
 
 # -- CHECK BACKUP DRVIE --------------------------------------------------------
 if config.backups == True:
-    if config.backup_drive == None: helpers.exit("10")
-    if not os.path.isdir(config.backup_drive): helpers.exit("11")
+    if config.backup_drive == None: helpers.exit("14")
+    if not os.path.isdir(config.backup_drive): helpers.exit("15")
 
     free_space = helpers.remaining_space(config.backup_drive)
-    if free_space == None or free_space < 5: helpers.exit("12")
+    if free_space == None or free_space < 5: helpers.exit("16")
 
 # -- CHECK GRAPHERS ------------------------------------------------------------
 if (config.statistic_generation == False and
     (config.month_graph_generation == True or
      config.year_graph_generation == True)):
 
-    helpers.exit("13")
+    helpers.exit("17")
     
 # -- CHECK GRAPH DIRECTORY -----------------------------------------------------
 if (config.day_graph_generation == True or
@@ -184,7 +239,7 @@ if (config.day_graph_generation == True or
     if not os.path.isdir(config.graph_directory):
         try:
             os.makedirs(config.graph_directory)
-        except: helpers.exit("14")
+        except: helpers.exit("18")
 
 # -- CHECK UPLOADERS -----------------------------------------------------------
 if ((config.environment_logging == False and
@@ -200,14 +255,14 @@ if ((config.environment_logging == False and
     (config.year_graph_generation == False and
      config.year_graph_uploading == True)):
 
-    helpers.exit("15")
+    helpers.exit("19")
 
 # -- CHECK UPLOAD ENDPOINTS ----------------------------------------------------
 if (config.report_uploading == True or
     config.environment_uploading == True or
     config.statistic_uploading == True):
 
-    if config.remote_sql_server == None: helpers.exit("16")
+    if config.remote_sql_server == None: helpers.exit("20")
 
 if (config.camera_uploading == True or
     config.day_graph_uploading == True or
@@ -218,7 +273,7 @@ if (config.camera_uploading == True or
         config.remote_ftp_username == None or
         config.remote_ftp_password == None):
 
-        helpers.exit("17")
+        helpers.exit("21")
 
 
 # -- RUN SUBPROCESSES ----------------------------------------------------------
@@ -237,13 +292,13 @@ if (config.day_graph_generation == True or
     try:
         subprocess.Popen(["lxterminal -e python3 " + current_dir
                           + "icaws_support.py"], shell = True)
-    except: helpers.exit("18")
+    except: helpers.exit("22")
 
 if config.local_network_server == True:
     try:
         subprocess.Popen(["lxterminal -e python3 " + current_dir
                           + "icaws_access.py"], shell = True)
-    except: helpers.exit("19")
+    except: helpers.exit("23")
 
 # -- WAIT FOR MINUTE -----------------------------------------------------------
 helpers.init_success()

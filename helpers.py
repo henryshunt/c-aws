@@ -2,6 +2,9 @@ import sys
 import os
 from datetime import datetime
 import RPi.GPIO as gpio
+import pytz
+
+from config import ConfigData
 
 def remaining_space(directory):
     """ Returns the amount of remaining space in gigabytes, for non-root users,
@@ -44,3 +47,7 @@ def init_success():
                        .format(datetime.now().strftime("%Y-%m-%d %H:%M:%S")))
 
     except: sys.exit(1)
+
+def utc_to_local(utc, timezone):
+    utc_time = pytz.utc.localize(utc)
+    return (utc_time.astimezone(pytz.timezone(timezone)).replace(tzinfo = None))
