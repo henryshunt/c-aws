@@ -223,6 +223,7 @@ if config.local_network_server == True:
     except: helpers.exit("17")
 
 # -- WAIT FOR MINUTE -----------------------------------------------------------
+helpers.init_success()
 gpio.output(24, gpio.HIGH)
 
 while True:

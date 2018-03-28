@@ -17,7 +17,7 @@ def remaining_space(directory):
 
 def exit(code):
     try:
-        with open("exit.txt", "w+") as file:
+        with open("init.txt", "w+") as file:
             file.write("initialisation failure at {} with exit code {}"
                        .format(datetime.now()
                                .strftime("%Y-%m-%d %H:%M:%S"), code))
@@ -29,10 +29,18 @@ def exit(code):
 
 def exit_no_light(code):
     try:
-        with open("exit.txt", "w+") as file:
+        with open("init.txt", "w+") as file:
             file.write("initialisation failure at {} with exit code {}"
                        .format(datetime.now()
                                .strftime("%Y-%m-%d %H:%M:%S"), code))
             sys.exit(1)
-            
+
+    except: sys.exit(1)
+
+def init_success():
+    try:
+        with open("init.txt", "w+") as file:
+            file.write("initialisation success at {}"
+                       .format(datetime.now().strftime("%Y-%m-%d %H:%M:%S")))
+
     except: sys.exit(1)
