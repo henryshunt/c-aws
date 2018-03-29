@@ -45,8 +45,32 @@ st00_temp_value = None
 enct_temp_value = None
 
 # HELPERS ----------------------------------------------------------------------
-def do_read_temp(probe):
-    pass
+def do_read_temp(address):
+    """ Reads value of specific temperature probe into its global variable
+    """
+    if not os.path.exists("/sys/bus/w1/devices/" + address): return
+    
+    try:
+        # Read data for specified sensor address
+        with open("/sys/bus/w1/devices/" + address + "/w1_slave", "r") as probe:
+            data = probe.readlines()
+            temp = int(data[1][data[1].find("t=") + 2:]) / 1000
+
+            # Store value in respective global variable
+            if temp != -127 and temp != 85:
+                if os.path.basename(address) == "28-04167053d6ff":
+                    global tair_temp_value; tair_temp_value = round(temp, 1)
+                elif os.path.basename(address) == "28-0416704a38ff":
+                    global expt_temp_value; expt_temp_value = round(temp, 1)
+                elif os.path.basename(address) == "28-0416705d66ff":
+                    global st10_temp_value; st10_temp_value = round(temp, 1)
+                elif os.path.basename(address) == "28-04167055d5ff":
+                    global st30_temp_value; st30_temp_value = round(temp, 1)
+                elif os.path.basename(address) == "28-0516704dc0ff":
+                    global st00_temp_value; st00_temp_value = round(temp, 1)
+                elif os.path.basename(address) == "":
+                    global enct_temp_value; enct_temp_value = round(temp, 1)
+    except: return
 
 # OPERATIONS -------------------------------------------------------------------
 def do_log_report():
