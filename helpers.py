@@ -24,11 +24,9 @@ def exit(code):
             file.write("initialisation failure at {} with exit code {}"
                        .format(datetime.now()
                                .strftime("%Y-%m-%d %H:%M:%S"), code))
-
-    except: pass
-    try: gpio.output(23, gpio.HIGH)
     except: pass
 
+    gpio.output(23, gpio.HIGH)
     sys.exit(1)
 
 def exit_no_light(code):

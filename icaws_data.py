@@ -72,7 +72,7 @@ def do_read_temp(address):
                     global st00_temp_value; st00_temp_value = round(temp, 1)
                 elif os.path.basename(address) == "":
                     global enct_temp_value; enct_temp_value = round(temp, 1)
-    except: return
+    except: gpio.output(23, gpio.HIGH)
 
 # OPERATIONS -------------------------------------------------------------------
 def do_log_report():
@@ -83,15 +83,17 @@ def do_log_environment():
 
     try:
         data.cpu_temperature = round(CPUTemperature().temperature, 1)
+        #do_read_temp("")
+        data.enclosure_temperature = enct_temp_value
     except: pass
 
-    print(data.cpu_temperature)
-
-    query = "INSERT INTO utcReports VALUES ('?', NULL, ?)"
-
-    with sqlite3.connect(config.database_path) as database:
+    try:
+        with sqlite3.connect(config.database_path) as database:
             cursor = database.cursor()
-            cursor.execute(query, (datetime.utcnow().strftime("%Y-%m-%d %H:%M:%S"),float(data.cpu_temperature))
+            cursor.execute("INSERT INTO utcEnviron VALUES (?, NULL, ?)",
+                           (datetime.utcnow().strftime("%Y-%m-%d %H:%M:%S"),
+                            float(data.cpu_temperature)))
+            
             database.commit()
     except: gpio.output(23, gpio.HIGH)
 
@@ -137,8 +139,10 @@ def every_minute():
         activate the camera and generate statistics
     """
     time.sleep(0.1)
+    gpio.output(23, gpio.LOW)
     gpio.output(24, gpio.HIGH)
 
+    # Run actions if configuration modifiers are active
     do_log_report()
     if config.environment_logging == True: do_log_environment()
     if config.camera_logging == True: do_log_camera()
