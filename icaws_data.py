@@ -60,8 +60,8 @@ def do_log_camera():
 
     # Only run every five minutes
     if cur_minute.endswith("0") or cur_minute.endswith("5"):
-        location = astral.Location(("", "", float(config.icaws_latitude),
-            float(config.icaws_longitude), "UTC", config.icaws_elevation))
+        location = astral.Location(("", "", config.icaws_latitude,
+            config.icaws_longitude, "UTC", config.icaws_elevation))
         solar = location.sun(date = datetime.utcnow(), local = False)
         
         sunset_threshold = solar["sunset"] + timedelta(minutes = 60)
@@ -133,11 +133,10 @@ except: helpers.exit_no_light("00")
 free_space = helpers.remaining_space("/")
 if free_space == None or free_space < 1: helpers.exit("01")
 
-config_load = config.load()
-if config_load == None: helpers.exit("02")
+# -- CHECK CONFIG --------------------------------------------------------------
+if config.load() == False: helpers.exit("02")
+if config.validate() == False helpers.exit("03")
 
-# -- CHECK DATA DIRECTORY ------------------------------------------------------
-if config.data_directory == None: helpers.exit("03")
 if not os.path.isdir(config.data_directory):
     try:
         os.makedirs(config.data_directory)
@@ -180,63 +179,24 @@ if not os.path.isfile(config.database_path):
             database.commit()
     except: helpers.exit("05")
 
-# -- CHECK TIME ZONE -----------------------------------------------------------
-if (config.camera_logging == True or
-    config.statistic_generation == True or
-    config.day_graph_generation == True or
-    config.month_graph_generation == True or
-    config.year_graph_generation == True or
-    config.integrity_checks == True or
-    config.local_network_server == True or
-    config.backups == True):
-
-    if config.icaws_time_zone == None: helpers.exit("06")
-    if not config.icaws_time_zone in pytz.all_timezones: helpers.exit("07")
-
 # -- CHECK CAMERA DRIVE --------------------------------------------------------
 if config.camera_logging == True:
-    if config.camera_drive == None: helpers.exit("08")
-    if not os.path.isdir(config.camera_drive): helpers.exit("09")
+    if not os.path.isdir(config.camera_drive): helpers.exit("06")
 
     free_space = helpers.remaining_space(config.camera_drive)
-    if free_space == None or free_space < 5: helpers.exit("10")
+    if free_space == None or free_space < 5: helpers.exit("07")
 
-    # Check latitude and longitude are correctly supplied
-    if config.icaws_latitude == None or config.icaws_longitude == None:
-        helpers.exit("11")
-
-    try:
-        latitude = float(config.icaws_latitude)
-        longitude = float(config.icaws_longitude)
-    except: helpers.exit("12")
-
-    # Check elevation is correctly supplied
-    if config.icaws_elevation == None:
-        helpers.exit("13")
-
-    try:
-        elevation = float(config.icaws_elevation)
-    except: helpers.exit("14")
-
-    # Check camera module is connected
+    # Ensure camera module is connected
     try:
         with picamera.PiCamera() as camera: pass
-    except: helpers.exit("15")
+    except: helpers.exit("08")
 
 # -- CHECK BACKUP DRVIE --------------------------------------------------------
 if config.backups == True:
-    if config.backup_drive == None: helpers.exit("16")
-    if not os.path.isdir(config.backup_drive): helpers.exit("17")
+    if not os.path.isdir(config.backup_drive): helpers.exit("09")
 
     free_space = helpers.remaining_space(config.backup_drive)
-    if free_space == None or free_space < 5: helpers.exit("18")
-
-# -- CHECK GRAPHERS ------------------------------------------------------------
-if (config.statistic_generation == False and
-    (config.month_graph_generation == True or
-     config.year_graph_generation == True)):
-
-    helpers.exit("19")
+    if free_space == None or free_space < 5: helpers.exit("10")
     
 # -- CHECK GRAPH DIRECTORY -----------------------------------------------------
 if (config.day_graph_generation == True or
@@ -246,41 +206,7 @@ if (config.day_graph_generation == True or
     if not os.path.isdir(config.graph_directory):
         try:
             os.makedirs(config.graph_directory)
-        except: helpers.exit("20")
-
-# -- CHECK UPLOADERS -----------------------------------------------------------
-if ((config.environment_logging == False and
-     config.environment_uploading == True) or
-    (config.camera_logging == False and
-     config.camera_uploading == True) or
-    (config.statistic_generation == False and
-     config.statistic_uploading == True) or
-    (config.day_graph_generation == False and
-     config.day_graph_uploading == True) or
-    (config.month_graph_generation == False and
-     config.month_graph_uploading == True) or
-    (config.year_graph_generation == False and
-     config.year_graph_uploading == True)):
-
-    helpers.exit("21")
-
-# -- CHECK UPLOAD ENDPOINTS ----------------------------------------------------
-if (config.report_uploading == True or
-    config.environment_uploading == True or
-    config.statistic_uploading == True):
-
-    if config.remote_sql_server == None: helpers.exit("22")
-
-if (config.camera_uploading == True or
-    config.day_graph_uploading == True or
-    config.month_graph_uploading == True or
-    config.year_graph_uploading == True):
-
-    if (config.remote_ftp_server == None or
-        config.remote_ftp_username == None or
-        config.remote_ftp_password == None):
-
-        helpers.exit("23")
+        except: helpers.exit("11")
 
 
 # -- RUN SUBPROCESSES ----------------------------------------------------------
@@ -299,13 +225,13 @@ if (config.day_graph_generation == True or
     try:
         subprocess.Popen(["lxterminal -e python3 " + current_dir
                           + "icaws_support.py"], shell = True)
-    except: helpers.exit("24")
+    except: helpers.exit("12")
 
 if config.local_network_server == True:
     try:
         subprocess.Popen(["lxterminal -e python3 " + current_dir
                           + "icaws_access.py"], shell = True)
-    except: helpers.exit("25")
+    except: helpers.exit("13")
 
 # -- WAIT FOR MINUTE -----------------------------------------------------------
 helpers.init_success()

@@ -1,5 +1,6 @@
 import os
-import configparser
+from configparser import ConfigParser
+import pytz
 
 class ConfigData():
     
@@ -12,7 +13,6 @@ class ConfigData():
         self.integrity_path = None
         self.camera_drive = None
         self.backup_drive = None
-
         self.environment_logging = None
         self.camera_logging = None
         self.statistic_generation = None
@@ -29,7 +29,6 @@ class ConfigData():
         self.integrity_checks = None
         self.local_network_server = None
         self.backups = None
-
         self.icaws_identifier = None
         self.icaws_name = None
         self.icaws_location = None
@@ -37,7 +36,6 @@ class ConfigData():
         self.icaws_latitude = None
         self.icaws_longitude = None
         self.icaws_elevation = None
-
         self.remote_sql_server = None
         self.remote_ftp_server = None
         self.remote_ftp_username = None
@@ -46,103 +44,133 @@ class ConfigData():
     def load(self):
         """ Loads the data from the config.ini file in the current directory
         """
-        if not os.path.isfile("config.ini"): return None
+        if not os.path.isfile("config.ini"): return False
 
         try:
-            parser = configparser.ConfigParser()
-            parser.read("config.ini")
+            parser = ConfigParser(); parser.read("config.ini")
 
+            # Check required configuration options
             self.data_directory = parser.get("DataStores", "DataDirectory")
+            if self.data_directory == "": return False
+            self.icaws_name = parser.get("ICAWSName", "ICAWSName")
+            if self.icaws_name == "": return False
+            self.icaws_location = parser.get("DataStores", "ICAWSLocation")
+            if self.icaws_location == "": return False
+            self.icaws_time_zone = parser.get("DataStores", "ICAWSTimeZone")
+            if not self.icaws_time_zone in pytz.all_timezones: return False
+            self.icaws_latitude = parser.getfloat("DataStores", "ICAWSLatitude")
+            self.icaws_longitude = (parser
+                .getfloat("DataStores", "ICAWSLongitude"))
+            self.icaws_elevation = (parser
+                .getfloat("DataStores", "ICAWSElevation"))
+
+            # Derive directories and file paths
+            self.database_path = os.path.join(
+                self.data_directory, "records.sq3")
+            self.graph_directory = os.path.join(self.data_directory, "graphs")
+            self.integrity_path = os.path.join(
+                self.data_directory, "integrity.xml")
             
-            if self.data_directory == "":
-                self.data_directory = None
-                self.database_path = None
-                self.graph_directory = None
-                self.integrity_path = None
-            else:
-                self.database_path = os.path.join(self.data_directory,
-                                                  "records.sq3")
-                self.graph_directory = os.path.join(self.data_directory,
-                                                    "graphs")
-                self.integrity_path = os.path.join(self.data_directory,
-                                                   "integrity.xml")
-            
+            # Load non-required configuration options
             self.camera_drive = parser.get("DataStores", "CameraDrive")
             if self.camera_drive == "": self.camera_drive = None
-            
             self.backup_drive = parser.get("DataStores", "BackupDrive")
             if self.backup_drive == "": self.backup_drive = None
             
-            self.environment_logging = parser.getboolean("ConfigModifiers",
-                                                         "EnvironmentLogging")
-            self.camera_logging = parser.getboolean("ConfigModifiers",
-                                                    "CameraLogging")
-            self.statistic_generation = parser.getboolean("ConfigModifiers",
-                                                          "StatisticGeneration")
-            self.day_graph_generation = parser.getboolean("ConfigModifiers",
-                                                          "DayGraphGeneration")
-            self.month_graph_generation = parser.getboolean(
-                "ConfigModifiers", "MonthGraphGeneration")
-            self.year_graph_generation = parser.getboolean(
-                "ConfigModifiers", "YearGraphGeneration")
-            self.report_uploading = parser.getboolean("ConfigModifiers",
-                                                      "ReportUploading")
-            self.environment_uploading = parser.getboolean(
-                "ConfigModifiers", "EnvironmentUploading")
-            self.statistic_uploading = parser.getboolean("ConfigModifiers",
-                                                         "StatisticUploading")
-            self.camera_uploading = parser.getboolean("ConfigModifiers",
-                                                      "CameraUploading")
-            self.day_graph_uploading = parser.getboolean("ConfigModifiers",
-                                                         "DayGraphUploading")
-            self.month_graph_uploading = parser.getboolean(
-                "ConfigModifiers", "MonthGraphUploading")
-            self.year_graph_uploading = parser.getboolean("ConfigModifiers",
-                                                          "YearGraphUploading")
-            self.integrity_checks = parser.getboolean("ConfigModifiers",
-                                                      "IntegrityChecks")
-            self.local_network_server = parser.getboolean("ConfigModifiers",
-                                                          "LocalNetworkServer")
+            # Load boolean configuration modifiers
+            self.environment_logging = (parser
+                .getboolean("ConfigModifiers", "EnvironmentLogging"))
+            self.camera_logging = (parser
+                .getboolean("ConfigModifiers", "CameraLogging"))
+            self.statistic_generation = (parser
+                .getboolean("ConfigModifiers", "StatisticGeneration"))
+            self.day_graph_generation = (parser
+                .getboolean("ConfigModifiers", "DayGraphGeneration"))
+            self.month_graph_generation = (parser
+                .getboolean("ConfigModifiers", "MonthGraphGeneration"))
+            self.year_graph_generation = (parser
+                .getboolean("ConfigModifiers", "YearGraphGeneration"))
+            self.report_uploading = (parser
+                .getboolean("ConfigModifiers", "ReportUploading"))
+            self.environment_uploading = (parser
+                .getboolean("ConfigModifiers", "EnvironmentUploading"))
+            self.statistic_uploading = (parser
+                .getboolean("ConfigModifiers", "StatisticUploading"))
+            self.camera_uploading = (parser
+                .getboolean("ConfigModifiers", "CameraUploading"))
+            self.day_graph_uploading = (parser
+                .getboolean("ConfigModifiers", "DayGraphUploading"))
+            self.month_graph_uploading = (parser
+                .getboolean("ConfigModifiers", "MonthGraphUploading"))
+            self.year_graph_uploading = (parser
+                .getboolean("ConfigModifiers", "YearGraphUploading"))
+            self.integrity_checks = (parser
+                .getboolean("ConfigModifiers", "IntegrityChecks"))
+            self.local_network_server = (parser
+                .getboolean("ConfigModifiers", "LocalNetworkServer"))
             self.backups = parser.getboolean("ConfigModifiers", "Backups")
-
-            self.icaws_identifier = parser.get("ICAWSInfo", "ICAWSIdentifier")
-            if self.icaws_identifier == "": self.icaws_identifier = None
             
-            self.icaws_name = parser.get("ICAWSInfo", "ICAWSName")
-            if self.icaws_name == "": self.icaws_name = None
-            
-            self.icaws_location = parser.get("ICAWSInfo", "ICAWSLocation")
-            if self.icaws_location == "": self.icaws_location = None
-            
-            self.icaws_time_zone = parser.get("ICAWSInfo", "ICAWSTimeZone")
-            if self.icaws_time_zone == "": self.icaws_time_zone = None
-            
-            self.icaws_latitude = parser.get("ICAWSInfo", "ICAWSLatitude")
-            if self.icaws_latitude == "": self.icaws_latitude = None
-            
-            self.icaws_longitude = parser.get("ICAWSInfo", "ICAWSLongitude")
-            if self.icaws_longitude == "": self.icaws_longitude = None
-            
-            self.icaws_elevation = parser.get("ICAWSInfo", "ICAWSElevation")
-            if self.icaws_elevation == "": self.icaws_elevation = None
-            
-            self.remote_sql_server = parser.get("DataEndpoints",
-                                                "RemoteSQLServer")
+            # Load non-required configuration options
+            self.remote_sql_server = (parser
+                .get("DataEndpoints", "RemoteSQLServer"))
             if self.remote_sql_server == "": self.remote_sql_server = None
             
-            self.remote_ftp_server = parser.get("DataEndpoints",
-                                                "RemoteFTPServer")
+            self.remote_ftp_server = (parser
+                .get("DataEndpoints", "RemoteFTPServer"))
             if self.remote_ftp_server == "": self.remote_ftp_server = None
 
-            self.remote_ftp_username = parser.get("DataEndpoints",
-                                                  "RemoteFTPUsername")
-            if self.remote_ftp_username == "":
-                self.remote_ftp_username = None
+            self.remote_ftp_username = (parser
+                .get("DataEndpoints", "RemoteFTPUsername"))
+            if self.remote_ftp_username == "": self.remote_ftp_username = None
 
-            self.remote_ftp_password = parser.get("DataEndpoints",
-                                                  "RemoteFTPPassword")
-            if self.remote_ftp_password == "":
-                self.remote_ftp_password = None
-        except: return None
+            self.remote_ftp_password = (parser
+                .get("DataEndpoints", "RemoteFTPPassword"))
+            if self.remote_ftp_password == "": self.remote_ftp_password = None
+        except: return False
+        return True
+
+    def validate(self):
+        if (self.camera_logging == True and
+            self.camera_drive == None):
+            return False
+
+        if (self.backup_logging == True and
+            self.backup_drive == None):
+            return False
+
+        if (self.statistic_generation == False and
+            (self.month_graph_generation == True or
+             self.year_graph_generation == True)):
+             return False
+
+        if ((self.environment_logging == False and
+            self.environment_uploading == True) or
+            (self.camera_logging == False and
+            self.camera_uploading == True) or
+            (self.statistic_generation == False and
+            self.statistic_uploading == True) or
+            (self.day_graph_generation == False and
+            self.day_graph_uploading == True) or
+            (self.month_graph_generation == False and
+            self.month_graph_uploading == True) or
+            (self.year_graph_generation == False and
+            self.year_graph_uploading == True)):
+            return False
+
+        if (self.report_uploading == True or
+            self.environment_uploading == True or
+            self.statistic_uploading == True):
+
+            if self.remote_sql_server == None: return False
+
+        if (self.camera_uploading == True or
+            self.day_graph_uploading == True or
+            self.month_graph_uploading == True or
+            self.year_graph_uploading == True):
+
+            if (self.remote_ftp_server == None or
+                self.remote_ftp_username == None or
+                self.remote_ftp_password == None):
+                return False
 
         return True
