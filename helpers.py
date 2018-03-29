@@ -44,3 +44,7 @@ def init_success():
             file.write("initialisation success at {}"
                        .format(datetime.now().strftime("%Y-%m-%d %H:%M:%S")))
     except: sys.exit(1)
+
+def db_float(value):
+    if value == None: return "NULL"
+    else: return float(value)

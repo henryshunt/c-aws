@@ -20,7 +20,7 @@ import astral
 
 from config import ConfigData
 import helpers
-import data_items
+import frames
 
 # GLOBAL VARIABLES -------------------------------------------------------------
 print("          ICAWS Data Acquisition Software, Version 4 - 2018, Henry Hunt"
@@ -79,20 +79,27 @@ def do_log_report():
     pass
 
 def do_log_environment():
-    data = data_items.DataUtcEnviron()
+    frame = frames.DataUtcEnviron()
+    frame.time = datetime.utcnow()
 
+    # Reaf CPU temperature
     try:
-        data.cpu_temperature = round(CPUTemperature().temperature, 1)
+        frame.cpu_temperature = round(CPUTemperature().temperature, 1)
+    except: pass
+
+    # Read enclosure temperature
+    try:
         #do_read_temp("")
-        data.enclosure_temperature = enct_temp_value
+        frame.enclosure_temperature = enct_temp_value
     except: pass
 
     try:
         with sqlite3.connect(config.database_path) as database:
             cursor = database.cursor()
-            cursor.execute("INSERT INTO utcEnviron VALUES (?, NULL, ?)",
-                           (datetime.utcnow().strftime("%Y-%m-%d %H:%M:%S"),
-                            float(data.cpu_temperature)))
+            cursor.execute("INSERT INTO utcEnviron VALUES (?, ?, ?)",
+                           (frame.time.strftime("%Y-%m-%d %H:%M:%S"),
+                            frame.enclosure_temperature,
+                            helpers.db_float(frame.cpu_temperature)))
             
             database.commit()
     except: gpio.output(23, gpio.HIGH)
