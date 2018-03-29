@@ -114,15 +114,12 @@ class ConfigData():
             self.remote_sql_server = (parser
                 .get("DataEndpoints", "RemoteSQLServer"))
             if self.remote_sql_server == "": self.remote_sql_server = None
-            
             self.remote_ftp_server = (parser
                 .get("DataEndpoints", "RemoteFTPServer"))
             if self.remote_ftp_server == "": self.remote_ftp_server = None
-
             self.remote_ftp_username = (parser
                 .get("DataEndpoints", "RemoteFTPUsername"))
             if self.remote_ftp_username == "": self.remote_ftp_username = None
-
             self.remote_ftp_password = (parser
                 .get("DataEndpoints", "RemoteFTPPassword"))
             if self.remote_ftp_password == "": self.remote_ftp_password = None
