@@ -42,7 +42,7 @@ class ConfigData():
         self.remote_ftp_password = None
 
     def load(self):
-        """ Loads the data from the config.ini file in the current directory
+        """ Loads data from the config.ini file in the current directory
         """
         if not os.path.isfile("config.ini"): return False
 
@@ -127,6 +127,8 @@ class ConfigData():
         return True
 
     def validate(self):
+        """ Checks if options needed for other options are set correctly
+        """
         if (self.camera_logging == True and
             self.camera_drive == None):
             return False
