@@ -135,7 +135,7 @@ if free_space == None or free_space < 1: helpers.exit("01")
 
 # -- CHECK CONFIG --------------------------------------------------------------
 if config.load() == False: helpers.exit("02")
-if config.validate() == False helpers.exit("03")
+if config.validate() == False: helpers.exit("03")
 
 if not os.path.isdir(config.data_directory):
     try:

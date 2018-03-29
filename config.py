@@ -52,17 +52,17 @@ class ConfigData():
             # Check required configuration options
             self.data_directory = parser.get("DataStores", "DataDirectory")
             if self.data_directory == "": return False
-            self.icaws_name = parser.get("ICAWSName", "ICAWSName")
+            self.icaws_name = parser.get("ICAWSInfo", "ICAWSName")
             if self.icaws_name == "": return False
-            self.icaws_location = parser.get("DataStores", "ICAWSLocation")
+            self.icaws_location = parser.get("ICAWSInfo", "ICAWSLocation")
             if self.icaws_location == "": return False
-            self.icaws_time_zone = parser.get("DataStores", "ICAWSTimeZone")
+            self.icaws_time_zone = parser.get("ICAWSInfo", "ICAWSTimeZone")
             if not self.icaws_time_zone in pytz.all_timezones: return False
-            self.icaws_latitude = parser.getfloat("DataStores", "ICAWSLatitude")
+            self.icaws_latitude = parser.getfloat("ICAWSInfo", "ICAWSLatitude")
             self.icaws_longitude = (parser
-                .getfloat("DataStores", "ICAWSLongitude"))
+                .getfloat("ICAWSInfo", "ICAWSLongitude"))
             self.icaws_elevation = (parser
-                .getfloat("DataStores", "ICAWSElevation"))
+                .getfloat("ICAWSInfo", "ICAWSElevation"))
 
             # Derive directories and file paths
             self.database_path = os.path.join(
@@ -134,7 +134,7 @@ class ConfigData():
             self.camera_drive == None):
             return False
 
-        if (self.backup_logging == True and
+        if (self.backups == True and
             self.backup_drive == None):
             return False
 
