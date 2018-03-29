@@ -12,6 +12,7 @@ import time
 import picamera
 import RPi.GPIO as gpio
 import pytz
+from gpiozero import CPUTemperature
 
 import sqlite3
 from apscheduler.schedulers.blocking import BlockingScheduler
@@ -19,6 +20,7 @@ import astral
 
 from config import ConfigData
 import helpers
+import data_items
 
 # GLOBAL VARIABLES -------------------------------------------------------------
 print("          ICAWS Data Acquisition Software, Version 4 - 2018, Henry Hunt"
@@ -77,7 +79,13 @@ def do_log_report():
     pass
 
 def do_log_environment():
-    pass
+    data = data_items.DataUtcEnviron()
+
+    try:
+        data.cpu_temperature = round(CPUTemperature().temperature, 1)
+    except: pass
+
+    print(data.cpu_temperature)
 
 def do_log_camera():
     cur_minute = str(datetime.utcnow().minute)
