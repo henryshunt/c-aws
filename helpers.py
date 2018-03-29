@@ -25,8 +25,10 @@ def exit(code):
                        .format(datetime.now()
                                .strftime("%Y-%m-%d %H:%M:%S"), code))
 
-            gpio.output(23, gpio.HIGH)
     except: pass
+    try: gpio.output(23, gpio.HIGH)
+    except: pass
+
     sys.exit(1)
 
 def exit_no_light(code):
