@@ -87,6 +87,14 @@ def do_log_environment():
 
     print(data.cpu_temperature)
 
+    query = "INSERT INTO utcReports VALUES ('?', NULL, ?)"
+
+    with sqlite3.connect(config.database_path) as database:
+            cursor = database.cursor()
+            cursor.execute(query, (datetime.utcnow().strftime("%Y-%m-%d %H:%M:%S"),float(data.cpu_temperature))
+            database.commit()
+    except: gpio.output(23, gpio.HIGH)
+
 def do_log_camera():
     cur_minute = str(datetime.utcnow().minute)
 
