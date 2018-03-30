@@ -22,7 +22,7 @@ def exit(code):
     try:
         with open("init.txt", "w+") as file:
             file.write("initialisation failure at {} with exit code {}"
-                       .format(datetime.now()
+                       .format(datetime.utcnow()
                                .strftime("%Y-%m-%d %H:%M:%S"), code))
     except: pass
 
@@ -33,7 +33,7 @@ def exit_no_light(code):
     try:
         with open("init.txt", "w+") as file:
             file.write("initialisation failure at {} with exit code {}"
-                       .format(datetime.now()
+                       .format(datetime.utcnow()
                                .strftime("%Y-%m-%d %H:%M:%S"), code))
     except: pass
     sys.exit(1)
@@ -42,7 +42,7 @@ def init_success():
     try:
         with open("init.txt", "w+") as file:
             file.write("initialisation success at {}"
-                       .format(datetime.now().strftime("%Y-%m-%d %H:%M:%S")))
+                       .format(datetime.utcnow().strftime("%Y-%m-%d %H:%M:%S")))
 
     except:
         gpio.output(23, gpio.HIGH)
