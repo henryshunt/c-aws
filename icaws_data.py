@@ -85,13 +85,13 @@ def do_log_environment(utc):
     # Read CPU temperature
     try:
         frame.cpu_temperature = round(CPUTemperature().temperature, 1)
-    except: pass
+    except: gpio.output(23, gpio.HIGH)
 
     # Read enclosure temperature
     try:
         #do_read_temp("")
         frame.enclosure_temperature = enct_temp_value
-    except: pass
+    except: gpio.output(23, gpio.HIGH)
 
     try:
         with sqlite3.connect(config.database_path) as database:
@@ -105,20 +105,17 @@ def do_log_environment(utc):
     except: gpio.output(23, gpio.HIGH)
 
 def do_log_camera(utc):
-    cur_minute = str(datetime.utcnow().minute)
-
-    # Only run every five minutes
-    if cur_minute.endswith("0") or cur_minute.endswith("5"):
+    if str(utc.minute).endswith("0") or str(utc.minute).endswith("5"):
         location = astral.Location(("", "", config.icaws_latitude,
             config.icaws_longitude, "UTC", config.icaws_elevation))
-        solar = location.sun(date = datetime.utcnow(), local = False)
+        solar = location.sun(date = utc, local = False)
         
         sunset_threshold = solar["sunset"] + timedelta(minutes = 60)
         sunrise_threshold = solar["sunrise"] - timedelta(minutes = 60)
 
         # Only take images between sunrise and sunset
-        if (datetime.utcnow() >= sunrise_threshold.replace(tzinfo = None) and
-            datetime.utcnow() <= sunset_threshold.replace(tzinfo = None)):
+        if (utc >= sunrise_threshold.replace(tzinfo = None) and
+            utc <= sunset_threshold.replace(tzinfo = None)):
 
             if not os.path.isdir(config.camera_drive): return
             free_space = helpers.remaining_space(config.camera_drive)
@@ -126,16 +123,16 @@ def do_log_camera(utc):
 
             try:
                 image_dir = os.path.join(config.camera_drive,
-                                         datetime.utcnow().strftime("%Y/%m/%d"))
+                                         utc.strftime("%Y/%m/%d"))
                 if not os.path.exists(image_dir): os.makedirs(image_dir)
-                image_name = datetime.utcnow().strftime("%Y-%m-%dT%H-%M-%S")
+                image_name = utc.strftime("%Y-%m-%dT%H-%M-%S")
             
                 # Set image annotation and capture image
-                local_time = datetime.now(pytz.timezone(config.icaws_time_zone))
+                local_time = pytz.utc.localize(utc).astimezone(config.icaws_time_zone)
                 camera.annotate_text = ("ICAWS Camera" + local_time.strftime(
                                         "on %d/%m/%Y at %H:%M:%S"))
                 camera.capture(os.path.join(image_dir, image_name + ".jpg"))
-            except: return
+            except: gpio.output(23, gpio.HIGH)
 
 def do_generate_stats(utc):
     pass
@@ -145,10 +142,10 @@ def every_minute():
     """ Triggered every minute to generate a report, add it to the database,
         activate the camera and generate statistics
     """
-    time.sleep(0.1)
-    timestamp = datetime.utcnow().replace(second = 0, microsecond = 0)
     gpio.output(23, gpio.LOW)
     gpio.output(24, gpio.HIGH)
+    timestamp = datetime.utcnow().replace(second = 0, microsecond = 0)
+    time.sleep(0.15)
 
     # Run actions if configuration modifiers are active
     do_log_report(timestamp)
