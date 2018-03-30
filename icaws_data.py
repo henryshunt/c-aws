@@ -148,8 +148,8 @@ def every_minute():
     time.sleep(0.15)
 
     # Run actions if configuration modifiers are active
-    do_log_report(timestamp)
     if config.environment_logging == True: do_log_environment(timestamp)
+    do_log_report(timestamp)
     if config.camera_logging == True: do_log_camera(timestamp)
     if config.statistic_generation == True: do_generate_stats(timestamp)
     time.sleep(0.5)
