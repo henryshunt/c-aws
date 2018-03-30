@@ -35,11 +35,13 @@ class DataLocalStat():
         self.dew_point_min = None
         self.dew_point_max = None
         self.dew_point_avg = None
+        self.wind_speed_min = None
         self.wind_speed_max = None
         self.wind_speed_avg = None
         self.wind_direction_min = None
         self.wind_direction_max = None
         self.wind_direction_avg = None
+        self.wind_gust_min = None
         self.wind_gust_max = None
         self.wind_gust_avg = None
         self.sunshine_duration_ttl = None
