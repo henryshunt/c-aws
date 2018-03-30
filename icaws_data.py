@@ -128,7 +128,8 @@ def do_log_camera(utc):
                 image_name = utc.strftime("%Y-%m-%dT%H-%M-%S")
             
                 # Set image annotation and capture image
-                local_time = pytz.utc.localize(utc).astimezone(config.icaws_time_zone)
+                local_time = pytz.utc.localize(utc).astimezone(
+                    config.icaws_time_zone)
                 camera.annotate_text = ("ICAWS Camera" + local_time.strftime(
                                         "on %d/%m/%Y at %H:%M:%S"))
                 camera.capture(os.path.join(image_dir, image_name + ".jpg"))
