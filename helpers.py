@@ -21,7 +21,7 @@ def remaining_space(directory):
 def exit(code):
     try:
         with open("init.txt", "w+") as file:
-            file.write("initialisation failure at {} with exit code {}"
+            file.write("initialisation failure at {} UTC with exit code {}"
                        .format(datetime.utcnow()
                                .strftime("%Y-%m-%d %H:%M:%S"), code))
     except: pass
@@ -32,7 +32,7 @@ def exit(code):
 def exit_no_light(code):
     try:
         with open("init.txt", "w+") as file:
-            file.write("initialisation failure at {} with exit code {}"
+            file.write("initialisation failure at {} UTC with exit code {}"
                        .format(datetime.utcnow()
                                .strftime("%Y-%m-%d %H:%M:%S"), code))
     except: pass
@@ -41,7 +41,7 @@ def exit_no_light(code):
 def init_success():
     try:
         with open("init.txt", "w+") as file:
-            file.write("initialisation success at {}"
+            file.write("initialisation success at {} UTC"
                        .format(datetime.utcnow().strftime("%Y-%m-%d %H:%M:%S")))
 
     except:
