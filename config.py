@@ -56,6 +56,7 @@ class ConfigData():
             if self.icaws_location == "": return False
             self.icaws_time_zone = parser.get("ICAWSInfo", "ICAWSTimeZone")
             if not self.icaws_time_zone in pytz.all_timezones: return False
+            self.icaws_time_zone = pytz.timezone(self.icaws_time_zone)
             self.icaws_latitude = parser.getfloat("ICAWSInfo", "ICAWSLatitude")
             self.icaws_longitude = (parser
                 .getfloat("ICAWSInfo", "ICAWSLongitude"))
