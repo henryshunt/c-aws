@@ -75,14 +75,14 @@ def do_read_temp(address):
     except: gpio.output(23, gpio.HIGH)
 
 # OPERATIONS -------------------------------------------------------------------
-def do_log_report():
+def do_log_report(utc):
     pass
 
-def do_log_environment():
+def do_log_environment(utc):
     frame = frames.DataUtcEnviron()
-    frame.time = datetime.utcnow()
+    frame.time = utc
 
-    # Reaf CPU temperature
+    # Read CPU temperature
     try:
         frame.cpu_temperature = round(CPUTemperature().temperature, 1)
     except: pass
@@ -98,13 +98,13 @@ def do_log_environment():
             cursor = database.cursor()
             cursor.execute("INSERT INTO utcEnviron VALUES (?, ?, ?)",
                            (frame.time.strftime("%Y-%m-%d %H:%M:%S"),
-                            frame.enclosure_temperature,
+                            helpers.db_float(frame.enclosure_temperature),
                             helpers.db_float(frame.cpu_temperature)))
             
             database.commit()
     except: gpio.output(23, gpio.HIGH)
 
-def do_log_camera():
+def do_log_camera(utc):
     cur_minute = str(datetime.utcnow().minute)
 
     # Only run every five minutes
@@ -137,7 +137,7 @@ def do_log_camera():
                 camera.capture(os.path.join(image_dir, image_name + ".jpg"))
             except: return
 
-def do_generate_stats():
+def do_generate_stats(utc):
     pass
 
 # SCHEDULED FUNCTIONS ----------------------------------------------------------
@@ -146,14 +146,15 @@ def every_minute():
         activate the camera and generate statistics
     """
     time.sleep(0.1)
+    timestamp = datetime.utcnow().replace(second = 0, microsecond = 0)
     gpio.output(23, gpio.LOW)
     gpio.output(24, gpio.HIGH)
 
     # Run actions if configuration modifiers are active
-    do_log_report()
-    if config.environment_logging == True: do_log_environment()
-    if config.camera_logging == True: do_log_camera()
-    if config.statistic_generation == True: do_generate_stats()
+    do_log_report(timestamp)
+    if config.environment_logging == True: do_log_environment(timestamp)
+    if config.camera_logging == True: do_log_camera(timestamp)
+    if config.statistic_generation == True: do_generate_stats(timestamp)
     time.sleep(0.5)
 
     gpio.output(24, gpio.LOW)
@@ -174,10 +175,13 @@ def do_trigger_rain():
 # ENTRY POINT ==================================================================
 # -- INIT GPIO AND LEDS --------------------------------------------------------
 try:
-    gpio.setwarnings(False); gpio.setmode(gpio.BCM)
+    gpio.setwarnings(False)
+    gpio.setmode(gpio.BCM)
 
-    gpio.setup(23, gpio.OUT); gpio.output(23, gpio.LOW)
-    gpio.setup(24, gpio.OUT); gpio.output(24, gpio.LOW)
+    gpio.setup(23, gpio.OUT)
+    gpio.output(23, gpio.LOW)
+    gpio.setup(24, gpio.OUT)
+    gpio.output(24, gpio.LOW)
 except: helpers.exit_no_light("00")
 
 # -- CHECK INTERNAL STORAGE ----------------------------------------------------

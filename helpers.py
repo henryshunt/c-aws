@@ -43,7 +43,10 @@ def init_success():
         with open("init.txt", "w+") as file:
             file.write("initialisation success at {}"
                        .format(datetime.now().strftime("%Y-%m-%d %H:%M:%S")))
-    except: sys.exit(1)
+    except: pass
+    
+    gpio.output(23, gpio.HIGH)
+    sys.exit(1)
 
 def db_float(value):
     if value == None: return "NULL"
