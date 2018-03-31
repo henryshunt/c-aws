@@ -1,3 +1,5 @@
+from enum import Enum
+
 class DataUtcReport():
     def __init__(self):
         self.time = None
@@ -58,3 +60,8 @@ class DataLocalStat():
         self.soil_temperature_00_min = None
         self.soil_temperature_00_max = None
         self.soil_temperature_00_avg = None
+
+class DbTable(Enum):
+    UTCREPORTS = 1
+    UTCENVIRON = 2
+    LOCALSTATS = 3
