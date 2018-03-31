@@ -4,7 +4,7 @@ from frames import DbTable
 
 def record_for_time(config, time, table):
     try:
-        time = utc.replace(second = 0, microsecond = 0)
+        time = time.replace(second = 0, microsecond = 0)
         
         with sqlite3.connect(config.database_path) as database:
             database.row_factory = sqlite3.Row
