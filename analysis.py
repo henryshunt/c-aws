@@ -12,11 +12,11 @@ def record_for_time(config, utc, table):
 
             # Query respective database table
             if table == DbTable.UTCREPORTS:
-                cursor.execute("SELECT * FROM utcReports WHERE utc = ?", (utc.strftime("%Y-%m-%d %H:%M:%S"),))
+                cursor.execute("SELECT * FROM utcReports WHERE Time = ?", (utc.strftime("%Y-%m-%d %H:%M:%S"),))
             elif table == DbTable.UTCENVIRON:
-                cursor.execute("SELECT * FROM utcEnviron WHERE utc = ?", (utc.strftime("%Y-%m-%d %H:%M:%S"),))
+                cursor.execute("SELECT * FROM utcEnviron WHERE Time = ?", (utc.strftime("%Y-%m-%d %H:%M:%S"),))
             elif table == DbTable.LOCALSTATS:
-                cursor.execute("SELECT * FROM localStats WHERE utc = ?", (utc.strftime("%Y-%m-%d"),))
+                cursor.execute("SELECT * FROM localStats WHERE Date = ?", (utc.strftime("%Y-%m-%d"),))
 
             return cursor.fetchone()
     except: return False
