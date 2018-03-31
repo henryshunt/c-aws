@@ -162,11 +162,11 @@ def every_minute():
     gpio.output(23, gpio.LOW)
     gpio.output(24, gpio.HIGH)
     utc = datetime.utcnow().replace(second = 0, microsecond = 0)
-    time.sleep(0.1)
+    time.sleep(0.15)
 
     # Run actions if configuration modifiers are active
-    if config.environment_logging == True: do_log_environment(utc)
     do_log_report(utc)
+    if config.environment_logging == True: do_log_environment(utc)
     if config.camera_logging == True: do_log_camera(utc)
     if config.statistic_generation == True: do_generate_stats(utc)
 
