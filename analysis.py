@@ -14,9 +14,11 @@ def record_for_time(config, time, table):
             if table == DbTable.UTCREPORTS:
                 cursor.execute("SELECT * FROM utcReports WHERE Time = ?",
                                (time.strftime("%Y-%m-%d %H:%M:%S"),))
+
             elif table == DbTable.UTCENVIRON:
                 cursor.execute("SELECT * FROM utcEnviron WHERE Time = ?",
                                (time.strftime("%Y-%m-%d %H:%M:%S"),))
+
             elif table == DbTable.LOCALSTATS:
                 cursor.execute("SELECT * FROM localStats WHERE Date = ?",
                                (time.strftime("%Y-%m-%d"),))
@@ -25,10 +27,10 @@ def record_for_time(config, time, table):
     except: return False
 
 def stats_for_range(config, start, end, table):
+    start = start.replace(second = 0, microsecond = 0)
+    end = end.replace(second = 0, microsecond = 0)
+
     try:
-        start = start.replace(second = 0, microsecond = 0)
-        end = end.replace(second = 0, microsecond = 0)
-        
         with sqlite3.connect(config.database_path) as database:
             database.row_factory = sqlite3.Row
             cursor = database.cursor()
@@ -50,6 +52,7 @@ def stats_for_range(config, start, end, table):
                                     + "? AND ?",
                                (start.strftime("%Y-%m-%d %H:%M:%S"),
                                 end.strftime("%Y-%m-%d %H:%M:%S")))
+
             elif table == DbTable.UTCENVIRON:
                 cursor.execute("SELECT min(EncT), max(EncT), avg(EncT), "
                                     + "min(CPUT), max(CPUT), avg(CPUT) "
@@ -57,11 +60,12 @@ def stats_for_range(config, start, end, table):
                                     + "? AND ?",
                                (start.strftime("%Y-%m-%d %H:%M:%S"),
                                 end.strftime("%Y-%m-%d %H:%M:%S")))
+
             elif table == DbTable.LOCALSTATS:
                 cursor.execute("SELECT * FROM localStats WHERE Date BETWEEN "
                                     + "? AND ?",
                                (start.strftime("%Y-%m-%d"),
-                               start.strftime("%Y-%m-%d")))
+                                start.strftime("%Y-%m-%d")))
 
             return cursor.fetchone()
     except: return False
