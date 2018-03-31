@@ -9,14 +9,14 @@ import subprocess
 import os
 from datetime import datetime, timedelta
 import time
-import picamera
-import RPi.GPIO as gpio
 import pytz
-from gpiozero import CPUTemperature
 
 import sqlite3
+import RPi.GPIO as gpio
 from apscheduler.schedulers.blocking import BlockingScheduler
 import astral
+import picamera
+from gpiozero import CPUTemperature
 
 from config import ConfigData
 import helpers
@@ -30,14 +30,14 @@ time.sleep(2.5)
 
 config = ConfigData()
 start_time = None
-disable_interrupts = False
+disable_sampling = False
 
 wspd_ticks = []
 past_wspd_ticks = []
 wdir_samples = []
 past_wdir_samples = []
-rain_ticks = 0
 sund_ticks = 0
+rain_ticks = 0
 
 tair_temp_value = None
 expt_temp_value = None
@@ -50,7 +50,9 @@ enct_temp_value = None
 def do_read_temp(address):
     """ Reads value of specific temperature probe into its global variable
     """
-    if not os.path.exists("/sys/bus/w1/devices/" + address): return
+    if not os.path.exists("/sys/bus/w1/devices/" + address):
+        gpio.output(23, gpio.HIGH)
+        return
 
     try:
         with open("/sys/bus/w1/devices/" + address + "/w1_slave", "r") as probe:
@@ -60,17 +62,28 @@ def do_read_temp(address):
             # Store value in respective global variable
             if temp != -127 and temp != 85:
                 if os.path.basename(address) == "28-04167053d6ff":
-                    global tair_temp_value; tair_temp_value = round(temp, 1)
+                    global tair_temp_value
+                    tair_temp_value = round(temp, 1)
+
                 elif os.path.basename(address) == "28-0416704a38ff":
-                    global expt_temp_value; expt_temp_value = round(temp, 1)
+                    global expt_temp_value
+                    expt_temp_value = round(temp, 1)
+
                 elif os.path.basename(address) == "28-0416705d66ff":
-                    global st10_temp_value; st10_temp_value = round(temp, 1)
+                    global st10_temp_value
+                    st10_temp_value = round(temp, 1)
+
                 elif os.path.basename(address) == "28-04167055d5ff":
-                    global st30_temp_value; st30_temp_value = round(temp, 1)
+                    global st30_temp_value
+                    st30_temp_value = round(temp, 1)
+
                 elif os.path.basename(address) == "28-0516704dc0ff":
-                    global st00_temp_value; st00_temp_value = round(temp, 1)
+                    global st00_temp_value
+                    st00_temp_value = round(temp, 1)
+
                 elif os.path.basename(address) == "":
-                    global enct_temp_value; enct_temp_value = round(temp, 1)
+                    global enct_temp_value
+                    enct_temp_value = round(temp, 1)
     except: gpio.output(23, gpio.HIGH)
 
 # OPERATIONS -------------------------------------------------------------------
@@ -149,7 +162,7 @@ def every_minute():
     gpio.output(23, gpio.LOW)
     gpio.output(24, gpio.HIGH)
     utc = datetime.utcnow().replace(second = 0, microsecond = 0)
-    time.sleep(0.15)
+    time.sleep(0.1)
 
     # Run actions if configuration modifiers are active
     if config.environment_logging == True: do_log_environment(utc)
