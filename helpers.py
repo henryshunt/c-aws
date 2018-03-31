@@ -23,7 +23,7 @@ def exit(code):
         with open("init.txt", "w+") as file:
             file.write("initialisation failure at {} UTC with exit code {}"
                        .format(datetime.utcnow()
-                               .strftime("%Y-%m-%d %H:%M:%S"), code))
+                               .strftime("%Y-%m-%dT%H:%M:%S"), code))
     except: pass
 
     gpio.output(23, gpio.HIGH)
@@ -34,7 +34,7 @@ def exit_no_light(code):
         with open("init.txt", "w+") as file:
             file.write("initialisation failure at {} UTC with exit code {}"
                        .format(datetime.utcnow()
-                               .strftime("%Y-%m-%d %H:%M:%S"), code))
+                               .strftime("%Y-%m-%dT%H:%M:%S"), code))
     except: pass
     sys.exit(1)
 
@@ -42,13 +42,13 @@ def init_success():
     try:
         with open("init.txt", "w+") as file:
             file.write("initialisation success at {} UTC"
-                       .format(datetime.utcnow().strftime("%Y-%m-%d %H:%M:%S")))
+                       .format(datetime.utcnow().strftime("%Y-%m-%dT%H:%M:%S")))
 
     except:
         gpio.output(23, gpio.HIGH)
         sys.exit(1)
 
-def db_float(value):
+def db_float_in(value):
     if value == None: return "NULL"
     else: return float(value)
 

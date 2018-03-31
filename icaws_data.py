@@ -51,9 +51,8 @@ def do_read_temp(address):
     """ Reads value of specific temperature probe into its global variable
     """
     if not os.path.exists("/sys/bus/w1/devices/" + address): return
-    
+
     try:
-        # Read data for specified sensor address
         with open("/sys/bus/w1/devices/" + address + "/w1_slave", "r") as probe:
             data = probe.readlines()
             temp = int(data[1][data[1].find("t=") + 2:]) / 1000
@@ -98,20 +97,25 @@ def do_log_environment(utc):
             cursor = database.cursor()
             cursor.execute("INSERT INTO utcEnviron VALUES (?, ?, ?)",
                            (frame.time.strftime("%Y-%m-%d %H:%M:%S"),
-                            helpers.db_float(frame.enclosure_temperature),
-                            helpers.db_float(frame.cpu_temperature)))
+                            helpers.db_float_in(frame.enclosure_temperature),
+                            helpers.db_float_in(frame.cpu_temperature)))
             
             database.commit()
     except: gpio.output(23, gpio.HIGH)
 
 def do_log_camera(utc):
     if str(utc.minute).endswith("0") or str(utc.minute).endswith("5"):
-        location = astral.Location(("", "", config.icaws_latitude,
-            config.icaws_longitude, "UTC", config.icaws_elevation))
-        solar = location.sun(date = utc, local = False)
-        
-        sunset_threshold = solar["sunset"] + timedelta(minutes = 60)
-        sunrise_threshold = solar["sunrise"] - timedelta(minutes = 60)
+        try:
+            location = astral.Location(("", "", config.icaws_latitude,
+                config.icaws_longitude, "UTC", config.icaws_elevation))
+            solar = location.sun(date = utc, local = False)
+            
+            sunset_threshold = solar["sunset"] + timedelta(minutes = 60)
+            sunrise_threshold = solar["sunrise"] - timedelta(minutes = 60)
+
+        except:
+            gpio.output(23, gpio.HIGH)
+            return
 
         # Only take images between sunrise and sunset
         if (utc >= sunrise_threshold.replace(tzinfo = None) and
@@ -128,8 +132,8 @@ def do_log_camera(utc):
                 image_name = utc.strftime("%Y-%m-%dT%H-%M-%S")
             
                 # Set image annotation and capture image
-                local_time = helpers.utc_to_local(config, utc)
-                camera.annotate_text = ("ICAWS Camera" + local_time.strftime(
+                local = helpers.utc_to_local(config, utc)
+                camera.annotate_text = ("ICAWS Camera" + local.strftime(
                                         "on %d/%m/%Y at %H:%M:%S"))
                 camera.capture(os.path.join(image_dir, image_name + ".jpg"))
             except: gpio.output(23, gpio.HIGH)
@@ -152,7 +156,6 @@ def every_minute():
     do_log_report(utc)
     if config.camera_logging == True: do_log_camera(utc)
     if config.statistic_generation == True: do_generate_stats(utc)
-    time.sleep(0.5)
 
     gpio.output(24, gpio.LOW)
 
