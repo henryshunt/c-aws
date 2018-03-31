@@ -3,9 +3,9 @@ import sqlite3
 from frames import DbTable
 
 def record_for_time(config, time, table):
-    try:
-        time = time.replace(second = 0, microsecond = 0)
+    time = time.replace(second = 0, microsecond = 0)
         
+    try:
         with sqlite3.connect(config.database_path) as database:
             database.row_factory = sqlite3.Row
             cursor = database.cursor()
