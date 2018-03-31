@@ -2,8 +2,10 @@ import sqlite3
 
 from frames import DbTable
 
-def record_for_time(config, utc, table)
+def record_for_time(config, utc, table):
     try:
+        utc = utc.replace(second = 0, microsecond = 0)
+        
         with sqlite3.connect(config.database_path) as database:
             database.row_factory = sqlite3.Row
             cursor = database.cursor()
