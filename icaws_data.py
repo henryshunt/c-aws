@@ -302,6 +302,7 @@ while True:
 
 gpio.output(24, gpio.LOW)
 
+
 # -- START DATA LOGGING --------------------------------------------------------
 start_time = datetime.utcnow().replace(second = 0, microsecond = 0)
 gpio.setup(17, gpio.IN, pull_up_down = gpio.PUD_DOWN)

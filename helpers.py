@@ -49,7 +49,7 @@ def init_success():
         sys.exit(1)
 
 def db_float_in(value):
-    if value == None: return "NULL"
+    if value == None: return None
     else: return float(value)
 
 def utc_to_local(config, utc):
