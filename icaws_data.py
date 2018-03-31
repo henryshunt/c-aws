@@ -102,7 +102,7 @@ def do_log_environment(utc):
     # Read enclosure temperature
     try:
         #do_read_temp("")
-        frame.enclosure_temperature = enct_temp_value
+        frame.enclosure_temperature = round(enct_temp_value, 1)
     except: gpio.output(23, gpio.HIGH)
 
     try:
@@ -110,8 +110,8 @@ def do_log_environment(utc):
             cursor = database.cursor()
             cursor.execute("INSERT INTO utcEnviron VALUES (?, ?, ?)",
                            (frame.time.strftime("%Y-%m-%d %H:%M:%S"),
-                            helpers.db_float_in(frame.enclosure_temperature),
-                            helpers.db_float_in(frame.cpu_temperature)))
+                            frame.enclosure_temperature,
+                            frame.cpu_temperature))
             
             database.commit()
     except: gpio.output(23, gpio.HIGH)

@@ -48,10 +48,6 @@ def init_success():
         gpio.output(23, gpio.HIGH)
         sys.exit(1)
 
-def db_float_in(value):
-    if value == None: return None
-    else: return float(value)
-
 def utc_to_local(config, utc):
     localised = pytz.utc.localize(utc)
     return (localised.astimezone(config.icaws_time_zone).replace(tzinfo = None))
