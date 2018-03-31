@@ -128,8 +128,7 @@ def do_log_camera(utc):
                 image_name = utc.strftime("%Y-%m-%dT%H-%M-%S")
             
                 # Set image annotation and capture image
-                local_time = pytz.utc.localize(utc).astimezone(
-                    config.icaws_time_zone)
+                local_time = helpers.utc_to_local(config, utc)
                 camera.annotate_text = ("ICAWS Camera" + local_time.strftime(
                                         "on %d/%m/%Y at %H:%M:%S"))
                 camera.capture(os.path.join(image_dir, image_name + ".jpg"))
@@ -145,14 +144,14 @@ def every_minute():
     """
     gpio.output(23, gpio.LOW)
     gpio.output(24, gpio.HIGH)
-    timestamp = datetime.utcnow().replace(second = 0, microsecond = 0)
+    utc = datetime.utcnow().replace(second = 0, microsecond = 0)
     time.sleep(0.15)
 
     # Run actions if configuration modifiers are active
-    if config.environment_logging == True: do_log_environment(timestamp)
-    do_log_report(timestamp)
-    if config.camera_logging == True: do_log_camera(timestamp)
-    if config.statistic_generation == True: do_generate_stats(timestamp)
+    if config.environment_logging == True: do_log_environment(utc)
+    do_log_report(utc)
+    if config.camera_logging == True: do_log_camera(utc)
+    if config.statistic_generation == True: do_generate_stats(utc)
     time.sleep(0.5)
 
     gpio.output(24, gpio.LOW)
