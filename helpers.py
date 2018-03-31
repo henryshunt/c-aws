@@ -51,3 +51,11 @@ def init_success():
 def db_float(value):
     if value == None: return "NULL"
     else: return float(value)
+
+def utc_to_local(config, utc):
+    localised = pytz.utc.localize(utc)
+    return (localised.astimezone(config.icaws_time_zone).replace(tzinfo = None))
+
+def local_to_utc(config, local):
+    localised = config.icaws_time_zone.localize(local)
+    return (localised.astimezone(pytz.utc).replace(tzinfo = None))
