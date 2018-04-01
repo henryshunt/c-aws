@@ -78,7 +78,7 @@ def stats_for_range(config, start, end, table):
                                     + "min(ST30_Min), max(ST30_Max), "
                                     + "avg(ST30_Avg), min(ST00_Min), "
                                     + "max(ST00_Max), avg(ST00_Avg) "
-                                    + " FROM utcReports WHERE Time BETWEEN "
+                                    + "FROM localStats WHERE Date BETWEEN "
                                     + "? AND ?",
                                (start.strftime("%Y-%m-%d"),
                                 start.strftime("%Y-%m-%d")))
