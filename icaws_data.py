@@ -240,7 +240,7 @@ def do_generate_stats(utc):
                          local_time.strftime("%Y-%m-%d")))
             
             database.commit()
-    except: pass
+    except: gpio.output(23, gpio.HIGH)
 
 # SCHEDULED FUNCTIONS ----------------------------------------------------------
 def every_minute():
