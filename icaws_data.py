@@ -54,8 +54,7 @@ def do_read_temp(address):
     """ Reads value of specific temperature probe into its global variable
     """
     if not os.path.exists("/sys/bus/w1/devices/" + address):
-        gpio.output(23, gpio.HIGH)
-        return
+        gpio.output(23, gpio.HIGH); return
 
     try:
         with open("/sys/bus/w1/devices/" + address + "/w1_slave", "r") as probe:
@@ -92,13 +91,14 @@ def do_read_temp(address):
 # OPERATIONS -------------------------------------------------------------------
 def do_log_report(utc):
     free_space = helpers.remaining_space("/")
-    
     if free_space == None or free_space < 0.1:
         gpio.output(23, gpio.HIGH); return
 
+    frame = frames.DataUtcReport()
+    frame.time = utc
+
 def do_log_environment(utc):
     free_space = helpers.remaining_space("/")
-    
     if free_space == None or free_space < 0.1:
         gpio.output(23, gpio.HIGH); return
 
@@ -134,12 +134,6 @@ def do_log_environment(utc):
     except: gpio.output(23, gpio.HIGH)
 
 def do_log_camera(utc):
-    free_space = helpers.remaining_space(config.camera_drive)
-
-    if free_space == None or free_space < 0.1:
-        gpio.output(23, gpio.HIGH); return
-
-
     if str(utc.minute).endswith("0") or str(utc.minute).endswith("5"):
         try:
             location = astral.Location(("", "", config.icaws_latitude,
@@ -148,16 +142,17 @@ def do_log_camera(utc):
             
             sunset_threshold = solar["sunset"] + timedelta(minutes = 60)
             sunrise_threshold = solar["sunrise"] - timedelta(minutes = 60)
-
-        except:
-            gpio.output(23, gpio.HIGH)
-            return
+        except: gpio.output(23, gpio.HIGH); return
 
         # Only take images between sunrise and sunset
         if (utc >= sunrise_threshold.replace(tzinfo = None) and
             utc <= sunset_threshold.replace(tzinfo = None)):
 
             if not os.path.isdir(config.camera_drive):
+                gpio.output(23, gpio.HIGH); return
+
+            free_space = helpers.remaining_space(config.camera_drive)
+            if free_space == None or free_space < 0.1:
                 gpio.output(23, gpio.HIGH); return
 
             try:
@@ -175,7 +170,6 @@ def do_log_camera(utc):
 
 def do_generate_stats(utc):
     free_space = helpers.remaining_space("/")
-
     if free_space == None or free_space < 0.1:
         gpio.output(23, gpio.HIGH); return
 
@@ -184,13 +178,9 @@ def do_generate_stats(utc):
     new_stats = analysis.stats_for_range(config, bounds[0], bounds[1],
                                         DbTable.UTCREPORTS)
 
-    if new_stats == False:
-        gpio.output(23, gpio.HIGH); return
-
+    if new_stats == False: gpio.output(23, gpio.HIGH); return
     cur_stats = analysis.record_for_time(config, local_time, DbTable.LOCALSTATS)
-
-    if cur_stats == False:
-        gpio.output(23, gpio.HIGH); return
+    if cur_stats == False: gpio.output(23, gpio.HIGH); return
     
     try:
         with sqlite3.connect(config.database_path) as database:
@@ -264,6 +254,7 @@ try:
     gpio.output(23, gpio.LOW)
     gpio.setup(24, gpio.OUT)
     gpio.output(24, gpio.LOW)
+
 except: helpers.exit_no_light("00")
 
 # -- CHECK INTERNAL STORAGE ----------------------------------------------------
@@ -284,10 +275,12 @@ if not os.path.isfile(config.database_path):
     try:
         with sqlite3.connect(config.database_path) as database:
             cursor = database.cursor()
+
             cursor.execute(queries.CREATE_UTCREPORTS_TABLE)
             cursor.execute(queries.CREATE_UTCENVIRON_TABLE)
             cursor.execute(queries.CREATE_LOCALSTATS_TABLE)
             database.commit()
+
     except: helpers.exit("05")
 
 # -- CHECK CAMERA DRIVE --------------------------------------------------------
