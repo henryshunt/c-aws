@@ -43,7 +43,7 @@ def stats_for_range(config, start, end, table):
                                     + "min(WSpd), max(WSpd), avg(WSpd), "
                                     + "min(WDir), max(WDir), avg(WDir), "
                                     + "min(WGst), max(WGst), avg(WGst), "
-                                    + "total(SunD), total(Rain), "
+                                    + "sum(SunD), sum(Rain), "
                                     + "min(MSLP), max(MSLP), avg(MSLP), "
                                     + "min(ST10), max(ST10), avg(ST10), "
                                     + "min(ST30), max(ST30), avg(ST30), "
@@ -62,7 +62,23 @@ def stats_for_range(config, start, end, table):
                                 end.strftime("%Y-%m-%d %H:%M:%S")))
 
             elif table == DbTable.LOCALSTATS:
-                cursor.execute("SELECT * FROM localStats WHERE Date BETWEEN "
+                cursor.execute("SELECT min(AirT_Min), max(AirT_Max), "
+                                    + "avg(AirT_Avg), min(RelH_Min), "
+                                    + "max(RelH_Max), avg(RelH_Avg), "
+                                    + "min(DewP_Min), max(DewP_Max), "
+                                    + "avg(DewP_Avg), min(WSpd_Min), "
+                                    + "max(WSpd_Max), avg(WSpd_Avg), "
+                                    + "min(WDir_Min), max(WDir_Max), "
+                                    + "avg(WDir_Avg), min(WGst_Min), "
+                                    + "max(WGst_Max), avg(WGst_Avg), "
+                                    + "sum(SunD_Ttl), sum(Rain_Ttl), "
+                                    + "min(MSLP_Min), max(MSLP_Max), "
+                                    + "avg(MSLP_Avg), min(ST10_Min), "
+                                    + "max(ST10_Max), avg(ST10_Avg), "
+                                    + "min(ST30_Min), max(ST30_Max), "
+                                    + "avg(ST30_Avg), min(ST00_Min), "
+                                    + "max(ST00_Max), avg(ST00_Avg) "
+                                    + " FROM utcReports WHERE Time BETWEEN "
                                     + "? AND ?",
                                (start.strftime("%Y-%m-%d"),
                                 start.strftime("%Y-%m-%d")))
