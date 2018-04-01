@@ -23,6 +23,7 @@ import helpers
 import frames
 from frames import DbTable
 import analysis
+import queries
 
 # GLOBAL VARIABLES -------------------------------------------------------------
 print("          ICAWS Data Acquisition Software, Version 4 - 2018, Henry Hunt"
@@ -90,9 +91,17 @@ def do_read_temp(address):
 
 # OPERATIONS -------------------------------------------------------------------
 def do_log_report(utc):
-    pass
+    free_space = helpers.remaining_space("/")
+    
+    if free_space == None or free_space < 0.1:
+        gpio.output(23, gpio.HIGH); return
 
 def do_log_environment(utc):
+    free_space = helpers.remaining_space("/")
+    
+    if free_space == None or free_space < 0.1:
+        gpio.output(23, gpio.HIGH); return
+
     frame = frames.DataUtcEnviron()
     frame.time = utc
 
@@ -113,15 +122,10 @@ def do_log_environment(utc):
             frame.enclosure_temperature = round(frame.enclosure_temperature, 1)
     except: gpio.output(23, gpio.HIGH)
 
-    free_space = helpers.remaining_space("/")
-    if free_space == None or free_space < 0.1:
-        gpio.output(23, gpio.HIGH)
-        return
-
     try:
         with sqlite3.connect(config.database_path) as database:
             cursor = database.cursor()
-            cursor.execute("INSERT INTO utcEnviron VALUES (?, ?, ?)",
+            cursor.execute(queries.INSERT_SINGLE_UTCENVIRON,
                                (frame.time.strftime("%Y-%m-%d %H:%M:%S"),
                                 frame.enclosure_temperature,
                                 frame.cpu_temperature))
@@ -130,6 +134,12 @@ def do_log_environment(utc):
     except: gpio.output(23, gpio.HIGH)
 
 def do_log_camera(utc):
+    free_space = helpers.remaining_space(config.camera_drive)
+
+    if free_space == None or free_space < 0.1:
+        gpio.output(23, gpio.HIGH); return
+
+
     if str(utc.minute).endswith("0") or str(utc.minute).endswith("5"):
         try:
             location = astral.Location(("", "", config.icaws_latitude,
@@ -148,13 +158,7 @@ def do_log_camera(utc):
             utc <= sunset_threshold.replace(tzinfo = None)):
 
             if not os.path.isdir(config.camera_drive):
-                gpio.output(23, gpio.HIGH)
-                return
-
-            free_space = helpers.remaining_space(config.camera_drive)
-            if free_space == None or free_space < 0.1:
-                gpio.output(23, gpio.HIGH)
-                return
+                gpio.output(23, gpio.HIGH); return
 
             try:
                 image_dir = os.path.join(config.camera_drive,
@@ -171,9 +175,9 @@ def do_log_camera(utc):
 
 def do_generate_stats(utc):
     free_space = helpers.remaining_space("/")
+
     if free_space == None or free_space < 0.1:
-        gpio.output(23, gpio.HIGH)
-        return
+        gpio.output(23, gpio.HIGH); return
 
     local_time = helpers.utc_to_local(config, utc)
     bounds = helpers.day_bounds_utc(config, local_time, False)
@@ -181,63 +185,40 @@ def do_generate_stats(utc):
                                         DbTable.UTCREPORTS)
 
     if new_stats == False:
-        gpio.output(23, gpio.HIGH)
-        return
+        gpio.output(23, gpio.HIGH); return
 
     cur_stats = analysis.record_for_time(config, local_time, DbTable.LOCALSTATS)
 
     if cur_stats == False:
-        gpio.output(23, gpio.HIGH)
-        return
+        gpio.output(23, gpio.HIGH); return
     
     try:
         with sqlite3.connect(config.database_path) as database:
             cursor = database.cursor()
 
             if cur_stats == None:
-                cursor.execute("INSERT INTO localStats (Date, AirT_Min, "
-                    + "AirT_Max, AirT_Avg, RelH_Min, RelH_Max, RelH_Avg, "
-                    + "DewP_Min, DewP_Max, DewP_Avg, WSpd_Min, WSpd_Max, "
-                    + "WSpd_Avg, WDir_Min, WDir_Max, WDir_Avg, WGst_Min, "
-                    + "WGst_Max, WGst_Avg, SunD_Ttl, Rain_Ttl, MSLP_Min, "
-                    + "MSLP_Max, MSLP_Avg, ST10_Min, ST10_Max, ST10_Avg, "
-                    + "ST30_Min, ST30_Max, ST30_Avg, ST00_Min, ST00_Max, "
-                    + "ST00_Avg) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, "
-                    + "?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, "
-                    + "?, ?, ?)",
-                        (local_time.strftime("%Y-%m-%d"), new_stats[0],
-                         new_stats[1], new_stats[2], new_stats[3], new_stats[4],
-                         new_stats[5], new_stats[6], new_stats[7], new_stats[8],
-                         new_stats[9], new_stats[10], new_stats[11],
-                         new_stats[12], new_stats[13], new_stats[14],
-                         new_stats[15], new_stats[16], new_stats[17],
-                         new_stats[18], new_stats[19], new_stats[20],
-                         new_stats[21], new_stats[22], new_stats[23],
-                         new_stats[24], new_stats[25], new_stats[26],
-                         new_stats[27], new_stats[28], new_stats[29],
-                         new_stats[30], new_stats[31]))
+                cursor.execute(queries.INSERT_SINGLE_LOCALSTATS,
+                    (local_time.strftime("%Y-%m-%d"), new_stats[0],
+                     new_stats[1], new_stats[2], new_stats[3], new_stats[4],
+                     new_stats[5], new_stats[6], new_stats[7], new_stats[8],
+                     new_stats[9], new_stats[10], new_stats[11], new_stats[12],
+                     new_stats[13], new_stats[14], new_stats[15], new_stats[16],
+                     new_stats[17], new_stats[18], new_stats[19], new_stats[20],
+                     new_stats[21], new_stats[22], new_stats[23], new_stats[24],
+                     new_stats[25], new_stats[26], new_stats[27], new_stats[28],
+                     new_stats[29], new_stats[30], new_stats[31]))
 
             else:
-                cursor.execute("UPDATE localStats SET AirT_Min = ?, "
-                    + "AirT_Max = ?, AirT_Avg = ?, RelH_Min = ?, RelH_Max = ?, "
-                    + "RelH_Avg = ?, DewP_Min = ?, DewP_Max = ?, DewP_Avg = ?, "
-                    + "WSpd_Min = ?, WSpd_Max = ?, WSpd_Avg = ?, WDir_Min = ?, "
-                    + "WDir_Max = ?, WDir_Avg = ?, WGst_Min = ?, WGst_Max = ?, "
-                    + "WGst_Avg = ?, SunD_Ttl = ?, Rain_Ttl = ?, MSLP_Min = ?, "
-                    + "MSLP_Max = ?, MSLP_Avg = ?, ST10_Min = ?, ST10_Max = ?, "
-                    + "ST10_Avg = ?, ST30_Min = ?, ST30_Max = ?, ST30_Avg = ?, "
-                    + "ST00_Min = ?, ST00_Max = ?, ST00_Avg = ? WHERE Date = ?",
-                        (new_stats[0], new_stats[1], new_stats[2], new_stats[3],
-                         new_stats[4], new_stats[5], new_stats[6], new_stats[7],
-                         new_stats[8], new_stats[9], new_stats[10],
-                         new_stats[11], new_stats[12], new_stats[13],
-                         new_stats[14], new_stats[15], new_stats[16],
-                         new_stats[17], new_stats[18], new_stats[19],
-                         new_stats[20], new_stats[21], new_stats[22],
-                         new_stats[23], new_stats[24], new_stats[25],
-                         new_stats[26], new_stats[27], new_stats[28],
-                         new_stats[29], new_stats[30], new_stats[31],
-                         local_time.strftime("%Y-%m-%d")))
+                cursor.execute(queries.UPDATE_SINGLE_LOCALSTATS,
+                    (new_stats[0], new_stats[1], new_stats[2], new_stats[3],
+                     new_stats[4], new_stats[5], new_stats[6], new_stats[7],
+                     new_stats[8], new_stats[9], new_stats[10],  new_stats[11], 
+                     new_stats[12], new_stats[13], new_stats[14], new_stats[15],
+                     new_stats[16], new_stats[17], new_stats[18], new_stats[19],
+                     new_stats[20], new_stats[21], new_stats[22], new_stats[23],
+                     new_stats[24], new_stats[25], new_stats[26], new_stats[27],
+                     new_stats[28], new_stats[29], new_stats[30], new_stats[31],
+                     local_time.strftime("%Y-%m-%d")))
             
             database.commit()
     except: gpio.output(23, gpio.HIGH)
@@ -303,26 +284,9 @@ if not os.path.isfile(config.database_path):
     try:
         with sqlite3.connect(config.database_path) as database:
             cursor = database.cursor()
-            cursor.execute("CREATE TABLE utcReports (Time TEXT PRIMARY KEY NOT "
-                + "NULL, AirT REAL, ExpT REAL, RelH REAL, DewP REAL, WSpd "
-                + "REAL, WDir REAL, WGst REAL, SunD REAL, Rain REAL, StaP "
-                + "REAL, PTen REAL, MSLP REAL, ST10 REAL, ST30 REAL, "
-                + "ST00 REAL)")
-
-            cursor.execute("CREATE TABLE utcEnviron (Time TEXT PRIMARY KEY NOT "
-                + "NULL, EncT REAL, CPUT REAL)")
-
-            cursor.execute("CREATE TABLE localStats (Date TEXT PRIMARY KEY NOT "
-                + "NULL, AirT_Min REAL, AirT_Max REAL, AirT_Avg REAL, RelH_Min "
-                + "REAL, RelH_Max REAL, RelH_Avg REAL, DewP_Min REAL, DewP_Max "
-                + "REAL, DewP_Avg REAL, WSpd_Min REAL, WSpd_Max REAL, WSpd_Avg "
-                + "REAL, WDir_Min REAL, WDir_Max REAL, WDir_Avg REAL, WGst_Min "
-                + "REAL, WGst_Max REAL, WGst_Avg REAL, SunD_Ttl REAL, Rain_Ttl "
-                + "REAL, MSLP_Min REAL, MSLP_Max REAL, MSLP_Avg REAL, ST10_Min "
-                + "REAL, ST10_Max REAL, ST10_Avg REAL, ST30_Min REAL, ST30_Max "
-                + "REAL, ST30_Avg REAL, ST00_Min REAL, ST00_Max REAL, ST00_Avg "
-                + "REAL)")
-
+            cursor.execute(queries.CREATE_UTCREPORTS_TABLE)
+            cursor.execute(queries.CREATE_UTCENVIRON_TABLE)
+            cursor.execute(queries.CREATE_LOCALSTATS_TABLE)
             database.commit()
     except: helpers.exit("05")
 
