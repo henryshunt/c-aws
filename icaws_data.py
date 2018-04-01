@@ -111,6 +111,11 @@ def do_log_environment(utc):
             frame.enclosure_temperature = round(frame.enclosure_temperature, 1)
     except: gpio.output(23, gpio.HIGH)
 
+    free_space = helpers.remaining_space("/")
+    if free_space == None or free_space < 0.1:
+        gpio.output(23, gpio.HIGH)
+        return
+
     try:
         with sqlite3.connect(config.database_path) as database:
             cursor = database.cursor()
@@ -140,9 +145,14 @@ def do_log_camera(utc):
         if (utc >= sunrise_threshold.replace(tzinfo = None) and
             utc <= sunset_threshold.replace(tzinfo = None)):
 
-            if not os.path.isdir(config.camera_drive): return
+            if not os.path.isdir(config.camera_drive):
+                gpio.output(23, gpio.HIGH)
+                return
+
             free_space = helpers.remaining_space(config.camera_drive)
-            if free_space == None or free_space < 5: return
+            if free_space == None or free_space < 0.1:
+                gpio.output(23, gpio.HIGH)
+                return
 
             try:
                 image_dir = os.path.join(config.camera_drive,
