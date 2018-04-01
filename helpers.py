@@ -50,23 +50,11 @@ def init_success():
 
 def utc_to_local(config, utc):
     localised = pytz.utc.localize(utc.replace(tzinfo = None))
-    return (localised.astimezone(config.icaws_time_zone).replace(tzinfo = None))
+    return localised.astimezone(config.icaws_time_zone).replace(tzinfo = None)
 
 def local_to_utc(config, local):
     localised = config.icaws_time_zone.localize(local.replace(tzinfo = None))
-    return (localised.astimezone(pytz.utc).replace(tzinfo = None))
-
-# def day_bounds_utc(config, local, inclusive):
-#     # Get start and end of local day
-#     start = local.replace(hour = 0, minute = 0, second = 0, microsecond = 0)
-#     end = local.replace(hour = 23, minute = 59, second = 0, microsecond = 0)
-
-#     # Use start of next day as end if inclusive
-#     if inclusive == True: end = local + timedelta(minute = 1)
-
-#     # Convert start and end to utc
-#     return local_to_utc(config, start), local_to_utc(config, end)
-
+    return localised.astimezone(pytz.utc).replace(tzinfo = None)
 
 def day_bounds_utc(config, local, inclusive):
     # Get start and end of local day
