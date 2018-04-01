@@ -246,11 +246,11 @@ if not os.path.isfile(config.database_path):
                                 + "WGst_Max REAL, WGst_Avg REAL, "
                                 + "SunD_Ttl REAL, Rain_Ttl REAL, "
                                 + "MSLP_Min REAL, MSLP_Max REAL, "
-                                + "MSLP_Avg REAL, TS10_Min REAL, "
-                                + "TS10_Max REAL, TS10_Avg REAL, "
-                                + "TS30_Min REAL, TS30_Max REAL, "
-                                + "TS30_Avg REAL, TS00_Min REAL, "
-                                + "TS00_Max REAL, TS00_Avg REAL"
+                                + "MSLP_Avg REAL, ST10_Min REAL, "
+                                + "ST10_Max REAL, ST10_Avg REAL, "
+                                + "ST30_Min REAL, ST30_Max REAL, "
+                                + "ST30_Avg REAL, ST00_Min REAL, "
+                                + "ST00_Max REAL, ST00_Avg REAL"
                             + ")")
             database.commit()
     except: helpers.exit("05")
