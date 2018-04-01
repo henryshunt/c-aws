@@ -96,13 +96,19 @@ def do_log_environment(utc):
 
     # Read CPU temperature
     try:
-        frame.cpu_temperature = round(CPUTemperature().temperature, 1)
+        frame.cpu_temperature = CPUTemperature().temperature
+
+        if not frame.cpu_temperature == None:
+            frame.cpu_temperature = round(frame.cpu_temperature, 1)
     except: gpio.output(23, gpio.HIGH)
 
     # Read enclosure temperature
     try:
         #do_read_temp("")
-        frame.enclosure_temperature = round(enct_temp_value, 1)
+        frame.enclosure_temperature = enct_temp_value
+        
+        if not frame.enclosure_temperature == None:
+            frame.enclosure_temperature = round(frame.enclosure_temperature, 1)
     except: gpio.output(23, gpio.HIGH)
 
     try:
