@@ -49,11 +49,11 @@ def init_success():
         sys.exit(1)
 
 def utc_to_local(config, utc):
-    localised = pytz.utc.localize(utc)
+    localised = pytz.utc.localize(utc.replace(tzinfo = None))
     return (localised.astimezone(config.icaws_time_zone).replace(tzinfo = None))
 
 def local_to_utc(config, local):
-    localised = config.icaws_time_zone.localize(local)
+    localised = config.icaws_time_zone.localize(local.replace(tzinfo = None))
     return (localised.astimezone(pytz.utc).replace(tzinfo = None))
 
 # def day_bounds_utc(config, local, inclusive):
@@ -69,27 +69,14 @@ def local_to_utc(config, local):
 
 
 def day_bounds_utc(config, local, inclusive):
-    """ returns the utc start and end times of a date in the local timezone
-    """
-    utc_timezone = pytz.timezone("UTC")
-
-    # set local time to start of day and convert to utc
+    # Get start and end of local day
     start = local.replace(hour = 0, minute = 0, second = 0, microsecond = 0,
                           tzinfo = None)
-    start = pytz.timezone(config.icaws_time_zone).localize(start)
-    start_utc = start.astimezone(utc_timezone).replace(tzinfo = None)
-
-    # set local time to end of day
     end = local.replace(hour = 23, minute = 59, second = 0, microsecond = 0,
                         tzinfo = None)
 
-    # use start of next day as end if inclusive
-    if inclusive == True:
-        end = local + timedelta(minutes = 1)
-        end = end.replace(hour = 0, minute = 0, second = 0, microsecond = 0,
-                          tzinfo = None)
+    # Use start of next day as end if inclusive
+    if inclusive == True: end += timedelta(minutes = 1)
 
-    # localise end and convert to utc
-    end = pytz.timezone(config.icaws_time_zone).localize(end)
-    end_utc = end.astimezone(utc_timezone).replace(tzinfo = None)
-    return start_utc, end_utc
+    # Convert start and end to UTC
+    return local_to_utc(config, start), local_to_utc(config, end)
