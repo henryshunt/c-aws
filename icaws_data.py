@@ -241,40 +241,38 @@ def every_minute():
 def every_second():
     """ Triggered every second to read sensor values into a list for averaging
     """
-    global wdir_samples, sund_ticks, disable_sampling
+    global disable_sampling, wdir_samples, sund_ticks
 
     if disable_sampling == False:
+        spi_bus = None
+
         try:
-            spi_bus = None
+            spi_bus = spidev.SpiDev()
+            spi_bus.open(0, 0)
 
-            try:
-                spi_bus = spidev.SpiDev()
-                spi_bus.open(0, 0)
+            # Read rotation value from analog to digital converter
+            wdir_data = spi_bus.xfer2([1, (8 + 1) << 4, 0])
+            adc_value = ((wdir_data[1] & 3) << 8) + wdir_data[2]
 
-                # Read rotation value from analog to digital converter
-                wdir_data = spi_bus.xfer2([1, (8 + 1) << 4, 0])
-                adc_value = ((wdir_data[1] & 3) << 8) + wdir_data[2]
+            # Convert ADC value to degrees
+            if adc_value > 0:
+                wdir_degrees = (adc_value - 52) / (976 - 52) * (360 - 0)
+                if wdir_degrees < 0 or wdir_degrees >= 359.5: wdir_degrees = 0
 
-                # Convert ADC value to degrees
-                if adc_value > 0:
-                    wdir_degrees = (adc_value - 52) / (976 - 52) * (360 - 0)
-                    if wdir_degrees < 0 or wdir_degrees >= 359.5:
-                        wdir_degrees = 0
+                # Add offset from north to compensate for non-north mounting
+                wdir_degrees -= 148
+                if wdir_degrees >= 360: wdir_degrees -= 360
+                elif wdir_degrees < 0: wdir_degrees += 360
 
-                    # Add offset from north to compensate for non-north mounting
-                    wdir_degrees -= 148
-                    if wdir_degrees >= 360: wdir_degrees -= 360
-                    elif wdir_degrees < 0: wdir_degrees += 360
+                # Add to sample list with timestamp
+                wdir_samples.append((datetime.now(), wdir_degrees))
+        except: gpio.output(23, gpio.HIGH)
 
-                    # Add to sample list with timestamp
-                    wdir_samples.append((datetime.now(), wdir_degrees))
-            except:
-                if spi_bus != None: spi_bus.close()
-        except: pass
+        if spi_bus != None: spi_bus.close()
 
         try:
             if gpio.input(22) == True: sund_ticks += 1
-        except: pass
+        except: gpio.output(23, gpio.HIGH)
 
 # INTERRUPT SERVICE ------------------------------------------------------------
 def do_trigger_wspd():
