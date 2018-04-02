@@ -10,6 +10,7 @@ import os
 from datetime import datetime, timedelta
 import time
 import pytz
+import threading
 
 import sqlite3
 import RPi.GPIO as gpio
@@ -43,7 +44,7 @@ past_wdir_samples = []
 sund_ticks = 0
 rain_ticks = 0
 
-tair_temp_value = None
+airt_temp_value = None
 expt_temp_value = None
 st10_temp_value = None
 st30_temp_value = None
@@ -91,19 +92,66 @@ def do_read_temp(address):
 
 # OPERATIONS -------------------------------------------------------------------
 def do_log_report(utc):
-    free_space = helpers.remaining_space("/")
-    if free_space == None or free_space < 0.1:
-        gpio.output(23, gpio.HIGH); return
+    global wspd_ticks, past_wspd_ticks, wdir_samples, past_wdir_samples
+    global sund_ticks, rain_ticks, airt_temp_value, expt_temp_value
+    global st10_temp_value, st30_temp_value, st00_temp_value, disable_sampling
+    
+    # -- COPY GLOBALS ----------------------------------------------------------
+    disable_sampling = True
+    new_wspd_ticks = wspd_ticks[:]
+    wspd_ticks = []
+    new_wdir_samples = wdir_samples[:]
+    wdir_samples = []
+    new_sund_ticks = sund_ticks
+    sund_ticks = 0
+    new_rain_ticks = rain_ticks
+    rain_ticks = 0
+    disable_sampling = False
 
     frame = frames.DataUtcReport()
     frame.time = utc
+
+    # -- TEMPERATURE -----------------------------------------------------------
+    try:
+        airt_thread = threading.Thread(target = do_read_temp,
+                                       args = ("28-04167053d6ff",))
+        airt_thread.start()
+        expt_thread = threading.Thread(target = do_read_temp,
+                                       args = ("28-0416704a38ff",))
+        expt_thread.start()
+        st10_thread = threading.Thread(target = do_read_temp,
+                                       args = ("28-0416705d66ff",))
+        st10_thread.start()
+        st30_thread = threading.Thread(target = do_read_temp,
+                                       args = ("28-04167055d5ff",))
+        st30_thread.start()
+        st00_thread = threading.Thread(target = do_read_temp,
+                                       args = ("28-0516704dc0ff",))
+        st00_thread.start()
+
+        # read all sensors in separate threads to reduce wait, then get values
+        airt_thread.join()
+        frame.air_temperature = airt_temp_value
+        expt_thread.join()
+        frame.exposed_temperature = expt_temp_value
+        st10_thread.join()
+        frame.soil_temperature_10 = st10_temp_value
+        st30_thread.join()
+        frame.soil_temperature_30 = st30_temp_value
+        st00_thread.join()
+        frame.soil_temperature_00 = st00_temp_value
+    except: pass
+
+    free_space = helpers.remaining_space("/")
+    if free_space == None or free_space < 0.1:
+        gpio.output(23, gpio.HIGH); return
 
 def do_log_environment(utc):
     global enct_temp_value
     frame = frames.DataUtcEnviron()
     frame.time = utc
 
-    # Read CPU temperature
+    # -- CPU TEMPERATURE -------------------------------------------------------
     try:
         frame.cpu_temperature = CPUTemperature().temperature
 
@@ -111,7 +159,7 @@ def do_log_environment(utc):
             frame.cpu_temperature = round(frame.cpu_temperature, 1)
     except: gpio.output(23, gpio.HIGH)
 
-    # Read enclosure temperature
+    # -- ENCLOSURE TEMPERATURE -------------------------------------------------
     try:
         #do_read_temp("")
         frame.enclosure_temperature = enct_temp_value
@@ -122,12 +170,11 @@ def do_log_environment(utc):
 
     enct_temp_value = None
 
-    # Check free space
+    # -- SAVE DATA -------------------------------------------------------------
     free_space = helpers.remaining_space("/")
     if free_space == None or free_space < 0.1:
         gpio.output(23, gpio.HIGH); return
 
-    # Save data to database
     try:
         with sqlite3.connect(config.database_path) as database:
             cursor = database.cursor()
@@ -182,20 +229,23 @@ def do_log_camera(utc):
             except: gpio.output(23, gpio.HIGH)
 
 def do_generate_stats(utc):
-    # Check free space
     free_space = helpers.remaining_space("/")
     if free_space == None or free_space < 0.1:
         gpio.output(23, gpio.HIGH); return
         
+    # -- GET NEW STATS ---------------------------------------------------------
     local = helpers.utc_to_local(config, utc)
     bounds = helpers.day_bounds_utc(config, local, False)
     new_stats = analysis.stats_for_range(config, bounds[0], bounds[1],
                                          DbTable.UTCREPORTS)
 
     if new_stats == False: gpio.output(23, gpio.HIGH); return
+
+    # -- GET CURRENT STATS -----------------------------------------------------
     cur_stats = analysis.record_for_time(config, local, DbTable.LOCALSTATS)
     if cur_stats == False: gpio.output(23, gpio.HIGH); return
 
+    # -- SAVE DATA -------------------------------------------------------------
     try:
         with sqlite3.connect(config.database_path) as database:
             cursor = database.cursor()
@@ -249,46 +299,52 @@ def every_second():
     """ Triggered every second to read sensor values into a list for averaging
     """
     global disable_sampling, wdir_samples, sund_ticks
+    if disable_sampling == True: return
 
-    if disable_sampling == False:
-        spi_bus = None
+    # -- WIND DIRECTION ----------------------------------------------------
+    spi_bus = None
 
-        try:
-            spi_bus = spidev.SpiDev()
-            spi_bus.open(0, 0)
+    try:
+        spi_bus = spidev.SpiDev()
+        spi_bus.open(0, 0)
 
-            # Read rotation value from analog to digital converter
-            wdir_data = spi_bus.xfer2([1, (8 + 1) << 4, 0])
-            adc_value = ((wdir_data[1] & 3) << 8) + wdir_data[2]
+        # Read rotation value from analog to digital converter
+        wdir_data = spi_bus.xfer2([1, (8 + 1) << 4, 0])
+        adc_value = ((wdir_data[1] & 3) << 8) + wdir_data[2]
 
-            # Convert ADC value to degrees
-            if adc_value > 0:
-                wdir_degrees = (adc_value - 52) / (976 - 52) * (360 - 0)
-                if wdir_degrees < 0 or wdir_degrees >= 359.5: wdir_degrees = 0
+        # Convert ADC value to degrees
+        if adc_value > 0:
+            wdir_degrees = (adc_value - 52) / (976 - 52) * (360 - 0)
+            if wdir_degrees < 0 or wdir_degrees >= 359.5: wdir_degrees = 0
 
-                # Add offset from north to compensate for non-north mounting
-                wdir_degrees -= 148
-                if wdir_degrees >= 360: wdir_degrees -= 360
-                elif wdir_degrees < 0: wdir_degrees += 360
+            # Add offset from north to compensate for non-north mounting
+            wdir_degrees -= 148
+            if wdir_degrees >= 360: wdir_degrees -= 360
+            elif wdir_degrees < 0: wdir_degrees += 360
 
-                # Add to sample list with timestamp
-                wdir_samples.append((datetime.now(), wdir_degrees))
-        except: gpio.output(23, gpio.HIGH)
+            # Add to sample list with timestamp
+            wdir_samples.append((datetime.now(), wdir_degrees))
+    except: gpio.output(23, gpio.HIGH)
 
-        if spi_bus != None: spi_bus.close()
+    if spi_bus != None: spi_bus.close()
 
-        try:
-            if gpio.input(22) == True: sund_ticks += 1
-        except: gpio.output(23, gpio.HIGH)
+    # -- SUNSHINE DURATION -------------------------------------------------
+    try:
+        if gpio.input(22) == True: sund_ticks += 1
+    except: gpio.output(23, gpio.HIGH)
 
 # INTERRUPT SERVICE ------------------------------------------------------------
-def do_trigger_wspd():
-    global wspd_ticks, disable_sampling
-    if disable_sampling == False: wspd_ticks.append(datetime.now())
+def do_trigger_wspd(channel):
+    global disable_sampling, wspd_ticks
+    if disable_sampling == True: return
+    
+    wspd_ticks.append(datetime.now())
 
-def do_trigger_rain():
-    global rain_ticks, disable_sampling
-    if disable_sampling == False: rain_ticks += 1
+def do_trigger_rain(channel):
+    global disable_sampling, rain_ticks
+    if disable_sampling == True: return
+        
+    rain_ticks += 1
 
 
 # ENTRY POINT ==================================================================
