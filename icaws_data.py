@@ -99,10 +99,7 @@ def do_log_report(utc):
     frame.time = utc
 
 def do_log_environment(utc):
-    free_space = helpers.remaining_space("/")
-    if free_space == None or free_space < 0.1:
-        gpio.output(23, gpio.HIGH); return
-
+    global enct_temp_value
     frame = frames.DataUtcEnviron()
     frame.time = utc
 
@@ -123,6 +120,14 @@ def do_log_environment(utc):
             frame.enclosure_temperature = round(frame.enclosure_temperature, 1)
     except: gpio.output(23, gpio.HIGH)
 
+    enct_temp_value = None
+
+    # Check free space
+    free_space = helpers.remaining_space("/")
+    if free_space == None or free_space < 0.1:
+        gpio.output(23, gpio.HIGH); return
+
+    # Save data to database
     try:
         with sqlite3.connect(config.database_path) as database:
             cursor = database.cursor()
@@ -136,10 +141,6 @@ def do_log_environment(utc):
 
 def do_log_camera(utc):
     if str(utc.minute).endswith("0") or str(utc.minute).endswith("5"):
-        free_space = helpers.remaining_space(config.camera_drive)
-        if free_space == None or free_space < 0.1:
-            gpio.output(23, gpio.HIGH); return
-
         try:
             location = astral.Location(("", "", config.icaws_latitude,
                 config.icaws_longitude, "UTC", config.icaws_elevation))
@@ -154,6 +155,11 @@ def do_log_camera(utc):
             utc <= sunset_threshold.replace(tzinfo = None)):
 
             if not os.path.isdir(config.camera_drive):
+                gpio.output(23, gpio.HIGH); return
+
+            # Check free space
+            free_space = helpers.remaining_space(config.camera_drive)
+            if free_space == None or free_space < 0.1:
                 gpio.output(23, gpio.HIGH); return
 
             try:
@@ -176,19 +182,20 @@ def do_log_camera(utc):
             except: gpio.output(23, gpio.HIGH)
 
 def do_generate_stats(utc):
+    # Check free space
     free_space = helpers.remaining_space("/")
     if free_space == None or free_space < 0.1:
         gpio.output(23, gpio.HIGH); return
-
+        
     local = helpers.utc_to_local(config, utc)
     bounds = helpers.day_bounds_utc(config, local, False)
     new_stats = analysis.stats_for_range(config, bounds[0], bounds[1],
-                                        DbTable.UTCREPORTS)
+                                         DbTable.UTCREPORTS)
 
     if new_stats == False: gpio.output(23, gpio.HIGH); return
     cur_stats = analysis.record_for_time(config, local, DbTable.LOCALSTATS)
     if cur_stats == False: gpio.output(23, gpio.HIGH); return
-    
+
     try:
         with sqlite3.connect(config.database_path) as database:
             cursor = database.cursor()
