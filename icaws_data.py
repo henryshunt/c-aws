@@ -180,13 +180,13 @@ def do_generate_stats(utc):
     if free_space == None or free_space < 0.1:
         gpio.output(23, gpio.HIGH); return
 
-    local_time = helpers.utc_to_local(config, utc)
-    bounds = helpers.day_bounds_utc(config, local_time, False)
+    local = helpers.utc_to_local(config, utc)
+    bounds = helpers.day_bounds_utc(config, local, False)
     new_stats = analysis.stats_for_range(config, bounds[0], bounds[1],
                                         DbTable.UTCREPORTS)
 
     if new_stats == False: gpio.output(23, gpio.HIGH); return
-    cur_stats = analysis.record_for_time(config, local_time, DbTable.LOCALSTATS)
+    cur_stats = analysis.record_for_time(config, local, DbTable.LOCALSTATS)
     if cur_stats == False: gpio.output(23, gpio.HIGH); return
     
     try:
@@ -195,15 +195,15 @@ def do_generate_stats(utc):
 
             if cur_stats == None:
                 cursor.execute(queries.INSERT_SINGLE_LOCALSTATS,
-                    (local_time.strftime("%Y-%m-%d"), new_stats[0],
-                     new_stats[1], new_stats[2], new_stats[3], new_stats[4],
-                     new_stats[5], new_stats[6], new_stats[7], new_stats[8],
-                     new_stats[9], new_stats[10], new_stats[11], new_stats[12],
-                     new_stats[13], new_stats[14], new_stats[15], new_stats[16],
-                     new_stats[17], new_stats[18], new_stats[19], new_stats[20],
-                     new_stats[21], new_stats[22], new_stats[23], new_stats[24],
-                     new_stats[25], new_stats[26], new_stats[27], new_stats[28],
-                     new_stats[29], new_stats[30], new_stats[31]))
+                    (local.strftime("%Y-%m-%d"), new_stats[0], new_stats[1],
+                     new_stats[2], new_stats[3], new_stats[4], new_stats[5],
+                     new_stats[6], new_stats[7], new_stats[8], new_stats[9],
+                     new_stats[10], new_stats[11], new_stats[12], new_stats[13],
+                     new_stats[14], new_stats[15], new_stats[16], new_stats[17],
+                     new_stats[18], new_stats[19], new_stats[20], new_stats[21],
+                     new_stats[22], new_stats[23], new_stats[24], new_stats[25],
+                     new_stats[26], new_stats[27], new_stats[28], new_stats[29],
+                     new_stats[30], new_stats[31]))
 
             else:
                 cursor.execute(queries.UPDATE_SINGLE_LOCALSTATS,
@@ -215,7 +215,7 @@ def do_generate_stats(utc):
                      new_stats[20], new_stats[21], new_stats[22], new_stats[23],
                      new_stats[24], new_stats[25], new_stats[26], new_stats[27],
                      new_stats[28], new_stats[29], new_stats[30], new_stats[31],
-                     local_time.strftime("%Y-%m-%d")))
+                     local.strftime("%Y-%m-%d")))
             
             database.commit()
     except: gpio.output(23, gpio.HIGH)
@@ -232,8 +232,8 @@ def every_minute():
 
     # Run actions if configuration modifiers are active
     do_log_report(utc)
-    if config.environment_logging == True: do_log_environment(utc)
     if config.camera_logging == True: do_log_camera(utc)
+    if config.environment_logging == True: do_log_environment(utc)
     if config.statistic_generation == True: do_generate_stats(utc)
 
     gpio.output(24, gpio.LOW)
