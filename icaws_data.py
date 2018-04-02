@@ -10,7 +10,6 @@ import os
 from datetime import datetime, timedelta
 import time
 import pytz
-import spidev
 
 import sqlite3
 import RPi.GPIO as gpio
@@ -18,6 +17,7 @@ from apscheduler.schedulers.blocking import BlockingScheduler
 import astral
 import picamera
 from gpiozero import CPUTemperature
+import spidev
 
 from config import ConfigData
 import helpers
@@ -27,7 +27,7 @@ import analysis
 import queries
 
 # GLOBAL VARIABLES -------------------------------------------------------------
-print("          ICAWS Data Acquisition Software, Version 4 - 2018, Henry Hunt"
+print("          ICAWS Data Acquisition Program, Version 4 - 2018, Henry Hunt"
     + "\n*********************************************************************"
     + "***********\n\n                          DO NOT TERMINATE THIS PROGRAM")
 time.sleep(2.5)
@@ -136,6 +136,10 @@ def do_log_environment(utc):
 
 def do_log_camera(utc):
     if str(utc.minute).endswith("0") or str(utc.minute).endswith("5"):
+        free_space = helpers.remaining_space(config.camera_drive)
+        if free_space == None or free_space < 0.1:
+            gpio.output(23, gpio.HIGH); return
+
         try:
             location = astral.Location(("", "", config.icaws_latitude,
                 config.icaws_longitude, "UTC", config.icaws_elevation))
@@ -152,10 +156,6 @@ def do_log_camera(utc):
             if not os.path.isdir(config.camera_drive):
                 gpio.output(23, gpio.HIGH); return
 
-            free_space = helpers.remaining_space(config.camera_drive)
-            if free_space == None or free_space < 0.1:
-                gpio.output(23, gpio.HIGH); return
-
             try:
                 image_dir = os.path.join(config.camera_drive,
                                          utc.strftime("%Y/%m/%d"))
@@ -163,8 +163,14 @@ def do_log_camera(utc):
                 image_name = utc.strftime("%Y-%m-%dT%H-%M-%S")
             
                 # Set image annotation and capture image
+                camera = picamera.PiCamera()
+                camera.resolution = (1400, 1052)
+                camera.annotate_background = picamera.Color("black")
+                camera.annotate_text_size = 36
+                time.sleep(1)
+
                 local = helpers.utc_to_local(config, utc)
-                camera.annotate_text = ("ICAWS Camera" + local.strftime(
+                camera.annotate_text = ("AWS Camera 1" + local.strftime(
                                         "on %d/%m/%Y at %H:%M:%S"))
                 camera.capture(os.path.join(image_dir, image_name + ".jpg"))
             except: gpio.output(23, gpio.HIGH)
@@ -290,7 +296,6 @@ try:
     gpio.output(23, gpio.LOW)
     gpio.setup(24, gpio.OUT)
     gpio.output(24, gpio.LOW)
-
 except: helpers.exit_no_light("00")
 
 # -- CHECK INTERNAL STORAGE ----------------------------------------------------
