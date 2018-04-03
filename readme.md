@@ -1,5 +1,5 @@
-# ICAWS
-Version 4 of the Isolated Custom Automatic Weather Station (ICAWS) Project
+# CAWS
+Version 4 of the Custom Automatic Weather Station (CAWS) Project
 
 # Dependencies
 - sqlite3 (pre-installed with Python 3)
