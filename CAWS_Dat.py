@@ -1,6 +1,6 @@
-""" ICAWS Data Acquisition Program
+""" CAWS Data Acquisition Program
       Responsible for measuring and logging data parameters, and for generating
-      statistics. This is the entry point for the ICAWS software
+      statistics. This is the entry point for the CAWS software
 """
 
 # DEPENDENCIES -----------------------------------------------------------------
@@ -31,7 +31,7 @@ import analysis
 import queries
 
 # GLOBAL VARIABLES -------------------------------------------------------------
-print("          ICAWS Data Acquisition Program, Version 4 - 2018, Henry Hunt"
+print("          CAWS Data Acquisition Program, Version 4 - 2018, Henry Hunt"
     + "\n*********************************************************************"
     + "***********\n\n                          DO NOT TERMINATE THIS PROGRAM")
 time.sleep(2.5)
@@ -239,8 +239,8 @@ def do_log_report(utc):
 
             pmsl_a = 6.11 * 10 ** ((7.5 * frame.dew_point) / (237.3 +
                                                              frame.dew_point))
-            pmsl_b = (9.80665 / 287.3) * config.icaws_elevation
-            pmsl_c = ((0.0065 * config.icaws_elevation) / 2) 
+            pmsl_b = (9.80665 / 287.3) * config.caws_elevation
+            pmsl_c = ((0.0065 * config.caws_elevation) / 2) 
             pmsl_d = frame.air_temperature + 273.15 + pmsl_c + pmsl_a * 0.12
             
             frame.mean_sea_level_pressure = round(frame.station_pressure * math.exp(pmsl_b / pmsl_d), 1)
@@ -315,8 +315,8 @@ def do_log_environment(utc):
 def do_log_camera(utc):
     if str(utc.minute).endswith("0") or str(utc.minute).endswith("5"):
         try:
-            location = astral.Location(("", "", config.icaws_latitude,
-                config.icaws_longitude, "UTC", config.icaws_elevation))
+            location = astral.Location(("", "", config.caws_latitude,
+                config.caws_longitude, "UTC", config.caws_elevation))
             solar = location.sun(date = utc, local = False)
             
             sunset_threshold = solar["sunset"] + timedelta(minutes = 60)
@@ -552,13 +552,13 @@ if (config.day_graph_generation == True or
 
     try:
         subprocess.Popen(["lxterminal -e python3 " + current_dir
-                          + "icaws_support.py"], shell = True)
+                          + "CAWS_Sup.py"], shell = True)
     except: helpers.exit("12")
 
 if config.local_network_server == True:
     try:
         subprocess.Popen(["lxterminal -e python3 " + current_dir
-                          + "icaws_access.py"], shell = True)
+                          + "CAWS_Acc.py"], shell = True)
     except: helpers.exit("13")
 
 # -- WAIT FOR MINUTE -----------------------------------------------------------

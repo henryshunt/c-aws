@@ -27,13 +27,13 @@ class ConfigData():
         self.integrity_checks = None
         self.local_network_server = None
         self.backups = None
-        self.icaws_identifier = None
-        self.icaws_name = None
-        self.icaws_location = None
-        self.icaws_time_zone = None
-        self.icaws_latitude = None
-        self.icaws_longitude = None
-        self.icaws_elevation = None
+        self.caws_identifier = None
+        self.caws_name = None
+        self.caws_location = None
+        self.caws_time_zone = None
+        self.caws_latitude = None
+        self.caws_longitude = None
+        self.caws_elevation = None
         self.remote_sql_server = None
         self.remote_ftp_server = None
         self.remote_ftp_username = None
@@ -50,18 +50,18 @@ class ConfigData():
             # Check required configuration options
             self.data_directory = parser.get("DataStores", "DataDirectory")
             if self.data_directory == "": return False
-            self.icaws_name = parser.get("ICAWSInfo", "ICAWSName")
-            if self.icaws_name == "": return False
-            self.icaws_location = parser.get("ICAWSInfo", "ICAWSLocation")
-            if self.icaws_location == "": return False
-            self.icaws_time_zone = parser.get("ICAWSInfo", "ICAWSTimeZone")
-            if not self.icaws_time_zone in pytz.all_timezones: return False
-            self.icaws_time_zone = pytz.timezone(self.icaws_time_zone)
-            self.icaws_latitude = parser.getfloat("ICAWSInfo", "ICAWSLatitude")
-            self.icaws_longitude = (parser
-                .getfloat("ICAWSInfo", "ICAWSLongitude"))
-            self.icaws_elevation = (parser
-                .getfloat("ICAWSInfo", "ICAWSElevation"))
+            self.caws_name = parser.get("CAWSInfo", "CAWSName")
+            if self.caws_name == "": return False
+            self.caws_location = parser.get("CAWSInfo", "CAWSLocation")
+            if self.caws_location == "": return False
+            self.caws_time_zone = parser.get("CAWSInfo", "CAWSTimeZone")
+            if not self.caws_time_zone in pytz.all_timezones: return False
+            self.caws_time_zone = pytz.timezone(self.caws_time_zone)
+            self.caws_latitude = parser.getfloat("CAWSInfo", "CAWSLatitude")
+            self.caws_longitude = (parser
+                .getfloat("CAWSInfo", "CAWSLongitude"))
+            self.caws_elevation = (parser
+                .getfloat("CAWSInfo", "CAWSElevation"))
 
             # Derive directories and file paths
             self.database_path = os.path.join(
