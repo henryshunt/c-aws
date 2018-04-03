@@ -130,7 +130,7 @@ def do_log_report(utc):
     airt_value = None; expt_value = None; st10_value = None; st30_value = None
     st00_value = None
 
-    # RELATIVE HUMIDITY --------------------------------------------------------
+    # -- RELATIVE HUMIDITY -----------------------------------------------------
     try:
         relh_value = sht31d.SHT31(address = 0x44).read_humidity()
 
@@ -138,7 +138,7 @@ def do_log_report(utc):
             frame.relative_humidity = round(relh_value, 1)
     except: gpio.output(23, gpio.HIGH)
 
-    # STATION PRESSURE ---------------------------------------------------------
+    # -- STATION PRESSURE ------------------------------------------------------
     try:
         stap_sensor = bme280.BME280(p_mode = bme280.BME280_OSAMPLE_8)
 
@@ -150,7 +150,7 @@ def do_log_report(utc):
             frame.station_pressure = round(stap_value / 100, 1)
     except: gpio.output(23, gpio.HIGH)
         
-    # WIND SPEED ---------------------------------------------------------------
+    # -- WIND SPEED ------------------------------------------------------------
     ten_mins_ago = frame.time - timedelta(minutes = 10)
     
     try:
@@ -165,7 +165,7 @@ def do_log_report(utc):
             frame.wind_speed = round((len(past_wspd_ticks) * 2.5) / 600, 1)
     except: gpio.output(23, gpio.HIGH)
 
-    # WIND DIRECTION -----------------------------------------------------------
+    # -- WIND DIRECTION --------------------------------------------------------
     try:
         past_wdir_samples.extend(new_wdir_samples)
 
@@ -183,7 +183,7 @@ def do_log_report(utc):
                 frame.wind_direction = int(wdir_value)
     except: gpio.output(23, gpio.HIGH)
 
-    # WIND GUST ----------------------------------------------------------------
+    # -- WIND GUST -------------------------------------------------------------
     try:
         # Calculate wind gust if there is positive wind speed
         if frame.wind_speed != None:
@@ -207,17 +207,17 @@ def do_log_report(utc):
                 frame.wind_gust = round(wgst_value, 1)
     except: gpio.output(23, gpio.HIGH)
 
-    # SUNSHINE DURATION --------------------------------------------------------
+    # -- SUNSHINE DURATION -----------------------------------------------------
     try:
         frame.sunshine_duration = sund_ticks
     except: gpio.output(23, gpio.HIGH)
 
-    # RAINFALL -----------------------------------------------------------------
+    # -- RAINFALL --------------------------------------------------------------
     try:
         frame.rainfall = round(new_rain_ticks * 0.254, 3)
     except: gpio.output(23, gpio.HIGH)
 
-    # DEW POINT ----------------------------------------------------------------
+    # -- DEW POINT -------------------------------------------------------------
     try:
         if (frame.air_temperature != None and
             frame.relative_humidity != None):
@@ -231,7 +231,7 @@ def do_log_report(utc):
             frame.dew_point = round(278.04 * ((8.0813 - dewp_c) - dewp_d), 1)
     except: gpio.output(23, gpio.HIGH)
 
-    # MEAN SEA LEVEL PRESSURE --------------------------------------------------
+    # -- MEAN SEA LEVEL PRESSURE -----------------------------------------------
     try:
         if (frame.station_pressure != None and
             frame.air_temperature != None and
@@ -244,6 +244,19 @@ def do_log_report(utc):
             pmsl_d = frame.air_temperature + 273.15 + pmsl_c + pmsl_a * 0.12
             
             frame.mean_sea_level_pressure = round(frame.station_pressure * math.exp(pmsl_b / pmsl_d), 1)
+    except: gpio.output(23, gpio.HIGH)
+
+    # -- PRESSURE TENDENCY -----------------------------------------------------
+    try:
+        if frame.station_pressure != None:
+            three_hours_ago = frame.time - timedelta(hours = 3)
+            stap_then = analysis.record_for_time(config, three_hours_ago, DbTable.UTCREPORTS)["PTen"]
+
+            # Calculate difference between pressure 3 hours ago
+            if stap_then != False:
+                if stap_then != None:
+                    pressure_change = round(frame.station_pressure - stap_then, 1)
+                    frame.pressure_tendency = pressure_change
     except: gpio.output(23, gpio.HIGH)
 
     # ADD TO DATABASE ----------------------------------------------------------
@@ -291,7 +304,7 @@ def do_log_environment(utc):
     # -- ENCLOSURE TEMPERATURE -------------------------------------------------
     try:
         #do_read_temp("")
-        frame.enclosure_temperature = enct_temp_value
+        frame.enclosure_temperature = enct_value
     except: gpio.output(23, gpio.HIGH)
 
     enct_temp_value = None
