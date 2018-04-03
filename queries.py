@@ -10,7 +10,7 @@ GENERATE_STATS_UTCREPORTS = "SELECT min(AirT), max(AirT), avg(AirT), min(RelH), 
 GENERATE_STATS_UTCENVIRON = "SELECT min(EncT), max(EncT), avg(EncT), min(CPUT), max(CPUT), avg(CPUT) FROM utcEnviron WHERE Time BETWEEN ? AND ?"
 GENERATE_STATS_LOCALSTATS = "SELECT min(AirT_Min), max(AirT_Max), avg(AirT_Avg), min(RelH_Min), max(RelH_Max), avg(RelH_Avg), min(DewP_Min), max(DewP_Max), avg(DewP_Avg), min(WSpd_Min), max(WSpd_Max), avg(WSpd_Avg), min(WDir_Min), max(WDir_Max), avg(WDir_Avg), min(WGst_Min), max(WGst_Max), avg(WGst_Avg), sum(SunD_Ttl), sum(Rain_Ttl), min(MSLP_Min), max(MSLP_Max), avg(MSLP_Avg), min(ST10_Min), max(ST10_Max), avg(ST10_Avg), min(ST30_Min), max(ST30_Max), avg(ST30_Avg), min(ST00_Min), max(ST00_Max), avg(ST00_Avg) FROM localStats WHERE Date BETWEEN ? AND ?"
 
-INSERT_SINGLE_UTCREPORTS = ""
+INSERT_SINGLE_UTCREPORTS = "INSERT INTO utcReports VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)"
 INSERT_SINGLE_UTCENVIRON = "INSERT INTO utcEnviron VALUES (?, ?, ?)"
 INSERT_SINGLE_LOCALSTATS = "INSERT INTO localStats (Date, AirT_Min, AirT_Max, AirT_Avg, RelH_Min, RelH_Max, RelH_Avg, DewP_Min, DewP_Max, DewP_Avg, WSpd_Min, WSpd_Max, WSpd_Avg, WDir_Min, WDir_Max, WDir_Avg, WGst_Min, WGst_Max, WGst_Avg, SunD_Ttl, Rain_Ttl, MSLP_Min, MSLP_Max, MSLP_Avg, ST10_Min, ST10_Max, ST10_Avg, ST30_Min, ST30_Max, ST30_Avg, ST00_Min, ST00_Max, ST00_Avg) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)"
 
