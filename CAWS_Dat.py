@@ -30,14 +30,16 @@ from frames import DbTable
 import analysis
 import queries
 
-# GLOBAL VARIABLES -------------------------------------------------------------
-print("          CAWS Data Acquisition Program, Version 4 - 2018, Henry Hunt"
-    + "\n*********************************************************************"
-    + "***********\n\n                          DO NOT TERMINATE THIS PROGRAM")
-time.sleep(2.5)
+# MESSAGE ----------------------------------------------------------------------
+print("--- Custom Automatic Weather Station ---")
+print("Program: Data Acquisition Software")
+print("Author:  Henry Hunt")
+print("Version: V4.0 (April 2018)")
+print("----------- DO NOT TERMINATE -----------")
 
+# GLOBAL VARIABLES -------------------------------------------------------------
 config = ConfigData()
-start_time = None
+start_time = None 
 disable_sampling = False
 
 wspd_ticks = []
@@ -487,6 +489,8 @@ def do_trigger_rain(channel):
 
 
 # ENTRY POINT ==================================================================
+time.sleep(2.5)
+
 # -- INIT GPIO AND LEDS --------------------------------------------------------
 try:
     gpio.setwarnings(False); gpio.setmode(gpio.BCM)
