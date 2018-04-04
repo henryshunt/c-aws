@@ -35,11 +35,13 @@ print("--- Custom Automatic Weather Station ---")
 print("Program: Data Acquisition Software")
 print("Author:  Henry Hunt")
 print("Version: V4.0 (April 2018)")
+print("")
 print("----------- DO NOT TERMINATE -----------")
+time.sleep(2.5)
 
 # GLOBAL VARIABLES -------------------------------------------------------------
 config = ConfigData()
-start_time = None 
+start_time = None
 disable_sampling = False
 
 wspd_ticks = []
@@ -69,12 +71,11 @@ def do_read_temp(address):
             temp = int(data[1][data[1].find("t=") + 2:]) / 1000
 
             # Check for error value
-            if temp == None or temp == -127 or temp == 85:
-                gpio.output(23, gpio.HIGH); return
+            if temp == -127 or temp == 85: gpio.output(23, gpio.HIGH); return
 
             # Store value in respective global variable
             if os.path.basename(address) == "28-04167053d6ff":
-                global tair_value; tair_value = round(temp, 1)
+                global airt_value; airt_value = round(temp, 1)
             elif os.path.basename(address) == "28-0416704a38ff":
                 global expt_value; expt_value = round(temp, 1)
             elif os.path.basename(address) == "28-0416705d66ff":
@@ -134,10 +135,8 @@ def do_log_report(utc):
 
     # -- RELATIVE HUMIDITY -----------------------------------------------------
     try:
-        relh_value = sht31d.SHT31(address = 0x44).read_humidity()
-
-        if relh_value != None:
-            frame.relative_humidity = round(relh_value, 1)
+        frame.relative_humidity = round(
+            sht31d.SHT31(address = 0x44).read_humidity(), 1)
     except: gpio.output(23, gpio.HIGH)
 
     # -- STATION PRESSURE ------------------------------------------------------
@@ -146,10 +145,7 @@ def do_log_report(utc):
 
         # Temperature must be read first or pressure will not return
         discard_stap_temp = stap_sensor.read_temperature()
-        stap_value = stap_sensor.read_pressure()
-
-        if stap_value != None:
-            frame.station_pressure = round(stap_value / 100, 1)
+        frame.station_pressure = round(stap_sensor.read_pressure() / 100, 1)
     except: gpio.output(23, gpio.HIGH)
         
     # -- WIND SPEED ------------------------------------------------------------
@@ -181,8 +177,8 @@ def do_log_report(utc):
                 wdir_total = 0
                 for i in past_wdir_samples: wdir_total += i[1]
 
-                wdir_value = round(wdir_total / len(past_wdir_samples))
-                frame.wind_direction = int(wdir_value)
+                frame.wind_direction = int(round(wdir_total
+                                                 / len(past_wdir_samples)))
     except: gpio.output(23, gpio.HIGH)
 
     # -- WIND GUST -------------------------------------------------------------
@@ -221,9 +217,7 @@ def do_log_report(utc):
 
     # -- DEW POINT -------------------------------------------------------------
     try:
-        if (frame.air_temperature != None and
-            frame.relative_humidity != None):
-
+        if frame.air_temperature != None and frame.relative_humidity != None:
             dewp_a = 0.4343 * math.log(frame.relative_humidity / 100)
             dewp_b = ((8.082 - frame.air_temperature / 556.0)
                       * frame.air_temperature)
@@ -245,19 +239,21 @@ def do_log_report(utc):
             pmsl_c = ((0.0065 * config.caws_elevation) / 2) 
             pmsl_d = frame.air_temperature + 273.15 + pmsl_c + pmsl_a * 0.12
             
-            frame.mean_sea_level_pressure = round(frame.station_pressure * math.exp(pmsl_b / pmsl_d), 1)
+            frame.mean_sea_level_pressure = round(frame.station_pressure
+                                                  *math.exp(pmsl_b / pmsl_d), 1)
     except: gpio.output(23, gpio.HIGH)
 
     # -- PRESSURE TENDENCY -----------------------------------------------------
     try:
         if frame.station_pressure != None:
             three_hours_ago = frame.time - timedelta(hours = 3)
-            stap_then = analysis.record_for_time(config, three_hours_ago, DbTable.UTCREPORTS)["PTen"]
+            record_then = analysis.record_for_time(config, three_hours_ago,
+                                                   DbTable.UTCREPORTS)
 
             # Calculate difference between pressure 3 hours ago
-            if stap_then != False:
-                if stap_then != None:
-                    pressure_change = round(frame.station_pressure - stap_then, 1)
+            if record_then != False:
+                if record_then != None:
+                    pten_value = round(frame.station_pressure - stap_then, 1)
                     frame.pressure_tendency = pressure_change
     except: gpio.output(23, gpio.HIGH)
 
@@ -291,17 +287,9 @@ def do_log_report(utc):
     except: gpio.output(23, gpio.HIGH)
 
 def do_log_environment(utc):
-    global enct_temp_value
+    global enct_value
     frame = frames.DataUtcEnviron()
     frame.time = utc
-
-    # -- CPU TEMPERATURE -------------------------------------------------------
-    try:
-        frame.cpu_temperature = CPUTemperature().temperature
-
-        if frame.cpu_temperature != None:
-            frame.cpu_temperature = round(frame.cpu_temperature, 1)
-    except: gpio.output(23, gpio.HIGH)
 
     # -- ENCLOSURE TEMPERATURE -------------------------------------------------
     try:
@@ -309,7 +297,12 @@ def do_log_environment(utc):
         frame.enclosure_temperature = enct_value
     except: gpio.output(23, gpio.HIGH)
 
-    enct_temp_value = None
+    # -- CPU TEMPERATURE -------------------------------------------------------
+    try:
+        frame.cpu_temperature = round(CPUTemperature().temperature, 1)
+    except: gpio.output(23, gpio.HIGH)
+
+    enct_value = None
 
     # -- SAVE DATA -------------------------------------------------------------
     free_space = helpers.remaining_space("/")
@@ -328,46 +321,47 @@ def do_log_environment(utc):
     except: gpio.output(23, gpio.HIGH)
 
 def do_log_camera(utc):
-    if str(utc.minute).endswith("0") or str(utc.minute).endswith("5"):
+    if (not str(utc.minute).endswith("0") and
+        not str(utc.minute).endswith("5")): return
+
+    # Get sunrise and sunset times for current date
+    location = astral.Location(("", "", config.caws_latitude,
+        config.caws_longitude, "UTC", config.caws_elevation))
+    solar = location.sun(date = utc, local = False)
+    
+    sunset_threshold = solar["sunset"] + timedelta(minutes = 60)
+    sunrise_threshold = solar["sunrise"] - timedelta(minutes = 60)
+
+    # Only take images between sunrise and sunset
+    if (utc >= sunrise_threshold.replace(tzinfo = None) and
+        utc <= sunset_threshold.replace(tzinfo = None)):
+
+        if not os.path.isdir(config.camera_drive):
+            gpio.output(23, gpio.HIGH); return
+
+        # Check free space
+        free_space = helpers.remaining_space(config.camera_drive)
+        if free_space == None or free_space < 0.1:
+            gpio.output(23, gpio.HIGH); return
+
         try:
-            location = astral.Location(("", "", config.caws_latitude,
-                config.caws_longitude, "UTC", config.caws_elevation))
-            solar = location.sun(date = utc, local = False)
-            
-            sunset_threshold = solar["sunset"] + timedelta(minutes = 60)
-            sunrise_threshold = solar["sunrise"] - timedelta(minutes = 60)
-        except: gpio.output(23, gpio.HIGH); return
+            image_dir = os.path.join(config.camera_drive,
+                                     utc.strftime("%Y/%m/%d"))
+            if not os.path.exists(image_dir): os.makedirs(image_dir)
+            image_name = utc.strftime("%Y-%m-%dT%H-%M-%S")
+        
+            # Set image annotation and capture image
+            camera = picamera.PiCamera()
+            camera.resolution = (1400, 1052)
+            camera.annotate_background = picamera.Color("black")
+            camera.annotate_text_size = 36
+            time.sleep(1)
 
-        # Only take images between sunrise and sunset
-        if (utc >= sunrise_threshold.replace(tzinfo = None) and
-            utc <= sunset_threshold.replace(tzinfo = None)):
-
-            if not os.path.isdir(config.camera_drive):
-                gpio.output(23, gpio.HIGH); return
-
-            # Check free space
-            free_space = helpers.remaining_space(config.camera_drive)
-            if free_space == None or free_space < 0.1:
-                gpio.output(23, gpio.HIGH); return
-
-            try:
-                image_dir = os.path.join(config.camera_drive,
-                                         utc.strftime("%Y/%m/%d"))
-                if not os.path.exists(image_dir): os.makedirs(image_dir)
-                image_name = utc.strftime("%Y-%m-%dT%H-%M-%S")
-            
-                # Set image annotation and capture image
-                camera = picamera.PiCamera()
-                camera.resolution = (1400, 1052)
-                camera.annotate_background = picamera.Color("black")
-                camera.annotate_text_size = 36
-                time.sleep(1)
-
-                local = helpers.utc_to_local(config, utc)
-                camera.annotate_text = ("AWS Camera 1" + local.strftime(
-                                        "on %d/%m/%Y at %H:%M:%S"))
-                camera.capture(os.path.join(image_dir, image_name + ".jpg"))
-            except: gpio.output(23, gpio.HIGH)
+            local_time = helpers.utc_to_local(config, utc)
+            camera.annotate_text = ("AWS Camera 1" + local_time.strftime(
+                                    "on %d/%m/%Y at %H:%M:%S"))
+            camera.capture(os.path.join(image_dir, image_name + ".jpg"))
+        except: gpio.output(23, gpio.HIGH)
 
 def do_generate_stats(utc):
     free_space = helpers.remaining_space("/")
@@ -489,8 +483,6 @@ def do_trigger_rain(channel):
 
 
 # ENTRY POINT ==================================================================
-time.sleep(2.5)
-
 # -- INIT GPIO AND LEDS --------------------------------------------------------
 try:
     gpio.setwarnings(False); gpio.setmode(gpio.BCM)
@@ -498,7 +490,7 @@ try:
     gpio.setup(24, gpio.OUT); gpio.output(24, gpio.LOW)
 except: helpers.exit_no_light("00")
 
-# -- CHECK INTERNAL STORAGE ----------------------------------------------------
+# -- CHECK INTERNAL DRIVE ------------------------------------------------------
 free_space = helpers.remaining_space("/")
 if free_space == None or free_space < 1: helpers.exit("01")
 
@@ -506,6 +498,7 @@ if free_space == None or free_space < 1: helpers.exit("01")
 if config.load() == False: helpers.exit("02")
 if config.validate() == False: helpers.exit("03")
 
+# -- CHECK DATA DIRECTORY ------------------------------------------------------
 if not os.path.isdir(config.data_directory):
     try:
         os.makedirs(config.data_directory)
@@ -531,7 +524,7 @@ if config.camera_logging == True:
     free_space = helpers.remaining_space(config.camera_drive)
     if free_space == None or free_space < 5: helpers.exit("07")
 
-    # Ensure camera module is connected
+    # Check camera module is connected
     try:
         with picamera.PiCamera() as camera: pass
     except: helpers.exit("08")
@@ -584,10 +577,8 @@ gpio.output(24, gpio.HIGH)
 
 while True:
     if datetime.utcnow().second != 0:
-        gpio.output(23, gpio.HIGH)
-        time.sleep(0.1)
-        gpio.output(23, gpio.LOW)
-        time.sleep(0.1)
+        gpio.output(23, gpio.HIGH); time.sleep(0.1)
+        gpio.output(23, gpio.LOW); time.sleep(0.1)
     else: break
 
 gpio.output(24, gpio.LOW)

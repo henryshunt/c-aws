@@ -3,9 +3,13 @@
       serving its data to devices accessing from within the local network
 """
 
+# DEPENDENCIES -----------------------------------------------------------------
 import time
 
-print("            CAWS Data Access Software, Version 4 - 2018, Henry Hunt"
-    + "\n*********************************************************************"
-    + "***********\n\n                          DO NOT TERMINATE THIS PROGRAM")
-time.sleep(2.5)
+# MESSAGE ----------------------------------------------------------------------
+print("--- Custom Automatic Weather Station ---")
+print("Program: Data Access Software")
+print("Author:  Henry Hunt")
+print("Version: V4.0 (April 2018)")
+print("")
+print("----------- DO NOT TERMINATE -----------")

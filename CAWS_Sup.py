@@ -3,9 +3,13 @@
       internet services, and generating backups and database metrics
 """
 
+# DEPENDENCIES -----------------------------------------------------------------
 import time
 
-print("           CAWS Data Support Software, Version 4 - 2018, Henry Hunt"
-    + "\n*********************************************************************"
-    + "***********\n\n                          DO NOT TERMINATE THIS PROGRAM")
-time.sleep(2.5)
+# MESSAGE ----------------------------------------------------------------------
+print("--- Custom Automatic Weather Station ---")
+print("Program: Data Support Software")
+print("Author:  Henry Hunt")
+print("Version: V4.0 (April 2018)")
+print("")
+print("----------- DO NOT TERMINATE -----------")
