@@ -352,15 +352,15 @@ def do_log_camera(utc):
         
             # Set image annotation and capture image
             camera = picamera.PiCamera()
-            camera.resolution = (1400, 1052)
             camera.annotate_background = picamera.Color("black")
-            camera.annotate_text_size = 36
+            camera.annotate_text_size = 28
             time.sleep(1)
 
             local_time = helpers.utc_to_local(config, utc)
-            camera.annotate_text = ("AWS Camera 1" + local_time.strftime(
+            camera.annotate_text = ("CAWS Camera " + local_time.strftime(
                                     "on %d/%m/%Y at %H:%M:%S"))
             camera.capture(os.path.join(image_dir, image_name + ".jpg"))
+            camera.close()
         except: gpio.output(23, gpio.HIGH)
 
 def do_generate_stats(utc):
