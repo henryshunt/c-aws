@@ -254,8 +254,9 @@ def do_log_report(utc):
             # Calculate difference between pressure 3 hours ago
             if record_then != False:
                 if record_then != None:
-                    pten_value = round(frame.station_pressure - stap_then, 1)
-                    frame.pressure_tendency = pressure_change
+                    pten_value = round(frame.station_pressure
+                                       - record_then["PTen"], 1)
+                    frame.pressure_tendency = pten_value
     except: gpio.output(23, gpio.HIGH)
 
     # ADD TO DATABASE ----------------------------------------------------------
