@@ -56,6 +56,7 @@ expt_value = None
 st10_value = None
 st30_value = None
 st00_value = None
+cput_value = None
 enct_value = None
 
 # HELPERS ----------------------------------------------------------------------
@@ -287,7 +288,7 @@ def do_log_report(utc):
     except: gpio.output(23, gpio.HIGH)
 
 def do_log_environment(utc):
-    global enct_value
+    global enct_value, cput_value
     frame = frames.DataUtcEnviron()
     frame.time = utc
 
@@ -299,10 +300,11 @@ def do_log_environment(utc):
 
     # -- CPU TEMPERATURE -------------------------------------------------------
     try:
-        frame.cpu_temperature = round(CPUTemperature().temperature, 1)
+        frame.cpu_temperature = cput_value
     except: gpio.output(23, gpio.HIGH)
 
     enct_value = None
+    cput_value = None
 
     # -- SAVE DATA -------------------------------------------------------------
     free_space = helpers.remaining_space("/")
@@ -422,7 +424,14 @@ def every_minute():
     utc = datetime.utcnow().replace(second = 0, microsecond = 0)
     time.sleep(0.15)
 
-    # Run actions if configuration modifiers are active
+    # Read CPU temperature before anything else happens. Considered idle temp
+    if config.environment_logging == True:
+        try:
+            global cput_value
+            cput_value = round(CPUTemperature().temperature, 1)
+        except: gpio.output(23, gpio.HIGH)
+
+    # Run actions if relevant configuration modifiers are active
     do_log_report(utc)
     if config.camera_logging == True: do_log_camera(utc)
     if config.environment_logging == True: do_log_environment(utc)
