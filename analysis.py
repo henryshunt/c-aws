@@ -27,6 +27,34 @@ def record_for_time(config, time, table):
             return cursor.fetchone()
     except: return False
 
+def records_in_range(config, start, end, table):
+    start = start.replace(second = 0, microsecond = 0)
+    end = end.replace(second = 0, microsecond = 0)
+
+    try:
+        with sqlite3.connect(config.database_path) as database:
+            database.row_factory = sqlite3.Row
+            cursor = database.cursor()
+
+            # Query respective database table
+            if table == DbTable.UTCREPORTS:
+                cursor.execute(queries.SELECT_RANGE_UTCREPORTS,
+                               (start.strftime("%Y-%m-%d %H:%M:%S"),
+                                end.strftime("%Y-%m-%d %H:%M:%S")))
+
+            elif table == DbTable.UTCENVIRON:
+                cursor.execute(queries.SELECT_RANGE_UTCENVIRON,
+                               (start.strftime("%Y-%m-%d %H:%M:%S"),
+                                end.strftime("%Y-%m-%d %H:%M:%S")))
+
+            elif table == DbTable.LOCALSTATS:
+                cursor.execute(queries.SELECT_RANGE_LOCALSTATS,
+                               (start.strftime("%Y-%m-%d"),
+                                end.strftime("%Y-%m-%d")))
+
+            return cursor.fetchall()
+    except: return False
+
 def stats_for_range(config, start, end, table):
     start = start.replace(second = 0, microsecond = 0)
     end = end.replace(second = 0, microsecond = 0)
