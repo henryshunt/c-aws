@@ -95,20 +95,22 @@ tr {
 }
 .scroller_button {
     display: table-cell;
-    padding-left: 14px;
-    width: 26px;
+    padding-left: 13px;
+    width: 27px;
     background-color: #f2f7f8;
     height: 100%;
     font-size: 40;
-    line-height: 0.6;
-    padding-bottom: 1px;
+    line-height: 0.7;
     text-decoration: none;
-    color: black";
+    color: black;
 }
 .scroller_button:hover {
     font-weight: bold;
 }
-#scroller_title {
+.scroller_button:visited {
+    color: black;
+}
+#scroller_time {
     display: table-cell;
     text-align: center;
     vertical-align: middle;
