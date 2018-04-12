@@ -139,11 +139,20 @@ def page_statistics():
     ST30_Min = "no data"; ST30_Max = "no data"; ST30_Avg = "no data"
     ST00_Min = "no data"; ST00_Max = "no data"; ST00_Avg = "no data"
 
-    # if flask.request.args.get("date") == None:
-
     utc = datetime.now().replace(second = 0, microsecond = 0)
-    local_time = helpers.utc_to_local(config, utc)
+    load_default = True
 
+    if flask.request.args.get("date") != None:
+        try:
+            local_time = datetime.strptime(flask.requests.args.get("date"),
+                                           "%Y-%m-%d")
+            load_default = False
+        except: pass
+
+    if load_default == True:
+         local_time = helpers.utc_to_local(config, utc)
+    else: local_time = flask.request.args.get("date")
+    
     record = analysis.record_for_time(config, local_time, DbTable.LOCALSTATS)
 
     # Try previous minute if no record for current minute
