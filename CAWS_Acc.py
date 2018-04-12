@@ -22,7 +22,7 @@ start_time = None
 
 # PAGE SERVERS -----------------------------------------------------------------
 def page_now():
-      return "Now"
+      return flask.render_template("index.html")
 
 def page_statistics():
       return "Statistics"

@@ -1,4 +1,4 @@
-function display_current_date_time() {
+function display_local_time() {
     var timestamp = new Date();
     
     var now_date = zero_pad(timestamp.getDate());
@@ -10,7 +10,7 @@ function display_current_date_time() {
 
     var formatted = now_date + "/" + now_month + "/" + now_year + 
         " at " + now_hour + ":" + now_minute + ":" + now_second;
-    document.getElementById("curt").innerHTML = formatted;
+    document.getElementById("local_time").innerHTML = formatted;
 }
 
 function zero_pad(value) {
@@ -19,17 +19,4 @@ function zero_pad(value) {
     }
 
     return value;
-}
-
-function send_cmd(command) {
-    var passphrase = prompt(
-        "Authentication is required to issue commands to the station computer. Enter the passphrase:");
-    var base_url = String(window.location).replace(".html", "/");
-
-    if (passphrase == "wsWarwick1") {
-        window.location.replace(base_url + "command/" + command);
-
-    } else {
-        alert("Incorrect passphrase, authentication failed.");
-    }
 }

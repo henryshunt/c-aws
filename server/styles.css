@@ -11,18 +11,16 @@ tr {
     line-height: 1.5em;
 }
 
-
 #header {
     width: 100%;
     height: 105px;
     top: 0px;
     position: fixed;
     background: #2a2a2a;
-    z-index: 1;
 }
 #header_items {
     max-width: 1050px;
-    min-width: 850px;
+    min-width: 570px;
     padding-right: 10px;
     padding-bottom: 9px;
     padding-left: 10px;
@@ -31,13 +29,6 @@ tr {
     position: center;
     margin: 0px auto;
     height: 63px;
-}
-#header_image {
-    width: 40px;
-    height: 40px;
-    float: left;
-    margin-right: 10px;
-    margin-top: 13px;
 }
 #header_left {
     font-family: "Trebuchet MS";
@@ -51,7 +42,7 @@ tr {
     float: right;
     font-size: 35;
     color: white;
-    margin-top: 11px;
+    margin-top: 10px;
     font-weight: bold;
     margin-bottom: 0px;
 }
@@ -62,7 +53,7 @@ tr {
 }
 #menu_items {
     max-width: 1050px;
-    min-width: 740px;
+    min-width: 570px;
     height: 15px;
 
     padding-right: 10px;
@@ -75,6 +66,8 @@ tr {
 }
 .menu_item {
     text-decoration: none;
+    float: left;
+    margin-right: 10px;
 }
 .menu_item:visited {
     color: blue;
@@ -92,7 +85,7 @@ tr {
     position: center;
     padding-right: 10px;
     padding-left: 10px;
-    padding-top: 15px;
+    padding-top: 10px;
     padding-bottom: 10px;
 }
 .group {
@@ -163,7 +156,7 @@ tr {
 }
 #footer_items {
     max-width: 1050px;
-    min-width: 700px;
+    min-width: 538px;
     margin: 0px auto;
     padding-top: 3px;
     padding-right: 10px;
@@ -178,7 +171,6 @@ tr {
     float: left;
     color: #cbff31;
     font-size: 14;
-    box-sizing: border-box;
 }
 .footer_value {
     margin-top: 0px;
@@ -189,5 +181,5 @@ tr {
     border: 1px solid #666666;
     box-sizing: border-box;
     height: 28px;
-    display: inline-block;
+    float: left;
 }
