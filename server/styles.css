@@ -76,7 +76,6 @@ tr {
     color: #00819d;
 }
 
-
 #main {
     max-width: 1050px;
     margin: 0px auto;
@@ -88,6 +87,34 @@ tr {
     padding-top: 10px;
     padding-bottom: 10px;
 }
+
+#scroller {
+    height: 40px;
+    display: table;
+    width: 100%;
+}
+.scroller_button {
+    display: table-cell;
+    padding-left: 14px;
+    width: 26px;
+    background-color: #f2f7f8;
+    height: 100%;
+    font-size: 40;
+    line-height: 0.6;
+    padding-bottom: 1px;
+    text-decoration: none;
+    color: black";
+}
+.scroller_button:hover {
+    font-weight: bold;
+}
+#scroller_title {
+    display: table-cell;
+    text-align: center;
+    vertical-align: middle;
+    padding-bottom: 1px;
+}
+
 .group {
     color: #222;
     border: 1px solid #cccccc;
@@ -105,6 +132,7 @@ tr {
     margin-top: 0px;
     margin-left: 10px;
 }
+
 .field_table {
     width: 100%;
     margin-top: 10px;
@@ -144,7 +172,6 @@ tr {
     margin-top: 4px;
     width: 100%;
 }
-
 
 #footer {
     width: 100%;
