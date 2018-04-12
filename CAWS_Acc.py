@@ -139,20 +139,25 @@ def page_statistics():
     ST30_Min = "no data"; ST30_Max = "no data"; ST30_Avg = "no data"
     ST00_Min = "no data"; ST00_Max = "no data"; ST00_Avg = "no data"
 
+    # if flask.request.args.get("date") == None:
+
     utc = datetime.now().replace(second = 0, microsecond = 0)
-    record = analysis.record_for_time(config, utc, DbTable.LOCALSTATS)
+    local_time = helpers.utc_to_local(config, utc)
+
+    record = analysis.record_for_time(config, local_time, DbTable.LOCALSTATS)
 
     # Try previous minute if no record for current minute
     if record == False or record == None:
-        utc -= timedelta(minutes = 1)
-        record = analysis.record_for_time(config, utc, DbTable.LOCALSTATS)
+        local_time -= timedelta(minutes = 1)
+        record = analysis.record_for_time(config,
+                                          local_time, DbTable.LOCALSTATS)
 
         # Return to current minute if no record for previous minute
         if record == False or record == None:
-              utc += timedelta(minutes = 1)
+              local_time += timedelta(minutes = 1)
             
-    data_time = helpers.utc_to_local(config, utc).strftime("%H:%M")
-    scroller_date = helpers.utc_to_local(config, utc).strftime("%d/%m/%Y")
+    data_time = local_time.strftime("%H:%M")
+    scroller_date = local_time.strftime("%d/%m/%Y")
 
     # Get values to display for each report parameter
     if record != False and record != None:
