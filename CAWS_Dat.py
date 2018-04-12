@@ -93,7 +93,7 @@ def do_log_report(utc):
     global wspd_ticks, past_wspd_ticks, wdir_samples, past_wdir_samples
     global sund_ticks, rain_ticks, airt_value, expt_value, st10_value
     global st30_value, st00_value, disable_sampling
-    
+
     frame = frames.DataUtcReport()
     frame.time = utc
     
@@ -130,8 +130,8 @@ def do_log_report(utc):
         st00_thread.join(); frame.soil_temperature_00 = st00_value
     except: gpio.output(23, gpio.HIGH)
 
-    airt_value = None; expt_value = None; st10_value = None; st30_value = None
-    st00_value = None
+    airt_value = None; expt_value = None; st10_value = None
+    st30_value = None; st00_value = None
 
     # -- RELATIVE HUMIDITY -----------------------------------------------------
     try:
