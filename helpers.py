@@ -78,3 +78,8 @@ def degrees_to_compass(degrees):
     elif degrees >= 203 and degrees < 248: return "SW"
     elif degrees >= 248 and degrees < 293: return "W"
     elif degrees >= 293 and degrees < 338: return "NW"
+
+def tendency_to_phrase(tendency):
+    if tendency <= 0.1 and tendency >= -0.1: return "stdy"
+    elif tendency > 0.1: return "ris"
+    elif tendency < -0.1: return "fal"
