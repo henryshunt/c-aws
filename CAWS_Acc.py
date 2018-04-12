@@ -45,8 +45,8 @@ def page_about():
 
 # ENTRY POINT ==================================================================
 # -- CREATE SERVER -------------------------------------------------------------
-server = flask.Flask(__name__, static_folder = "interface",
-                     template_folder = "interface")
+server = flask.Flask(__name__, static_folder = "server",
+                     template_folder = "server")
 
 # -- ROUTE URLS ----------------------------------------------------------------
 server.add_url_rule("/", "", page_now)
@@ -60,4 +60,4 @@ server.add_url_rule("/", "about.html", page_about)
 
 # -- START SERVER --------------------------------------------------------------
 start_time = datetime.utcnow().replace(second = 0, microsecond = 0)
-server.run(host = "0.0.0.0", port = 80, threaded = True)
+server.run(host = "0.0.0.0", threaded = True)
