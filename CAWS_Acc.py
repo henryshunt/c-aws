@@ -123,7 +123,7 @@ def page_now():
                                  data_time = local_time)
 
 def page_statistics():
-    return "Statistics"
+    return flask.render_template("statistics.html")
 
 def page_graph_day():
     return "Graph Day"
@@ -152,13 +152,13 @@ server = flask.Flask(__name__, static_folder = "server",
 
 # -- ROUTE URLS ----------------------------------------------------------------
 server.add_url_rule("/", "", page_now)
-server.add_url_rule("/", "index.html", page_now)
-server.add_url_rule("/", "statistics.html", page_statistics)
-server.add_url_rule("/", "graph_day.html", page_graph_day)
-server.add_url_rule("/", "graph_month.html", page_graph_month)
-server.add_url_rule("/", "graph_year.html", page_graph_year)
-server.add_url_rule("/", "camera.html", page_camera)
-server.add_url_rule("/", "about.html", page_about)
+server.add_url_rule("/index.html", "index.html", page_now)
+server.add_url_rule("/statistics.html", "statistics.html", page_statistics)
+server.add_url_rule("/graph_day.html", "graph_day.html", page_graph_day)
+server.add_url_rule("/graph_month.html", "graph_month.html", page_graph_month)
+server.add_url_rule("/graph_year.html", "graph_year.html", page_graph_year)
+server.add_url_rule("/camera.html", "camera.html", page_camera)
+server.add_url_rule("/about.html", "about.html", page_about)
 
 # -- START SERVER --------------------------------------------------------------
 start_time = datetime.utcnow().replace(second = 0, microsecond = 0)
