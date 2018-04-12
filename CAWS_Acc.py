@@ -28,11 +28,11 @@ start_time = None
 
 # PAGE SERVERS -----------------------------------------------------------------
 def page_now():
-    AirT = "No Data"; ExpT = "No Data"; RelH = "No Data"; DewP = "No Data"
-    WSpd = "No Data"; WDir = "No Data"; WGst = "No Data"; SunD = "No Data"
-    Rain = "No Data"; StaP = "No Data"; MSLP = "No Data"; PTen = "No Data"
-    ST10 = "No Data"; ST30 = "No Data"; ST00 = "No Data"
-    SunD_Phr = "No Data"; Rain_Phr = "No Data"
+    AirT = "no data"; ExpT = "no data"; RelH = "no data"; DewP = "no data"
+    WSpd = "no data"; WDir = "no data"; WGst = "no data"; SunD = "no data"
+    Rain = "no data"; StaP = "no data"; MSLP = "no data"; PTen = "no data"
+    ST10 = "no data"; ST30 = "no data"; ST00 = "no data"
+    SunD_Phr = "no data"; Rain_Phr = "no data"
 
     utc = datetime.now().replace(second = 0, microsecond = 0)
     record = analysis.record_for_time(config, utc, DbTable.UTCREPORTS)
@@ -50,30 +50,40 @@ def page_now():
 
     # get values to display for each report parameter
     if record != False and record != None:
-        if record["AirT"] != None: AirT = str(record["AirT"]) + "°C"
-        if record["ExpT"] != None: ExpT = str(record["ExpT"]) + "°C"
-        if record["RelH"] != None: RelH = str(record["RelH"]) + "%"
-        if record["DewP"] != None: DewP = str(record["DewP"]) + "°C"
-        if record["WSpd"] != None: WSpd = str(record["WSpd"]) + " mph"
+        if record["AirT"] != None:
+            AirT = "{0:g}".format(record["AirT"]) + "°C"
+        if record["ExpT"] != None:
+            ExpT = "{0:g}".format(record["ExpT"]) + "°C"
+        if record["RelH"] != None:
+            RelH = "{0:g}".format(record["RelH"]) + "%"
+        if record["DewP"] != None:
+            DewP = "{0:g}".format(record["DewP"]) + "°C"
+        if record["WSpd"] != None:
+            WSpd = "{0:g}".format(record["WSpd"]) + " mph"
         
         if record["wdir"] != None:
             wdir_compass = helpers.degrees_to_compass(record["WDir"])
-            WDir = str(record["WDir"]) + "° (" + wdir_compass + ")"
+            WDir = "{0:g}".format(record["WDir"]) + "° (" + wdir_compass + ")"
             
         if record["WGst"] != None: WGst = str(record["WGst"]) + " mph"
         if record["SunD"] != None: SunD = str(record["SunD"]) + " sec"
-        if record["Rain"] != None: Rain = str(record["Rain"]) + " mm"
+        if record["Rain"] != None:
+            Rain = "{0:g}".format(record["Rain"]) + " mm"
         if record["StaP"] != None: StaP = str(record["StaP"]) + " hPa"
         if record["MSLP"] != None: MSLP = str(record["MSLP"]) + " hPa"
 
         if record["PTen"] != None:
-            if float(record["PTen"]) > 0:
-                PTen = "+" + str(record["PTen"]) + " hPa"
-            else: PTen = str(record["PTen"]) + " hPa"
+            pten_phrase = helpers.tendency_to_phrase(record["PTen"])
+            
+            PTen = "+" if record["PTen"] > 0 else ""
+            PTen += str(record["PTen"]) + pten_phrase + " hPa"
 
-        if record["ST10"] != None: ST10 = str(record["ST10"]) + "°C"
-        if record["ST30"] != None: ST30 = str(record["ST30"]) + "°C"
-        if record["ST00"] != None: ST00 = str(record["ST00"]) + "°C"
+        if record["ST10"] != None:
+            ST10 = "{0:g}".format(record["ST10"]) + "°C"
+        if record["ST30"] != None:
+            ST30 = "{0:g}".format(record["ST30"]) + "°C"
+        if record["ST00"] != None:
+            ST00 = "{0:g}".format(record["ST00"]) + "°C"
 
     # calculate rain over past hour
     # reports_past_hour = analysis.records_in_range(rain_time - timedelta(
@@ -89,9 +99,9 @@ def page_now():
                                  caws_location = config.caws_location,
                                  AirT = AirT, ExpT = ExpT, RelH = RelH,
                                  DewP = DewP, WSpd = WSpd, WDir = WDir,
-                                 WGst = WGst, Rain = Rain, StaP = StaP,
-                                 MSLP = MSLP, PTen = PTen, ST10 = ST10,
-                                 ST30 = ST30, ST00 = ST00,
+                                 WGst = WGst, SunD = SunD, Rain = Rain,
+                                 StaP = StaP, MSLP = MSLP, PTen = PTen,
+                                 ST10 = ST10, ST30 = ST30, ST00 = ST00,
                                  SunD_Phr = SunD_Phr, Rain_Phr = Rain_Phr,
                                  data_time = local_time)
 
