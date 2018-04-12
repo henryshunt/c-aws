@@ -1,0 +1,266 @@
+<meta charset="utf-8">
+
+<html>
+    <head>
+        <title>CAWS Warwick [Local]</title>
+        <link rel="icon" type="image/jpeg" href="images/favicon.png">
+        <link rel="stylesheet" type="text/css" href="styles.css">
+        <script src="scripts.js"></script>
+
+        <script type="text/javascript">
+            function page_load_js() {
+                var timestamp = new Date();
+                var refresh_time = new Date(timestamp.getTime());
+
+                if (timestamp.getSeconds() == 8 || timestamp.getSeconds() > 8) {
+                    refresh_time.setMinutes(refresh_time.getMinutes() + 1);
+                }
+
+                refresh_time.setSeconds(8);
+                refresh_time.setMilliseconds(0);
+                var difference = refresh_time.getTime() - timestamp.getTime();
+                setTimeout("location.reload()", difference);
+
+                setInterval(function() {
+                    var timestamp = new Date();
+                    var refresh_time = new Date(timestamp.getTime());
+
+                    if (timestamp.getSeconds() == 8 || timestamp.getSeconds() > 8) {
+                        refresh_time.setMinutes(refresh_time.getMinutes() + 1);
+                    }
+
+                    refresh_time.setSeconds(8);
+                    refresh_time.setMilliseconds(0);
+                    var difference = (refresh_time.getTime() - timestamp.getTime());
+                    document.getElementById("refs").innerHTML = parseInt(
+                        (difference / 1000) + 1);
+
+                    display_current_date_time();
+                }, 100);
+            }
+        </script>
+    </head>
+
+    <body onload="page_load_js()">
+        <div id="header">
+            <div id="header_items">
+                <img id="header_image" src="images/favicon.png">
+                <p id="header_left">Warwick, England</p>
+                <p id="header_right">CAWS Data [Local]</p>
+            </div>
+
+            <div id="menu">
+                <div id="menu_items">
+                    <a class="menu_item" style="margin-right: 10px" href="."><b>Now</b></a>
+                    <a class="menu_item" href="today.html">Statistics</a>
+                    <span style="margin-right: 10px; margin-left: 10"><b>|</b></span>
+                    <span style="margin-left: 0; margin-right: 5px"><b>Graph:</b></span>
+                    <a class="menu_item" style="margin-right: 10px" href="graphs.html">Day</a>
+                    <a class="menu_item" style="margin-right: 10px" href="year.html">Month</a>
+                    <a class="menu_item" href="year.html">Year</a>
+                    <span style="margin-right: 10px; margin-left: 10"><b>|</b></span>
+                    <a class="menu_item" style="margin-right: 10px" href="webcam.html">Cameras</a>
+                    <a class="menu_item" href="admin.html">About</a>
+                    <i style="float: right">Lat: ***REMOVED***, Lon: ***REMOVED***, Elev: 56m ASL</i>
+                </div>
+            </div>
+        </div>
+
+        <div id="main">
+            <div class="group">
+                <div class="group_header">
+                    <p class="group_title">Ambient Temperature</p>
+                </div>
+
+                <table class="field_table">
+                    <tr>
+                        <td><p class="field_label">Air Temperature:</p></td>
+                        <td><p class="field_value"><b>{{ tamb }}</b></p></td>
+                    </tr>
+                    <tr>
+                        <td><p class="field_label">Un-Shielded Temperature (affected by weather):</p></td>
+                        <td><p class="field_value"><b>{{ tusd }}</b></p></td>
+                    </tr>
+                </table>
+            </div>
+
+            <div class="group">
+                <div class="group_header">
+                    <p class="group_title">Moisture</p>
+                </div>
+
+                <table class="field_table">
+                    <tr>
+                        <td><p class="field_label">Relative Humidity:</p></td>
+                        <td><p class="field_value"><b>{{ relh }}</b></p></td>
+                    </tr>
+                    <tr>
+                        <td><p class="field_label">Dew Point:</p></td>
+                        <td><p class="field_value"><b>{{ dewp }}</b></p></td>
+                    </tr>
+                </table>
+            </div>
+
+            <div class="group">
+                <div class="group_header">
+                    <p class="group_title">Ten Minute Wind</p>
+                </div>
+
+                <table class="field_table">
+                    <tr>
+                        <td><p class="field_label">Wind Speed:</p></td>
+                        <td><p class="field_value"><b>{{ wspd }}</b></p></td>
+                    </tr>
+                    <tr>
+                        <td><p class="field_label">Wind Direction (blowing from):</p></td>
+                        <td><p class="field_value"><b>{{ wdir }}</b></p></td>
+                    </tr>
+                    <tr>
+                        <td><p class="field_label" style="margin-top: 10px">Wind Gust:</p></td>
+                        <td><p class="field_value" style="margin-top: 10px"><b>{{ wgst }}</b></p></td>
+                    </tr>
+                </table>
+            </div>
+
+            <div class="group">
+                <div class="group_header">
+                    <p class="group_title">Solar Radiation</p>
+                </div>
+
+                <table class="field_table">
+                    <tr>
+                        <td><p class="field_label">Sunshine:</p></td>
+                        <td><p class="field_value"><b>no sensor</b></p></td>
+                    </tr>
+                    <tr>
+                        <td><p class="field_label">Sunshine over Past Hour:</p></td>
+                        <td><p class="field_value"><b>no sensor</b></p></td>
+                    </tr>
+                    <tr>
+                        <td><p class="field_label" style="margin-top: 10px">Shortwave Radiation:</p></td>
+                        <td><p class="field_value" style="margin-top: 10px"><b>no sensor</b></p></td>
+                    </tr>
+                </table>
+            </div>
+
+            <div class="group">
+                <div class="group_header">
+                    <p class="group_title">Precipitation</p>
+                </div>
+
+                <table class="field_table">
+                    <tr>
+                        <td><p class="field_label">Rainfall:</p></td>
+                        <td><p class="field_value"><b>{{ rain }}</b></p></td>
+                    </tr>
+                    <tr>
+                        <td><p class="field_label">Rainfall over Past Hour:</p></td>
+                        <td><p class="field_value"><b>{{ rain_phr }}</b></p></td>
+                    </tr>
+                </table>
+            </div>
+
+            <div class="group">
+                <div class="group_header">
+                    <p class="group_title">Barometric Pressure</p>
+                </div>
+
+                <table class="field_table">
+                    <tr>
+                        <td><p class="field_label">Station Pressure (at station elevation):</p></td>
+                        <td><p class="field_value"><b>{{ psta }}</b></p></td>
+                    </tr>
+                    <tr>
+                        <td><p class="field_label">Mean Sea Level Pressure:</p></td>
+                        <td><p class="field_value"><b>{{ pmsl }}<b></p></td>
+                    </tr>
+                    <tr>
+                        <td><p class="field_label" style="margin-top: 10px">3-Hour Pressure Tendency:</p></td>
+                        <td><p class="field_value" style="margin-top: 10px"><b>{{ psta_ten }}</b></p></td>
+                    </tr>
+                </table>
+            </div>
+
+            <div class="group">
+                <div class="group_header">
+                    <p class="group_title">Air Quality</p>
+                </div>
+
+                <table class="field_table">
+                    <tr>
+                        <td><p class="field_label">Particulate Matter 1.0:</p></td>
+                        <td><p class="field_value"><b>no sensor</b></p></td>
+                    </tr>
+                    <tr>
+                        <td><p class="field_label">Particulate Matter 2.5:</p></td>
+                        <td><p class="field_value"><b>no sensor<b></p></td>
+                    </tr>
+                    <tr>
+                        <td><p class="field_label">Particulate Matter 10:</p></td>
+                        <td><p class="field_value"><b>no sensor</b></p></td>
+                    </tr>
+                </table>
+            </div>
+
+            <div class="group">
+                <div class="group_header">
+                    <p class="group_title">Radio Atmospherics</p>
+                </div>
+
+                <table class="field_table">
+                    <tr>
+                        <td><p class="field_label">Lightning Strikes:</p></td>
+                        <td><p class="field_value"><b>no sensor</b></p></td>
+                    </tr>
+                    <tr>
+                        <td><p class="field_label">Lightning Strikes over Past Hour:</p></td>
+                        <td><p class="field_value"><b>no sensor</b></p></td>
+                    </tr>
+                    <tr>
+                        <td><p class="field_label" style="margin-top: 10px">Storm Distance:</p></td>
+                        <td><p class="field_value" style="margin-top: 10px"><b>no sensor</b></p></td>
+                    </tr>
+                </table>
+            </div>
+
+            <div class="group" style="margin-bottom: 0px">
+                <div class="group_header">
+                    <p class="group_title">Soil Temperature</p>
+                </div>
+
+                <table class="field_table">
+                    <tr>
+                        <td><p class="field_label">10 Centimetres Down:</p></td>
+                        <td><p class="field_value"><b>{{ ts10 }}</b></p></td>
+                    </tr>
+                    <tr>
+                        <td><p class="field_label">30 Centimetres Down:</p></td>
+                        <td><p class="field_value"><b>{{ ts30 }}</b></p></td>
+                    </tr>
+                    <tr>
+                        <td><p class="field_label">1 Metre Down:</p></td>
+                        <td><p class="field_value"><b>{{ ts00 }}</b></p></td>
+                    </tr>
+                </table>
+            </div>
+        </div>
+
+        <div id="footer">
+            <div id="footer_items">
+                <p class="footer_label">Current Date &amp; Time:</p>
+                <p class="footer_value" id="curt" style="width: 210px"></p>
+          
+                <div style="float: right">
+                    <p class="footer_label">Seconds to Update:</p>
+                    <p class="footer_value" id="refs" style="width: 35px"></p>
+                </div>
+
+                <div style="float: right">
+                    <p class="footer_label">Time of Data:</p>
+                    <p class="footer_value" style="width: 60px; margin-right: 10px">{{ datt }}</p>
+                </div>
+            </div>
+        </div>
+
+    </body>
+</html>

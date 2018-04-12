@@ -1,0 +1,193 @@
+* {
+    font-family: "Segoe UI", "-apple-system", "Helvetica Neue";
+}
+body {
+    margin: 0px;
+}
+td {
+    padding: 0px;
+}
+tr {
+    line-height: 1.5em;
+}
+
+
+#header {
+    width: 100%;
+    height: 105px;
+    top: 0px;
+    position: fixed;
+    background: #2a2a2a;
+    z-index: 1;
+}
+#header_items {
+    max-width: 1050px;
+    min-width: 850px;
+    padding-right: 10px;
+    padding-bottom: 9px;
+    padding-left: 10px;
+    padding-top: 1px;
+    font-size: 13;
+    position: center;
+    margin: 0px auto;
+    height: 63px;
+}
+#header_image {
+    width: 40px;
+    height: 40px;
+    float: left;
+    margin-right: 10px;
+    margin-top: 13px;
+}
+#header_left {
+    font-family: "Trebuchet MS";
+    float: left;
+    font-size: 46;
+    color: white;
+    margin-top: 6px;
+    margin-bottom: 0px;
+}
+#header_right {
+    float: right;
+    font-size: 35;
+    color: white;
+    margin-top: 11px;
+    font-weight: bold;
+    margin-bottom: 0px;
+}
+
+#menu {
+    width: 100%;
+    background: #d0d0d0;
+}
+#menu_items {
+    max-width: 1050px;
+    min-width: 740px;
+    height: 15px;
+
+    padding-right: 10px;
+    padding-bottom: 8px;
+    padding-left: 10px;
+    padding-top: 2px;
+    font-size: 13;
+    position: center;
+    margin: 0px auto;
+}
+.menu_item {
+    text-decoration: none;
+}
+.menu_item:visited {
+    color: blue;
+}
+.menu_item:hover {
+    color: #00819d;
+}
+
+
+#main {
+    max-width: 1050px;
+    margin: 0px auto;
+    margin-top: 105px;
+    margin-bottom: 34px;
+    position: center;
+    padding-right: 10px;
+    padding-left: 10px;
+    padding-top: 15px;
+    padding-bottom: 10px;
+}
+.group {
+    color: #222;
+    border: 1px solid #cccccc;
+    margin-bottom: 15px;
+}
+.group_header {
+    background: #f2f7f8;
+    border-bottom: 1px solid #cccccc;
+    padding-top: 5px;
+}
+.group_title {
+    margin-bottom: 7px;
+    font-size: 25;
+    font-family: "Trebuchet MS";
+    margin-top: 0px;
+    margin-left: 10px;
+}
+.field_table {
+    width: 100%;
+    margin-top: 10px;
+    margin-bottom: 15px;
+}
+.field_label {
+    max-width: 1070px;
+    margin-left: 35px;
+    color: grey;
+}
+.field_value {
+    text-align: right;
+    padding-right: 15px;
+}
+
+#control_sub_content {
+    margin-left: 38px;
+    margin-right: 17px;
+    margin-top: 15px;
+    margin-bottom: 17px;
+}
+#control_sub_group {
+    margin-top: -19px;
+    border: none;
+    margin-right: 1px;
+    margin-left: 1px;
+    margin-bottom: 0px;
+}
+#control_sub_table {
+    width: calc(100% + 7px);
+    margin-left: -4px;
+    height: 15px;
+}
+#command_field {
+    font-size: 14;
+    height: 22px;
+    margin-top: 4px;
+    width: 100%;
+}
+
+
+#footer {
+    width: 100%;
+    height: 34px;
+    margin-bottom: 0px auto;
+    bottom: 0px;
+    position: fixed;
+    background: #2a2a2a;
+}
+#footer_items {
+    max-width: 1050px;
+    min-width: 700px;
+    margin: 0px auto;
+    padding-top: 3px;
+    padding-right: 10px;
+    padding-left: 10px;
+    position: center;
+}
+
+.footer_label {
+    margin-top: -4px;
+    padding-top: 7px;
+    margin-right: 10px;
+    float: left;
+    color: #cbff31;
+    font-size: 14;
+    box-sizing: border-box;
+}
+.footer_value {
+    margin-top: 0px;
+    width: 100%;
+    color: white;
+    text-align: center;
+    font-size: 18;
+    border: 1px solid #666666;
+    box-sizing: border-box;
+    height: 28px;
+    display: inline-block;
+}
