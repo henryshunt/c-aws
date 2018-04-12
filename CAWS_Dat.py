@@ -372,15 +372,26 @@ def do_generate_stats(utc):
         gpio.output(23, gpio.HIGH); return
         
     # -- GET NEW STATS ---------------------------------------------------------
-    local = helpers.utc_to_local(config, utc)
-    bounds = helpers.day_bounds_utc(config, local, False)
-    new_stats = analysis.stats_for_range(config, bounds[0], bounds[1],
-                                         DbTable.UTCREPORTS)
+    local_time = helpers.utc_to_local(config, utc)
+    bounds = helpers.day_bounds_utc(config, local_time, False)
+    new_stats = None
+    
+    try:
+        with sqlite3.connect(config.database_path) as database:
+            database.row_factory = sqlite3.Row
+            cursor = database.cursor()
 
-    if new_stats == False: gpio.output(23, gpio.HIGH); return
+            cursor.execute(queries.GENERATE_STATS_UTCREPORTS,
+                           (bounds[0].strftime("%Y-%m-%d %H:%M:%S"),
+                            bounds[1].strftime("%Y-%m-%d %H:%M:%S")))
+
+            new_stats = cursor.fetchone()
+    except: gpio.output(23, gpio.HIGH); return
+
+    if new_stats == None: gpio.output(23, gpio.HIGH); return
 
     # -- GET CURRENT STATS -----------------------------------------------------
-    cur_stats = analysis.record_for_time(config, local, DbTable.LOCALSTATS)
+    cur_stats = analysis.record_for_time(config, local_time, DbTable.LOCALSTATS)
     if cur_stats == False: gpio.output(23, gpio.HIGH); return
 
     # -- SAVE DATA -------------------------------------------------------------
@@ -388,29 +399,46 @@ def do_generate_stats(utc):
         with sqlite3.connect(config.database_path) as database:
             cursor = database.cursor()
 
+            # Insert or update depending on status of current statistics
             if cur_stats == None:
                 cursor.execute(queries.INSERT_SINGLE_LOCALSTATS,
-                    (local.strftime("%Y-%m-%d"), new_stats[0], new_stats[1],
-                     new_stats[2], new_stats[3], new_stats[4], new_stats[5],
-                     new_stats[6], new_stats[7], new_stats[8], new_stats[9],
-                     new_stats[10], new_stats[11], new_stats[12], new_stats[13],
-                     new_stats[14], new_stats[15], new_stats[16], new_stats[17],
-                     new_stats[18], new_stats[19], new_stats[20], new_stats[21],
-                     new_stats[22], new_stats[23], new_stats[24], new_stats[25],
-                     new_stats[26], new_stats[27], new_stats[28], new_stats[29],
-                     new_stats[30], new_stats[31]))
-
+                    (local_time.strftime("%Y-%m-%d"),
+                     new_stats["min(AirT)"], new_stats["max(AirT)"],
+                     new_stats["avg(AirT)"], new_stats["min(RelH)"],
+                     new_stats["max(RelH)"], new_stats["avg(RelH)"],
+                     new_stats["min(DewP)"], new_stats["max(DewP)"],
+                     new_stats["avg(DewP)"], new_stats["min(WSpd)"],
+                     new_stats["max(WSpd)"], new_stats["avg(WSpd)"],
+                     new_stats["min(WDir)"], new_stats["max(WDir)"],
+                     new_stats["avg(WDir)"], new_stats["min(WGst)"],
+                     new_stats["max(WGst)"], new_stats["avg(WGst)"],
+                     new_stats["sum(SunD)"], new_stats["sum(Rain)"],
+                     new_stats["min(MSLP)"], new_stats["max(MSLP)"],
+                     new_stats["avg(MSLP)"], new_stats["min(ST10)"],
+                     new_stats["max(ST10)"], new_stats["avg(ST10)"],
+                     new_stats["min(ST30)"], new_stats["max(ST30)"],
+                     new_stats["avg(ST30)"], new_stats["min(ST00)"],
+                     new_stats["max(ST00)"], new_stats["avg(ST00)"]))
+                
             else:
                 cursor.execute(queries.UPDATE_SINGLE_LOCALSTATS,
-                    (new_stats[0], new_stats[1], new_stats[2], new_stats[3],
-                     new_stats[4], new_stats[5], new_stats[6], new_stats[7],
-                     new_stats[8], new_stats[9], new_stats[10],  new_stats[11], 
-                     new_stats[12], new_stats[13], new_stats[14], new_stats[15],
-                     new_stats[16], new_stats[17], new_stats[18], new_stats[19],
-                     new_stats[20], new_stats[21], new_stats[22], new_stats[23],
-                     new_stats[24], new_stats[25], new_stats[26], new_stats[27],
-                     new_stats[28], new_stats[29], new_stats[30], new_stats[31],
-                     local.strftime("%Y-%m-%d")))
+                    (new_stats["min(AirT)"], new_stats["max(AirT)"],
+                     new_stats["avg(AirT)"], new_stats["min(RelH)"],
+                     new_stats["max(RelH)"], new_stats["avg(RelH)"],
+                     new_stats["min(DewP)"], new_stats["max(DewP)"],
+                     new_stats["avg(DewP)"], new_stats["min(WSpd)"],
+                     new_stats["max(WSpd)"], new_stats["avg(WSpd)"],
+                     new_stats["min(WDir)"], new_stats["max(WDir)"],
+                     new_stats["avg(WDir)"], new_stats["min(WGst)"],
+                     new_stats["max(WGst)"], new_stats["avg(WGst)"],
+                     new_stats["sum(SunD)"], new_stats["sum(Rain)"],
+                     new_stats["min(MSLP)"], new_stats["max(MSLP)"],
+                     new_stats["avg(MSLP)"], new_stats["min(ST10)"],
+                     new_stats["max(ST10)"], new_stats["avg(ST10)"],
+                     new_stats["min(ST30)"], new_stats["max(ST30)"],
+                     new_stats["avg(ST30)"], new_stats["min(ST00)"],
+                     new_stats["max(ST00)"], new_stats["avg(ST00)"],
+                     local_time.strftime("%Y-%m-%d")))
             
             database.commit()
     except: gpio.output(23, gpio.HIGH)
