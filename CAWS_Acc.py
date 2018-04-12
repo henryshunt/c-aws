@@ -123,9 +123,37 @@ def page_now():
                                  data_time = local_time)
 
 def page_statistics():
+    AirT_Min = "no data"; AirT_Max = "no data"; AirT_Avg = "no data"
+    RelH_Min = "no data"; RelH_Max = "no data"; RelH_Avg = "no data"
+    DewP_Min = "no data"; DewP_Max = "no data"; DewP_Avg = "no data"
+    WSpd_Min = "no data"; WSpd_Max = "no data"; WSpd_Avg = "no data"
+    WDir_Min = "no data"; WDir_Max = "no data"; WDir_Avg = "no data"
+    WGst_Min = "no data"; WGst_Max = "no data"; WGst_Avg = "no data"
+    SunD_Ttl = "no data"; Rain_Ttl = "no data"
+    MSLP_Min = "no data"; MSLP_Max = "no data"; MSLP_Avg = "no data"
+    ST10_Min = "no data"; ST10_Max = "no data"; ST10_Avg = "no data"
+    ST30_Min = "no data"; ST30_Max = "no data"; ST30_Avg = "no data"
+    ST00_Min = "no data"; ST00_Max = "no data"; ST00_Avg = "no data"
+
     return flask.render_template("statistics.html",
                                  caws_name = config.caws_name,
-                                 caws_location = config.caws_location)
+                                 caws_location = config.caws_location,
+                                 AirT_Min = AirT_Min, AirT_Max = AirT_Max,
+                                 AirT_Avg = AirT_Avg, RelH_Min = RelH_Min,
+                                 RelH_Max = RelH_Max, RelH_Avg = RelH_Avg,
+                                 DewP_Min = DewP_Min, DewP_Max = DewP_Max,
+                                 DewP_Avg = DewP_Avg, WSpd_Min = WSpd_Min,
+                                 WSpd_Max = WSpd_Max, WSpd_Avg = WSpd_Avg,
+                                 WDir_Min = WDir_Min, WDir_Max = WDir_Max,
+                                 WDir_Avg = WDir_Avg, WGst_Min = WGst_Min,
+                                 WGst_Max = WGst_Max, WGst_Avg = WGst_Avg,
+                                 SunD_Ttl = SunD_Ttl, Rain_Ttl = Rain_Ttl,
+                                 MSLP_Min = MSLP_Min, MSLP_Max = MSLP_Max,
+                                 MSLP_Avg = MSLP_Avg, ST10_Min = ST10_Min,
+                                 ST10_Max = ST10_Max, ST10_Avg = ST10_Avg,
+                                 ST30_Min = ST30_Min, ST30_Max = ST30_Max,
+                                 ST30_Avg = ST30_Avg, ST00_Min = ST00_Min,
+                                 ST00_Max = ST00_Max, ST00_Avg = ST00_Avg)
 
 def page_graph_day():
     return "Graph Day"
