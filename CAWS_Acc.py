@@ -168,7 +168,9 @@ def page_statistics():
                   local_time += timedelta(minutes = 1)
 
     data_time = helpers.utc_to_local(config, utc).strftime("%H:%M")
-    scroller_date = local_time.strftime("%d/%m/%Y")
+    scroller_prev = (local_time - timedelta(days = 1)).strftime("%Y-%m-%d")
+    scroller_time = local_time.strftime("%d/%m/%Y")
+    scroller_next = (local_time + timedelta(days = 1)).strftime("%Y-%m-%d")
 
     # Get values to display for each report parameter
     if record != False and record != None:
@@ -235,7 +237,9 @@ def page_statistics():
     return flask.render_template("statistics.html",
                                  caws_name = config.caws_name,
                                  caws_location = config.caws_location,
-                                 scroller_date = scroller_date,
+                                 scroller_prev = scroller_prev,
+                                 scroller_time = scroller_time,
+                                 scroller_next = scroller_next,
                                  AirT_Min = AirT_Min, AirT_Max = AirT_Max,
                                  AirT_Avg = AirT_Avg, RelH_Min = RelH_Min,
                                  RelH_Max = RelH_Max, RelH_Avg = RelH_Avg,
