@@ -67,7 +67,7 @@ tr {
 .menu_item {
     text-decoration: none;
     float: left;
-    margin-right: 10px;
+    margin-right: 15px;
 }
 .menu_item:visited {
     color: blue;
