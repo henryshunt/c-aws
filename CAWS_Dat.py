@@ -85,7 +85,7 @@ def do_read_temp(address):
                 global st30_value; st30_value = round(temp, 1)
             elif os.path.basename(address) == "28-0516704dc0ff":
                 global st00_value; st00_value = round(temp, 1)
-            elif os.path.basename(address) == "":
+            elif os.path.basename(address) == "28-8000001f88fa":
                 global enct_value; enct_value = round(temp, 1)
     except: gpio.output(23, gpio.HIGH)
 
@@ -295,7 +295,7 @@ def do_log_environment(utc):
 
     # -- ENCLOSURE TEMPERATURE -------------------------------------------------
     try:
-        #do_read_temp("")
+        do_read_temp("28-8000001f88fa")
         frame.enclosure_temperature = enct_value
     except: gpio.output(23, gpio.HIGH)
 
@@ -355,9 +355,10 @@ def do_log_camera(utc):
         
             # Set image annotation and capture image
             with picamera.PiCamera() as camera:
+                camera.resolution = (1280, 960)
                 camera.annotate_background = picamera.Color("black")
-                camera.annotate_text_size = 28
-                time.sleep(1)
+                camera.annotate_text_size = 24
+                time.sleep(0.8)
 
                 local_time = helpers.utc_to_local(config, utc)
                 camera.annotate_text = ("CAWS Camera " + local_time.strftime(
