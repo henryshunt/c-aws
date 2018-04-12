@@ -123,7 +123,9 @@ def page_now():
                                  data_time = local_time)
 
 def page_statistics():
-    return flask.render_template("statistics.html")
+    return flask.render_template("statistics.html",
+                                 caws_name = config.caws_name,
+                                 caws_location = config.caws_location)
 
 def page_graph_day():
     return "Graph Day"
