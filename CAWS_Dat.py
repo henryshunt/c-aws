@@ -37,7 +37,6 @@ print("Author:  Henry Hunt")
 print("Version: V4.0 (April 2018)")
 print("")
 print("----------- DO NOT TERMINATE -----------")
-time.sleep(2.5)
 
 # GLOBAL VARIABLES -------------------------------------------------------------
 config = ConfigData()
@@ -95,6 +94,9 @@ def do_log_report(utc):
     global sund_ticks, rain_ticks, airt_value, expt_value, st10_value
     global st30_value, st00_value, disable_sampling
     
+    frame = frames.DataUtcReport()
+    frame.time = utc
+    
     # -- COPY GLOBALS ----------------------------------------------------------
     disable_sampling = True
     new_wspd_ticks = wspd_ticks[:]
@@ -106,9 +108,6 @@ def do_log_report(utc):
     new_rain_ticks = rain_ticks
     rain_ticks = 0
     disable_sampling = False
-
-    frame = frames.DataUtcReport()
-    frame.time = utc
 
     # -- TEMPERATURE -----------------------------------------------------------
     try:
@@ -208,7 +207,7 @@ def do_log_report(utc):
 
     # -- SUNSHINE DURATION -----------------------------------------------------
     try:
-        frame.sunshine_duration = sund_ticks
+        frame.sunshine_duration = new_sund_ticks
     except: gpio.output(23, gpio.HIGH)
 
     # -- RAINFALL --------------------------------------------------------------
@@ -324,12 +323,13 @@ def do_log_environment(utc):
     except: gpio.output(23, gpio.HIGH)
 
 def do_log_camera(utc):
-    if (not str(utc.minute).endswith("0") and
-        not str(utc.minute).endswith("5")): return
+    if not str(utc.minute).endswith("0") and not str(utc.minute).endswith("5"):
+        return
 
     # Get sunrise and sunset times for current date
-    location = astral.Location(("", "", config.caws_latitude,
-        config.caws_longitude, "UTC", config.caws_elevation))
+    location = astral.Location(
+        ("", "", config.caws_latitude, config.caws_longitude, "UTC",
+         config.caws_elevation))
     solar = location.sun(date = utc, local = False)
     
     sunset_threshold = solar["sunset"] + timedelta(minutes = 60)
@@ -361,18 +361,15 @@ def do_log_camera(utc):
                 time.sleep(0.8)
 
                 local_time = helpers.utc_to_local(config, utc)
-                camera.annotate_text = ("CAWS Camera " + local_time.strftime(
+                camera.annotate_text = ("AWS Camera " + local_time.strftime(
                                         "on %d/%m/%Y at %H:%M:%S"))
                 camera.capture(os.path.join(image_dir, image_name + ".jpg"))
         except: gpio.output(23, gpio.HIGH)
 
 def do_generate_stats(utc):
-    free_space = helpers.remaining_space("/")
-    if free_space == None or free_space < 0.1:
-        gpio.output(23, gpio.HIGH); return
-        
-    # -- GET NEW STATS ---------------------------------------------------------
     local_time = helpers.utc_to_local(config, utc)
+
+    # -- GET NEW STATS ---------------------------------------------------------
     bounds = helpers.day_bounds_utc(config, local_time, False)
     new_stats = None
     
@@ -384,17 +381,19 @@ def do_generate_stats(utc):
             cursor.execute(queries.GENERATE_STATS_UTCREPORTS,
                            (bounds[0].strftime("%Y-%m-%d %H:%M:%S"),
                             bounds[1].strftime("%Y-%m-%d %H:%M:%S")))
-
+                            
             new_stats = cursor.fetchone()
     except: gpio.output(23, gpio.HIGH); return
-
-    if new_stats == None: gpio.output(23, gpio.HIGH); return
 
     # -- GET CURRENT STATS -----------------------------------------------------
     cur_stats = analysis.record_for_time(config, local_time, DbTable.LOCALSTATS)
     if cur_stats == False: gpio.output(23, gpio.HIGH); return
 
     # -- SAVE DATA -------------------------------------------------------------
+    free_space = helpers.remaining_space("/")
+    if free_space == None or free_space < 0.1:
+        gpio.output(23, gpio.HIGH); return
+
     try:
         with sqlite3.connect(config.database_path) as database:
             cursor = database.cursor()
@@ -522,6 +521,8 @@ def do_trigger_rain(channel):
 
 # ENTRY POINT ==================================================================
 # -- INIT GPIO AND LEDS --------------------------------------------------------
+time.sleep(2.5)
+
 try:
     gpio.setwarnings(False); gpio.setmode(gpio.BCM)
     gpio.setup(23, gpio.OUT); gpio.output(23, gpio.LOW)
