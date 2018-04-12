@@ -49,7 +49,7 @@ def page_now():
             
     local_time = helpers.utc_to_local(config, utc).strftime("%H:%M")
 
-    # get values to display for each report parameter
+    # Get values to display for each report parameter
     if record != False and record != None:
         if record["AirT"] != None:
             AirT = "{0:g}".format(record["AirT"]) + "°C"
@@ -64,20 +64,23 @@ def page_now():
         
         if record["wdir"] != None:
             wdir_compass = helpers.degrees_to_compass(record["WDir"])
-            WDir = "{0:g}".format(record["WDir"]) + "° (" + wdir_compass + ")"
+            WDir = str(record["WDir"]) + "° (" + wdir_compass + ")"
             
-        if record["WGst"] != None: WGst = str(record["WGst"]) + " mph"
+        if record["WGst"] != None:
+            WGst = "{0:g}".format(record["WGst"]) + " mph"
         if record["SunD"] != None: SunD = str(record["SunD"]) + " sec"
         if record["Rain"] != None:
-            Rain = "{0:g}".format(record["Rain"]) + " mm"
-        if record["StaP"] != None: StaP = str(record["StaP"]) + " hPa"
-        if record["MSLP"] != None: MSLP = str(record["MSLP"]) + " hPa"
+            Rain = "{0:g}".format(round(record["Rain"], 2)) + " mm"
+        if record["StaP"] != None:
+            StaP = "{0:g}".format(record["StaP"]) + " hPa"
+        if record["MSLP"] != None:
+            MSLP = "{0:g}".format(record["MSLP"]) + " hPa"
 
         if record["PTen"] != None:
             pten_phrase = helpers.tendency_to_phrase(record["PTen"])
             
             PTen = "+" if record["PTen"] > 0 else ""
-            PTen += str(record["PTen"]) + pten_phrase + " hPa"
+            PTen += "{0:g}".format(record["PTen"]) + pten_phrase + " hPa"
 
         if record["ST10"] != None:
             ST10 = "{0:g}".format(record["ST10"]) + "°C"
@@ -108,7 +111,8 @@ def page_now():
                 if rain_phr_num == None: rain_phr_num = record["Rain"]
                 else: rain_phr_num += record["Rain"]
 
-        if rain_phr_num != None: Rain_Phr = "{0:g}".format(rain_phr_num) + " mm"
+        if rain_phr_num != None:
+            Rain_Phr = "{0:g}".format(round(rain_phr_num, 2)) + " mm"
 
     # render page with data
     return flask.render_template("index.html",
@@ -135,6 +139,82 @@ def page_statistics():
     ST30_Min = "no data"; ST30_Max = "no data"; ST30_Avg = "no data"
     ST00_Min = "no data"; ST00_Max = "no data"; ST00_Avg = "no data"
 
+    utc = datetime.now().replace(second = 0, microsecond = 0)
+    record = analysis.record_for_time(config, utc, DbTable.LOCALSTATS)
+
+    # Try previous minute if no record for current minute
+    if record == False or record == None:
+        utc -= timedelta(minutes = 1)
+        record = analysis.record_for_time(config, utc, DbTable.LOCALSTATS)
+
+        # Return to current minute if no record for previous minute
+        if record == False or record == None:
+              utc += timedelta(minutes = 1)
+            
+    local_time = helpers.utc_to_local(config, utc).strftime("%H:%M")
+
+    # Get values to display for each report parameter
+    if record != False and record != None:
+        if record["AirT_Min"] != None:
+            AirT_Min = "{0:g}".format(record["AirT_Min"]) + "°C"
+        if record["AirT_Max"] != None:
+            AirT_Max = "{0:g}".format(record["AirT_Max"]) + "°C"
+        if record["AirT_Avg"] != None:
+            AirT_Avg = "{0:g}".format(record["AirT_Avg"]) + "°C"
+        if record["RelH_Min"] != None:
+            RelH_Min = "{0:g}".format(record["RelH_Min"]) + "%"
+        if record["RelH_Max"] != None:
+            RelH_Max = "{0:g}".format(record["RelH_Max"]) + "%"
+        if record["RelH_Avg"] != None:
+            RelH_Avg = "{0:g}".format(record["RelH_Avg"]) + "%"
+        if record["DewP_Min"] != None:
+            DewP_Min = "{0:g}".format(record["DewP_Min"]) + "°C"
+        if record["DewP_Max"] != None:
+            DewP_Max = "{0:g}".format(record["DewP_Max"]) + "°C"
+        if record["DewP_Avg"] != None:
+            DewP_Avg = "{0:g}".format(record["DewP_Avg"]) + "°C"
+        if record["WSpd_Min"] != None:
+            WSpd_Min = "{0:g}".format(record["WSpd_Min"]) + " mph"
+        if record["WSpd_Max"] != None:
+            WSpd_Max = "{0:g}".format(record["WSpd_Max"]) + " mph"
+        if record["WSpd_Avg"] != None:
+            WSpd_Avg = "{0:g}".format(record["WSpd_Avg"]) + " mph"
+        if record["WDir_Min"] != None:
+            WDir_Min = str(record["WDir_Min"]) + "°"
+        if record["WDir_Max"] != None:
+            WDir_Max = str(record["WDir_Max"]) + "°"
+        if record["WDir_Avg"] != None:
+            WDir_Avg = str(record["WDir_Avg"]) + "°"
+        if record["WGst_Min"] != None:
+            WGst_Min = "{0:g}".format(record["WGst_Min"]) + " mph"
+        if record["WGst_Max"] != None:
+            WGst_Max = "{0:g}".format(record["WGst_Max"]) + " mph"
+        if record["WGst_Avg"] != None:
+            WGst_Avg = "{0:g}".format(record["WGst_Avg"]) + " mph"
+        if record["SunD_Ttl"] != None:
+            SunD_Ttl = str(record["SunD_Ttl"]) + " sec"
+        if record["Rain_Ttl"] != None:
+            Rain_Ttl = "{0:g}".format(round(record["Rain_Ttl"], 2)) + " mm"
+        if record["MSLP_Min"] != None:
+            MSLP_Min = "{0:g}".format(record["MSLP_Min"]) + " hPa"
+        if record["MSLP_Max"] != None:
+            MSLP_Max = "{0:g}".format(record["MSLP_Max"]) + " hPa"
+        if record["MSLP_Avg"] != None:
+            MSLP_Avg = "{0:g}".format(record["MSLP_Avg"]) + " hPa"
+        if record["ST10_Min"] != None:
+            ST10_Min = "{0:g}".format(record["ST10_Min"]) + "°C"
+        if record["ST10_Max"] != None:
+            ST10_Max = "{0:g}".format(record["ST10_Max"]) + "°C"
+        if record["ST10_Avg"] != None:
+            ST10_Avg = "{0:g}".format(record["ST10_Avg"]) + "°C"
+        if record["ST30_Min"] != None:
+            ST30_Min = "{0:g}".format(record["ST30_Min"]) + "°C"
+        if record["ST30_Max"] != None:
+            ST30_Max = "{0:g}".format(record["ST30_Max"]) + "°C"
+        if record["ST30_Avg"] != None:
+            ST30_Avg = "{0:g}".format(record["ST30_Avg"]) + "°C"
+        
+
     return flask.render_template("statistics.html",
                                  caws_name = config.caws_name,
                                  caws_location = config.caws_location,
@@ -153,7 +233,8 @@ def page_statistics():
                                  ST10_Max = ST10_Max, ST10_Avg = ST10_Avg,
                                  ST30_Min = ST30_Min, ST30_Max = ST30_Max,
                                  ST30_Avg = ST30_Avg, ST00_Min = ST00_Min,
-                                 ST00_Max = ST00_Max, ST00_Avg = ST00_Avg)
+                                 ST00_Max = ST00_Max, ST00_Avg = ST00_Avg,
+                                 data_time = local_time)
 
 def page_graph_day():
     return "Graph Day"
