@@ -142,30 +142,32 @@ def page_statistics():
     utc = datetime.now().replace(second = 0, microsecond = 0)
     load_default = True
 
+    # Check for date specified in URL
     if flask.request.args.get("date") != None:
         try:
-            local_time = datetime.strptime(flask.requests.args.get("date"),
-                                           "%Y-%m-%d")
+            local_time = datetime.strptime(
+                flask.request.args.get("date"), "%Y-%m-%d")
             load_default = False
         except: pass
 
+    # Load data for specified date if in URL
     if load_default == True:
          local_time = helpers.utc_to_local(config, utc)
-    else: local_time = flask.request.args.get("date")
     
     record = analysis.record_for_time(config, local_time, DbTable.LOCALSTATS)
 
     # Try previous minute if no record for current minute
     if record == False or record == None:
-        local_time -= timedelta(minutes = 1)
-        record = analysis.record_for_time(config,
-                                          local_time, DbTable.LOCALSTATS)
+        if load_default == True:
+            local_time -= timedelta(minutes = 1)
+            record = analysis.record_for_time(config,
+                                              local_time, DbTable.LOCALSTATS)
 
-        # Return to current minute if no record for previous minute
-        if record == False or record == None:
-              local_time += timedelta(minutes = 1)
-            
-    data_time = local_time.strftime("%H:%M")
+            # Return to current minute if no record for previous minute
+            if record == False or record == None:
+                  local_time += timedelta(minutes = 1)
+
+    data_time = helpers.utc_to_local(config, utc).strftime("%H:%M")
     scroller_date = local_time.strftime("%d/%m/%Y")
 
     # Get values to display for each report parameter
