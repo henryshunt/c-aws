@@ -601,13 +601,13 @@ if (config.day_graph_generation == True or
 
     try:
         subprocess.Popen(["lxterminal -e python3 " + current_dir
-                          + "CAWS_Sup.py"], shell = True)
+                          + "/CAWS_Sup.py"], shell = True)
     except: helpers.exit("12")
 
 if config.local_network_server == True:
     try:
         subprocess.Popen(["lxterminal -e python3 " + current_dir
-                          + "CAWS_Acc.py"], shell = True)
+                          + "/CAWS_Acc.py"], shell = True)
     except: helpers.exit("13")
 
 # -- WAIT FOR MINUTE -----------------------------------------------------------
