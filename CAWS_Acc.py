@@ -47,7 +47,7 @@ def page_now():
         if record == False or record == None:
               utc += timedelta(minutes = 1)
             
-    local_time = helpers.utc_to_local(config, utc).strftime("%H:%M")
+    data_time = helpers.utc_to_local(config, utc).strftime("%H:%M")
 
     # Get values to display for each report parameter
     if record != False and record != None:
@@ -124,7 +124,7 @@ def page_now():
                                  StaP = StaP, MSLP = MSLP, PTen = PTen,
                                  ST10 = ST10, ST30 = ST30, ST00 = ST00,
                                  SunD_Phr = SunD_Phr, Rain_Phr = Rain_Phr,
-                                 data_time = local_time)
+                                 data_time = data_time)
 
 def page_statistics():
     AirT_Min = "no data"; AirT_Max = "no data"; AirT_Avg = "no data"
@@ -151,7 +151,8 @@ def page_statistics():
         if record == False or record == None:
               utc += timedelta(minutes = 1)
             
-    local_time = helpers.utc_to_local(config, utc).strftime("%H:%M")
+    data_time = helpers.utc_to_local(config, utc).strftime("%H:%M")
+    scroller_date = helpers.utc_to_local(config, utc).strftime("%d/%m/%Y")
 
     # Get values to display for each report parameter
     if record != False and record != None:
@@ -218,6 +219,7 @@ def page_statistics():
     return flask.render_template("statistics.html",
                                  caws_name = config.caws_name,
                                  caws_location = config.caws_location,
+                                 scroller_date = scroller_date,
                                  AirT_Min = AirT_Min, AirT_Max = AirT_Max,
                                  AirT_Avg = AirT_Avg, RelH_Min = RelH_Min,
                                  RelH_Max = RelH_Max, RelH_Avg = RelH_Avg,
@@ -234,7 +236,7 @@ def page_statistics():
                                  ST30_Min = ST30_Min, ST30_Max = ST30_Max,
                                  ST30_Avg = ST30_Avg, ST00_Min = ST00_Min,
                                  ST00_Max = ST00_Max, ST00_Avg = ST00_Avg,
-                                 data_time = local_time)
+                                 data_time = data_time)
 
 def page_graph_day():
     return "Graph Day"
