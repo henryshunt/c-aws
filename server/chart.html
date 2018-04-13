@@ -3,7 +3,7 @@
         <link rel="stylesheet" href="{{ url_for("static", filename = "chartist.min.css") }}">
         <script src="{{ url_for("static", filename = "chartist.min.js") }}"></script>
         <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.22.0/moment.min.js"></script>
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.22.0/moment.min.js"></script>
 
         <style>
             .ct-series .ct-line {
@@ -16,36 +16,31 @@
         <div class="ct-chart"></div>
 
         <script type="text/javascript">
-        var getData = $.get("/data");
+            var getData = $.get("/data", function(points) {
+                var data = { series: [points] };
 
-        getData.done(function(data) {
-            var dat = {
-                series: [data]
-            };
+                var options = {
+                    fullWidth: true,
+                    height: 400,
+                    showPoint: false,
+                    lineSmooth: false,
 
-            var options = {
-                fullWidth: true,
-                height: 400,
-                showPoint: false,
-                lineSmooth: false,
+                    axisX: {
+                        type: Chartist.FixedScaleAxis,
+                        low: {{ low }},
+                        high: {{ high }},
+                        divisor: 8,
+        
+                        labelInterpolationFnc: function(value) {
+                            return moment.unix(value).zone("+0000").format("HH:mm");
+                        }
+                    },
 
-                axisX: {
-                  type: Chartist.FixedScaleAxis,
-low: {{ low }}, high: {{ high }},
+                    axisY: { offset: 60 }
+                };
 
-divisor: 8,
-    labelInterpolationFnc: function(value) {
-      return moment.unix(value).zone("+0000").format("HH:mm");
-    }
-                },
-
-                axisY: {
-                    offset: 60,
-                }
-            };
-
-            new Chartist.Line('.ct-chart', dat, options);
-        });
+                new Chartist.Line('.ct-chart', data, options);
+            });
         </script>
     </body>
 </html>
