@@ -1,13 +1,16 @@
-<meta charset="utf-8">
-
 <html>
     <head>
         <title>CAWS {{ caws_name }} [Local]</title>
-        <link rel="icon" type="image/jpeg" href="{{ url_for("static", filename = "favicon.png") }}">
-        <link rel="stylesheet" type="text/css" href="{{ url_for("static", filename = "styles.css") }}">
-        <script src="{{ url_for("static", filename = "scripts.js") }}"></script>
+        <link href="{{ url_for("static", filename = "favicon.png") }}" rel="icon" >
+        <link href="{{ url_for("static", filename = "styles.css") }}" rel="stylesheet">
 
-        <script type="text/javascript">
+        <script src="{{ url_for("static", filename = "scripts.js") }}"></script>
+        <script src="{{ url_for("static", filename = "jquery.js") }}"></script>
+        <script src="{{ url_for("static", filename = "chartist.js") }}"></script>
+        <script src="{{ url_for("static", filename = "chartist.css") }}"></script>
+        <script src="{{ url_for("static", filename = "moment.js") }}"></script>
+
+        <script>
             function page_load_js() {
                 if (window.location.href.includes("?time=") == false) {
                     var timestamp = new Date();
@@ -28,15 +31,12 @@
                         }
                     }
 
-                    refresh_time.setSeconds(8);
-                    refresh_time.setMilliseconds(0);
+                    refresh_time.setSeconds(8); refresh_time.setMilliseconds(0);
                     var difference = refresh_time.getTime() - timestamp.getTime();
                     setTimeout("location.reload()", difference);
                 }
 
-                setInterval(function() {
-                    display_local_time();
-                }, 100);
+                setInterval(function() { display_local_time(); }, 100);
             }
         </script>
     </head>

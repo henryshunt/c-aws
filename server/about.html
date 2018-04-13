@@ -1,13 +1,11 @@
-<meta charset="utf-8">
-
 <html>
     <head>
         <title>CAWS {{ caws_name }} [Local]</title>
-        <link rel="icon" type="image/jpeg" href="{{ url_for("static", filename = "favicon.png") }}">
-        <link rel="stylesheet" type="text/css" href="{{ url_for("static", filename = "styles.css") }}">
+        <link href="{{ url_for("static", filename = "favicon.png") }}" rel="icon" >
+        <link href="{{ url_for("static", filename = "styles.css") }}" rel="stylesheet">
         <script src="{{ url_for("static", filename = "scripts.js") }}"></script>
 
-        <script type="text/javascript">
+        <script>
             function page_load_js() {
                 var timestamp = new Date();
                 var refresh_time = new Date(timestamp.getTime());
@@ -16,8 +14,7 @@
                     refresh_time.setMinutes(refresh_time.getMinutes() + 1);
                 }
 
-                refresh_time.setSeconds(8);
-                refresh_time.setMilliseconds(0);
+                refresh_time.setSeconds(8); refresh_time.setMilliseconds(0);
                 var difference = refresh_time.getTime() - timestamp.getTime();
                 setTimeout("location.reload()", difference);
 
@@ -29,11 +26,10 @@
                         refresh_time.setMinutes(refresh_time.getMinutes() + 1);
                     }
 
-                    refresh_time.setSeconds(8);
-                    refresh_time.setMilliseconds(0);
+                    refresh_time.setSeconds(8); refresh_time.setMilliseconds(0);
                     var difference = (refresh_time.getTime() - timestamp.getTime());
-                    document.getElementById("update").innerHTML = parseInt(
-                        (difference / 1000) + 1);
+                    document.getElementById("update")
+                        .innerHTML = parseInt((difference / 1000) + 1);
 
                     display_local_time();
                 }, 100);
@@ -173,27 +169,36 @@
                 </table>
             </div>
 
-            <div class="group">
+            <div class="group" style="margin-bottom: 10px">
                 <div class="group_header">
                     <p class="group_title">Software Modifiers</p>
                 </div>
 
                 <table class="field_table">
                     <tr>
-                        <td><p class="field_label">Camera Logging:</p></td>
+                        <td><p class="field_label">Environment Logging:</p></td>
                         <td>
                             <p class="field_value">
-                                <b style="margin-right: 8px">{{ clim }}, toggle:</b>
-                                <button onclick="send_cmd('clim')">Send Command</button>
+                                <b style="margin-right: 8px">X, toggle:</b>
+                                <button onclick="send_cmd('')">Send Command</button>
                             </p>
                         </td>
                     </tr>
                     <tr>
-                        <td><p class="field_label">Statistic Generation:</p></td>
+                        <td><p class="field_label">Camera Logging:</p></td>
                         <td>
                             <p class="field_value">
-                                <b style="margin-right: 8px">{{ cstg }}, toggle:</b>
-                                <button onclick="send_cmd('cstg')">Send Command</button>
+                                <b style="margin-right: 8px">X, toggle:</b>
+                                <button onclick="send_cmd('')">Send Command</button>
+                            </p>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td><p class="field_label" style="margin-top: 10px">Statistic Generation:</p></td>
+                        <td>
+                            <p class="field_value" style="margin-top: 10px">
+                                <b style="margin-right: 8px">X, toggle:</b>
+                                <button onclick="send_cmd('')">Send Command</button>
                             </p>
                         </td>
                     </tr>
@@ -201,8 +206,17 @@
                         <td><p class="field_label" style="margin-top: 10px">Report Uploading:</p></td>
                         <td>
                             <p class="field_value" style="margin-top: 10px">
-                                <b style="margin-right: 8px">{{ curp }}, toggle:</b>
-                                <button onclick="send_cmd('curp')">Send Command</button>
+                                <b style="margin-right: 8px">X, toggle:</b>
+                                <button onclick="send_cmd('')">Send Command</button>
+                            </p>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td><p class="field_label">Environment Uploading:</p></td>
+                        <td>
+                            <p class="field_value">
+                                <b style="margin-right: 8px">X, toggle:</b>
+                                <button onclick="send_cmd('')">Send Command</button>
                             </p>
                         </td>
                     </tr>
@@ -210,8 +224,8 @@
                         <td><p class="field_label">Statistic Uploading:</p></td>
                         <td>
                             <p class="field_value">
-                                <b style="margin-right: 8px">{{ cust }}, toggle:</b>
-                                <button onclick="send_cmd('cust')">Send Command</button>
+                                <b style="margin-right: 8px">X, toggle:</b>
+                                <button onclick="send_cmd('')">Send Command</button>
                             </p>
                         </td>
                     </tr>
@@ -219,8 +233,8 @@
                         <td><p class="field_label">Camera Uploading:</p></td>
                         <td>
                             <p class="field_value">
-                                <b style="margin-right: 8px">{{ cuim }}, toggle:</b>
-                                <button onclick="send_cmd('cuim')">Send Command</button>
+                                <b style="margin-right: 8px">X, toggle:</b>
+                                <button onclick="send_cmd('')">Send Command</button>
                             </p>
                         </td>
                     </tr>
@@ -228,8 +242,8 @@
                         <td><p class="field_label" style="margin-top: 10px">Integrity Checks:</p></td>
                         <td>
                             <p class="field_value" style="margin-top: 10px">
-                                <b style="margin-right: 8px">{{ citg }}, toggle:</b>
-                                <button onclick="send_cmd('citg')">Send Command</button>
+                                <b style="margin-right: 8px">X, toggle:</b>
+                                <button onclick="send_cmd('')">Send Command</button>
                             </p>
                         </td>
                     </tr>
@@ -237,8 +251,8 @@
                         <td><p class="field_label">Local Network Server:</p></td>
                         <td>
                             <p class="field_value">
-                                <b style="margin-right: 8px">{{ csvr }}, toggle:</b>
-                                <button onclick="send_cmd('csvr')">Send Command</button>
+                                <b style="margin-right: 8px">X, toggle:</b>
+                                <button onclick="send_cmd('')">Send Command</button>
                             </p>
                         </td>
                     </tr>
@@ -246,8 +260,8 @@
                         <td><p class="field_label">Backups:</p></td>
                         <td>
                             <p class="field_value">
-                                <b style="margin-right: 8px">{{ cbkp }}, toggle:</b>
-                                <button onclick="send_cmd('cbkp')">Send Command</button>
+                                <b style="margin-right: 8px">X, toggle:</b>
+                                <button onclick="send_cmd('')">Send Command</button>
                             </p>
                         </td>
                     </tr>
