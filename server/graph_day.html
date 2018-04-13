@@ -1,0 +1,94 @@
+<meta charset="utf-8">
+
+<html>
+    <head>
+        <title>CAWS {{ caws_name }} [Local]</title>
+        <link rel="icon" type="image/jpeg" href="{{ url_for("static", filename = "favicon.png") }}">
+        <link rel="stylesheet" type="text/css" href="{{ url_for("static", filename = "styles.css") }}">
+        <script src="{{ url_for("static", filename = "scripts.js") }}"></script>
+
+        <script type="text/javascript">
+            function page_load_js() {
+                if (window.location.href.includes("?time=") == false) {
+                    var timestamp = new Date();
+                    var refresh_time = new Date(timestamp.getTime());
+
+                    if (String(timestamp.getMinutes()).endsWith("0") ||
+                        String(timestamp.getMinutes()).endsWith("5")) {
+
+                        if (timestamp.getSeconds() == 8 || timestamp.getSeconds() > 8) {
+                            refresh_time.setMinutes(refresh_time.getMinutes() + 5);
+                        }
+
+                    } else {
+                        while (!String(refresh_time.getMinutes()).endsWith("0")
+                            && !String(refresh_time.getMinutes()).endsWith("5")) {
+
+                            refresh_time.setMinutes(refresh_time.getMinutes() + 1);
+                        }
+                    }
+
+                    refresh_time.setSeconds(8);
+                    refresh_time.setMilliseconds(0);
+                    var difference = refresh_time.getTime() - timestamp.getTime();
+                    setTimeout("location.reload()", difference);
+                }
+
+                setInterval(function() {
+                    display_local_time();
+                }, 100);
+            }
+        </script>
+    </head>
+
+    <body onload="page_load_js()">
+        <div id="header">
+            <div id="header_items">
+                <p id="header_left">{{ caws_location }}</p>
+                <p id="header_right">CAWS</p>
+            </div>
+
+            <div id="menu">
+                <div id="menu_items">
+                    <a class="menu_item" href=".">Now</a>
+                    <a class="menu_item" href="statistics.html">Statistics</a>
+                    <span class="menu_item" style="line-height: 1.3"><b>|</b></span>
+
+                    <span class="menu_item"><b>Graph:</b></span>
+                    <a class="menu_item" href="graph_day.html"><b>Day</b></a>
+                    <a class="menu_item" href="graph_month.html">Month</a>
+                    <a class="menu_item" href="graph_year.html">Year</a>
+
+                    <span class="menu_item" style="line-height: 1.3"><b>|</b></span>
+                    <a class="menu_item" href="camera.html">Camera</a>
+                    <a class="menu_item" href="about.html">About</a>
+
+                    <span style="float: right">Accessing <b>LOCAL</b> Data Stores</span>
+                </div>
+            </div>
+        </div>
+
+        <div id="main">
+            <div class="group">
+                <div class="group_header">
+                    <p class="group_title">Ambient Temperature</p>
+                </div>
+
+                
+            </div>
+        </div>
+
+        <div id="footer">
+            <div id="footer_items">
+                <p class="footer_label">Local Time:</p>
+                <p class="footer_value" id="local_time" style="width: 210px"></p>
+    
+                <div style="float: right; margin-left: 10px">
+                    <p class="footer_label">Data Time:</p>
+                    <p class="footer_value" style="width: 60px">{{ data_time }}</p>
+                </div>
+            </div>
+        </div>
+
+    </body>
+</html>
