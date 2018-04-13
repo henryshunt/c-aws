@@ -1,0 +1,50 @@
+<html>
+    <head>
+        <link rel="stylesheet" href="chartist.min.css">
+        <script src="chartist.min.js"></script>
+        <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
+
+        <style>
+            .ct-series .ct-line {
+                stroke-width: 1px;
+            }
+        </style>
+    </head>
+
+    <body>
+        <div class="ct-chart"></div>
+
+        <script type="text/javascript">
+        var getData = $.get("/data");
+
+        getData.done(function(data) {
+            var dat = {
+                series: [ data.CPUT ]
+            };
+
+            var options = {
+                width: "100%",
+                height: 400,
+                showPoint: false,
+                lineSmooth: false,
+
+                axisX: {
+                    showGrid: false,
+                    showLabel: false,
+    //                 type: Chartist.AutoScaleAxis,
+    // onlyInteger: true
+                },
+
+                axisY: {
+                    offset: 60,
+                    // labelInterpolationFnc: function(value) {
+                    //     return '$' + value + 'm';
+                    // }
+                }
+            };
+
+            new Chartist.Line('.ct-chart', dat, options);
+        });
+        </script>
+    </body>
+</html>
