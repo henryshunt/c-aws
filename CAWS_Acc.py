@@ -261,6 +261,7 @@ def page_graph_year():
 
 def page_camera():
     utc = datetime.utcnow().replace(second = 0, microsecond = 0)
+    utc = helpers.last_five_mins(utc)
     load_now_data = True
 
     # Check for local time specified in URL and try parsing
@@ -268,12 +269,11 @@ def page_camera():
         try:
             local_time = datetime.strptime(
                 flask.request.args.get("time"), "%Y-%m-%dT%H-%M")
-            last_five = helpers.utc_to_local(config,
-                                             helpers.last_five_mins(utc))
 
             # Remove time parameter if same as current time
             if (local_time.strftime("%Y-%m-%dT%H-%M")
-                == last_five.strftime("%Y-%m-%dT%H-%M")):
+                == helpers.utc_to_local(config,
+                                        utc).strftime("%Y-%m-%dT%H-%M")):
                     return flask.redirect(flask.url_for("page_camera"))
                 
             load_now_data = False
@@ -281,13 +281,12 @@ def page_camera():
 
     # Convert UTC to local if loading now data
     if load_now_data == True:
-        local_time = helpers.utc_to_local(config, helpers.last_five_mins(utc))
+        local_time = helpers.utc_to_local(config, utc)
 
         # Try previous 5 mins if no image for current 5 min
-        to_utc = helpers.local_to_utc(config, local_time)
         image_dir = os.path.join(config.camera_drive,
-                                 to_utc.strftime("%Y/%m/%d"))
-        image_name = to_utc.strftime("%Y-%m-%dT%H-%M-%S.jpg")
+                                 utc.strftime("%Y/%m/%d"))
+        image_name = utc.strftime("%Y-%m-%dT%H-%M-%S.jpg")
                 
         if not os.path.isfile(os.path.join(image_dir, image_name)):
             local_time -= timedelta(minutes = 5)
