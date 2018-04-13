@@ -121,32 +121,32 @@ def page_statistics():
     WSpd_Min = "no data"; WSpd_Max = "no data"; WSpd_Avg = "no data"
     WDir_Min = "no data"; WDir_Max = "no data"; WDir_Avg = "no data"
     WGst_Min = "no data"; WGst_Max = "no data"; WGst_Avg = "no data"
-    SunD_Ttl = "no data"; Rain_Ttl = "no data"
-    MSLP_Min = "no data"; MSLP_Max = "no data"; MSLP_Avg = "no data"
-    ST10_Min = "no data"; ST10_Max = "no data"; ST10_Avg = "no data"
-    ST30_Min = "no data"; ST30_Max = "no data"; ST30_Avg = "no data"
-    ST00_Min = "no data"; ST00_Max = "no data"; ST00_Avg = "no data"
+    SunD_Ttl = "no data"; Rain_Ttl = "no data"; MSLP_Min = "no data"
+    MSLP_Max = "no data"; MSLP_Avg = "no data"; ST10_Min = "no data"
+    ST10_Max = "no data"; ST10_Avg = "no data"; ST30_Min = "no data"
+    ST30_Max = "no data"; ST30_Avg = "no data"; ST00_Min = "no data"
+    ST00_Max = "no data"; ST00_Avg = "no data"
 
     utc = datetime.utcnow().replace(second = 0, microsecond = 0)
-    load_default = True
+    load_now_data = True
 
-    # Check for date specified in URL
+    # Check for local date specified in URL and try parsing
     if flask.request.args.get("date") != None:
         try:
             local_time = datetime.strptime(
                 flask.request.args.get("date"), "%Y-%m-%d")
-            load_default = False
+            load_now_data = False
         except: pass
 
-    # Load data for specified date if in URL
-    if load_default == True:
-         local_time = helpers.utc_to_local(config, utc)
+    # Convert UTC to local if not loading now data
+    if load_now_data == True:
+        local_time = helpers.utc_to_local(config, utc)
     
     record = analysis.record_for_time(config, local_time, DbTable.LOCALSTATS)
 
-    # Try previous minute if no record for current minute
+    # If loading now data, try previous minute if no record for current minute
     if record == False or record == None:
-        if load_default == True:
+        if load_now_data == True:
             local_time -= timedelta(minutes = 1)
             record = analysis.record_for_time(config,
                                               local_time, DbTable.LOCALSTATS)
@@ -155,10 +155,10 @@ def page_statistics():
             if record == False or record == None:
                   local_time += timedelta(minutes = 1)
 
-    data_time = helpers.utc_to_local(config, utc).strftime("%H:%M")
     scroller_prev = (local_time - timedelta(days = 1)).strftime("%Y-%m-%d")
     scroller_time = local_time.strftime("%d/%m/%Y")
     scroller_next = (local_time + timedelta(days = 1)).strftime("%Y-%m-%d")
+    data_time = helpers.utc_to_local(config, utc).strftime("%H:%M")
 
     # Get values to display for each report parameter
     if record != False and record != None:
@@ -257,18 +257,18 @@ def page_graph_year():
 
 def page_camera():
     utc = datetime.utcnow().replace(second = 0, microsecond = 0)
-    load_default = True
+    load_now_data = True
 
     # Check for date specified in URL
     if flask.request.args.get("time") != None:
         try:
             local_time = datetime.strptime(
                 flask.request.args.get("time"), "%Y-%m-%dT%H-%M")
-            load_default = False
+            load_now_data = False
         except: pass
 
     # Load data for specified date if in URL
-    if load_default == True:
+    if load_now_data == True:
          local_time = helpers.utc_to_local(config, utc)
 
     data_time = helpers.utc_to_local(config, utc).strftime("%H:%M")
