@@ -36,7 +36,7 @@ def page_now():
     StaP = "no data"; MSLP = "no data"; PTen = "no data"; ST10 = "no data"
     ST30 = "no data"; ST00 = "no data"
 
-    utc = datetime.now().replace(second = 0, microsecond = 0)
+    utc = datetime.utcnow().replace(second = 0, microsecond = 0)
     record = analysis.record_for_time(config, utc, DbTable.UTCREPORTS)
 
     # Try previous minute if no record for current minute
@@ -127,7 +127,7 @@ def page_statistics():
     ST30_Min = "no data"; ST30_Max = "no data"; ST30_Avg = "no data"
     ST00_Min = "no data"; ST00_Max = "no data"; ST00_Avg = "no data"
 
-    utc = datetime.now().replace(second = 0, microsecond = 0)
+    utc = datetime.utcnow().replace(second = 0, microsecond = 0)
     load_default = True
 
     # Check for date specified in URL
@@ -256,7 +256,7 @@ def page_graph_year():
     return "Graph Year"
 
 def page_camera():
-    utc = datetime.now().replace(second = 0, microsecond = 0)
+    utc = datetime.utcnow().replace(second = 0, microsecond = 0)
     load_default = True
 
     # Check for date specified in URL
