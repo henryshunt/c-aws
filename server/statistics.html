@@ -9,19 +9,7 @@
 
         <script type="text/javascript">
             function page_load_js() {
-                var timestamp = new Date();
-                var refresh_time = new Date(timestamp.getTime());
-
-                if (timestamp.getSeconds() == 8 || timestamp.getSeconds() > 8) {
-                    refresh_time.setMinutes(refresh_time.getMinutes() + 1);
-                }
-
-                refresh_time.setSeconds(8);
-                refresh_time.setMilliseconds(0);
-                var difference = refresh_time.getTime() - timestamp.getTime();
-                setTimeout("location.reload()", difference);
-
-                setInterval(function() {
+                if (window.location.href.includes("?date=") == false) {
                     var timestamp = new Date();
                     var refresh_time = new Date(timestamp.getTime());
 
@@ -31,9 +19,25 @@
 
                     refresh_time.setSeconds(8);
                     refresh_time.setMilliseconds(0);
-                    var difference = (refresh_time.getTime() - timestamp.getTime());
-                    document.getElementById("update").innerHTML = parseInt(
-                        (difference / 1000) + 1);
+                    var difference = refresh_time.getTime() - timestamp.getTime();
+                    setTimeout("location.reload()", difference);
+                }
+
+                setInterval(function() {
+                    if (window.location.href.includes("?date=") == false) {
+                        var timestamp = new Date();
+                        var refresh_time = new Date(timestamp.getTime());
+
+                        if (timestamp.getSeconds() == 8 || timestamp.getSeconds() > 8) {
+                            refresh_time.setMinutes(refresh_time.getMinutes() + 1);
+                        }
+
+                        refresh_time.setSeconds(8);
+                        refresh_time.setMilliseconds(0);
+                        var difference = (refresh_time.getTime() - timestamp.getTime());
+                        document.getElementById("update").innerHTML = parseInt(
+                            (difference / 1000) + 1);
+                    }
 
                     display_local_time();
                 }, 100);
