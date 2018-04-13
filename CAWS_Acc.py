@@ -6,6 +6,7 @@
 # DEPENDENCIES -----------------------------------------------------------------
 import time
 from datetime import datetime, timedelta
+import os
 
 import flask
 
@@ -268,10 +269,71 @@ def page_graph_year():
     return "Graph Year"
 
 def page_camera():
-    return flask.render_template("camera.html")
+    utc = datetime.now().replace(second = 0, microsecond = 0)
+    load_default = True
+
+    # Check for date specified in URL
+    if flask.request.args.get("time") != None:
+        try:
+            local_time = datetime.strptime(
+                flask.request.args.get("time"), "%Y-%m-%dT%H-%M")
+            load_default = False
+        except: pass
+
+    # Load data for specified date if in URL
+    if load_default == True:
+         local_time = helpers.utc_to_local(config, utc)
+
+    data_time = helpers.utc_to_local(config, utc).strftime("%H:%M")
+    delta = timedelta(minutes = 5)
+    scroller_prev = (local_time - delta).strftime("%Y-%m-%dT%H-%M")
+    
+    scroller_next = (local_time + delta).strftime("%Y-%m-%dT%H-%M")
+
+    # reverse time until a 5 minute step is reached
+    minute = str(local_time.minute)
+    
+    while not minute.endswith("0") and not minute.endswith("5"):
+        local_time -= timedelta(minutes = 1)
+        minute = str(local_time.minute)
+        
+    image_path = "camera/" + local_time.strftime("%Y-%m-%dT%H-%M")
+    scroller_time = local_time.strftime("%d/%m/%Y %H:%M")
+
+    
+    return flask.render_template("camera.html",
+                                 caws_name = config.caws_name,
+                                 caws_location = config.caws_location,
+                                 scroller_prev = scroller_prev,
+                                 scroller_time = scroller_time,
+                                 scroller_next = scroller_next,
+                                 image_path = image_path,
+                                 data_time = data_time)
 
 def page_about():
     return "About"
+
+def file_camera(image_time):
+    try:
+        local_time = datetime.strptime(image_time, "%Y-%m-%dT%H-%M")
+        utc = helpers.local_to_utc(config, local_time)
+
+        # Return error image if no camera drive
+        if not os.path.isdir(config.camera_drive):
+            return flask.send_from_directory("server", "no_camera_image.png")
+
+        # Generate local image path for supplied URL
+        image_dir = os.path.join(config.camera_drive, utc.strftime("%Y/%m/%d"))
+
+        # Return error image if file does not exist
+        #if not s.path.isfile(image_dir):
+           #return flask.send_from_directory("server", "no_camera_image.png") 
+
+        # Return the file if it does exist
+        return flask.send_from_directory(image_dir,
+            utc.strftime("%Y-%m-%dT%H-%M-00.jpg"))
+
+    except: return flask.send_from_directory("server", "no_camera_image.png")
 
 
 # ENTRY POINT ==================================================================
@@ -284,14 +346,15 @@ server = flask.Flask(__name__, static_folder = "server",
                      template_folder = "server")
 
 # -- ROUTE URLS ----------------------------------------------------------------
-server.add_url_rule("/", "", page_now)
-server.add_url_rule("/index.html", "index.html", page_now)
-server.add_url_rule("/statistics.html", "statistics.html", page_statistics)
-server.add_url_rule("/graph_day.html", "graph_day.html", page_graph_day)
-server.add_url_rule("/graph_month.html", "graph_month.html", page_graph_month)
-server.add_url_rule("/graph_year.html", "graph_year.html", page_graph_year)
-server.add_url_rule("/camera.html", "camera.html", page_camera)
-server.add_url_rule("/about.html", "about.html", page_about)
+server.add_url_rule("/", view_func = page_now)
+server.add_url_rule("/index.html", view_func = page_now)
+server.add_url_rule("/statistics.html", view_func = page_statistics)
+server.add_url_rule("/graph_day.html", view_func = page_graph_day)
+server.add_url_rule("/graph_month.html", view_func = page_graph_month)
+server.add_url_rule("/graph_year.html", view_func = page_graph_year)
+server.add_url_rule("/camera.html", view_func = page_camera)
+server.add_url_rule("/about.html", view_func = page_about)
+server.add_url_rule("/camera/<image_time>", view_func = file_camera)
 
 # -- START SERVER --------------------------------------------------------------
 start_time = datetime.utcnow().replace(second = 0, microsecond = 0)

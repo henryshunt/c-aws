@@ -91,7 +91,7 @@ tr {
 #scroller {
     height: 40px;
     display: table;
-    width: 100%;
+    width: calc(100% - 2px);
 }
 .scroller_button {
     display: table-cell;
