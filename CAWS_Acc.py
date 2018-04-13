@@ -139,10 +139,10 @@ def page_statistics():
             # Remove date parameter if same as current date
             if (local_time.strftime("%Y-%m-%d")
                 == helpers.utc_to_local(config, utc).strftime("%Y-%m-%d")):
-                    return server.redirect(server.url_for("page_statistics"))
+                    return flask.redirect(flask.url_for("page_statistics"))
 
             load_now_data = False
-        except: return server.redirect(server.url_for("page_statistics"))
+        except: return flask.redirect(flask.url_for("page_statistics"))
 
     # Convert UTC to local if not loading now data
     if load_now_data == True:
