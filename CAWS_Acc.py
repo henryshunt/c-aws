@@ -102,7 +102,6 @@ def page_now():
     if rain_phr_record != False and rain_phr_record != None:
         Rain_Phr = "{0:g}".format(round(rain_phr_record["Rain"], 2)) + " mm"
 
-    # render page with data
     return flask.render_template("index.html",
                                  caws_name = config.caws_name,
                                  caws_location = config.caws_location,
@@ -144,7 +143,7 @@ def page_statistics():
             load_now_data = False
         except: return flask.redirect(flask.url_for("page_statistics"))
 
-    # Convert UTC to local if not loading now data
+    # Convert UTC to local if loading now data
     if load_now_data == True:
         local_time = helpers.utc_to_local(config, utc)
     
@@ -227,7 +226,6 @@ def page_statistics():
         if record["ST30_Avg"] != None:
             ST30_Avg = "{0:g}".format(record["ST30_Avg"]) + "°C"
         
-
     return flask.render_template("statistics.html",
                                  caws_name = config.caws_name,
                                  caws_location = config.caws_location,
@@ -265,35 +263,50 @@ def page_camera():
     utc = datetime.utcnow().replace(second = 0, microsecond = 0)
     load_now_data = True
 
-    # Check for date specified in URL
+    # Check for local time specified in URL and try parsing
     if flask.request.args.get("time") != None:
         try:
             local_time = datetime.strptime(
                 flask.request.args.get("time"), "%Y-%m-%dT%H-%M")
+            last_five = helpers.utc_to_local(config,
+                                             helpers.last_five_mins(utc))
+
+            # Remove time parameter if same as current time
+            if (local_time.strftime("%Y-%m-%dT%H-%M")
+                == last_five.strftime("%Y-%m-%dT%H-%M")):
+                    return flask.redirect(flask.url_for("page_camera"))
+                
             load_now_data = False
-        except: pass
+        except: return flask.redirect(flask.url_for("page_camera"))
 
-    # Load data for specified date if in URL
+    # Convert UTC to local if loading now data
     if load_now_data == True:
-         local_time = helpers.utc_to_local(config, utc)
+        local_time = helpers.utc_to_local(config, helpers.last_five_mins(utc))
 
-    data_time = helpers.utc_to_local(config, utc).strftime("%H:%M")
+        # Try previous 5 mins if no image for current 5 min
+        to_utc = helpers.local_to_utc(config, local_time)
+        image_dir = os.path.join(config.camera_drive,
+                                 to_utc.strftime("%Y/%m/%d"))
+        image_name = to_utc.strftime("%Y-%m-%dT%H-%M-%S.jpg")
+                
+        if not os.path.isfile(os.path.join(image_dir, image_name)):
+            local_time -= timedelta(minutes = 5)
+            to_utc = helpers.local_to_utc(config, local_time)
+            image_dir = os.path.join(config.camera_drive,
+                                     to_utc.strftime("%Y/%m/%d"))
+            image_name = to_utc.strftime("%Y-%m-%dT%H-%M-%S.jpg")
+
+            # Return to current 5 mins if no image for previous 5 mins
+            if not os.path.isfile(os.path.join(image_dir, image_name)):
+                local_time += timedelta(minutes = 5)
+
     delta = timedelta(minutes = 5)
     scroller_prev = (local_time - delta).strftime("%Y-%m-%dT%H-%M")
-    
-    scroller_next = (local_time + delta).strftime("%Y-%m-%dT%H-%M")
-
-    # reverse time until a 5 minute step is reached
-    minute = str(local_time.minute)
-    
-    while not minute.endswith("0") and not minute.endswith("5"):
-        local_time -= timedelta(minutes = 1)
-        minute = str(local_time.minute)
-        
-    image_path = "camera/" + local_time.strftime("%Y-%m-%dT%H-%M")
     scroller_time = local_time.strftime("%d/%m/%Y %H:%M")
+    scroller_next = (local_time + delta).strftime("%Y-%m-%dT%H-%M")
+    image_path = "camera/" + local_time.strftime("%Y-%m-%dT%H-%M-%S.jpg")
+    data_time = local_time.strftime("%H:%M")
 
-    
     return flask.render_template("camera.html",
                                  caws_name = config.caws_name,
                                  caws_location = config.caws_location,
@@ -306,26 +319,20 @@ def page_camera():
 def page_about():
     return "About"
 
-def file_camera(image_time):
+def file_camera(file_name):
     try:
-        local_time = datetime.strptime(image_time, "%Y-%m-%dT%H-%M")
+        local_time = datetime.strptime(file_name, "%Y-%m-%dT%H-%M-%S.jpg")
         utc = helpers.local_to_utc(config, local_time)
 
-        # Return error image if no camera drive
-        if not os.path.isdir(config.camera_drive):
-            return flask.send_from_directory("server", "no_camera_image.png")
-
-        # Generate local image path for supplied URL
+        # Generate path to local image from supplied URL
         image_dir = os.path.join(config.camera_drive, utc.strftime("%Y/%m/%d"))
+        image_name = utc.strftime("%Y-%m-%dT%H-%M-%S.jpg")
 
         # Return error image if file does not exist
-        #if not s.path.isfile(image_dir):
-           #return flask.send_from_directory("server", "no_camera_image.png") 
+        if not os.path.isfile(os.path.join(image_dir, image_name)):
+           return flask.send_from_directory("server", "no_camera_image.png") 
 
-        # Return the file if it does exist
-        return flask.send_from_directory(image_dir,
-            utc.strftime("%Y-%m-%dT%H-%M-00.jpg"))
-
+        return flask.send_from_directory(image_dir, image_name)
     except: return flask.send_from_directory("server", "no_camera_image.png")
 
 
@@ -348,7 +355,7 @@ server.add_url_rule("/graph_month.html", view_func = page_graph_month)
 server.add_url_rule("/graph_year.html", view_func = page_graph_year)
 server.add_url_rule("/camera.html", view_func = page_camera)
 server.add_url_rule("/about.html", view_func = page_about)
-server.add_url_rule("/camera/<image_time>", view_func = file_camera)
+server.add_url_rule("/camera/<file_name>", view_func = file_camera)
 
 # -- START SERVER --------------------------------------------------------------
 start_time = datetime.utcnow().replace(second = 0, microsecond = 0)

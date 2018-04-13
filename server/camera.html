@@ -9,28 +9,30 @@
 
         <script type="text/javascript">
             function page_load_js() {
-                var timestamp = new Date();
-                var refresh_time = new Date(timestamp.getTime());
+                if (window.location.href.includes("?time=") == false) {
+                    var timestamp = new Date();
+                    var refresh_time = new Date(timestamp.getTime());
 
-                if (String(timestamp.getMinutes()).endsWith("0") ||
-                    String(timestamp.getMinutes()).endsWith("5")) {
+                    if (String(timestamp.getMinutes()).endsWith("0") ||
+                        String(timestamp.getMinutes()).endsWith("5")) {
 
-                    if (timestamp.getSeconds() == 8 || timestamp.getSeconds() > 8) {
-                        refresh_time.setMinutes(refresh_time.getMinutes() + 5);
+                        if (timestamp.getSeconds() == 8 || timestamp.getSeconds() > 8) {
+                            refresh_time.setMinutes(refresh_time.getMinutes() + 5);
+                        }
+
+                    } else {
+                        while (!String(refresh_time.getMinutes()).endsWith("0")
+                            && !String(refresh_time.getMinutes()).endsWith("5")) {
+
+                            refresh_time.setMinutes(refresh_time.getMinutes() + 1);
+                        }
                     }
 
-                } else {
-                    while (!String(refresh_time.getMinutes()).endsWith("0")
-                        && !String(refresh_time.getMinutes()).endsWith("5")) {
-
-                        refresh_time.setMinutes(refresh_time.getMinutes() + 1);
-                    }
+                    refresh_time.setSeconds(8);
+                    refresh_time.setMilliseconds(0);
+                    var difference = refresh_time.getTime() - timestamp.getTime();
+                    setTimeout("location.reload()", difference);
                 }
-
-                refresh_time.setSeconds(8);
-                refresh_time.setMilliseconds(0);
-                var difference = refresh_time.getTime() - timestamp.getTime();
-                setTimeout("location.reload()", difference);
 
                 setInterval(function() {
                     display_local_time();
@@ -67,7 +69,7 @@
         </div>
 
         <div id="main">
-            <div class="group" id="scroller">
+            <div class="group" id="scroller" style="margin-bottom: 10px">
                 <a class="scroller_button" href="camera.html?time={{ scroller_prev }}">&#8249;</a>
                 <p id="scroller_time"><b>{{ scroller_time }}</b></p>
                 <a class="scroller_button" href="camera.html?time={{ scroller_next }}">&#8250;</a>

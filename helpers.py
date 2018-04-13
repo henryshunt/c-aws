@@ -83,3 +83,12 @@ def tendency_to_phrase(tendency):
     if tendency <= 0.1 and tendency >= -0.1: return "stdy"
     elif tendency > 0.1: return "ris"
     elif tendency < -0.1: return "fal"
+
+def last_five_mins(utc):
+    minute = str(utc.minute)
+    
+    while not minute.endswith("0") and not minute.endswith("5"):
+        utc -= timedelta(minutes = 1)
+        minute = str(utc.minute)
+
+    return utc

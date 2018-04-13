@@ -353,16 +353,11 @@ def do_log_camera(utc):
             if not os.path.exists(image_dir): os.makedirs(image_dir)
             image_name = utc.strftime("%Y-%m-%dT%H-%M-%S")
         
-            # Set image annotation and capture image
+            # Set image resolution and capture image
             with picamera.PiCamera() as camera:
                 camera.resolution = (1280, 960)
-                camera.annotate_background = picamera.Color("black")
-                camera.annotate_text_size = 24
                 time.sleep(0.8)
 
-                local_time = helpers.utc_to_local(config, utc)
-                camera.annotate_text = ("AWS Camera " + local_time.strftime(
-                                        "on %d/%m/%Y at %H:%M:%S"))
                 camera.capture(os.path.join(image_dir, image_name + ".jpg"))
         except: gpio.output(23, gpio.HIGH)
 
