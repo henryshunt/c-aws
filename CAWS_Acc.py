@@ -268,7 +268,7 @@ def page_graph_year():
     return "Graph Year"
 
 def page_camera():
-    return "Camera"
+    return flask.render_template("camera.html")
 
 def page_about():
     return "About"
