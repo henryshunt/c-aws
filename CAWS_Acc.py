@@ -37,7 +37,6 @@ def page_now():
     ST30 = "no data"; ST00 = "no data"
 
     utc = datetime.now().replace(second = 0, microsecond = 0)
-    phr_time = utc
     record = analysis.record_for_time(config, utc, DbTable.UTCREPORTS)
 
     # Try previous minute if no record for current minute
@@ -92,16 +91,16 @@ def page_now():
             ST00 = "{0:g}".format(record["ST00"]) + "°C"
 
     # Calculate total sunshine duration over past hour
-    sund_phr_data = analysis.past_hour_total(config, phr_time, "SunD")
+    sund_phr_record = analysis.past_hour_total(config, utc, "SunD")
 
-    if sund_phr_data != False and sund_phr_data != None:
-        SunD_Phr = str(sund_phr_data["SunD"]) + " sec"
+    if sund_phr_record != False and sund_phr_record != None:
+        SunD_Phr = str(sund_phr_record["SunD"]) + " sec"
 
     # Calculate total rainfall over past hour
-    rain_phr_data = analysis.past_hour_total(config, phr_time, "Rain")
+    rain_phr_record = analysis.past_hour_total(config, utc, "Rain")
 
-    if rain_phr_data != False and rain_phr_data != None:
-        Rain_Phr = "{0:g}".format(round(rain_phr_data["Rain"], 2)) + " mm"
+    if rain_phr_record != False and rain_phr_record != None:
+        Rain_Phr = "{0:g}".format(round(rain_phr_record["Rain"], 2)) + " mm"
 
     # render page with data
     return flask.render_template("index.html",
