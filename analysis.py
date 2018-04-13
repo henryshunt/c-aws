@@ -61,16 +61,15 @@ def past_hour_total(config, now, column):
     start = now.replace(second = 0, microsecond = 0) - timedelta(hours = 1)
     end = now.replace(second = 0, microsecond = 0)
 
-    #try:
-    print("SELECT SUM(" + column + ") AS " + column + "_Ttl FROM utcReports WHERE Time BETWEEN '" + start.strftime("%Y-%m-%d %H:%M:%S") + "' AND '" + end.strftime("%Y-%m-%d %H:%M:%S") + "'")
-    with sqlite3.connect(config.database_path) as database:
-        database.row_factory = sqlite3.Row
-        cursor = database.cursor()
+    try:
+        with sqlite3.connect(config.database_path) as database:
+            database.row_factory = sqlite3.Row
+            cursor = database.cursor()
 
-        cursor.execute(queries.SELECT_PAST_HOUR_UTCREPORTS
-                       .format(column),
-                       (start.strftime("%Y-%m-%d %H:%M:%S"),
-                        end.strftime("%Y-%m-%d %H:%M:%S")))
+            cursor.execute(queries.SELECT_PAST_HOUR_UTCREPORTS
+                           .format(column),
+                           (start.strftime("%Y-%m-%d %H:%M:%S"),
+                            end.strftime("%Y-%m-%d %H:%M:%S")))
 
-        return cursor.fetchone()
-    #except: return False
+            return cursor.fetchone()
+    except: return False

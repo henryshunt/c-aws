@@ -251,13 +251,19 @@ def page_statistics():
                                  data_time = data_time)
 
 def page_graph_day():
-    return "Graph Day"
+    return flask.render_template("graph_day.html",
+                                 caws_name = config.caws_name,
+                                 caws_location = config.caws_location)
 
 def page_graph_month():
-    return "Graph Month"
+    return flask.render_template("graph_month.html",
+                                 caws_name = config.caws_name,
+                                 caws_location = config.caws_location)
 
 def page_graph_year():
-    return "Graph Year"
+    return flask.render_template("graph_year.html",
+                                 caws_name = config.caws_name,
+                                 caws_location = config.caws_location)
 
 def page_camera():
     utc = datetime.utcnow().replace(second = 0, microsecond = 0)
@@ -317,15 +323,18 @@ def page_camera():
 
 def page_about():
     startup_time = "no data"; EncT = "no data"; CPUT = "no data"
-    internal_space = "no data"; camera_space = "no data"
-    backup_space = "no data";
+    internal_space = "no data"; camera_space = "no data";
+    backup_space = "no data"
+
+    utc = datetime.utcnow().replace(second = 0, microsecond = 0)
+    caws_elevation = "{0:g}".format(config.caws_elevation) + " m asl."
 
     # Format software startup time
     if start_time != None:
         startup_time = (helpers.utc_to_local(config, start_time)
                         .strftime("%d/%m/%Y at %H:%M:%S"))
-    
-    utc = datetime.utcnow().replace(second = 0, microsecond = 0)
+
+
     record = analysis.record_for_time(config, utc, DbTable.UTCENVIRON)
 
     # Try previous minute if no record for current minute
@@ -370,6 +379,10 @@ def page_about():
     return flask.render_template("about.html",
                                  caws_name = config.caws_name,
                                  caws_location = config.caws_location,
+                                 caws_latitude = config.caws_latitude,
+                                 caws_longitude = config.caws_longitude,
+                                 caws_elevation = caws_elevation,
+                                 caws_time_zone = config.caws_time_zone,
                                  startup_time = startup_time,
                                  EncT = EncT, CPUT = CPUT,
                                  internal_space = internal_space,
@@ -393,31 +406,6 @@ def file_camera(file_name):
         return flask.send_from_directory(image_dir, image_name)
     except: return flask.send_from_directory("server", "no_camera_image.png")
 
-def page_chart():
-    bounds = helpers.day_bounds_utc(config, helpers.utc_to_local(config, datetime.utcnow()), True)
-    data = analysis.records_in_range(config,
-        bounds[0], bounds[1], DbTable.UTCENVIRON)
-    low = helpers.utc_to_local(config, bounds[0]).timestamp()
-    high = helpers.utc_to_local(config, bounds[1]).timestamp()
-    return flask.render_template("chart.html", low = low, high = high)
-
-def data_chart():
-    bounds = helpers.day_bounds_utc(config, helpers.utc_to_local(config, datetime.utcnow()), True)
-    data = analysis.records_in_range(config,
-        bounds[0], bounds[1], DbTable.UTCENVIRON)
-
-    dataa = []
-    for i in data:
-        dicti = {
-            "x" : helpers.utc_to_local(config,
-                datetime.strptime(i["Time"], "%Y-%m-%d %H:%M:%S")).timestamp(),
-            "y" : i["EncT"]
-        }
-        dataa.append(dicti)
-   
-
-    return flask.jsonify(dataa)
-
 
 # ENTRY POINT ==================================================================
 # -- LOAD CONFIG ---------------------------------------------------------------
@@ -439,8 +427,6 @@ server.add_url_rule("/graph_year.html", view_func = page_graph_year)
 server.add_url_rule("/camera.html", view_func = page_camera)
 server.add_url_rule("/about.html", view_func = page_about)
 server.add_url_rule("/camera/<file_name>", view_func = file_camera)
-server.add_url_rule("/graph.html", view_func = page_chart)
-server.add_url_rule("/data", view_func = data_chart)
 
 # -- START SERVER --------------------------------------------------------------
 start_time = datetime.utcnow().replace(second = 0, microsecond = 0)
