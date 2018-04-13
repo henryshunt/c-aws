@@ -7,6 +7,7 @@
 import time
 from datetime import datetime, timedelta
 import os
+import sys
 
 import flask
 
@@ -31,9 +32,9 @@ start_time = None
 def page_now():
     AirT = "no data"; ExpT = "no data"; RelH = "no data"; DewP = "no data"
     WSpd = "no data"; WDir = "no data"; WGst = "no data"; SunD = "no data"
-    Rain = "no data"; StaP = "no data"; MSLP = "no data"; PTen = "no data"
-    ST10 = "no data"; ST30 = "no data"; ST00 = "no data"
-    SunD_Phr = "no data"; Rain_Phr = "no data"
+    SunD_Phr = "no data"; Rain = "no data"; Rain_Phr = "no data"
+    StaP = "no data"; MSLP = "no data"; PTen = "no data"; ST10 = "no data"
+    ST30 = "no data"; ST00 = "no data"
 
     utc = datetime.now().replace(second = 0, microsecond = 0)
     phr_time = utc
@@ -90,30 +91,17 @@ def page_now():
         if record["ST00"] != None:
             ST00 = "{0:g}".format(record["ST00"]) + "°C"
 
-    # Calculate totals over past hour
-    records_phr = analysis.records_in_range(
-        config, phr_time - timedelta(hours = 1), phr_time, DbTable.UTCREPORTS)
+    # Calculate total sunshine duration over past hour
+    sund_phr_record = analysis.past_hour_total(config, phr_time, "SunD")
 
-    if records_phr != False and records_phr != True:
-        rain_phr_num = None
-        sund_phr_num = None
+    if sund_phr_record != False and sund_phr_record != None:
+        SunD_Phr = str(sund_phr_record["SunD_Ttl"]) + " sec"
 
-        # Calculate total sun
-        for record in records_phr:
-            if record["SunD"] != None:
-                if sund_phr_num == None: sund_phr_num = record["sund"]
-                else: sund_phr_num += record["SunD"]
+    # Calculate total rainfall over past hour
+    rain_phr_record = analysis.past_hour_total(config, phr_time, "Rain")
 
-        if sund_phr_num != None: SunD_Phr = str(sund_phr_num) + " sec"
-        
-        # Calculate total rain
-        for record in records_phr:
-            if record["Rain"] != None:
-                if rain_phr_num == None: rain_phr_num = record["Rain"]
-                else: rain_phr_num += record["Rain"]
-
-        if rain_phr_num != None:
-            Rain_Phr = "{0:g}".format(round(rain_phr_num, 2)) + " mm"
+    if rain_phr_record != False and rain_phr_record != None:
+        Rain_Phr = "{0:g}".format(round(rain_phr_record["Rain_Ttl"], 2)) + " mm"
 
     # render page with data
     return flask.render_template("index.html",
@@ -339,7 +327,8 @@ def file_camera(image_time):
 # ENTRY POINT ==================================================================
 # -- LOAD CONFIG ---------------------------------------------------------------
 config = ConfigData()
-config.load()
+if config.load() == False: sys.exit(1)
+if config.validate() == False: sys.exit(1)
 
 # -- CREATE SERVER -------------------------------------------------------------
 server = flask.Flask(__name__, static_folder = "server",

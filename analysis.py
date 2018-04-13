@@ -1,3 +1,5 @@
+from datetime import timedelta
+
 import sqlite3
 
 from frames import DbTable
@@ -53,4 +55,21 @@ def records_in_range(config, start, end, table):
                                 end.strftime("%Y-%m-%d")))
 
             return cursor.fetchall()
+    except: return False
+
+def past_hour_total(config, now, column):
+    start = now.replace(second = 0, microsecond = 0) - timedelta(hours = 1)
+    end = now.replace(second = 0, microsecond = 0)
+
+    try:
+        with sqlite3.connect(config.database_path) as database:
+            database.row_factory = sqlite3.Row
+            cursor = database.cursor()
+
+            cursor.execute(queries.SELECT_PAST_HOUR_UTCREPORTS,
+                           (column, column,
+                            start.strftime("%Y-%m-%d %H:%M:%S"),
+                            end.strftime("%Y-%m-%d %H:%M:%S")))
+
+            return cursor.fetchone()
     except: return False
