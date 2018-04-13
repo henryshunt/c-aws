@@ -1,0 +1,126 @@
+<html>
+    <head>
+        <title>CAWS {{ caws_name }} [Local]</title>
+        <link href="{{ url_for("static", filename = "favicon.png") }}" rel="icon" >
+        <link href="{{ url_for("static", filename = "styles.css") }}" rel="stylesheet">
+
+        <script src="{{ url_for("static", filename = "scripts.js") }}"></script>
+        <script src="{{ url_for("static", filename = "jquery.js") }}"></script>
+        <script src="{{ url_for("static", filename = "chartist.js") }}"></script>
+        <script src="{{ url_for("static", filename = "chartist.css") }}"></script>
+        <script src="{{ url_for("static", filename = "moment.js") }}"></script>
+
+        <script>
+            function page_load_js() {
+                setInterval(function() { display_local_time(); }, 100);
+            }
+        </script>
+    </head>
+
+    <body onload="page_load_js()">
+        <div id="header">
+            <div id="header_items">
+                <p id="header_left">{{ caws_location }}</p>
+                <p id="header_right">CAWS</p>
+            </div>
+
+            <div id="menu">
+                <div id="menu_items">
+                    <a class="menu_item" href=".">Now</a>
+                    <a class="menu_item" href="statistics.html">Statistics</a>
+                    <span class="menu_item" style="line-height: 1.3"><b>|</b></span>
+
+                    <span class="menu_item"><b>Graph:</b></span>
+                    <a class="menu_item" href="graph_day.html">Day</a>
+                    <a class="menu_item" href="graph_month.html">Month</a>
+                    <a class="menu_item" href="graph_year.html"><b>Year</b></a>
+
+                    <span class="menu_item" style="line-height: 1.3"><b>|</b></span>
+                    <a class="menu_item" href="camera.html">Camera</a>
+                    <a class="menu_item" href="about.html">About</a>
+
+                    <span style="float: right">Accessing <b>LOCAL</b> Data Stores</span>
+                </div>
+            </div>
+        </div>
+
+        <div id="main">
+            <div class="group">
+                <div class="group_header">
+                    <p class="group_title">Air Temperature</p>
+                </div>
+
+                
+            </div>
+
+            <div class="group">
+                <div class="group_header">
+                    <p class="group_title">Relative Humidity</p>
+                </div>
+
+                
+            </div>
+
+            <div class="group">
+                <div class="group_header">
+                    <p class="group_title">Ten Minute Wind</p>
+                </div>
+    
+                    
+            </div>
+
+            <div class="group">
+                <div class="group_header">
+                    <p class="group_title">Ten Minute Wind Direction</p>
+                </div>
+    
+                    
+            </div>
+
+            <div class="group">
+                <div class="group_header">
+                    <p class="group_title">Sunshine Duration</p>
+                </div>
+    
+                    
+            </div>
+
+            <div class="group">
+                <div class="group_header">
+                    <p class="group_title">Rainfall</p>
+                </div>
+    
+                    
+            </div>
+
+            <div class="group">
+                <div class="group_header">
+                    <p class="group_title">Mean Sea Level Pressure</p>
+                </div>
+    
+                    
+            </div>
+
+            <div class="group" style="margin-bottom: 10px">
+                <div class="group_header">
+                    <p class="group_title">Soil Temperature</p>
+                </div>
+    
+                    
+            </div>
+        </div>
+
+        <div id="footer">
+            <div id="footer_items">
+                <p class="footer_label">Local Time:</p>
+                <p class="footer_value" id="local_time" style="width: 210px"></p>
+    
+                <div style="float: right; margin-left: 10px">
+                    <p class="footer_label">Data Time:</p>
+                    <p class="footer_value" style="width: 60px">{{ data_time }}</p>
+                </div>
+            </div>
+        </div>
+
+    </body>
+</html>
