@@ -70,25 +70,188 @@
 
         <div id="main">
             <div class="group">
-                    <div class="group_header">
-                        <p class="group_title">Custom Automatic Weather Station (CAWS) Unit</p>
-                    </div>
-    
-                    <table class="field_table">
-                        <tr>
-                            <td><p class="field_label">Hardware Version:</p></td>
-                            <td><p class="field_value"><b>V3.0 (April 2018)</b></p></td>
-                        </tr>
-                        <tr>
-                            <td><p class="field_label">Software Version:</p></td>
-                            <td><p class="field_value"><b>V4.0 (April 2018)</b></p></td>
-                        </tr>
-                        <tr>
-                            <td><p class="field_label">Copyright:</p></td>
-                            <td><p class="field_value"><b>Henry Hunt, 2018</b></p></td>
-                        </tr>
-                    </table>
+                <div class="group_header">
+                    <p class="group_title">Information</p>
                 </div>
+    
+                <table class="field_table">
+                    <tr>
+                        <td><p class="field_label">Internal Software Version:</p></td>
+                        <td><p class="field_value"><b>V4.0 (April 2018)</b></p></td>
+                    </tr>
+                    <tr>
+                        <td><p class="field_label">Hardware Configuration Version:</p></td>
+                        <td><p class="field_value"><b>V3.0 (April 2018)</b></p></td>
+                    </tr>
+                    <tr>
+                        <td><p class="field_label">Copyright:</p></td>
+                        <td><p class="field_value"><b>Henry Hunt, 2018</b></p></td>
+                    </tr>
+                </table>
+            </div>
+
+            <div class="group">
+                <div class="group_header">
+                    <p class="group_title">Computer Environment</p>
+                </div>
+    
+                <table class="field_table">
+                    <tr>
+                        <td><p class="field_label">Start Up Time:</p></td>
+                        <td><p class="field_value"><b>{{ startup_time }}</b></p></td>
+                    </tr>
+                    <tr>
+                        <td><p class="field_label" style="margin-top: 10px">Enclosure Temperature:</p></td>
+                        <td><p class="field_value" style="margin-top: 10px"><b>{{ EncT }}</b></p></td>
+                    </tr>
+                    <tr>
+                        <td><p class="field_label">Idle CPU Temperature:</p></td>
+                        <td><p class="field_value"><b>{{ CPUT }}</b></p></td>
+                    </tr>
+                    <tr>
+                        <td><p class="field_label">Battery Voltage:</p></td>
+                        <td><p class="field_value"><b>230V Mains</b></p></td>
+                    </tr>
+                </table>
+            </div>
+
+            <div class="group">
+                <div class="group_header">
+                    <p class="group_title">Storage Capacity</p>
+                </div>
+    
+                <table class="field_table">
+                    <tr>
+                        <td><p class="field_label">Internal Drive Space Remaining:</p></td>
+                        <td><p class="field_value"><b>{{ internal_space }}</b></p></td>
+                    </tr>
+                    <tr>
+                        <td><p class="field_label">Camera Storage Drive Space Remaining:</p></td>
+                        <td><p class="field_value"><b>{{ camera_space }}</b></p></td>
+                    </tr>
+                    <tr>
+                        <td><p class="field_label">Backup Storage Drive Space Remaining:</p></td>
+                        <td><p class="field_value"><b>{{ backup_space }}</b></p></td>
+                    </tr>
+                </table>
+            </div>
+
+            <div class="group">
+                <div class="group_header">
+                    <p class="group_title">Database Integrity</p>
+                </div>
+
+                <table class="field_table">
+                    <tr>
+                        <td><p class="field_label">Database File Size:</p></td>
+                        <td><p class="field_value"><b></b></p></td>
+                    </tr>
+                    <tr>
+                        <td><p class="field_label">Earliest Data Recorded:</p></td>
+                        <td><p class="field_value"><b></b></p></td>
+                    </tr>
+                    <tr>
+                        <td><p class="field_label">Last Integrity Check Performed:</p></td>
+                        <td><p class="field_value"><b></b></p></td>
+                    </tr>
+                    <tr>
+                        <td><p class="field_label" style="margin-top: 10px">Total Records in Database:</p></td>
+                        <td><p class="field_value" style="margin-top: 10px"><b></b></p></td>
+                    </tr>
+                    <tr>
+                        <td><p class="field_label">Days with 100% Integrity:</p></td>
+                        <td><p class="field_value"><b></b></p></td>
+                    </tr>
+                    <tr>
+                        <td><p class="field_label">Lost Records:</p></td>
+                        <td><p class="field_value"><b></b></p></td>
+                    </tr>
+                    <tr>
+                        <td><p class="field_label">Overall Database Integrity:</p></td>
+                        <td><p class="field_value"><b></b></p></td>
+                    </tr>
+                </table>
+            </div>
+
+            <div class="group">
+                <div class="group_header">
+                    <p class="group_title">Software Modifiers</p>
+                </div>
+
+                <table class="field_table">
+                    <tr>
+                        <td><p class="field_label">Camera Logging:</p></td>
+                        <td>
+                            <p class="field_value">
+                                <b style="margin-right: 8px">{{ clim }}, toggle:</b>
+                                <button onclick="send_cmd('clim')">Send Command</button>
+                            </p>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td><p class="field_label">Statistic Generation:</p></td>
+                        <td>
+                            <p class="field_value">
+                                <b style="margin-right: 8px">{{ cstg }}, toggle:</b>
+                                <button onclick="send_cmd('cstg')">Send Command</button>
+                            </p>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td><p class="field_label" style="margin-top: 10px">Report Uploading:</p></td>
+                        <td>
+                            <p class="field_value" style="margin-top: 10px">
+                                <b style="margin-right: 8px">{{ curp }}, toggle:</b>
+                                <button onclick="send_cmd('curp')">Send Command</button>
+                            </p>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td><p class="field_label">Statistic Uploading:</p></td>
+                        <td>
+                            <p class="field_value">
+                                <b style="margin-right: 8px">{{ cust }}, toggle:</b>
+                                <button onclick="send_cmd('cust')">Send Command</button>
+                            </p>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td><p class="field_label">Camera Uploading:</p></td>
+                        <td>
+                            <p class="field_value">
+                                <b style="margin-right: 8px">{{ cuim }}, toggle:</b>
+                                <button onclick="send_cmd('cuim')">Send Command</button>
+                            </p>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td><p class="field_label" style="margin-top: 10px">Integrity Checks:</p></td>
+                        <td>
+                            <p class="field_value" style="margin-top: 10px">
+                                <b style="margin-right: 8px">{{ citg }}, toggle:</b>
+                                <button onclick="send_cmd('citg')">Send Command</button>
+                            </p>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td><p class="field_label">Local Network Server:</p></td>
+                        <td>
+                            <p class="field_value">
+                                <b style="margin-right: 8px">{{ csvr }}, toggle:</b>
+                                <button onclick="send_cmd('csvr')">Send Command</button>
+                            </p>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td><p class="field_label">Backups:</p></td>
+                        <td>
+                            <p class="field_value">
+                                <b style="margin-right: 8px">{{ cbkp }}, toggle:</b>
+                                <button onclick="send_cmd('cbkp')">Send Command</button>
+                            </p>
+                        </td>
+                    </tr>
+                </table>
             </div>
         </div>
 

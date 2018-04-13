@@ -1,8 +1,9 @@
 <html>
     <head>
-        <link rel="stylesheet" href="chartist.min.css">
-        <script src="chartist.min.js"></script>
+        <link rel="stylesheet" href="{{ url_for("static", filename = "chartist.min.css") }}">
+        <script src="{{ url_for("static", filename = "chartist.min.js") }}"></script>
         <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.22.0/moment.min.js"></script>
 
         <style>
             .ct-series .ct-line {
@@ -19,27 +20,27 @@
 
         getData.done(function(data) {
             var dat = {
-                series: [ data.CPUT ]
+                series: [data]
             };
 
             var options = {
-                width: "100%",
+                fullWidth: true,
                 height: 400,
                 showPoint: false,
                 lineSmooth: false,
 
                 axisX: {
-                    showGrid: false,
-                    showLabel: false,
-    //                 type: Chartist.AutoScaleAxis,
-    // onlyInteger: true
+                  type: Chartist.FixedScaleAxis,
+low: {{ low }}, high: {{ high }},
+
+divisor: 8,
+    labelInterpolationFnc: function(value) {
+      return moment.unix(value).zone("+0000").format("HH:mm");
+    }
                 },
 
                 axisY: {
                     offset: 60,
-                    // labelInterpolationFnc: function(value) {
-                    //     return '$' + value + 'm';
-                    // }
                 }
             };
 

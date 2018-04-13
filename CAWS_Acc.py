@@ -165,7 +165,7 @@ def page_statistics():
     scroller_next = (local_time + timedelta(days = 1)).strftime("%Y-%m-%d")
     data_time = helpers.utc_to_local(config, utc).strftime("%H:%M")
 
-    # Get values to display for each report parameter
+    # Get values to display for each statistic parameter
     if record != False and record != None:
         if record["AirT_Min"] != None:
             AirT_Min = "{0:g}".format(record["AirT_Min"]) + "°C"
@@ -316,7 +316,66 @@ def page_camera():
                                  data_time = data_time)
 
 def page_about():
-    return "About"
+    startup_time = "no data"; EncT = "no data"; CPUT = "no data"
+    internal_space = "no data"; camera_space = "no data"
+    backup_space = "no data";
+
+    # Format software startup time
+    if start_time != None:
+        startup_time = (helpers.utc_to_local(config, start_time)
+                        .strftime("%d/%m/%Y at %H:%M:%S"))
+    
+    utc = datetime.utcnow().replace(second = 0, microsecond = 0)
+    record = analysis.record_for_time(config, utc, DbTable.UTCENVIRON)
+
+    # Try previous minute if no record for current minute
+    if record == False or record == None:
+        utc -= timedelta(minutes = 1)
+        record = analysis.record_for_time(config, utc, DbTable.UTCENVIRON)
+
+        # Return to current minute if no record for previous minute
+        if record == False or record == None:
+              utc += timedelta(minutes = 1)
+            
+    data_time = helpers.utc_to_local(config, utc).strftime("%H:%M")
+
+    # Get values to display for each environment parameter
+    if record != False and record != None:
+        if record["EncT"] != None:
+            EncT = "{0:g}".format(record["EncT"]) + "°C"
+        if record["CPUT"] != None:
+            CPUT = "{0:g}".format(record["CPUT"]) + "°C"
+
+    # Calculate remaining storage space for drives
+    _internal_space = helpers.remaining_space("/")
+    if _internal_space != None:
+        internal_space = str(round(_internal_space, 2)) + " gb"
+
+    if not os.path.isdir(config.camera_drive):
+        camera_space = "no drive"
+    else:
+        _camera_space = helpers.remaining_space(config.camera_drive)
+        
+        if _camera_space != None:
+            camera_space = str(round(_camera_space, 2)) + " gb"
+
+    if not os.path.isdir(config.backup_drive):
+        backup_space = "no drive"
+    else:
+        _backup_space = helpers.remaining_space(config.backup_drive)
+        
+        if _backup_space != None:
+            backup_space = str(round(_backup_space, 2)) + " gb"
+    
+    return flask.render_template("about.html",
+                                 caws_name = config.caws_name,
+                                 caws_location = config.caws_location,
+                                 startup_time = startup_time,
+                                 EncT = EncT, CPUT = CPUT,
+                                 internal_space = internal_space,
+                                 camera_space = camera_space,
+                                 backup_space = backup_space,
+                                 data_time = data_time)
 
 def file_camera(file_name):
     try:
@@ -333,6 +392,31 @@ def file_camera(file_name):
 
         return flask.send_from_directory(image_dir, image_name)
     except: return flask.send_from_directory("server", "no_camera_image.png")
+
+def page_chart():
+    bounds = helpers.day_bounds_utc(config, helpers.utc_to_local(config, datetime.utcnow()), True)
+    data = analysis.records_in_range(config,
+        bounds[0], bounds[1], DbTable.UTCENVIRON)
+    low = helpers.utc_to_local(config, bounds[0]).timestamp()
+    high = helpers.utc_to_local(config, bounds[1]).timestamp()
+    return flask.render_template("chart.html", low = low, high = high)
+
+def data_chart():
+    bounds = helpers.day_bounds_utc(config, helpers.utc_to_local(config, datetime.utcnow()), True)
+    data = analysis.records_in_range(config,
+        bounds[0], bounds[1], DbTable.UTCENVIRON)
+
+    dataa = []
+    for i in data:
+        dicti = {
+            "x" : helpers.utc_to_local(config,
+                datetime.strptime(i["Time"], "%Y-%m-%d %H:%M:%S")).timestamp(),
+            "y" : i["EncT"]
+        }
+        dataa.append(dicti)
+   
+
+    return flask.jsonify(dataa)
 
 
 # ENTRY POINT ==================================================================
@@ -355,6 +439,8 @@ server.add_url_rule("/graph_year.html", view_func = page_graph_year)
 server.add_url_rule("/camera.html", view_func = page_camera)
 server.add_url_rule("/about.html", view_func = page_about)
 server.add_url_rule("/camera/<file_name>", view_func = file_camera)
+server.add_url_rule("/graph.html", view_func = page_chart)
+server.add_url_rule("/data", view_func = data_chart)
 
 # -- START SERVER --------------------------------------------------------------
 start_time = datetime.utcnow().replace(second = 0, microsecond = 0)
