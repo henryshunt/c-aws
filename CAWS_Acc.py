@@ -53,54 +53,47 @@ def page_now():
     # Get values to display for each report parameter
     if record != False and record != None:
         if record["AirT"] != None:
-            AirT = "{0:g}".format(record["AirT"]) + "°C"
+            AirT = "{:.1f}".format(record["AirT"]) + "°C"
         if record["ExpT"] != None:
-            ExpT = "{0:g}".format(record["ExpT"]) + "°C"
+            ExpT = "{:.1f}".format(record["ExpT"]) + "°C"
         if record["RelH"] != None:
-            RelH = "{0:g}".format(record["RelH"]) + "%"
+            RelH = "{:.1f}".format(record["RelH"]) + "%"
         if record["DewP"] != None:
-            DewP = "{0:g}".format(record["DewP"]) + "°C"
+            DewP = "{:.1f}".format(record["DewP"]) + "°C"
         if record["WSpd"] != None:
-            WSpd = "{0:g}".format(record["WSpd"]) + " mph"
+            WSpd = "{:.1f}".format(record["WSpd"]) + " mph"
         
-        if record["wdir"] != None:
+        if record["WDir"] != None:
             wdir_compass = helpers.degrees_to_compass(record["WDir"])
-            WDir = str(record["WDir"]) + "° (" + wdir_compass + ")"
+            WDir = "{:d}".format(record["WDir"]) + "° (" + wdir_compass + ")"
             
         if record["WGst"] != None:
-            WGst = "{0:g}".format(record["WGst"]) + " mph"
+            WGst = "{:.1f}".format(record["WGst"]) + " mph"
         if record["SunD"] != None: SunD = str(record["SunD"]) + " sec"
         if record["Rain"] != None:
-            Rain = "{0:g}".format(round(record["Rain"], 2)) + " mm"
+            Rain = "{:.2f}".format(round(record["Rain"], 2)) + " mm"
         if record["StaP"] != None:
-            StaP = "{0:g}".format(record["StaP"]) + " hPa"
+            StaP = "{:.1f}".format(record["StaP"]) + " hPa"
         if record["MSLP"] != None:
-            MSLP = "{0:g}".format(record["MSLP"]) + " hPa"
-
+            MSLP = "{:.1f}".format(record["MSLP"]) + " hPa"
         if record["PTen"] != None:
-            pten_phrase = helpers.tendency_to_phrase(record["PTen"])
-            
-            PTen = "+" if record["PTen"] > 0 else ""
-            PTen += "{0:g}".format(record["PTen"]) + pten_phrase + " hPa"
-
+            PTen = ("{:+.1f}".format(record["PTen"]) + " hPa")
         if record["ST10"] != None:
-            ST10 = "{0:g}".format(record["ST10"]) + "°C"
+            ST10 = "{:.1f}".format(record["ST10"]) + "°C"
         if record["ST30"] != None:
-            ST30 = "{0:g}".format(record["ST30"]) + "°C"
+            ST30 = "{:.1f}".format(record["ST30"]) + "°C"
         if record["ST00"] != None:
-            ST00 = "{0:g}".format(record["ST00"]) + "°C"
+            ST00 = "{:.1f}".format(record["ST00"]) + "°C"
 
     # Calculate total sunshine duration over past hour
     sund_phr_record = analysis.past_hour_total(config, utc, "SunD")
-
     if sund_phr_record != False and sund_phr_record != None:
-        SunD_Phr = str(sund_phr_record["SunD"]) + " sec"
+        SunD_Phr = "{:d}".format(sund_phr_record["SunD"]) + " sec"
 
     # Calculate total rainfall over past hour
     rain_phr_record = analysis.past_hour_total(config, utc, "Rain")
-
     if rain_phr_record != False and rain_phr_record != None:
-        Rain_Phr = "{0:g}".format(round(rain_phr_record["Rain"], 2)) + " mm"
+        Rain_Phr = "{:.2f}".format(rain_phr_record["Rain"]) + " mm"
 
     return flask.render_template("index.html",
                                  caws_name = config.caws_name,
@@ -168,63 +161,63 @@ def page_statistics():
     # Get values to display for each statistic parameter
     if record != False and record != None:
         if record["AirT_Min"] != None:
-            AirT_Min = "{0:g}".format(record["AirT_Min"]) + "°C"
+            AirT_Min = "{:.1f}".format(record["AirT_Min"]) + "°C"
         if record["AirT_Max"] != None:
-            AirT_Max = "{0:g}".format(record["AirT_Max"]) + "°C"
+            AirT_Max = "{:.1f}".format(record["AirT_Max"]) + "°C"
         if record["AirT_Avg"] != None:
-            AirT_Avg = "{0:g}".format(record["AirT_Avg"]) + "°C"
+            AirT_Avg = "{:.1f}".format(record["AirT_Avg"]) + "°C"
         if record["RelH_Min"] != None:
-            RelH_Min = "{0:g}".format(record["RelH_Min"]) + "%"
+            RelH_Min = "{:.1f}".format(record["RelH_Min"]) + "%"
         if record["RelH_Max"] != None:
-            RelH_Max = "{0:g}".format(record["RelH_Max"]) + "%"
+            RelH_Max = "{:.1f}".format(record["RelH_Max"]) + "%"
         if record["RelH_Avg"] != None:
-            RelH_Avg = "{0:g}".format(record["RelH_Avg"]) + "%"
+            RelH_Avg = "{:.1f}".format(record["RelH_Avg"]) + "%"
         if record["DewP_Min"] != None:
-            DewP_Min = "{0:g}".format(record["DewP_Min"]) + "°C"
+            DewP_Min = "{:.1f}".format(record["DewP_Min"]) + "°C"
         if record["DewP_Max"] != None:
-            DewP_Max = "{0:g}".format(record["DewP_Max"]) + "°C"
+            DewP_Max = "{:.1f}".format(record["DewP_Max"]) + "°C"
         if record["DewP_Avg"] != None:
-            DewP_Avg = "{0:g}".format(record["DewP_Avg"]) + "°C"
+            DewP_Avg = "{:.1f}".format(record["DewP_Avg"]) + "°C"
         if record["WSpd_Min"] != None:
-            WSpd_Min = "{0:g}".format(record["WSpd_Min"]) + " mph"
+            WSpd_Min = "{:.1f}".format(record["WSpd_Min"]) + " mph"
         if record["WSpd_Max"] != None:
-            WSpd_Max = "{0:g}".format(record["WSpd_Max"]) + " mph"
+            WSpd_Max = "{:.1f}".format(record["WSpd_Max"]) + " mph"
         if record["WSpd_Avg"] != None:
-            WSpd_Avg = "{0:g}".format(record["WSpd_Avg"]) + " mph"
+            WSpd_Avg = "{:.1f}".format(record["WSpd_Avg"]) + " mph"
         if record["WDir_Min"] != None:
-            WDir_Min = str(record["WDir_Min"]) + "°"
+            WDir_Min = "{:d}".format(record["WDir_Min"]) + "°"
         if record["WDir_Max"] != None:
-            WDir_Max = str(record["WDir_Max"]) + "°"
+            WDir_Max = "{:d}".format(record["WDir_Max"]) + "°"
         if record["WDir_Avg"] != None:
-            WDir_Avg = str(record["WDir_Avg"]) + "°"
+            WDir_Avg = "{:d}".format(record["WDir_Avg"]) + "°"
         if record["WGst_Min"] != None:
-            WGst_Min = "{0:g}".format(record["WGst_Min"]) + " mph"
+            WGst_Min = "{:.1f}".format(record["WGst_Min"]) + " mph"
         if record["WGst_Max"] != None:
-            WGst_Max = "{0:g}".format(record["WGst_Max"]) + " mph"
+            WGst_Max = "{:.1f}".format(record["WGst_Max"]) + " mph"
         if record["WGst_Avg"] != None:
-            WGst_Avg = "{0:g}".format(record["WGst_Avg"]) + " mph"
+            WGst_Avg = "{:.1f}".format(record["WGst_Avg"]) + " mph"
         if record["SunD_Ttl"] != None:
-            SunD_Ttl = str(record["SunD_Ttl"]) + " sec"
+            SunD_Ttl = "{:d}".format(record["SunD_Ttl"]) + " sec"
         if record["Rain_Ttl"] != None:
-            Rain_Ttl = "{0:g}".format(round(record["Rain_Ttl"], 2)) + " mm"
+            Rain_Ttl = "{:.2f}".format(record["Rain_Ttl"]) + " mm"
         if record["MSLP_Min"] != None:
-            MSLP_Min = "{0:g}".format(record["MSLP_Min"]) + " hPa"
+            MSLP_Min = "{:.1f}".format(record["MSLP_Min"]) + " hPa"
         if record["MSLP_Max"] != None:
-            MSLP_Max = "{0:g}".format(record["MSLP_Max"]) + " hPa"
+            MSLP_Max = "{:.1f}".format(record["MSLP_Max"]) + " hPa"
         if record["MSLP_Avg"] != None:
-            MSLP_Avg = "{0:g}".format(record["MSLP_Avg"]) + " hPa"
+            MSLP_Avg = "{:.1f}".format(record["MSLP_Avg"]) + " hPa"
         if record["ST10_Min"] != None:
-            ST10_Min = "{0:g}".format(record["ST10_Min"]) + "°C"
+            ST10_Min = "{:.1f}".format(record["ST10_Min"]) + "°C"
         if record["ST10_Max"] != None:
-            ST10_Max = "{0:g}".format(record["ST10_Max"]) + "°C"
+            ST10_Max = "{:.1f}".format(record["ST10_Max"]) + "°C"
         if record["ST10_Avg"] != None:
-            ST10_Avg = "{0:g}".format(record["ST10_Avg"]) + "°C"
+            ST10_Avg = "{:.1f}".format(record["ST10_Avg"]) + "°C"
         if record["ST30_Min"] != None:
-            ST30_Min = "{0:g}".format(record["ST30_Min"]) + "°C"
+            ST30_Min = "{:.1f}".format(record["ST30_Min"]) + "°C"
         if record["ST30_Max"] != None:
-            ST30_Max = "{0:g}".format(record["ST30_Max"]) + "°C"
+            ST30_Max = "{:.1f}".format(record["ST30_Max"]) + "°C"
         if record["ST30_Avg"] != None:
-            ST30_Avg = "{0:g}".format(record["ST30_Avg"]) + "°C"
+            ST30_Avg = "{:.1f}".format(record["ST30_Avg"]) + "°C"
         
     return flask.render_template("statistics.html",
                                  caws_name = config.caws_name,
@@ -351,14 +344,14 @@ def page_about():
     # Get values to display for each environment parameter
     if record != False and record != None:
         if record["EncT"] != None:
-            EncT = "{0:g}".format(record["EncT"]) + "°C"
+            EncT = "{:.1f}".format(record["EncT"]) + "°C"
         if record["CPUT"] != None:
-            CPUT = "{0:g}".format(record["CPUT"]) + "°C"
+            CPUT = "{:.1f}".format(record["CPUT"]) + "°C"
 
     # Calculate remaining storage space for drives
     _internal_space = helpers.remaining_space("/")
     if _internal_space != None:
-        internal_space = str(round(_internal_space, 2)) + " gb"
+        internal_space = "{:.2f}".format(_internal_space) + " gb"
 
     if not os.path.isdir(config.camera_drive):
         camera_space = "no drive"
@@ -366,7 +359,7 @@ def page_about():
         _camera_space = helpers.remaining_space(config.camera_drive)
         
         if _camera_space != None:
-            camera_space = str(round(_camera_space, 2)) + " gb"
+            camera_space = "{:.2f}".format(_camera_space) + " gb"
 
     if not os.path.isdir(config.backup_drive):
         backup_space = "no drive"
@@ -374,7 +367,7 @@ def page_about():
         _backup_space = helpers.remaining_space(config.backup_drive)
         
         if _backup_space != None:
-            backup_space = str(round(_backup_space, 2)) + " gb"
+            backup_space = "{:.2f}".format(_backup_space) + " gb"
     
     return flask.render_template("about.html",
                                  caws_name = config.caws_name,

@@ -253,9 +253,10 @@ def do_log_report(utc):
             # Calculate difference between pressure 3 hours ago
             if record_then != False:
                 if record_then != None:
-                    pten_value = round(frame.station_pressure
-                                       - record_then["PTen"], 1)
-                    frame.pressure_tendency = pten_value
+                    if record_then["MSLP"] != None:
+                        pten_value = round(frame.station_pressure
+                                           - record_then["MSLP"], 1)
+                        frame.pressure_tendency = pten_value
     except: gpio.output(23, gpio.HIGH)
 
     # ADD TO DATABASE ----------------------------------------------------------
@@ -478,7 +479,7 @@ def every_second():
         # Read rotation value from analog to digital converter
         wdir_data = spi_bus.xfer2([1, (8 + 1) << 4, 0])
         adc_value = ((wdir_data[1] & 3) << 8) + wdir_data[2]
-
+        
         # Convert ADC value to degrees
         if adc_value > 0:
             wdir_degrees = (adc_value - 52) / (976 - 52) * (360 - 0)
