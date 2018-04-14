@@ -437,7 +437,7 @@ def do_generate_stats(utc):
             database.commit()
     except: gpio.output(23, gpio.HIGH)
 
-# SCHEDULED FUNCTIONS ----------------------------------------------------------
+# SCHEDULEDS -------------------------------------------------------------------
 def every_minute():
     """ Triggered every minute to generate a report, add it to the database,
         activate the camera and generate statistics
@@ -500,7 +500,7 @@ def every_second():
         if gpio.input(22) == True: sund_ticks += 1
     except: gpio.output(23, gpio.HIGH)
 
-# INTERRUPT SERVICE ------------------------------------------------------------
+# INTERRUPTS -------------------------------------------------------------------
 def do_trigger_wspd(channel):
     global disable_sampling, wspd_ticks
     if disable_sampling == True: return
@@ -569,25 +569,12 @@ if config.backups == True:
 
     free_space = helpers.remaining_space(config.backup_drive)
     if free_space == None or free_space < 5: helpers.exit("10")
-    
-# -- CHECK GRAPH DIRECTORY -----------------------------------------------------
-if (config.day_graph_generation == True or
-    config.month_graph_generation == True or
-    config.year_graph_generation == True):
-
-    if not os.path.isdir(config.graph_directory):
-        try:
-            os.makedirs(config.graph_directory)
-        except: helpers.exit("11")
 
 
 # -- RUN SUBPROCESSES ----------------------------------------------------------
 current_dir = os.path.dirname(os.path.realpath(__file__))
 
-if (config.day_graph_generation == True or
-    config.month_graph_generation == True or
-    config.year_graph_generation == True or
-    config.report_uploading == True or
+if (config.report_uploading == True or
     config.environment_uploading == True or
     config.statistic_uploading == True or
     config.camera_uploading == True or
