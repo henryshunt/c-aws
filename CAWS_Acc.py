@@ -106,7 +106,7 @@ def page_statistics():
     MSLP_Max = "no data"; MSLP_Avg = "no data"; ST10_Min = "no data"
     ST10_Max = "no data"; ST10_Avg = "no data"; ST30_Min = "no data"
     ST30_Max = "no data"; ST30_Avg = "no data"; ST00_Min = "no data"
-    ST00_Max = "no data"; ST00_Avg = "no data"; update = False
+    ST00_Max = "no data"; ST00_Avg = "no data"; update_override = False
 
     utc = datetime.utcnow(); utc_second = utc.second
     utc = utc.replace(second = 0, microsecond = 0)
