@@ -291,18 +291,18 @@ def page_camera():
 
 def page_about():
     startup_time = "no data"; EncT = "no data"; CPUT = "no data"
-    internal_space = "no data"; camera_space = "no data";
+    internal_space = "no data"; camera_space = "no data"
     backup_space = "no data"
 
     utc = datetime.utcnow().replace(second = 0, microsecond = 0)
-    caws_elevation = "{0:g}".format(config.caws_elevation) + " m asl."
+    caws_elevation = str(config.caws_elevation) + " m asl."
 
     # Format software startup time
     if program_start != None:
         startup_time = (helpers.utc_to_local(config, program_start)
                         .strftime("%d/%m/%Y at %H:%M:%S"))
 
-
+    # Get computer environment data
     record = analysis.record_for_time(config, utc, DbTable.UTCENVIRON)
 
     # Try previous minute if no record for current minute
@@ -324,7 +324,7 @@ def page_about():
     # Calculate remaining storage space for drives
     _internal_space = helpers.remaining_space("/")
     if _internal_space != None:
-        internal_space = str(round(_internal_space), 2) + " gb"
+        internal_space = str(round(_internal_space, 2)) + " gb"
 
     if not os.path.isdir(config.camera_drive):
         camera_space = "no drive"
@@ -379,9 +379,9 @@ config = ConfigData()
 if config.load() == False: sys.exit(1)
 if config.validate() == False: sys.exit(1)
 
-print(sys.argv)
-if len(sys.argv) == 5:
-    pass
+if len(sys.argv) == 2:
+    program_start = datetime.strptime(sys.argv[1], "%Y-%m-%dT%H:%M:%S")
+else: program_start = datetime.utcnow()
 
 # -- CREATE SERVER -------------------------------------------------------------
 server = flask.Flask(__name__, static_folder = "server",
