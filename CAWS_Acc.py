@@ -26,7 +26,7 @@ print("----------- DO NOT TERMINATE -----------")
 
 # GLOBAL VARIABLES -------------------------------------------------------------
 config = None
-start_time = None
+program_start = None
 
 # PAGE SERVERS -----------------------------------------------------------------
 def page_now():
@@ -59,8 +59,8 @@ def page_now():
         if record["WSpd"] != None: WSpd = str(record["WSpd"]) + " mph"
         
         if record["WDir"] != None:
-            wdir_compass = helpers.degrees_to_compass(record["WDir"])
-            WDir = str(record["WDir"]) + "° (" + wdir_compass + ")"
+            WDir_compass = helpers.degrees_to_compass(record["WDir"])
+            WDir = str(record["WDir"]) + "° (" + WDir_compass + ")"
             
         if record["WGst"] != None: WGst = str(record["WGst"]) + " mph"
         if record["SunD"] != None: SunD = str(record["SunD"]) + " sec"
@@ -73,14 +73,14 @@ def page_now():
         if record["ST00"] != None: ST00 = str(record["ST00"]) + "°C"
 
     # Calculate total sunshine duration over past hour
-    sund_phr_record = analysis.past_hour_total(config, utc, "SunD")
-    if sund_phr_record != False and sund_phr_record != None:
-        SunD_Phr = str(sund_phr_record["SunD"]) + " sec"
+    SunD_Phr_record = analysis.past_hour_total(config, utc, "SunD")
+    if SunD_Phr_record != False and SunD_Phr_record != None:
+        SunD_Phr = str(SunD_Phr_record["SunD"]) + " sec"
 
     # Calculate total rainfall over past hour
-    rain_phr_record = analysis.past_hour_total(config, utc, "Rain")
-    if rain_phr_record != False and rain_phr_record != None:
-        Rain_Phr = str(round(rain_phr_record["Rain"], 2)) + " mm"
+    Rain_Phr_record = analysis.past_hour_total(config, utc, "Rain")
+    if Rain_Phr_record != False and Rain_Phr_record != None:
+        Rain_Phr = str(round(Rain_Phr_record["Rain"], 2)) + " mm"
 
     return flask.render_template("index.html",
                                  caws_name = config.caws_name,
@@ -298,8 +298,8 @@ def page_about():
     caws_elevation = "{0:g}".format(config.caws_elevation) + " m asl."
 
     # Format software startup time
-    if start_time != None:
-        startup_time = (helpers.utc_to_local(config, start_time)
+    if program_start != None:
+        startup_time = (helpers.utc_to_local(config, program_start)
                         .strftime("%d/%m/%Y at %H:%M:%S"))
 
 
