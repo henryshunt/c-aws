@@ -379,6 +379,10 @@ config = ConfigData()
 if config.load() == False: sys.exit(1)
 if config.validate() == False: sys.exit(1)
 
+print(sys.argv)
+if len(sys.argv) == 5:
+    pass
+
 # -- CREATE SERVER -------------------------------------------------------------
 server = flask.Flask(__name__, static_folder = "server",
                      template_folder = "server")

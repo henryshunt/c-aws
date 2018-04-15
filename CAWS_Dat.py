@@ -603,8 +603,9 @@ if (config.report_uploading == True or
 
 if config.local_network_server == True:
     try:
+        time_arg = program_start.strftime("%Y-%m-%dT%H:%M:%S")
         subprocess.Popen(["lxterminal -e python3 " + current_dir
-                          + "/CAWS_Acc.py"], shell = True)
+                          + "/CAWS_Acc.py " + time_arg], shell = True)
     except: helpers.exit("13")
 
 # -- WAIT FOR MINUTE -----------------------------------------------------------
