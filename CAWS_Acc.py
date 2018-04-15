@@ -154,7 +154,7 @@ def page_statistics():
         if record["RelH_Min"] != None: RelH_Min = str(record["RelH_Min"]) + "%"
         if record["RelH_Max"] != None: RelH_Max = str(record["RelH_Max"]) + "%"
         if record["RelH_Avg"] != None:
-            RelH_Avg = str(round(record["RelH_Avg"])) + "%"
+            RelH_Avg = str(round(record["RelH_Avg"], 1)) + "%"
         if record["DewP_Min"] != None: DewP_Min = str(record["DewP_Min"]) + "°C"
         if record["DewP_Max"] != None: DewP_Max = str(record["DewP_Max"]) + "°C"
         if record["DewP_Avg"] != None:
@@ -164,35 +164,35 @@ def page_statistics():
         if record["WSpd_Max"] != None:
             WSpd_Max = str(record["WSpd_Max"]) + " mph"
         if record["WSpd_Avg"] != None:
-            WSpd_Avg = str(record["WSpd_Avg"]) + " mph"
+            WSpd_Avg = str(round(record["WSpd_Avg"], 1)) + " mph"
         if record["WDir_Min"] != None: WDir_Min = str(record["WDir_Min"]) + "°"
         if record["WDir_Max"] != None: WDir_Max = str(record["WDir_Max"]) + "°"
         if record["WDir_Avg"] != None:
-            WDir_Avg = str(round(record["WDir_Avg"], 2)) + "°"
+            WDir_Avg = str(round(record["WDir_Avg"])) + "°"
         if record["WGst_Min"] != None:
             WGst_Min = str(record["WGst_Min"]) + " mph"
         if record["WGst_Max"] != None:
             WGst_Max = str(record["WGst_Max"]) + " mph"
         if record["WGst_Avg"] != None:
-            WGst_Avg = str(round(record["WGst_Avg"], 2)) + " mph"
+            WGst_Avg = str(round(record["WGst_Avg"], 1)) + " mph"
         if record["SunD_Ttl"] != None:
             SunD_Ttl = str(record["SunD_Ttl"]) + " sec"
         if record["Rain_Ttl"] != None:
-            Rain_Ttl = str(record["Rain_Ttl"]) + " mm"
+            Rain_Ttl = str(round(record["Rain_Ttl"], 2)) + " mm"
         if record["MSLP_Min"] != None:
             MSLP_Min = str(record["MSLP_Min"]) + " hPa"
         if record["MSLP_Max"] != None:
             MSLP_Max = str(record["MSLP_Max"]) + " hPa"
         if record["MSLP_Avg"] != None:
-            MSLP_Avg = str(round(record["MSLP_Avg"], 2)) + " hPa"
+            MSLP_Avg = str(round(record["MSLP_Avg"], 1)) + " hPa"
         if record["ST10_Min"] != None: ST10_Min = str(record["ST10_Min"]) + "°C"
         if record["ST10_Max"] != None: ST10_Max = str(record["ST10_Max"]) + "°C"
         if record["ST10_Avg"] != None:
-            ST10_Avg = str(round(record["ST10_Avg"], 2)) + "°C"
+            ST10_Avg = str(round(record["ST10_Avg"], 1)) + "°C"
         if record["ST30_Min"] != None: ST30_Min = str(record["ST30_Min"]) + "°C"
         if record["ST30_Max"] != None: ST30_Max = str(record["ST30_Max"]) + "°C"
         if record["ST30_Avg"] != None:
-            ST30_Avg = str(round(record["ST30_Avg"], 2)) + "°C"
+            ST30_Avg = str(round(record["ST30_Avg"], 1)) + "°C"
         
     return flask.render_template("statistics.html",
                                  caws_name = config.caws_name,
