@@ -22,8 +22,6 @@ from gpiozero import CPUTemperature
 import spidev
 import bme280
 import sht31d
-import Adafruit_MCP3008
-import Adafruit_GPIO.SPI as SPI
 
 from config import ConfigData
 import helpers
@@ -472,23 +470,31 @@ def every_second():
     if disable_sampling == True: return
 
     # -- WIND DIRECTION --------------------------------------------------------
-    #try:
-    # Read rotation value from analog to digital converter
-    adc_value = Adafruit_MCP3008.MCP3008(spi = SPI.SpiDev(0, 0)).read_adc(1)
-    
-    # Convert ADC value to degrees
-    if adc_value > 0:
-        wdir_degrees = (adc_value - 52) / (976 - 52) * (360 - 0)
-        if wdir_degrees < 0 or wdir_degrees >= 359.5: wdir_degrees = 0
+    spi_bus = None
 
-        # Add offset from north to compensate for non-north mounting
-        wdir_degrees -= 148
-        if wdir_degrees >= 360: wdir_degrees -= 360
-        elif wdir_degrees < 0: wdir_degrees += 360
+    try:
+        spi_bus = spidev.SpiDev()
+        spi_bus.open(0, 0)
 
-        # Add to sample list with timestamp
-        wdir_samples.append((datetime.utcnow(), int(round(wdir_degrees))))
-    #except: gpio.output(23, gpio.HIGH)
+        # Read rotation value from analog to digital converter
+        wdir_data = spi_bus.xfer2([1, (8 + 1) << 4, 0])
+        adc_value = ((wdir_data[1] & 3) << 8) + wdir_data[2]
+
+        # Convert ADC value to degrees
+        if adc_value > 0:
+            wdir_degrees = (adc_value - 52) / (976 - 52) * (360 - 0)
+            if wdir_degrees < 0 or wdir_degrees >= 359.5: wdir_degrees = 0
+
+            # Add offset from north to compensate for non-north mounting
+            wdir_degrees -= 148
+            if wdir_degrees >= 360: wdir_degrees -= 360
+            elif wdir_degrees < 0: wdir_degrees += 360
+
+            # Add to sample list with timestamp
+            wdir_samples.append((datetime.now(), int(round(wdir_degrees))))
+    except: gpio.output(23, gpio.HIGH)
+
+    if spi_bus != None: spi_bus.close()
 
     # -- SUNSHINE DURATION -----------------------------------------------------
     try:
