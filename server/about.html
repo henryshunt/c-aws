@@ -34,6 +34,15 @@
                     display_local_time();
                 }, 100);
             }
+
+            function send_cmd(command) {
+                var passphrase = prompt(
+                    "Authentication is required to issue commands to the CAWS computer. Enter the passphrase:");
+
+                if (passphrase == "weather station") {
+                    window.location.replace("command/" + command);
+                } else { alert("Incorrect passphrase, authentication failed."); }
+            }
         </script>
     </head>
 
@@ -148,7 +157,7 @@
                 </table>
             </div>
 
-            <div class="group" style="margin-bottom: 0px">
+            <div class="group">
                 <div class="group_header">
                     <p class="group_title">Database Integrity</p>
                 </div>
@@ -185,7 +194,7 @@
                 </table>
             </div>
 
-            <div class="group">
+            <div class="group" style="margin-bottom: 0px">
                 <div class="group_header">
                     <p class="group_title">Power Controls</p>
                 </div>
