@@ -8,6 +8,7 @@ import time
 from datetime import datetime, timedelta
 import os
 import sys
+import subprocess
 
 import flask
 
@@ -358,7 +359,7 @@ def page_about():
                                  backup_space = backup_space,
                                  data_time = data_time)
 
-def file_camera(file_name):
+def data_camera(file_name):
     try:
         local_time = datetime.strptime(file_name, "%Y-%m-%dT%H-%M-%S.jpg")
         utc = helpers.local_to_utc(config, local_time)
@@ -373,6 +374,21 @@ def file_camera(file_name):
 
         return flask.send_from_directory(image_dir, image_name)
     except: return flask.send_from_directory("server", "no_camera_image.png")
+
+def data_graph(fields):
+    pass
+
+def data_command(command):
+    current_dir = os.path.dirname(os.path.realpath(__file__))
+
+    if command == "shutdown":
+        subprocess.Popen(["python3 " + current_dir + "/power.py -h"],
+                         shell = True)
+    elif command == "restart":
+        subprocess.Popen(["python3 " + current_dir + "/power.py -r"],
+                         shell = True)
+
+    return flask.redirect("about.html")
 
 
 # ENTRY POINT ==================================================================
@@ -398,7 +414,10 @@ server.add_url_rule("/graph_month.html", view_func = page_graph_month)
 server.add_url_rule("/graph_year.html", view_func = page_graph_year)
 server.add_url_rule("/camera.html", view_func = page_camera)
 server.add_url_rule("/about.html", view_func = page_about)
-server.add_url_rule("/camera/<file_name>", view_func = file_camera)
+
+server.add_url_rule("/camera/<file_name>", view_func = data_camera)
+server.add_url_rule("/graph/<fields>", view_func = data_graph)
+server.add_url_rule("/command/<command>", view_func = data_command)
 
 # -- START SERVER --------------------------------------------------------------
 start_time = datetime.utcnow().replace(second = 0, microsecond = 0)
