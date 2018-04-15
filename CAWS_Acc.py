@@ -152,16 +152,15 @@ def page_statistics():
 
         # If loading now data, try previous minute if no record for current minute
         if record == False or record == None and utc_second < 8:
-            if load_now_data == True:
-                utc -= timedelta(minutes = 1)
-                local_time -= timedelta(minutes = 1)
-                record = analysis.record_for_time(config,
-                                                  local_time, DbTable.LOCALSTATS)
+            utc -= timedelta(minutes = 1)
+            local_time -= timedelta(minutes = 1)
+            record = analysis.record_for_time(config,
+                                              local_time, DbTable.LOCALSTATS)
 
-                # Return to current minute if no record for previous minute
-                if record == False or record == None:
-                    utc += timedelta(minutes = 1)
-                    local_time += timedelta(minutes = 1)
+            # Return to current minute if no record for previous minute
+            if record == False or record == None:
+                utc += timedelta(minutes = 1)
+                local_time += timedelta(minutes = 1)
 
     scroller_prev = (local_time - timedelta(days = 1)).strftime("%Y-%m-%d")
     scroller_time = local_time.strftime("%d/%m/%Y")
