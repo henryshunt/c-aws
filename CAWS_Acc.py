@@ -321,11 +321,12 @@ def page_about():
         if record["EncT"] != None: EncT = str(record["EncT"]) + "°C"
         if record["CPUT"] != None: CPUT = str(record["CPUT"]) + "°C"
 
-    # Calculate remaining storage space for drives
+    # Get remaining internal storage space
     _internal_space = helpers.remaining_space("/")
     if _internal_space != None:
         internal_space = str(round(_internal_space, 2)) + " gb"
 
+    # Get remaining camera storage space
     if not os.path.isdir(config.camera_drive):
         camera_space = "no drive"
     else:
@@ -334,6 +335,7 @@ def page_about():
         if _camera_space != None:
             camera_space = str(round(_camera_space, 2)) + " gb"
 
+    # Get remaining backup storage space
     if not os.path.isdir(config.backup_drive):
         backup_space = "no drive"
     else:
@@ -345,10 +347,10 @@ def page_about():
     return flask.render_template("about.html",
                                  caws_name = config.caws_name,
                                  caws_location = config.caws_location,
+                                 caws_time_zone = config.caws_time_zone,
                                  caws_latitude = config.caws_latitude,
                                  caws_longitude = config.caws_longitude,
                                  caws_elevation = caws_elevation,
-                                 caws_time_zone = config.caws_time_zone,
                                  startup_time = startup_time,
                                  EncT = EncT, CPUT = CPUT,
                                  internal_space = internal_space,
