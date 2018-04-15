@@ -258,9 +258,9 @@ def do_log_report(utc):
 
             # Calculate difference between pressure 3 hours ago
             if record_then != False and record_then != None:
-                if record_then["MSLP"] != None:
+                if record_then["StaP"] != None:
                     frame.pressure_tendency = round(
-                        frame.station_pressure - record_then["MSLP"], 1)
+                        frame.station_pressure - record_then["StaP"], 1)
     except: gpio.output(23, gpio.HIGH)
 
     # ADD TO DATABASE ----------------------------------------------------------
