@@ -498,7 +498,7 @@ def every_second():
             if WDir_degrees < 0 or WDir_degrees >= 359.5: WDir_degrees = 0
 
             # Add to sample list with timestamp
-            WDir_samples.append((datetime.now(), int(round(WDir_degrees))))
+            WDir_samples.append((datetime.utcnow(), int(round(WDir_degrees))))
         else: gpio.output(23, gpio.HIGH)
     except: gpio.output(23, gpio.HIGH)
 
@@ -514,7 +514,7 @@ def do_trigger_wspd(channel):
     global disable_sampling, WSpd_ticks
     if disable_sampling == True: return
     
-    WSpd_ticks.append(datetime.now())
+    WSpd_ticks.append(datetime.utcnow())
 
 def do_trigger_rain(channel):
     global disable_sampling, Rain_ticks
