@@ -17,11 +17,13 @@ import math
 import sqlite3
 import RPi.GPIO as gpio
 import spidev
+import Adafruit_GPIO
 
 import astral
 from apscheduler.schedulers.blocking import BlockingScheduler
 import bme280
 import sht31d
+import Adafruit_MCP3008
 
 from config import ConfigData
 import helpers
@@ -481,15 +483,14 @@ def every_second():
     if disable_sampling == True: return
 
     # -- WIND DIRECTION --------------------------------------------------------
-    spi_bus = None
+    spi = None
 
     try:
-        spi_bus = spidev.SpiDev()
-        spi_bus.open(0, 0)
+        spi = Adafruit_GPIO.SPI.SpiDev(0, 0)
+        adc = Adafruit_MCP3008.MCP3008(spi = spi)
 
         # Read sensor value from analog to digital converter
-        adc_data = spi_bus.xfer2([1, (8 + 1) << 4, 0])
-        adc_value = ((adc_data[1] & 3) << 8) + adc_data[2]
+        adc_value = adc.read_adc(1)
 
         # Convert ADC value to degrees
         if adc_value > 0:
@@ -501,7 +502,7 @@ def every_second():
         else: gpio.output(23, gpio.HIGH)
     except: gpio.output(23, gpio.HIGH)
 
-    if spi_bus != None: spi_bus.close()
+    if spi != None: spi.close()
 
     # -- SUNSHINE DURATION -----------------------------------------------------
     try:
