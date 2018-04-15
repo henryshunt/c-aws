@@ -64,7 +64,7 @@ def do_read_temp(address):
     """ Reads value of specific temperature probe into its global variable
     """
     if not os.path.isdir("/sys/bus/w1/devices/" + address):
-        gpio.output(23, gpio.HIGH); return
+        return #gpio.output(23, gpio.HIGH); return
 
     try:
         with open("/sys/bus/w1/devices/" + address + "/w1_slave", "r") as probe:
@@ -498,6 +498,7 @@ def every_second():
 
             # Add to sample list with timestamp
             WDir_samples.append((datetime.now(), int(round(WDir_degrees))))
+        else: gpio.output(23, gpio.HIGH)
     except: gpio.output(23, gpio.HIGH)
 
     if spi_bus != None: spi_bus.close()
