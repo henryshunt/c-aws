@@ -37,11 +37,12 @@ def page_now():
     StaP = "no data"; MSLP = "no data"; PTen = "no data"; ST10 = "no data"
     ST30 = "no data"; ST00 = "no data"
 
-    utc = datetime.utcnow().replace(second = 0, microsecond = 0)
+    utc = datetime.utcnow(); utc_second = utc.second
+    utc = utc.replace(second = 0, microsecond = 0)
     record = analysis.record_for_time(config, utc, DbTable.UTCREPORTS)
 
     # Try previous minute if no record for current minute
-    if record == False or record == None:
+    if record == False or record == None and utc_second < 8:
         utc -= timedelta(minutes = 1)
         record = analysis.record_for_time(config, utc, DbTable.UTCREPORTS)
 
@@ -105,41 +106,62 @@ def page_statistics():
     MSLP_Max = "no data"; MSLP_Avg = "no data"; ST10_Min = "no data"
     ST10_Max = "no data"; ST10_Avg = "no data"; ST30_Min = "no data"
     ST30_Max = "no data"; ST30_Avg = "no data"; ST00_Min = "no data"
-    ST00_Max = "no data"; ST00_Avg = "no data"
+    ST00_Max = "no data"; ST00_Avg = "no data"; update = False
 
-    utc = datetime.utcnow().replace(second = 0, microsecond = 0)
-    load_now_data = True
+    utc = datetime.utcnow(); utc_second = utc.second
+    utc = utc.replace(second = 0, microsecond = 0)
 
     # Check for local date specified in URL and try parsing
     if flask.request.args.get("date") != None:
         try:
-            local_time = datetime.strptime(
+            url_date = datetime.strptime(
                 flask.request.args.get("date"), "%Y-%m-%d")
             
             # Remove date parameter if same as current date
-            if (local_time.strftime("%Y-%m-%d")
+            if (url_date.strftime("%Y-%m-%d")
                 == helpers.utc_to_local(config, utc).strftime("%Y-%m-%d")):
-                    return flask.redirect(flask.url_for("page_statistics"))
 
-            load_now_data = False
+                    if utc_second < 8:
+                        local_time = url_date
+                        record = analysis.record_for_time(config, url_date, DbTable.LOCALSTATS)
+
+                        # If loading now data, try previous minute if no record for current minute
+                        if record != False and record != None:
+                            return flask.redirect(flask.url_for("page_statistics"))
+                        
+                        elif record == False or record == None:
+                            update_override = True
+                            local_time = url_date - timedelta(minutes = 1)
+                            utc -= timedelta(minutes = 1)
+                            record = analysis.record_for_time(config, local_time, DbTable.LOCALSTATS)
+
+                            if record == False or record == None:
+                                return flask.redirect(flask.url_for("page_statistics"))
+                            
+                    else: return flask.redirect(flask.url_for("page_statistics"))
+
+            else:
+                local_time = url_date
+                record = analysis.record_for_time(config, url_date, DbTable.LOCALSTATS)
+
         except: return flask.redirect(flask.url_for("page_statistics"))
 
-    # Convert UTC to local if loading now data
-    if load_now_data == True:
+    else:
         local_time = helpers.utc_to_local(config, utc)
-    
-    record = analysis.record_for_time(config, local_time, DbTable.LOCALSTATS)
+        record = analysis.record_for_time(config, local_time, DbTable.LOCALSTATS)
 
-    # If loading now data, try previous minute if no record for current minute
-    if record == False or record == None:
-        if load_now_data == True:
-            local_time -= timedelta(minutes = 1)
-            record = analysis.record_for_time(config,
-                                              local_time, DbTable.LOCALSTATS)
+        # If loading now data, try previous minute if no record for current minute
+        if record == False or record == None and utc_second < 8:
+            if load_now_data == True:
+                utc -= timedelta(minutes = 1)
+                local_time -= timedelta(minutes = 1)
+                record = analysis.record_for_time(config,
+                                                  local_time, DbTable.LOCALSTATS)
 
-            # Return to current minute if no record for previous minute
-            if record == False or record == None:
-                  local_time += timedelta(minutes = 1)
+                # Return to current minute if no record for previous minute
+                if record == False or record == None:
+                    utc += timedelta(minutes = 1)
+                    local_time += timedelta(minutes = 1)
 
     scroller_prev = (local_time - timedelta(days = 1)).strftime("%Y-%m-%d")
     scroller_time = local_time.strftime("%d/%m/%Y")
@@ -249,7 +271,15 @@ def page_camera():
             if (local_time.strftime("%Y-%m-%dT%H-%M")
                 == helpers.utc_to_local(config,
                                         utc).strftime("%Y-%m-%dT%H-%M")):
-                    return flask.redirect(flask.url_for("page_camera"))
+
+                    local_time = helpers.utc_to_local(config, utc)
+
+                    # Try previous 5 mins if no image for current 5 min
+                    image_dir = os.path.join(config.camera_drive,
+                                             utc.strftime("%Y/%m/%d"))
+                    image_name = utc.strftime("%Y-%m-%dT%H-%M-%S.jpg")
+                    if os.path.isfile(os.path.join(image_dir, image_name)):
+                        return flask.redirect(flask.url_for("page_camera"))
                 
             load_now_data = False
         except: return flask.redirect(flask.url_for("page_camera"))
@@ -262,7 +292,7 @@ def page_camera():
         image_dir = os.path.join(config.camera_drive,
                                  utc.strftime("%Y/%m/%d"))
         image_name = utc.strftime("%Y-%m-%dT%H-%M-%S.jpg")
-                
+        
         if not os.path.isfile(os.path.join(image_dir, image_name)):
             local_time -= timedelta(minutes = 5)
             to_utc = helpers.local_to_utc(config, local_time)
@@ -295,7 +325,8 @@ def page_about():
     internal_space = "no data"; camera_space = "no data"
     backup_space = "no data"
 
-    utc = datetime.utcnow().replace(second = 0, microsecond = 0)
+    utc = datetime.utcnow(); utc_second = utc.second
+    utc = utc.replace(second = 0, microsecond = 0)
     caws_elevation = str(config.caws_elevation) + " m asl."
 
     # Format software startup time
@@ -307,7 +338,7 @@ def page_about():
     record = analysis.record_for_time(config, utc, DbTable.UTCENVIRON)
 
     # Try previous minute if no record for current minute
-    if record == False or record == None:
+    if record == False or record == None and utc_second < 8:
         utc -= timedelta(minutes = 1)
         record = analysis.record_for_time(config, utc, DbTable.UTCENVIRON)
 
