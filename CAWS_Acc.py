@@ -69,7 +69,12 @@ def page_now():
         if record["Rain"] != None: Rain = str(round(record["Rain"], 2)) + " mm"
         if record["StaP"] != None: StaP = str(record["StaP"]) + " hPa"
         if record["MSLP"] != None: MSLP = str(record["MSLP"]) + " hPa"
-        if record["PTen"] != None: PTen = str(record["PTen"]) + " hPa"
+        
+        if record["PTen"] != None:
+            if record["PTen"] > 0:
+                PTen = "+" + str(record["PTen"]) + " hPa"
+            else: PTen = str(record["PTen"]) + " hPa"
+            
         if record["ST10"] != None: ST10 = str(record["ST10"]) + "°C"
         if record["ST30"] != None: ST30 = str(record["ST30"]) + "°C"
         if record["ST00"] != None: ST00 = str(record["ST00"]) + "°C"
@@ -238,9 +243,19 @@ def page_statistics():
                                  override_update = override_update)
 
 def page_graph_day():
+    bounds = helpers.day_bounds_utc(config, helpers.utc_to_local(config, datetime.utcnow()), True)
+
+    start = bounds[0].strftime("%Y-%m-%dT%H-%M-%S")
+    end = bounds[1].strftime("%Y-%m-%dT%H-%M-%S")
+    low = helpers.utc_to_local(config, bounds[0]).timestamp()
+    high = helpers.utc_to_local(config, bounds[1]).timestamp()
+
     return flask.render_template("graph_day.html",
                                  caws_name = config.caws_name,
-                                 caws_location = config.caws_location)
+                                 caws_location = config.caws_location,
+                                 start = start, end = end,
+                                 field = "AirT",
+                                 low = low, high = high)
 
 def page_graph_month():
     return flask.render_template("graph_month.html",
@@ -408,9 +423,9 @@ def data_camera(file_name):
         return flask.send_from_directory(image_dir, image_name)
     except: return flask.send_from_directory("server", "no_camera_image.png")
 
-def data_graph(start, end, field):
-    start = datetime.strptime(start, "%Y-%m-%dT%H-%M-%S")
-    end = datetime.strptime(end, "%Y-%m-%dT%H-%M-%S")
+def data_graph():
+    start = datetime.strptime(flask.request.args.get("start"), "%Y-%m-%dT%H-%M-%S")
+    end = datetime.strptime(flask.request.args.get("end"), "%Y-%m-%dT%H-%M-%S")
     records = analysis.records_in_range(config, start, end, DbTable.UTCREPORTS)
     final_data = []
 
@@ -418,8 +433,8 @@ def data_graph(start, end, field):
         record_time = datetime.strptime(record["Time"], "%Y-%m-%d %H:%M:%S")
 
         point = { 
-            "x": helpers.utc_to_local(config, record_time.timestamp()),
-            "y": record[field]
+            "x": helpers.utc_to_local(config, record_time).timestamp(),
+            "y": record[flask.request.args.get("field")]
         }
 
         final_data.append(point)
@@ -463,7 +478,7 @@ server.add_url_rule("/camera.html", view_func = page_camera)
 server.add_url_rule("/about.html", view_func = page_about)
 
 server.add_url_rule("/camera/<file_name>", view_func = data_camera)
-server.add_url_rule("/graph/<fields>", view_func = data_graph)
+server.add_url_rule("/graph/data", view_func = data_graph)
 server.add_url_rule("/command/<command>", view_func = data_command)
 
 # -- START SERVER --------------------------------------------------------------

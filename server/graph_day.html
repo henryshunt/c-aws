@@ -7,7 +7,7 @@
         <script src="{{ url_for("static", filename = "scripts.js") }}"></script>
         <script src="{{ url_for("static", filename = "jquery.js") }}"></script>
         <script src="{{ url_for("static", filename = "chartist.js") }}"></script>
-        <script src="{{ url_for("static", filename = "chartist.css") }}"></script>
+        <link href="{{ url_for("static", filename = "chartist.css") }}" rel="stylesheet">
         <script src="{{ url_for("static", filename = "moment.js") }}"></script>
 
         <script>
@@ -39,6 +39,12 @@
                 setInterval(function() { display_local_time(); }, 100);
             }
         </script>
+
+        <style>
+            .ct-series .ct-line {
+                stroke-width: 1px;
+            }
+        </style>
     </head>
 
     <body onload="page_load_js()">
@@ -74,7 +80,7 @@
                     <p class="group_title">Ambient Temperature &amp; Dew Pt</p>
                 </div>
 
-                
+                <div class="ct-chart"></div>
             </div>
 
             <div class="group">
@@ -148,5 +154,32 @@
             </div>
         </div>
 
+        <script type="text/javascript">
+            var getData = $.get("/graph/data?start={{ start }}&end={{ end }}&field={{ field }}", function(points) {
+                var data = { series: [points] };
+
+                var options = {
+                    fullWidth: true,
+                    height: 400,
+                    showPoint: false,
+                    lineSmooth: false,
+
+                    axisX: {
+                        type: Chartist.FixedScaleAxis,
+                        low: {{ low }},
+                        high: {{ high }},
+                        divisor: 8,
+        
+                        labelInterpolationFnc: function(value) {
+                            return moment.unix(value).zone("+0000").format("HH:mm");
+                        }
+                    },
+
+                    axisY: { offset: 30 }
+                };
+
+                new Chartist.Line('.ct-chart', data, options);
+            });
+        </script>
     </body>
 </html>
