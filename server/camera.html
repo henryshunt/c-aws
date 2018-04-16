@@ -7,7 +7,11 @@
 
         <script>
             function page_load_js() {
-                if (window.location.href.includes("?time=") == false) {
+                var override_update = {{ override_update }};
+
+                if (window.location.href.includes("?time=") == false ||
+                    override_update == true) {
+
                     var timestamp = new Date();
                     var refresh_time = new Date(timestamp.getTime());
 
