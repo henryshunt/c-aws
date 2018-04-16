@@ -57,6 +57,37 @@ def records_in_range(config, start, end, table):
             return cursor.fetchall()
     except: return False
 
+def fields_in_range(config, start, end, fields, table):
+    start = start.replace(second = 0, microsecond = 0)
+    end = end.replace(second = 0, microsecond = 0)
+
+    try:
+        with sqlite3.connect(config.database_path) as database:
+            database.row_factory = sqlite3.Row
+            cursor = database.cursor()
+
+            # Query respective database table
+            if table == DbTable.UTCREPORTS:
+                cursor.execute(queries.SELECT_FIELDS_UTCREPORTS
+                               .format(fields),
+                               (start.strftime("%Y-%m-%d %H:%M:%S"),
+                                end.strftime("%Y-%m-%d %H:%M:%S")))
+
+            elif table == DbTable.UTCENVIRON:
+                cursor.execute(queries.SELECT_FIELDS_UTCENVIRON
+                               .format(fields),
+                               (start.strftime("%Y-%m-%d %H:%M:%S"),
+                                end.strftime("%Y-%m-%d %H:%M:%S")))
+
+            elif table == DbTable.LOCALSTATS:
+                cursor.execute(queries.SELECT_FIELDS_LOCALSTATS
+                               .format(fields),
+                               (start.strftime("%Y-%m-%d"),
+                                end.strftime("%Y-%m-%d")))
+
+            return cursor.fetchall()
+    except: return False
+
 def past_hour_total(config, now, column):
     start = now.replace(second = 0, microsecond = 0) - timedelta(hours = 1)
     end = now.replace(second = 0, microsecond = 0)

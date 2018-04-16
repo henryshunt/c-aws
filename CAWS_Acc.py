@@ -426,19 +426,33 @@ def data_camera(file_name):
 def data_graph():
     start = datetime.strptime(flask.request.args.get("start"), "%Y-%m-%dT%H-%M-%S")
     end = datetime.strptime(flask.request.args.get("end"), "%Y-%m-%dT%H-%M-%S")
-    records = analysis.records_in_range(config, start, end, DbTable.UTCREPORTS)
+    records = analysis.fields_in_range(config, start, end, "Time, AirT, ExpT, DewP", DbTable.UTCREPORTS)
     final_data = []
+    fd2 = []
+    fd3 = []
 
     for record in records:
         record_time = datetime.strptime(record["Time"], "%Y-%m-%d %H:%M:%S")
 
         point = { 
             "x": helpers.utc_to_local(config, record_time).timestamp(),
-            "y": record[flask.request.args.get("field")]
+            "y": record["AirT"]
+        }
+        point2 = { 
+            "x": helpers.utc_to_local(config, record_time).timestamp(),
+            "y": record["ExpT"]
+        }
+        point3 = { 
+            "x": helpers.utc_to_local(config, record_time).timestamp(),
+            "y": record["DewP"]
         }
 
         final_data.append(point)
-    return flask.jsonify(final_data)
+        fd2.append(point2)
+        fd3.append(point3)
+
+    x = [final_data, fd2, fd3]
+    return flask.jsonify(x)
 
 def data_command(command):
     current_dir = os.path.dirname(os.path.realpath(__file__))

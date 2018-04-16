@@ -44,6 +44,19 @@
             .ct-series .ct-line {
                 stroke-width: 1px;
             }
+            .ct-label {
+                color: rgba(0, 0, 0, 0.8);
+                text-anchor: middle;
+                font-size: 10;
+            }
+.ct-label.ct-horizontal.ct-end {
+    transform: translate(-50%, 0);
+    display: block;
+    text-align: center;
+}
+.ct-label.ct-vertical.ct-start {
+    transform: translateY(15.5%);
+}
         </style>
     </head>
 
@@ -156,13 +169,12 @@
 
         <script type="text/javascript">
             var getData = $.get("/graph/data?start={{ start }}&end={{ end }}&field={{ field }}", function(points) {
-                var data = { series: [points] };
+                var data = { series: points };
 
                 var options = {
                     fullWidth: true,
                     height: 400,
                     showPoint: false,
-                    lineSmooth: false,
 
                     axisX: {
                         type: Chartist.FixedScaleAxis,
@@ -172,7 +184,9 @@
         
                         labelInterpolationFnc: function(value) {
                             return moment.unix(value).zone("+0000").format("HH:mm");
-                        }
+                        },
+
+                        offset: 20
                     },
 
                     axisY: { offset: 30 }
