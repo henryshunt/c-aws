@@ -106,58 +106,51 @@ def page_statistics():
     MSLP_Max = "no data"; MSLP_Avg = "no data"; ST10_Min = "no data"
     ST10_Max = "no data"; ST10_Avg = "no data"; ST30_Min = "no data"
     ST30_Max = "no data"; ST30_Avg = "no data"; ST00_Min = "no data"
-    ST00_Max = "no data"; ST00_Avg = "no data"; update_override = False
+    ST00_Max = "no data"; ST00_Avg = "no data"
 
     utc = datetime.utcnow(); utc_second = utc.second
     utc = utc.replace(second = 0, microsecond = 0)
+    override_update = False
 
-    # Check for local date specified in URL and try parsing
+    # Check for a local date in the URL
     if flask.request.args.get("date") != None:
         try:
             url_date = datetime.strptime(
                 flask.request.args.get("date"), "%Y-%m-%d")
+            local_date = helpers.utc_to_local(config, utc)
             
-            # Remove date parameter if same as current date
+            # Check if date in URL is the same as current date
             if (url_date.strftime("%Y-%m-%d")
-                == helpers.utc_to_local(config, utc).strftime("%Y-%m-%d")):
+                == local_date.strftime("%Y-%m-%d")):
 
-                    if utc_second < 8:
-                        local_time = url_date
-                        record = analysis.record_for_time(config, url_date, DbTable.LOCALSTATS)
+                record = analysis.record_for_time(config, local_date,
+                                                DbTable.LOCALSTATS)
 
-                        # If loading now data, try previous minute if no record for current minute
-                        if record != False and record != None:
-                            return flask.redirect(flask.url_for("page_statistics"))
-                        
-                        elif record == False or record == None:
-                            update_override = True
-                            local_time = url_date - timedelta(minutes = 1)
-                            utc -= timedelta(minutes = 1)
-                            record = analysis.record_for_time(config, local_time, DbTable.LOCALSTATS)
-
-                            if record == False or record == None:
-                                return flask.redirect(flask.url_for("page_statistics"))
-                            
-                    else: return flask.redirect(flask.url_for("page_statistics"))
+                # Override updating to trigger if less than 8 seconds
+                if record == False or record == None and utc_second < 8:
+                    override_update = True
+                else: return flask.redirect(flask.url_for("page_statistics"))
 
             else:
+                utc = helpers.local_to_utc(config, url_date)
                 local_time = url_date
-                record = analysis.record_for_time(config, url_date, DbTable.LOCALSTATS)
-
+                record = analysis.record_for_time(config, url_date,
+                                                  DbTable.LOCALSTATS)
         except: return flask.redirect(flask.url_for("page_statistics"))
 
     else:
         local_time = helpers.utc_to_local(config, utc)
-        record = analysis.record_for_time(config, local_time, DbTable.LOCALSTATS)
-
-        # If loading now data, try previous minute if no record for current minute
+        record = analysis.record_for_time(config, local_time,
+                                          DbTable.LOCALSTATS)
+        
+        # Try previous minute if no image for current minute
         if record == False or record == None and utc_second < 8:
             utc -= timedelta(minutes = 1)
             local_time -= timedelta(minutes = 1)
             record = analysis.record_for_time(config,
                                               local_time, DbTable.LOCALSTATS)
 
-            # Return to current minute if no record for previous minute
+            # Return to current minute if no image for previous minute
             if record == False or record == None:
                 utc += timedelta(minutes = 1)
                 local_time += timedelta(minutes = 1)
@@ -166,6 +159,7 @@ def page_statistics():
     scroller_time = local_time.strftime("%d/%m/%Y")
     scroller_next = (local_time + timedelta(days = 1)).strftime("%Y-%m-%d")
     data_time = helpers.utc_to_local(config, utc).strftime("%H:%M")
+    override_update = str(override_update).lower()
 
     # Get values to display for each statistic parameter
     if record != False and record != None:
@@ -238,7 +232,8 @@ def page_statistics():
                                  ST30_Min = ST30_Min, ST30_Max = ST30_Max,
                                  ST30_Avg = ST30_Avg, ST00_Min = ST00_Min,
                                  ST00_Max = ST00_Max, ST00_Avg = ST00_Avg,
-                                 data_time = data_time)
+                                 data_time = data_time,
+                                 override_update = override_update)
 
 def page_graph_day():
     return flask.render_template("graph_day.html",
@@ -271,16 +266,16 @@ def page_camera():
             if (url_time.strftime("%Y-%m-%dT%H-%M")
                 == local_time.strftime("%Y-%m-%dT%H-%M")):
                 
-                    image_dir = os.path.join(config.camera_drive,
-                                             utc.strftime("%Y/%m/%d"))
-                    image_name = utc.strftime("%Y-%m-%dT%H-%M-%S.jpg")
+                image_dir = os.path.join(config.camera_drive,
+                                            utc.strftime("%Y/%m/%d"))
+                image_name = utc.strftime("%Y-%m-%dT%H-%M-%S.jpg")
+                
+                # Override updating to trigger if less than 8 seconds
+                if (not os.path.isfile(os.path.join(image_dir, image_name))
+                    and utc_second < 8):
                     
-                    # Override updating to trigger if less than 8 seconds
-                    if (not os.path.isfile(os.path.join(image_dir, image_name))
-                        and utc_second < 8):
-                        
-                        override_update = True
-                    else: return flask.redirect(flask.url_for("page_camera"))
+                    override_update = True
+                else: return flask.redirect(flask.url_for("page_camera"))
                 
             else:
                 utc = helpers.local_to_utc(config, url_time)
