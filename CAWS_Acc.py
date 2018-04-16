@@ -77,12 +77,14 @@ def page_now():
     # Calculate total sunshine duration over past hour
     SunD_Phr_record = analysis.past_hour_total(config, utc, "SunD")
     if SunD_Phr_record != False and SunD_Phr_record != None:
-        SunD_Phr = str(SunD_Phr_record["SunD"]) + " sec"
+        if SunD_Phr_record["SunD"] != None:
+            SunD_Phr = str(SunD_Phr_record["SunD"]) + " sec"
 
     # Calculate total rainfall over past hour
     Rain_Phr_record = analysis.past_hour_total(config, utc, "Rain")
     if Rain_Phr_record != False and Rain_Phr_record != None:
-        Rain_Phr = str(round(Rain_Phr_record["Rain"], 2)) + " mm"
+        if Rain_Phr_record["Rain"] != None:
+            Rain_Phr = str(round(Rain_Phr_record["Rain"], 2)) + " mm"
 
     return flask.render_template("index.html",
                                  caws_name = config.caws_name,
@@ -406,8 +408,22 @@ def data_camera(file_name):
         return flask.send_from_directory(image_dir, image_name)
     except: return flask.send_from_directory("server", "no_camera_image.png")
 
-def data_graph(fields):
-    pass
+def data_graph(start, end, field):
+    start = datetime.strptime(start, "%Y-%m-%dT%H-%M-%S")
+    end = datetime.strptime(end, "%Y-%m-%dT%H-%M-%S")
+    records = analysis.records_in_range(config, start, end, DbTable.UTCREPORTS)
+    final_data = []
+
+    for record in records:
+        record_time = datetime.strptime(record["Time"], "%Y-%m-%d %H:%M:%S")
+
+        point = { 
+            "x": helpers.utc_to_local(config, record_time.timestamp()),
+            "y": record[field]
+        }
+
+        final_data.append(point)
+    return flask.jsonify(final_data)
 
 def data_command(command):
     current_dir = os.path.dirname(os.path.realpath(__file__))
