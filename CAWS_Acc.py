@@ -243,7 +243,8 @@ def page_statistics():
                                  override_update = override_update)
 
 def page_graph_day():
-    bounds = helpers.day_bounds_utc(config, helpers.utc_to_local(config, datetime.utcnow()), True)
+    bounds = helpers.day_bounds_utc(config, helpers.utc_to_local(
+        config, datetime.utcnow()), True)
 
     start = bounds[0].strftime("%Y-%m-%dT%H-%M-%S")
     end = bounds[1].strftime("%Y-%m-%dT%H-%M-%S")
@@ -254,7 +255,6 @@ def page_graph_day():
                                  caws_name = config.caws_name,
                                  caws_location = config.caws_location,
                                  start = start, end = end,
-                                 fields = "Time,AirT,ExpT,DewP",
                                  low = low, high = high)
 
 def page_graph_month():
