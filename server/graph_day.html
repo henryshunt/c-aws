@@ -99,7 +99,7 @@
                     <p class="group_title">Ambient Temperature</p>
                 </div>
 
-                <div class="ct-chart"></div>
+                <div class="ct-chart" id="ambient_temperature"></div>
             </div>
 
             <div class="group">
@@ -107,7 +107,7 @@
                     <p class="group_title">Relative Humidity</p>
                 </div>
 
-                
+                <div class="ct-chart" id="relative_humidity"></div>
             </div>
 
             <div class="group">
@@ -115,7 +115,7 @@
                     <p class="group_title">Ten Minute Wind</p>
                 </div>
     
-                    
+                <div class="ct-chart" id="ten_miute_wind"></div>
             </div>
 
             <div class="group">
@@ -123,7 +123,7 @@
                     <p class="group_title">Ten Minute Wind Direction</p>
                 </div>
     
-                    
+                <div class="ct-chart" id="ten_miute_wind_direction"></div>
             </div>
 
             <div class="group">
@@ -131,7 +131,7 @@
                     <p class="group_title">Sunshine Accumulation</p>
                 </div>
     
-                    
+                <div class="ct-chart" id="sunshine_accumulation"></div>
             </div>
 
             <div class="group">
@@ -139,7 +139,7 @@
                     <p class="group_title">Rainfall Accumulation</p>
                 </div>
     
-                    
+                <div class="ct-chart" id="rainfall_accumulation"></div>
             </div>
 
             <div class="group">
@@ -147,7 +147,7 @@
                     <p class="group_title">Mean Sea Level Pressure</p>
                 </div>
     
-                    
+                <div class="ct-chart" id="mean_sea_level_pressure"></div>
             </div>
 
             <div class="group" style="margin-bottom: 0px">
@@ -155,7 +155,7 @@
                     <p class="group_title">Soil Temperature</p>
                 </div>
     
-                    
+                <div class="ct-chart" id="soil_temperature"></div>
             </div>
         </div>
 
@@ -174,7 +174,7 @@
         </div>
 
         <script>
-            var request = $.get("/graph/data?start={{ start }}&end={{ end }}&fields=Time,AirT,ExpT,DewP", function(response) {
+            var ambient_temperature = $.get("/graph/data?start={{ start }}&end={{ end }}&fields=Time,AirT,ExpT,DewP", function(response) {
                 var data = { series: response };
 
                 var options = {
@@ -196,7 +196,32 @@
                     axisY: { offset: 30 }
                 };
 
-                new Chartist.Line(".ct-chart", data, options);
+                new Chartist.Line("#ambient_temperature", data, options);
+            });
+
+            var relative_humidity = $.get("/graph/data?start={{ start }}&end={{ end }}&fields=Time,RelH", function(response) {
+                var data = { series: response };
+
+                var options = {
+                    showPoint: false,
+                    height: 380,
+
+                    axisX: {
+                        type: Chartist.FixedScaleAxis,
+                        low: {{ low }},
+                        high: {{ high }},
+                        divisor: 8,
+                        offset: 20,
+        
+                        labelInterpolationFnc: function(value) {
+                            return moment.unix(value).zone("+0000").format("HH:mm");
+                        }
+                    },
+
+                    axisY: { offset: 30 }
+                };
+
+                new Chartist.Line("#relative_humidity", data, options);
             });
         </script>
     </body>
