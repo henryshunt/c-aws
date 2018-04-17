@@ -168,7 +168,7 @@
         </div>
 
         <script type="text/javascript">
-            var getData = $.get("/graph/data?start={{ start }}&end={{ end }}&field={{ field }}", function(points) {
+            var getData = $.get("/graph/data?start={{ start }}&end={{ end }}&field={{ fields }}", function(points) {
                 var data = { series: points };
 
                 var options = {

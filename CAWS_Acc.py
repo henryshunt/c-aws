@@ -254,7 +254,7 @@ def page_graph_day():
                                  caws_name = config.caws_name,
                                  caws_location = config.caws_location,
                                  start = start, end = end,
-                                 field = "AirT",
+                                 fields = "AirT,ExpT,DewP",
                                  low = low, high = high)
 
 def page_graph_month():
@@ -426,33 +426,27 @@ def data_camera(file_name):
 def data_graph():
     start = datetime.strptime(flask.request.args.get("start"), "%Y-%m-%dT%H-%M-%S")
     end = datetime.strptime(flask.request.args.get("end"), "%Y-%m-%dT%H-%M-%S")
-    records = analysis.fields_in_range(config, start, end, "Time, AirT, ExpT, DewP", DbTable.UTCREPORTS)
+    records = analysis.fields_in_range(config, start, end, flask.request.args.get("fields"), DbTable.UTCREPORTS)
+
+    fields = flask.request.args.get("fields").split(",")
     final_data = []
-    fd2 = []
-    fd3 = []
+
+    for field in range(1, len(fields - 1)):
+        final_data.append([])
 
     for record in records:
         record_time = datetime.strptime(record["Time"], "%Y-%m-%d %H:%M:%S")
+        x = helpers.utc_to_local(config, record_time).timestamp()
 
-        point = { 
-            "x": helpers.utc_to_local(config, record_time).timestamp(),
-            "y": record["AirT"]
-        }
-        point2 = { 
-            "x": helpers.utc_to_local(config, record_time).timestamp(),
-            "y": record["ExpT"]
-        }
-        point3 = { 
-            "x": helpers.utc_to_local(config, record_time).timestamp(),
-            "y": record["DewP"]
-        }
+        for field in range(1, len(fields - 1)):
+            point = { 
+                "x": x,
+                "y": record[fields[field]]
+            }
 
-        final_data.append(point)
-        fd2.append(point2)
-        fd3.append(point3)
+            final_data[field].append(point)
 
-    x = [final_data, fd2, fd3]
-    return flask.jsonify(x)
+    return flask.jsonify(final_data)
 
 def data_command(command):
     current_dir = os.path.dirname(os.path.realpath(__file__))
