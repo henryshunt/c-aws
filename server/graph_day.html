@@ -118,7 +118,7 @@
                 document.getElementById("open_graph_sunshine").style.visibility = "hidden";
 
                 var soil_temperature = $.get(
-                    "/graph/data?start={{ start }}&end={{ end }}&table=utsReports&fields=Time,SunD", function(response) {
+                    "/graph/data?start={{ start }}&end={{ end }}&table=utcReports&fields=Time,SunD", function(response) {
                     var data = { series: response };
 
                     var options = {
@@ -143,7 +143,7 @@
                 document.getElementById("open_graph_rainfall").style.visibility = "hidden";
 
                 var soil_temperature = $.get(
-                    "/graph/data?start={{ start }}&end={{ end }}&table=utsReports&fields=Time,Rain", function(response) {
+                    "/graph/data?start={{ start }}&end={{ end }}&table=utcReports&fields=Time,Rain", function(response) {
                     var data = { series: response };
 
                     var options = {
@@ -193,7 +193,7 @@
                 document.getElementById("open_graph_soil_temperature").style.visibility = "hidden";
 
                 var soil_temperature = $.get(
-                    "/graph/data?start={{ start }}&end={{ end }}&table=utsReports&fields=Time,ST10,ST30,ST00", function(response) {
+                    "/graph/data?start={{ start }}&end={{ end }}&table=utcReports&fields=Time,ST10,ST30,ST00", function(response) {
                     var data = { series: response };
 
                     var options = {
