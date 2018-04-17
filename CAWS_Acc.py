@@ -459,6 +459,9 @@ def data_graph():
     records = analysis.fields_in_range(config, start, end,
                                        flask.request.args.get("fields"),
                                        DbTable.UTCREPORTS)
+    
+    if records == False: return flask.jsonify([])
+    if len(records) == 0: return flask.jsonify([])
 
     # Create list for each requested database field
     fields = flask.request.args.get("fields").split(",")

@@ -133,6 +133,18 @@ tr {
     font-family: "Trebuchet MS";
     margin-top: 0px;
     margin-left: 10px;
+    display: inline-block;
+}
+.group_open {
+    float: right;
+    font-weight: bold;
+    cursor: pointer;
+    font-size: 26;
+    margin-right: 12px;
+    line-height: 1em;
+}
+.group_open:hover {
+    color: gray;
 }
 
 .field_table {

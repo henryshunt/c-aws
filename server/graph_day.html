@@ -38,6 +38,131 @@
 
                 setInterval(function() { display_local_time(); }, 100);
             }
+
+            function open_graph_humidity() {
+                document.getElementById("open_graph_humidity").style.visibility = "hidden";
+
+                var relative_humidity = $.get(
+                    "/graph/data?start={{ start }}&end={{ end }}&fields=Time,RelH", function(response) {
+                    var data = { series: response };
+
+                    var options = {
+                        showPoint: false, lineSmooth: false, height: 300,
+                        axisY: { offset: 30 },
+
+                        axisX: {
+                            type: Chartist.FixedScaleAxis,
+                            low: {{ low }}, high: {{ high }}, divisor: 8, offset: 20,
+        
+                            labelInterpolationFnc: function(value) {
+                                return moment.unix(value).zone("+0000").format("HH:mm");
+                            }
+                        }
+                    };
+
+                    new Chartist.Line("#graph_humidity", data, options);
+                });
+            }
+
+            function open_graph_wind() {
+                document.getElementById("open_graph_wind").style.visibility = "hidden";
+
+                var ten_minute_wind = $.get(
+                    "/graph/data?start={{ start }}&end={{ end }}&fields=Time,WSpd,WGst", function(response) {
+                    var data = { series: response };
+
+                    var options = {
+                        showPoint: false, lineSmooth: false, height: 380,
+                        axisY: { offset: 30, low: 0 },
+
+                        axisX: {
+                            type: Chartist.FixedScaleAxis,
+                            low: {{ low }}, high: {{ high }}, divisor: 8, offset: 20,
+        
+                            labelInterpolationFnc: function(value) {
+                                return moment.unix(value).zone("+0000").format("HH:mm");
+                            }
+                        }
+                    };
+
+                    new Chartist.Line("#graph_wind", data, options);
+                });
+            }
+
+            function open_graph_wind_direction() {
+                document.getElementById("open_graph_wind_direction").style.visibility = "hidden";
+
+                var ten_minute_wind_direction = $.get(
+                    "/graph/data?start={{ start }}&end={{ end }}&fields=Time,WDir", function(response) {
+                    var data = { series: response };
+
+                    var options = {
+                        showLine: false, lineSmooth: false, height: 380,
+                        axisY: { offset: 30, low: 0, high: 360 },
+
+                        axisX: {
+                            type: Chartist.FixedScaleAxis,
+                            low: {{ low }}, high: {{ high }}, divisor: 8, offset: 20,
+        
+                            labelInterpolationFnc: function(value) {
+                                return moment.unix(value).zone("+0000").format("HH:mm");
+                            }
+                        }
+                    };
+
+                    new Chartist.Line("#graph_wind_direction", data, options);
+                });
+            }
+
+            function open_graph_pressure() {
+                document.getElementById("open_graph_pressure").style.visibility = "hidden";
+
+                var mean_sea_level_pressure = $.get(
+                    "/graph/data?start={{ start }}&end={{ end }}&fields=Time,MSLP", function(response) {
+                    var data = { series: response };
+
+                    var options = {
+                        showPoint: false, lineSmooth: false, height: 300,
+                        axisY: { offset: 30 },
+
+                        axisX: {
+                            type: Chartist.FixedScaleAxis,
+                            low: {{ low }}, high: {{ high }}, divisor: 8, offset: 20,
+        
+                            labelInterpolationFnc: function(value) {
+                                return moment.unix(value).zone("+0000").format("HH:mm");
+                            }
+                        }
+                    };
+
+                    new Chartist.Line("#graph_pressure", data, options);
+                });
+            }
+
+            function open_graph_soil_temperature() {
+                document.getElementById("open_graph_soil_temperature").style.visibility = "hidden";
+
+                var soil_temperature = $.get(
+                    "/graph/data?start={{ start }}&end={{ end }}&fields=Time,ST10,ST30,ST00", function(response) {
+                    var data = { series: response };
+
+                    var options = {
+                        showPoint: false, lineSmooth: false, height: 300,
+                        axisY: { offset: 30 },
+
+                        axisX: {
+                            type: Chartist.FixedScaleAxis,
+                            low: {{ low }}, high: {{ high }}, divisor: 8, offset: 20,
+        
+                            labelInterpolationFnc: function(value) {
+                                return moment.unix(value).zone("+0000").format("HH:mm");
+                            }
+                        }
+                    };
+
+                    new Chartist.Line("#graph_soil_temperature", data, options);
+                });
+            }
         </script>
 
         <style>
@@ -102,63 +227,70 @@
                     <p class="group_title">Ambient Temperature</p>
                 </div>
 
-                <div class="ct-chart" id="ambient_temperature"></div>
+                <div class="ct-chart" id="graph_ambient"></div>
             </div>
 
             <div class="group">
                 <div class="group_header">
                     <p class="group_title">Relative Humidity</p>
+                    <a class="group_open" id="open_graph_humidity" onclick="open_graph_humidity()">+</a>
                 </div>
 
-                <div class="ct-chart" id="relative_humidity"></div>
+                <div class="ct-chart" id="graph_humidity"></div>
             </div>
 
             <div class="group">
                 <div class="group_header">
                     <p class="group_title">Ten Minute Wind</p>
+                    <a class="group_open" id="open_graph_wind" onclick="open_graph_wind()">+</a>
                 </div>
     
-                <div class="ct-chart" id="ten_minute_wind"></div>
+                <div class="ct-chart" id="graph_wind"></div>
             </div>
 
             <div class="group">
                 <div class="group_header">
                     <p class="group_title">Ten Minute Wind Direction</p>
+                    <a class="group_open" id="open_graph_wind_direction" onclick="open_graph_wind_direction()">+</a>
                 </div>
     
-                <div class="ct-chart" id="ten_minute_wind_direction"></div>
+                <div class="ct-chart" id="graph_wind_direction"></div>
             </div>
 
             <div class="group">
                 <div class="group_header">
                     <p class="group_title">Sunshine Accumulation</p>
+                    <a class="group_open" id="open_graph_sunshine" onclick="open_graph_sunshine()">+</a>
                 </div>
     
-                <div class="ct-chart" id="sunshine_accumulation"></div>
+                <div class="ct-chart" id="graph_sunshine"></div>
             </div>
 
             <div class="group">
                 <div class="group_header">
                     <p class="group_title">Rainfall Accumulation</p>
+                    <a class="group_open" id="open_graph_rainfall" onclick="open_graph_rainfall()">+</a>
                 </div>
     
-                <div class="ct-chart" id="rainfall_accumulation"></div>
+                <div class="ct-chart" id="graph_rainfall"></div>
             </div>
 
             <div class="group">
                 <div class="group_header">
                     <p class="group_title">Mean Sea Level Pressure</p>
+                    <a class="group_open" id="open_graph_pressure" onclick="open_graph_pressure()">+</a>
                 </div>
     
-                <div class="ct-chart" id="mean_sea_level_pressure"></div>
+                <div class="ct-chart" id="graph_pressure"></div>
             </div>
 
             <div class="group" style="margin-bottom: 0px">
                 <div class="group_header">
                     <p class="group_title">Soil Temperature</p>
+                    <a class="group_open" id="open_graph_soil_temperature" onclick="open_graph_soil_temperature()">+</a>
                 </div>
     
-                <div class="ct-chart" id="soil_temperature"></div>
+                <div class="ct-chart" id="graph_soil_temperature"></div>
             </div>
         </div>
 
@@ -195,112 +327,7 @@
                     }
                 };
 
-                new Chartist.Line("#ambient_temperature", data, options);
-            });
-
-            var relative_humidity = $.get(
-                "/graph/data?start={{ start }}&end={{ end }}&fields=Time,RelH", function(response) {
-                var data = { series: response };
-
-                var options = {
-                    showPoint: false, lineSmooth: false, height: 300,
-                    axisY: { offset: 30 },
-
-                    axisX: {
-                        type: Chartist.FixedScaleAxis,
-                        low: {{ low }}, high: {{ high }}, divisor: 8, offset: 20,
-        
-                        labelInterpolationFnc: function(value) {
-                            return moment.unix(value).zone("+0000").format("HH:mm");
-                        }
-                    }
-                };
-
-                new Chartist.Line("#relative_humidity", data, options);
-            });
-
-            var ten_minute_wind = $.get(
-                "/graph/data?start={{ start }}&end={{ end }}&fields=Time,WSpd,WGst", function(response) {
-                var data = { series: response };
-
-                var options = {
-                    showPoint: false, lineSmooth: false, height: 380,
-                    axisY: { offset: 30, low: 0 },
-
-                    axisX: {
-                        type: Chartist.FixedScaleAxis,
-                        low: {{ low }}, high: {{ high }}, divisor: 8, offset: 20,
-        
-                        labelInterpolationFnc: function(value) {
-                            return moment.unix(value).zone("+0000").format("HH:mm");
-                        }
-                    }
-                };
-
-                new Chartist.Line("#ten_minute_wind", data, options);
-            });
-
-            var ten_minute_wind_direction = $.get(
-                "/graph/data?start={{ start }}&end={{ end }}&fields=Time,WDir", function(response) {
-                var data = { series: response };
-
-                var options = {
-                    showLine: false, lineSmooth: false, height: 380,
-                    axisY: { offset: 30, low: 0, high: 360 },
-
-                    axisX: {
-                        type: Chartist.FixedScaleAxis,
-                        low: {{ low }}, high: {{ high }}, divisor: 8, offset: 20,
-        
-                        labelInterpolationFnc: function(value) {
-                            return moment.unix(value).zone("+0000").format("HH:mm");
-                        }
-                    }
-                };
-
-                new Chartist.Line("#ten_minute_wind_direction", data, options);
-            });
-
-            var mean_sea_level_pressure = $.get(
-                "/graph/data?start={{ start }}&end={{ end }}&fields=Time,MSLP", function(response) {
-                var data = { series: response };
-
-                var options = {
-                    showPoint: false, lineSmooth: false, height: 300,
-                    axisY: { offset: 30 },
-
-                    axisX: {
-                        type: Chartist.FixedScaleAxis,
-                        low: {{ low }}, high: {{ high }}, divisor: 8, offset: 20,
-        
-                        labelInterpolationFnc: function(value) {
-                            return moment.unix(value).zone("+0000").format("HH:mm");
-                        }
-                    }
-                };
-
-                new Chartist.Line("#mean_sea_level_pressure", data, options);
-            });
-
-            var soil_temperature = $.get(
-                "/graph/data?start={{ start }}&end={{ end }}&fields=Time,ST10,ST30,ST00", function(response) {
-                var data = { series: response };
-
-                var options = {
-                    showPoint: false, lineSmooth: false, height: 300,
-                    axisY: { offset: 30 },
-
-                    axisX: {
-                        type: Chartist.FixedScaleAxis,
-                        low: {{ low }}, high: {{ high }}, divisor: 8, offset: 20,
-        
-                        labelInterpolationFnc: function(value) {
-                            return moment.unix(value).zone("+0000").format("HH:mm");
-                        }
-                    }
-                };
-
-                new Chartist.Line("#soil_temperature", data, options);
+                new Chartist.Line("#graph_ambient", data, options);
             });
         </script>
     </body>
