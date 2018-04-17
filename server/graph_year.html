@@ -7,14 +7,208 @@
         <script src="{{ url_for("static", filename = "scripts.js") }}"></script>
         <script src="{{ url_for("static", filename = "jquery.js") }}"></script>
         <script src="{{ url_for("static", filename = "chartist.js") }}"></script>
-        <script src="{{ url_for("static", filename = "chartist.css") }}"></script>
+        <link href="{{ url_for("static", filename = "chartist.css") }}" rel="stylesheet">
         <script src="{{ url_for("static", filename = "moment.js") }}"></script>
 
         <script>
             function page_load_js() {
                 setInterval(function() { display_local_time(); }, 100);
             }
+
+            function open_graph_humidity() {
+                document.getElementById("open_graph_humidity").style.visibility = "hidden";
+
+                $.get("/graph/data?start={{ start }}&end={{ end }}&table=localStats&fields=Date,RelH_Avg,RelH_Min,RelH_Max", function(response) {
+                    var data = { series: response };
+
+                    var options = {
+                        showPoint: false, lineSmooth: false, height: 380,
+                        axisY: { offset: 30 },
+
+                        axisX: {
+                            type: Chartist.FixedScaleAxis,
+                            low: {{ low }}, high: {{ high }}, divisor: 8, offset: 20,
+        
+                            labelInterpolationFnc: function(value) {
+                                return moment.unix(value).zone("+0000").format("MMM DD");
+                            }
+                        }
+                    };
+
+                    new Chartist.Line("#graph_humidity", data, options);
+                });
+            }
+
+            function open_graph_wind() {
+                document.getElementById("open_graph_wind").style.visibility = "hidden";
+
+                $.get("/graph/data?start={{ start }}&end={{ end }}&table=localStats&fields=Date,WSpd_Avg,WSpd_Max,WGst_Max", function(response) {
+                    var data = { series: response };
+
+                    var options = {
+                        showPoint: false, lineSmooth: false, height: 380,
+                        axisY: { offset: 30 },
+
+                        axisX: {
+                            type: Chartist.FixedScaleAxis,
+                            low: {{ low }}, high: {{ high }}, divisor: 8, offset: 20,
+        
+                            labelInterpolationFnc: function(value) {
+                                return moment.unix(value).zone("+0000").format("MMM DD");
+                            }
+                        }
+                    };
+
+                    new Chartist.Line("#graph_wind", data, options);
+                });
+            }
+
+            function open_graph_wind_direction() {
+                document.getElementById("open_graph_wind_direction").style.visibility = "hidden";
+
+                $.get("/graph/data?start={{ start }}&end={{ end }}&table=localStats&fields=Date,WDir_Avg,WDir_Min,WDir_Max", function(response) {
+                    var data = { series: response };
+
+                    var options = {
+                        showLine: false, lineSmooth: false, height: 380,
+                        axisY: { offset: 30, min: 0, max: 360 },
+
+                        axisX: {
+                            type: Chartist.FixedScaleAxis,
+                            low: {{ low }}, high: {{ high }}, divisor: 8, offset: 20,
+        
+                            labelInterpolationFnc: function(value) {
+                                return moment.unix(value).zone("+0000").format("MMM DD");
+                            }
+                        }
+                    };
+
+                    new Chartist.Line("#graph_wind_direction", data, options);
+                });
+            }
+
+            function open_graph_sunshine() {
+                document.getElementById("open_graph_sunshine").style.visibility = "hidden";
+
+                $.get("/graph/data?start={{ start }}&end={{ end }}&table=localStats&fields=Date,SunD_Ttl", function(response) {
+                    var data = { series: response };
+
+                    var options = {
+                        showPoint: false, lineSmooth: false, height: 380,
+                        axisY: { offset: 30, min: 0 },
+
+                        axisX: {
+                            type: Chartist.FixedScaleAxis,
+                            low: {{ low }}, high: {{ high }}, divisor: 8, offset: 20,
+        
+                            labelInterpolationFnc: function(value) {
+                                return moment.unix(value).zone("+0000").format("MMM DD");
+                            }
+                        }
+                    };
+
+                    new Chartist.Bar("#graph_sunshine", data, options);
+                });
+            }
+
+            function open_graph_rainfall() {
+                document.getElementById("open_graph_rainfall").style.visibility = "hidden";
+
+                $.get("/graph/data?start={{ start }}&end={{ end }}&table=localStats&fields=Date,Rain_Ttl", function(response) {
+                    var data = { series: response };
+
+                    var options = {
+                        showPoint: false, lineSmooth: false, height: 380,
+                        axisY: { offset: 30, min: 0 },
+
+                        axisX: {
+                            type: Chartist.FixedScaleAxis,
+                            low: {{ low }}, high: {{ high }}, divisor: 8, offset: 20,
+        
+                            labelInterpolationFnc: function(value) {
+                                return moment.unix(value).zone("+0000").format("MMM DD");
+                            }
+                        }
+                    };
+
+                    new Chartist.Bar("#graph_rainfall", data, options);
+                });
+            }
+
+            function open_graph_pressure() {
+                document.getElementById("open_graph_pressure").style.visibility = "hidden";
+
+                $.get("/graph/data?start={{ start }}&end={{ end }}&table=localStats&fields=Date,MSLP_Avg,MSLP_Min,MSLP_Max", function(response) {
+                    var data = { series: response };
+
+                    var options = {
+                        showPoint: false, lineSmooth: false, height: 380,
+                        axisY: { offset: 30 },
+
+                        axisX: {
+                            type: Chartist.FixedScaleAxis,
+                            low: {{ low }}, high: {{ high }}, divisor: 8, offset: 20,
+        
+                            labelInterpolationFnc: function(value) {
+                                return moment.unix(value).zone("+0000").format("MMM DD");
+                            }
+                        }
+                    };
+
+                    new Chartist.Line("#graph_pressure", data, options);
+                });
+            }
+
+            function open_graph_soil_temperature() {
+                document.getElementById("open_graph_soil_temperature").style.visibility = "hidden";
+
+                $.get("/graph/data?start={{ start }}&end={{ end }}&table=localStats&fields=Date,ST10_Avg,ST30_Avg,ST00_Avg", function(response) {
+                    var data = { series: response };
+
+                    var options = {
+                        showPoint: false, lineSmooth: false, height: 380,
+                        axisY: { offset: 30 },
+
+                        axisX: {
+                            type: Chartist.FixedScaleAxis,
+                            low: {{ low }}, high: {{ high }}, divisor: 8, offset: 20,
+        
+                            labelInterpolationFnc: function(value) {
+                                return moment.unix(value).zone("+0000").format("MMM DD");
+                            }
+                        }
+                    };
+
+                    new Chartist.Line("#graph_soil_temperature", data, options);
+                });
+            }
         </script>
+
+        <style>
+            .ct-series .ct-line {
+                stroke-width: 1px;
+            }
+            .ct-series .ct-point {
+                stroke-width: 3;
+            }
+            .ct-label {
+                color: rgba(0, 0, 0, 1);
+                font-size: 10;
+            }
+            .ct-label.ct-horizontal.ct-end {
+                transform: translateX(-9.8%);
+            }
+            .ct-label.ct-vertical.ct-start {
+                transform: translateY(10%);
+            }
+            .ct-series-b .ct-line {
+                stroke: #e58e24;
+            }
+
+            .ct-series .ct-bar {
+                stroke-width: 2
+            }
+        </style>
     </head>
 
     <body onload="page_load_js()">
@@ -56,6 +250,7 @@
             <div class="group">
                 <div class="group_header">
                     <p class="group_title">Relative Humidity</p>
+                    <a class="group_open" id="open_graph_humidity" onclick="open_graph_humidity()">+</a>
                 </div>
 
                 <div class="ct-chart" id="graph_humidity"></div>
@@ -64,6 +259,7 @@
             <div class="group">
                 <div class="group_header">
                     <p class="group_title">Ten Minute Wind</p>
+                    <a class="group_open" id="open_graph_wind" onclick="open_graph_wind()">+</a>
                 </div>
     
                 <div class="ct-chart" id="graph_wind"></div>
@@ -72,6 +268,7 @@
             <div class="group">
                 <div class="group_header">
                     <p class="group_title">Ten Minute Wind Direction</p>
+                    <a class="group_open" id="open_graph_wind_direction" onclick="open_graph_wind_direction()">+</a>
                 </div>
     
                 <div class="ct-chart" id="graph_wind_direction"></div>
@@ -80,6 +277,7 @@
             <div class="group">
                 <div class="group_header">
                     <p class="group_title">Sunshine Duration</p>
+                    <a class="group_open" id="open_graph_sunshine" onclick="open_graph_sunshine()">+</a>
                 </div>
     
                 <div class="ct-chart" id="graph_sunshine"></div>
@@ -88,6 +286,7 @@
             <div class="group">
                 <div class="group_header">
                     <p class="group_title">Rainfall</p>
+                    <a class="group_open" id="open_graph_rainfall" onclick="open_graph_rainfall()">+</a>
                 </div>
     
                 <div class="ct-chart" id="graph_rainfall"></div>
@@ -96,6 +295,7 @@
             <div class="group">
                 <div class="group_header">
                     <p class="group_title">Mean Sea Level Pressure</p>
+                    <a class="group_open" id="open_graph_pressure" onclick="open_graph_pressure()">+</a>
                 </div>
     
                 <div class="ct-chart" id="graph_pressure"></div>
@@ -104,6 +304,7 @@
             <div class="group" style="margin-bottom: 10px">
                 <div class="group_header">
                     <p class="group_title">Soil Temperature</p>
+                    <a class="group_open" id="open_graph_soil_temperature" onclick="open_graph_soil_temperature()">+</a>
                 </div>
     
                 <div class="ct-chart" id="graph_soil_temperature"></div>
@@ -123,8 +324,7 @@
         </div>
 
         <script>
-            var ambient_temperature = $.get(
-                "/graph/data?start={{ start }}&end={{ end }}&table=utcStats&fields=Time,AirT_Avg,AirT_Min,AirT_Max", function(response) {
+            $.get("/graph/data?start={{ start }}&end={{ end }}&table=localStats&fields=Date,AirT_Avg,AirT_Min,AirT_Max", function(response) {
                 var data = { series: response };
 
                 var options = {
