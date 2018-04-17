@@ -57,6 +57,9 @@
 .ct-label.ct-vertical.ct-start {
     transform: translateY(15.5%);
 }
+.ct-series-b .ct-line {
+    stroke: #e58e24;
+}
         </style>
     </head>
 
@@ -90,7 +93,7 @@
         <div id="main">
             <div class="group">
                 <div class="group_header">
-                    <p class="group_title">Ambient Temperature &amp; Dew Pt</p>
+                    <p class="group_title">Ambient Temperature</p>
                 </div>
 
                 <div class="ct-chart"></div>
@@ -122,7 +125,7 @@
 
             <div class="group">
                 <div class="group_header">
-                    <p class="group_title">Sunshine Duration Accumulation</p>
+                    <p class="group_title">Sunshine Accumulation</p>
                 </div>
     
                     
@@ -168,7 +171,7 @@
         </div>
 
         <script type="text/javascript">
-            var getData = $.get("/graph/data?start={{ start }}&end={{ end }}&field={{ fields }}", function(points) {
+            var getData = $.get("/graph/data?start={{ start }}&end={{ end }}&fields={{ fields }}", function(points) {
                 var data = { series: points };
 
                 var options = {

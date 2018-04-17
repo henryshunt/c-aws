@@ -254,7 +254,7 @@ def page_graph_day():
                                  caws_name = config.caws_name,
                                  caws_location = config.caws_location,
                                  start = start, end = end,
-                                 fields = "AirT,ExpT,DewP",
+                                 fields = "Time,AirT,ExpT,DewP",
                                  low = low, high = high)
 
 def page_graph_month():
@@ -424,29 +424,32 @@ def data_camera(file_name):
     except: return flask.send_from_directory("server", "no_camera_image.png")
 
 def data_graph():
-    start = datetime.strptime(flask.request.args.get("start"), "%Y-%m-%dT%H-%M-%S")
+    start = datetime.strptime(flask.request.args.get("start"),
+                              "%Y-%m-%dT%H-%M-%S")
     end = datetime.strptime(flask.request.args.get("end"), "%Y-%m-%dT%H-%M-%S")
-    records = analysis.fields_in_range(config, start, end, flask.request.args.get("fields"), DbTable.UTCREPORTS)
+    records = analysis.fields_in_range(config, start, end,
+                                       flask.request.args.get("fields"),
+                                       DbTable.UTCREPORTS)
 
+    # Create list for each requested database field
     fields = flask.request.args.get("fields").split(",")
-    final_data = []
+    graph_data = []
+    for i in range(1, len(fields)): graph_data.append([])
 
-    for field in range(1, len(fields - 1)):
-        final_data.append([])
-
+    # Generate each series from retrieved records 
     for record in records:
-        record_time = datetime.strptime(record["Time"], "%Y-%m-%d %H:%M:%S")
-        x = helpers.utc_to_local(config, record_time).timestamp()
+        if fields[0] == "Time":
+            time = datetime.strptime(record["Time"], "%Y-%m-%d %H:%M:%S")
+        else: time = datetime.strptime(record["Date"], "%Y-%m-%d")
 
-        for field in range(1, len(fields - 1)):
-            point = { 
-                "x": x,
-                "y": record[fields[field]]
-            }
+        record_time = helpers.utc_to_local(config, time).timestamp()
 
-            final_data[field].append(point)
+        # Create point and add to relevant series
+        for field in range(1, len(fields)):
+            point = {"x": record_time, "y": record[fields[field]] }
+            graph_data[field - 1].append(point)
 
-    return flask.jsonify(final_data)
+    return flask.jsonify(graph_data)
 
 def data_command(command):
     current_dir = os.path.dirname(os.path.realpath(__file__))
