@@ -476,9 +476,9 @@ def data_graph():
         graph_data = []
         for field in range(1, len(fields)): graph_data.append([])
 
-        # if table == DbTable.UTCREPORTS:
-        #     if "Rain" in fields:
-        #         Rain_Ttl = 0 or "SunD" in fields)):
+        if table == DbTable.UTCREPORTS:
+            if "Rain" in fields: Rain_Ttl = 0
+            if "SunD" in fields: SunD_Ttl = 0
 
         # Generate each series from retrieved records 
         for record in records:
@@ -490,7 +490,21 @@ def data_graph():
 
             # Create point and add to relevant series
             for field in range(1, len(fields)):
-                point = {"x": record_time, "y": record[fields[field]] }
+                if table == DbTable.UTCREPORTS:
+                    if fields[field] == "Rain":
+                        if record[fields[field]] != None:
+                            Rain_Ttl += record[fields[field]]
+                        point = { "x": record_time, "y": Rain_Ttl }
+
+                    elif fields[field] == "SunD":
+                        if record[fields[field]] != None:
+                            SunD_Ttl += record[fields[field]]
+                        point = { "x": record_time, "y": SunD_Ttl }
+
+                    else:
+                        point = { "x": record_time, "y": record[fields[field]] }
+                else: point = { "x": record_time, "y": record[fields[field]] }
+                    
                 graph_data[field - 1].append(point)
 
         return flask.jsonify(graph_data)
