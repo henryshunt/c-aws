@@ -177,82 +177,130 @@
         </div>
 
         <script>
-            var ambient_temperature = $.get("/graph/data?start={{ start }}&end={{ end }}&fields=Time,AirT,ExpT,DewP", function(response) {
+            var ambient_temperature = $.get(
+                "/graph/data?start={{ start }}&end={{ end }}&fields=Time,AirT,ExpT,DewP", function(response) {
                 var data = { series: response };
 
                 var options = {
-                    showPoint: false,
-                    lineSmooth: false,
-                    height: 380,
+                    showPoint: false, lineSmooth: false, height: 380,
+                    axisY: { offset: 30 },
 
                     axisX: {
                         type: Chartist.FixedScaleAxis,
-                        low: {{ low }},
-                        high: {{ high }},
-                        divisor: 8,
-                        offset: 20,
+                        low: {{ low }}, high: {{ high }}, divisor: 8, offset: 20,
         
                         labelInterpolationFnc: function(value) {
                             return moment.unix(value).zone("+0000").format("HH:mm");
                         }
-                    },
-
-                    axisY: { offset: 30 }
+                    }
                 };
 
                 new Chartist.Line("#ambient_temperature", data, options);
             });
 
-            var relative_humidity = $.get("/graph/data?start={{ start }}&end={{ end }}&fields=Time,RelH", function(response) {
+            var relative_humidity = $.get(
+                "/graph/data?start={{ start }}&end={{ end }}&fields=Time,RelH", function(response) {
                 var data = { series: response };
 
                 var options = {
-                    showPoint: false,
-                    lineSmooth: false,
-                    height: 380,
+                    showPoint: false, lineSmooth: false, height: 380,
+                    axisY: { offset: 30 },
 
                     axisX: {
                         type: Chartist.FixedScaleAxis,
-                        low: {{ low }},
-                        high: {{ high }},
-                        divisor: 8,
-                        offset: 20,
+                        low: {{ low }}, high: {{ high }}, divisor: 8, offset: 20,
         
                         labelInterpolationFnc: function(value) {
                             return moment.unix(value).zone("+0000").format("HH:mm");
                         }
-                    },
-
-                    axisY: { offset: 30 }
+                    }
                 };
 
                 new Chartist.Line("#relative_humidity", data, options);
             });
 
-            var relative_humidity = $.get("/graph/data?start={{ start }}&end={{ end }}&fields=Time,WDir", function(response) {
+            var ten_minute_wind = $.get(
+                "/graph/data?start={{ start }}&end={{ end }}&fields=Time,WSpd,WGst", function(response) {
                 var data = { series: response };
 
                 var options = {
-                    showLine: false,
-                    lineSmooth: false,
-                    height: 380,
+                    showLine: false, lineSmooth: false, height: 380,
+                    axisY: { offset: 30, low: 0 },
 
                     axisX: {
                         type: Chartist.FixedScaleAxis,
-                        low: {{ low }},
-                        high: {{ high }},
-                        divisor: 8,
-                        offset: 20,
+                        low: {{ low }}, high: {{ high }}, divisor: 8, offset: 20,
         
                         labelInterpolationFnc: function(value) {
                             return moment.unix(value).zone("+0000").format("HH:mm");
                         }
-                    },
+                    }
+                };
 
-                    axisY: { offset: 30 }
+                new Chartist.Line("#ten_minute_wind", data, options);
+            });
+
+            var ten_minute_wind_direction = $.get(
+                "/graph/data?start={{ start }}&end={{ end }}&fields=Time,WDir", function(response) {
+                var data = { series: response };
+
+                var options = {
+                    showLine: false, lineSmooth: false, height: 380,
+                    axisY: { offset: 30, low: 0, high: 360 },
+
+                    axisX: {
+                        type: Chartist.FixedScaleAxis,
+                        low: {{ low }}, high: {{ high }}, divisor: 8, offset: 20,
+        
+                        labelInterpolationFnc: function(value) {
+                            return moment.unix(value).zone("+0000").format("HH:mm");
+                        }
+                    }
                 };
 
                 new Chartist.Line("#ten_minute_wind_direction", data, options);
+            });
+
+            var mean_sea_level_pressure = $.get(
+                "/graph/data?start={{ start }}&end={{ end }}&fields=Time,MSLP", function(response) {
+                var data = { series: response };
+
+                var options = {
+                    showPoint: false, lineSmooth: false, height: 380,
+                    axisY: { offset: 30 },
+
+                    axisX: {
+                        type: Chartist.FixedScaleAxis,
+                        low: {{ low }}, high: {{ high }}, divisor: 8, offset: 20,
+        
+                        labelInterpolationFnc: function(value) {
+                            return moment.unix(value).zone("+0000").format("HH:mm");
+                        }
+                    }
+                };
+
+                new Chartist.Line("#mean_sea_level_pressure", data, options);
+            });
+
+            var soil_temperature = $.get(
+                "/graph/data?start={{ start }}&end={{ end }}&fields=Time,ST10,ST30,ST00", function(response) {
+                var data = { series: response };
+
+                var options = {
+                    showPoint: false, lineSmooth: false, height: 380,
+                    axisY: { offset: 30 },
+
+                    axisX: {
+                        type: Chartist.FixedScaleAxis,
+                        low: {{ low }}, high: {{ high }}, divisor: 8, offset: 20,
+        
+                        labelInterpolationFnc: function(value) {
+                            return moment.unix(value).zone("+0000").format("HH:mm");
+                        }
+                    }
+                };
+
+                new Chartist.Line("#soil_temperature", data, options);
             });
         </script>
     </body>
