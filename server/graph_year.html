@@ -50,7 +50,7 @@
                     <p class="group_title">Air Temperature</p>
                 </div>
 
-                
+                <div class="ct-chart" id="graph_air"></div>
             </div>
 
             <div class="group">
@@ -58,7 +58,7 @@
                     <p class="group_title">Relative Humidity</p>
                 </div>
 
-                
+                <div class="ct-chart" id="graph_humidity"></div>
             </div>
 
             <div class="group">
@@ -66,7 +66,7 @@
                     <p class="group_title">Ten Minute Wind</p>
                 </div>
     
-                    
+                <div class="ct-chart" id="graph_wind"></div>
             </div>
 
             <div class="group">
@@ -74,7 +74,7 @@
                     <p class="group_title">Ten Minute Wind Direction</p>
                 </div>
     
-                    
+                <div class="ct-chart" id="graph_wind_direction"></div>
             </div>
 
             <div class="group">
@@ -82,7 +82,7 @@
                     <p class="group_title">Sunshine Duration</p>
                 </div>
     
-                    
+                <div class="ct-chart" id="graph_sunshine"></div>
             </div>
 
             <div class="group">
@@ -90,7 +90,7 @@
                     <p class="group_title">Rainfall</p>
                 </div>
     
-                    
+                <div class="ct-chart" id="graph_rainfall"></div>
             </div>
 
             <div class="group">
@@ -98,7 +98,7 @@
                     <p class="group_title">Mean Sea Level Pressure</p>
                 </div>
     
-                    
+                <div class="ct-chart" id="graph_pressure"></div>
             </div>
 
             <div class="group" style="margin-bottom: 10px">
@@ -106,7 +106,7 @@
                     <p class="group_title">Soil Temperature</p>
                 </div>
     
-                    
+                <div class="ct-chart" id="graph_soil_temperature"></div>
             </div>
         </div>
 
@@ -122,5 +122,27 @@
             </div>
         </div>
 
+        <script>
+            var ambient_temperature = $.get(
+                "/graph/data?start={{ start }}&end={{ end }}&table=utcStats&fields=Time,AirT_Avg,AirT_Min,AirT_Max", function(response) {
+                var data = { series: response };
+
+                var options = {
+                    showPoint: false, lineSmooth: false, height: 380,
+                    axisY: { offset: 30 },
+
+                    axisX: {
+                        type: Chartist.FixedScaleAxis,
+                        low: {{ low }}, high: {{ high }}, divisor: 8, offset: 20,
+        
+                        labelInterpolationFnc: function(value) {
+                            return moment.unix(value).zone("+0000").format("MMM DD");
+                        }
+                    }
+                };
+
+                new Chartist.Line("#graph_air", data, options);
+            });
+        </script>
     </body>
 </html>

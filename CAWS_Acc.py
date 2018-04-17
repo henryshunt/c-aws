@@ -292,9 +292,24 @@ def page_graph_month():
                                  caws_location = config.caws_location)
 
 def page_graph_year():
+    utc = datetime.utcnow().replace(second = 0, microsecond = 0)
+    local_time = helpers.utc_to_local(config, utc).replace(hour = 0, minute = 0)
+    
+    start = local_time - timedelta(days = 1)
+    end = local_time - timedelta(days = 365)
+    low = helpers.utc_to_local(config, start).timestamp()
+    high = helpers.utc_to_local(config, end).timestamp()
+    start = start.strftime("%Y-%m-%dT%H-%M-%S")
+    end = end.strftime("%Y-%m-%dT%H-%M-%S")
+
+    data_time = local_time.strftime("%H:%M")
+
     return flask.render_template("graph_year.html",
                                  caws_name = config.caws_name,
-                                 caws_location = config.caws_location)
+                                 caws_location = config.caws_location,
+                                 start = start, end = end,
+                                 low = low, high = high,
+                                 data_time = data_time)
 
 def page_camera():
     utc = datetime.utcnow(); utc_second = utc.second
