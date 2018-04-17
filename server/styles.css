@@ -72,7 +72,7 @@ tr {
 .menu_item:visited {
     color: blue;
 }
-.menu_item:hover {
+.menu_item:not(.no_hover):hover {
     color: #00819d;
 }
 
