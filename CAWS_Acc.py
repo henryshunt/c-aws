@@ -476,6 +476,10 @@ def data_graph():
         graph_data = []
         for field in range(1, len(fields)): graph_data.append([])
 
+        # if table == DbTable.UTCREPORTS:
+        #     if "Rain" in fields:
+        #         Rain_Ttl = 0 or "SunD" in fields)):
+
         # Generate each series from retrieved records 
         for record in records:
             if fields[0] == "Time":
