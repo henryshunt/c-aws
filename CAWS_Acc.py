@@ -243,27 +243,23 @@ def page_statistics():
                                  override_update = override_update)
 
 def page_graph_day():
-    utc = datetime.utcnow(); utc_second = utc.second
-    utc = utc.replace(second = 0, microsecond = 0)
+    utc = datetime.utcnow().replace(second = 0, microsecond = 0)
 
     # Check for a local date in the URL
     if flask.request.args.get("date") != None:
         try:
             url_date = datetime.strptime(
                 flask.request.args.get("date"), "%Y-%m-%d")
-            local_date = helpers.utc_to_local(config, utc)
 
             # Check if date in URL is the same as current date
             if (url_date.strftime("%Y-%m-%d")
-                == local_date.strftime("%Y-%m-%d")):
-
-                return flask.redirect(flask.url_for("page_graph_day"))
+                == helpers.utc_to_local(config, utc).strftime("%Y-%m-%d")):
+                    return flask.redirect(flask.url_for("page_graph_day"))
 
             else:
                 utc = helpers.local_to_utc(config, url_date)
                 local_time = url_date
-                bounds = helpers.day_bounds_utc(config, helpers.utc_to_local(
-                                                config, utc), True)
+                bounds = helpers.day_bounds_utc(config, url_date, True)
         except: return flask.redirect(flask.url_for("page_graph_day"))
 
     else:
@@ -278,6 +274,7 @@ def page_graph_day():
     scroller_prev = (local_time - timedelta(days = 1)).strftime("%Y-%m-%d")
     scroller_time = local_time.strftime("%d/%m/%Y")
     scroller_next = (local_time + timedelta(days = 1)).strftime("%Y-%m-%d")
+    data_time = local_time.strftime("%H:%M")
 
     return flask.render_template("graph_day.html",
                                  caws_name = config.caws_name,
@@ -286,7 +283,8 @@ def page_graph_day():
                                  low = low, high = high,
                                  scroller_prev = scroller_prev,
                                  scroller_time = scroller_time,
-                                 scroller_next = scroller_next)
+                                 scroller_next = scroller_next,
+                                 data_time = data_time)
 
 def page_graph_month():
     return flask.render_template("graph_month.html",
