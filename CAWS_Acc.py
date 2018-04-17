@@ -453,35 +453,44 @@ def data_camera(file_name):
     except: return flask.send_from_directory("server", "no_camera_image.png")
 
 def data_graph():
-    start = datetime.strptime(flask.request.args.get("start"),
-                              "%Y-%m-%dT%H-%M-%S")
-    end = datetime.strptime(flask.request.args.get("end"), "%Y-%m-%dT%H-%M-%S")
-    records = analysis.fields_in_range(config, start, end,
-                                       flask.request.args.get("fields"),
-                                       DbTable.UTCREPORTS)
-    
-    if records == False: return flask.jsonify([])
-    if len(records) == 0: return flask.jsonify([])
+    try:
+        start = datetime.strptime(flask.request.args.get("start"),
+                                "%Y-%m-%dT%H-%M-%S")
+        end = datetime.strptime(flask.request.args.get("end"),
+                                "%Y-%m-%dT%H-%M-%S")
 
-    # Create list for each requested database field
-    fields = flask.request.args.get("fields").split(",")
-    graph_data = []
-    for i in range(1, len(fields)): graph_data.append([])
+        if flask.request.args.get("table") == "utcReports":
+            table = DbTable.UTCREPORTS
+        elif flask.request.args.get("table") == "localStats":
+            table = DbTable.LOCALSTATS
+        else: table = DbTable.UTCENVIRON
 
-    # Generate each series from retrieved records 
-    for record in records:
-        if fields[0] == "Time":
-            time = datetime.strptime(record["Time"], "%Y-%m-%d %H:%M:%S")
-        else: time = datetime.strptime(record["Date"], "%Y-%m-%d")
+        records = analysis.fields_in_range(
+            config, start, end, flask.request.args.get("fields"), table)
+        
+        if records == False: return flask.jsonify([])
+        if len(records) == 0: return flask.jsonify([])
 
-        record_time = helpers.utc_to_local(config, time).timestamp()
+        # Create list for each requested database field
+        fields = flask.request.args.get("fields").split(",")
+        graph_data = []
+        for field in range(1, len(fields)): graph_data.append([])
 
-        # Create point and add to relevant series
-        for field in range(1, len(fields)):
-            point = {"x": record_time, "y": record[fields[field]] }
-            graph_data[field - 1].append(point)
+        # Generate each series from retrieved records 
+        for record in records:
+            if fields[0] == "Time":
+                time = datetime.strptime(record["Time"], "%Y-%m-%d %H:%M:%S")
+            else: time = datetime.strptime(record["Date"], "%Y-%m-%d")
 
-    return flask.jsonify(graph_data)
+            record_time = helpers.utc_to_local(config, time).timestamp()
+
+            # Create point and add to relevant series
+            for field in range(1, len(fields)):
+                point = {"x": record_time, "y": record[fields[field]] }
+                graph_data[field - 1].append(point)
+
+        return flask.jsonify(graph_data)
+    except: return flask.jsonify([])
 
 def data_command(command):
     current_dir = os.path.dirname(os.path.realpath(__file__))

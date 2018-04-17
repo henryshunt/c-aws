@@ -43,7 +43,7 @@
                 document.getElementById("open_graph_humidity").style.visibility = "hidden";
 
                 var relative_humidity = $.get(
-                    "/graph/data?start={{ start }}&end={{ end }}&fields=Time,RelH", function(response) {
+                    "/graph/data?start={{ start }}&end={{ end }}&table=utcReports&fields=Time,RelH", function(response) {
                     var data = { series: response };
 
                     var options = {
@@ -68,7 +68,7 @@
                 document.getElementById("open_graph_wind").style.visibility = "hidden";
 
                 var ten_minute_wind = $.get(
-                    "/graph/data?start={{ start }}&end={{ end }}&fields=Time,WSpd,WGst", function(response) {
+                    "/graph/data?start={{ start }}&end={{ end }}&table=utcReports&fields=Time,WSpd,WGst", function(response) {
                     var data = { series: response };
 
                     var options = {
@@ -93,7 +93,7 @@
                 document.getElementById("open_graph_wind_direction").style.visibility = "hidden";
 
                 var ten_minute_wind_direction = $.get(
-                    "/graph/data?start={{ start }}&end={{ end }}&fields=Time,WDir", function(response) {
+                    "/graph/data?start={{ start }}&end={{ end }}&table=utcReports&fields=Time,WDir", function(response) {
                     var data = { series: response };
 
                     var options = {
@@ -118,7 +118,7 @@
                 document.getElementById("open_graph_pressure").style.visibility = "hidden";
 
                 var mean_sea_level_pressure = $.get(
-                    "/graph/data?start={{ start }}&end={{ end }}&fields=Time,MSLP", function(response) {
+                    "/graph/data?start={{ start }}&end={{ end }}&table=utcReports&fields=Time,MSLP", function(response) {
                     var data = { series: response };
 
                     var options = {
@@ -143,7 +143,7 @@
                 document.getElementById("open_graph_soil_temperature").style.visibility = "hidden";
 
                 var soil_temperature = $.get(
-                    "/graph/data?start={{ start }}&end={{ end }}&fields=Time,ST10,ST30,ST00", function(response) {
+                    "/graph/data?start={{ start }}&end={{ end }}&table=utsReports&fields=Time,ST10,ST30,ST00", function(response) {
                     var data = { series: response };
 
                     var options = {
@@ -310,7 +310,7 @@
 
         <script>
             var ambient_temperature = $.get(
-                "/graph/data?start={{ start }}&end={{ end }}&fields=Time,AirT,ExpT,DewP", function(response) {
+                "/graph/data?start={{ start }}&end={{ end }}&table=utcReports&fields=Time,AirT,ExpT,DewP", function(response) {
                 var data = { series: response };
 
                 var options = {
