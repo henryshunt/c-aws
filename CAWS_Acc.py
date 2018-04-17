@@ -494,12 +494,12 @@ def data_graph():
                     if fields[field] == "Rain":
                         if record[fields[field]] != None:
                             Rain_Ttl += record[fields[field]]
-                        point = { "x": record_time, "y": Rain_Ttl }
+                        point = { "x": record_time, "y": round(Rain_Ttl, 2) }
 
                     elif fields[field] == "SunD":
                         if record[fields[field]] != None:
                             SunD_Ttl += record[fields[field]]
-                        point = { "x": record_time, "y": SunD_Ttl }
+                        point = { "x": record_time, "y": round(SunD_Ttl, 2) }
 
                     else:
                         point = { "x": record_time, "y": record[fields[field]] }
