@@ -83,7 +83,7 @@ def page_now():
     SunD_Phr_record = analysis.past_hour_total(config, utc, "SunD")
     if SunD_Phr_record != False and SunD_Phr_record != None:
         if SunD_Phr_record["SunD"] != None:
-            SunD_Phr = str(SunD_Phr_record["SunD"]) + " sec"
+            SunD_Phr = str(timedelta(seconds = SunD_Phr_record["SunD"]))
 
     # Calculate total rainfall over past hour
     Rain_Phr_record = analysis.past_hour_total(config, utc, "Rain")
@@ -199,7 +199,7 @@ def page_statistics():
         if record["WGst_Avg"] != None:
             WGst_Avg = str(round(record["WGst_Avg"], 1)) + " mph"
         if record["SunD_Ttl"] != None:
-            SunD_Ttl = str(record["SunD_Ttl"]) + " sec"
+            SunD_Ttl = str(timedelta(seconds = record["SunD_Ttl"]))
         if record["Rain_Ttl"] != None:
             Rain_Ttl = str(round(record["Rain_Ttl"], 2)) + " mm"
         if record["MSLP_Min"] != None:
