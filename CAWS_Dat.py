@@ -305,7 +305,7 @@ def do_log_environment(utc):
     try:
         do_read_temp("28-8000001f88fa")
         frame.enclosure_temperature = EncT_value
-    except: gpio.output(23, gpio.HIGH)
+    except: pass #gpio.output(23, gpio.HIGH)
 
     # -- CPU TEMPERATURE -------------------------------------------------------
     try:
