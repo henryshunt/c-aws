@@ -9,6 +9,7 @@ from datetime import datetime, timedelta
 import os
 import sys
 import subprocess
+import logging
 
 import flask
 
@@ -568,4 +569,5 @@ server.add_url_rule("/command/<command>", view_func = data_command)
 
 # -- START SERVER --------------------------------------------------------------
 start_time = datetime.utcnow().replace(second = 0, microsecond = 0)
+logging.getLogger("werkzeug").setLevel(logging.CRITICAL)
 server.run(host = "0.0.0.0", threaded = True)
