@@ -217,6 +217,10 @@ def page_statistics():
         if record["ST30_Max"] != None: ST30_Max = str(record["ST30_Max"]) + "°C"
         if record["ST30_Avg"] != None:
             ST30_Avg = str(round(record["ST30_Avg"], 1)) + "°C"
+        if record["ST00_Min"] != None: ST00_Min = str(record["ST00_Min"]) + "°C"
+        if record["ST00_Max"] != None: ST00_Max = str(record["ST00_Max"]) + "°C"
+        if record["ST00_Avg"] != None:
+            ST00_Avg = str(round(record["ST00_Avg"], 1)) + "°C"
         
     return flask.render_template("statistics.html",
                                  caws_name = config.caws_name,
