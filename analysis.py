@@ -89,7 +89,7 @@ def fields_in_range(config, start, end, fields, table):
     except: return False
 
 def past_hour_total(config, now, column):
-    start = now.replace(second = 0, microsecond = 0) - timedelta(hours = 1)
+    start = now.replace(second = 0, microsecond = 0) - timedelta(minutes = 59)
     end = now.replace(second = 0, microsecond = 0)
 
     try:
