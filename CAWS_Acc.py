@@ -467,7 +467,7 @@ def data_camera(file_name):
 
         # Return error image if file does not exist
         if not os.path.isfile(os.path.join(image_dir, image_name)):
-           return flask.send_from_directory("server", "no_camera_image.png") 
+            return flask.send_from_directory("server", "no_camera_image.png") 
 
         return flask.send_from_directory(image_dir, image_name)
     except: return flask.send_from_directory("server", "no_camera_image.png")
@@ -573,5 +573,7 @@ server.add_url_rule("/command/<command>", view_func = data_command)
 
 # -- START SERVER --------------------------------------------------------------
 start_time = datetime.utcnow().replace(second = 0, microsecond = 0)
+
+server.config["SEND_FILE_MAX_AGE_DEFAULT"] = 0
 logging.getLogger("werkzeug").setLevel(logging.CRITICAL)
 server.run(host = "0.0.0.0", threaded = True)
