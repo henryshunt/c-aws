@@ -87,3 +87,8 @@ def last_five_mins(utc):
         minute = str(utc.minute)
 
     return utc
+
+def none_to_null(value):
+    if value == None:
+        return "NULL"
+    else: return value
