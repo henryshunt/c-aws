@@ -95,7 +95,14 @@
 
                     var options = {
                         showPoint: false, lineSmooth: false, height: 380,
-                        axisY: { offset: 30, min: 0 },
+                        axisY: {
+                            offset: 30,
+                            low: 0,
+
+                            labelInterpolationFnc: function(value) {
+                                return moment.utc(value * 1000).format("HH:mm");
+                            }
+                        },
 
                         axisX: {
                             type: Chartist.FixedScaleAxis,
