@@ -91,7 +91,7 @@ current_dir = os.path.dirname(os.path.realpath(__file__))
 
 try:
     subprocess.Popen(["lxterminal -e python3 " + current_dir
-                        + "/aws_data.py"], shell = True)
+                      + "/aws_data.py"], shell = True)
 except: helpers.exit("11")
 
 if (config.report_uploading == True or
