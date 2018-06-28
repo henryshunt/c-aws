@@ -1,5 +1,5 @@
 """ C-AWS Main Entry Point
-      Performs initial environment checks and then starts the three sub-systems
+      Performs initial environment checks and then starts the sub-systems
 """
 
 # DEPENDENCIES -----------------------------------------------------------------
@@ -90,8 +90,9 @@ if config.backups == True:
 current_dir = os.path.dirname(os.path.realpath(__file__))
 
 try:
-    subprocess.Popen(["lxterminal -e python3 " + current_dir
-                      + "/aws_data.py"], shell = True)
+    subprocess.Popen(["lxterminal", "-e", "python3",
+                      os.path.join(current_dir, "aws_data.py")],
+                     shell = True)
 except: helpers.exit("11")
 
 if (config.report_uploading == True or
@@ -102,13 +103,19 @@ if (config.report_uploading == True or
     config.backups == True):
 
     try:
-        subprocess.Popen(["lxterminal -e python3 " + current_dir
-                          + "/aws_support.py"], shell = True)
+        subprocess.Popen(["lxterminal", "-e", "python3",
+                          os.path.join(current_dir, "aws_support.py")],
+                         shell = True)
     except: helpers.exit("12")
 
 if config.local_network_server == True:
     try:
-        time_arg = software_start.strftime("%Y-%m-%dT%H:%M:%S")
-        subprocess.Popen(["lxterminal -e python3 " + current_dir
-                          + "/aws_access.py " + time_arg], shell = True)
+        subprocess.Popen(["lxterminal", "-e", "python3",
+                          os.path.join(current_dir, "aws_access.py"),
+                          software_start.strftime("%Y-%m-%dT%H:%M:%S")],
+                         shell = True)
     except: helpers.exit("13")
+
+# -- INIT SUCCESS --------------------------------------------------------------
+helpers.init_success()
+gpio.output(24, gpio.HIGH)

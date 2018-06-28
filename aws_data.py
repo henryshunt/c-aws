@@ -525,88 +525,9 @@ def do_trigger_rain(channel):
 
 # ENTRY POINT ==================================================================
 # -- INIT GPIO AND LEDS --------------------------------------------------------
-program_start = datetime.utcnow(); time.sleep(2.5)
-
-try:
-    gpio.setwarnings(False); gpio.setmode(gpio.BCM)
-    gpio.setup(23, gpio.OUT); gpio.output(23, gpio.LOW)
-    gpio.setup(24, gpio.OUT); gpio.output(24, gpio.LOW)
-except: helpers.exit_no_light("00")
-
-# -- CHECK INTERNAL DRIVE ------------------------------------------------------
-free_space = helpers.remaining_space("/")
-if free_space == None or free_space < 1: helpers.exit("01")
-
-# -- CHECK CONFIG --------------------------------------------------------------
-if config.load() == False: helpers.exit("02")
-if config.validate() == False: helpers.exit("03")
-
-# -- CHECK DATA DIRECTORY ------------------------------------------------------
-if not os.path.isdir(config.data_directory):
-    try:
-        os.makedirs(config.data_directory)
-    except: helpers.exit("04")
-
-# -- MAKE DATABASE -------------------------------------------------------------
-if not os.path.isfile(config.database_path):
-    try:
-        with sqlite3.connect(config.database_path) as database:
-            cursor = database.cursor()
-
-            cursor.execute(queries.CREATE_UTCREPORTS_TABLE)
-            cursor.execute(queries.CREATE_UTCENVIRON_TABLE)
-            cursor.execute(queries.CREATE_LOCALSTATS_TABLE)
-            database.commit()
-
-    except: helpers.exit("05")
-
-# -- CHECK CAMERA DRIVE --------------------------------------------------------
-if config.camera_logging == True:
-    if not os.path.isdir(config.camera_drive): helpers.exit("06")
-
-    free_space = helpers.remaining_space(config.camera_drive)
-    if free_space == None or free_space < 5: helpers.exit("07")
-
-    # Check camera module is connected
-    try:
-        with picamera.PiCamera() as camera: pass
-    except: helpers.exit("08")
-
-# -- CHECK BACKUP DRVIE --------------------------------------------------------
-if config.backups == True:
-    if not os.path.isdir(config.backup_drive): helpers.exit("09")
-
-    free_space = helpers.remaining_space(config.backup_drive)
-    if free_space == None or free_space < 5: helpers.exit("10")
-
-# -- SET UP SENSORS ------------------------------------------------------------
-try:
-    gpio.setup(17, gpio.IN, pull_up_down = gpio.PUD_DOWN)
-    gpio.setup(27, gpio.IN, pull_up_down = gpio.PUD_DOWN)
-    gpio.setup(22, gpio.IN, pull_up_down = gpio.PUD_DOWN)
-except: helpers.exit("11")
-
-# -- RUN SUBPROCESSES ----------------------------------------------------------
-current_dir = os.path.dirname(os.path.realpath(__file__))
-
-if (config.report_uploading == True or
-    config.environment_uploading == True or
-    config.statistic_uploading == True or
-    config.camera_uploading == True or
-    config.integrity_checks == True or
-    config.backups == True):
-
-    try:
-        subprocess.Popen(["lxterminal -e python3 " + current_dir
-                          + "/CAWS_Sup.py"], shell = True)
-    except: helpers.exit("12")
-
-if config.local_network_server == True:
-    try:
-        time_arg = program_start.strftime("%Y-%m-%dT%H:%M:%S")
-        subprocess.Popen(["lxterminal -e python3 " + current_dir
-                          + "/CAWS_Acc.py " + time_arg], shell = True)
-    except: helpers.exit("13")
+gpio.setwarnings(False); gpio.setmode(gpio.BCM)
+gpio.setup(23, gpio.OUT); gpio.output(23, gpio.LOW)
+gpio.setup(24, gpio.OUT); gpio.output(24, gpio.LOW)
 
 # -- WAIT FOR MINUTE -----------------------------------------------------------
 helpers.init_success()
