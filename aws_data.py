@@ -1,6 +1,5 @@
 """ CAWS Data Acquisition Program
-      Responsible for measuring and logging data parameters, and for generating
-      statistics. This is the entry point for the CAWS software
+      Responsible for logging data parameters and generating statistics.
 """
 
 # DEPENDENCIES -----------------------------------------------------------------
@@ -525,9 +524,16 @@ def do_trigger_rain(channel):
 
 # ENTRY POINT ==================================================================
 # -- INIT GPIO AND LEDS --------------------------------------------------------
-gpio.setwarnings(False); gpio.setmode(gpio.BCM)
-gpio.setup(23, gpio.OUT); gpio.output(23, gpio.LOW)
-gpio.setup(24, gpio.OUT); gpio.output(24, gpio.LOW)
+gpio.setwarnings(False)
+gpio.setmode(gpio.BCM)
+gpio.setup(23, gpio.OUT)
+gpio.setup(24, gpio.OUT)
+gpio.output(24, gpio.HIGH)
+
+# -- SET UP SENSORS ------------------------------------------------------------
+gpio.setup(17, gpio.IN, pull_up_down = gpio.PUD_DOWN)
+gpio.setup(27, gpio.IN, pull_up_down = gpio.PUD_DOWN)
+gpio.setup(22, gpio.IN, pull_up_down = gpio.PUD_DOWN)
 
 # -- WAIT FOR MINUTE -----------------------------------------------------------
 while True:
