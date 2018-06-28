@@ -530,9 +530,6 @@ gpio.setup(23, gpio.OUT); gpio.output(23, gpio.LOW)
 gpio.setup(24, gpio.OUT); gpio.output(24, gpio.LOW)
 
 # -- WAIT FOR MINUTE -----------------------------------------------------------
-helpers.init_success()
-gpio.output(24, gpio.HIGH)
-
 while True:
     if datetime.utcnow().second != 0:
         gpio.output(23, gpio.HIGH); time.sleep(0.1)
