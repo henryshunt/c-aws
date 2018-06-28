@@ -29,30 +29,32 @@ software_start = None
 
 
 # ENTRY POINT ==================================================================
-# -- INIT GPIO AND LEDS --------------------------------------------------------
 software_start = datetime.utcnow()
 
+# -- INIT GPIO AND LEDS --------------------------------------------------------
 try:
     gpio.setwarnings(False); gpio.setmode(gpio.BCM)
     gpio.setup(23, gpio.OUT); gpio.output(23, gpio.LOW)
     gpio.setup(24, gpio.OUT); gpio.output(24, gpio.LOW)
-except: helpers.exit_no_light("00")
+except: helpers.init_exit_blind("00")
 
+gpio.output(24, gpio.HIGH)
 time.sleep(2.5)
+gpio.output(24, gpio.LOW)
 
 # -- CHECK INTERNAL DRIVE ------------------------------------------------------
 free_space = helpers.remaining_space("/")
-if free_space == None or free_space < 1: helpers.exit("01")
+if free_space == None or free_space < 1: helpers.init_exit("01")
 
 # -- CHECK CONFIG --------------------------------------------------------------
-if config.load() == False: helpers.exit("02")
-if config.validate() == False: helpers.exit("03")
+if config.load() == False: helpers.init_exit("02")
+if config.validate() == False: helpers.init_exit("03")
 
 # -- CHECK DATA DIRECTORY ------------------------------------------------------
 if not os.path.isdir(config.data_directory):
     try:
         os.makedirs(config.data_directory)
-    except: helpers.exit("04")
+    except: helpers.init_exit("04")
 
 # -- MAKE DATABASE -------------------------------------------------------------
 if not os.path.isfile(config.database_path):
@@ -65,26 +67,26 @@ if not os.path.isfile(config.database_path):
             cursor.execute(queries.CREATE_LOCALSTATS_TABLE)
             database.commit()
 
-    except: helpers.exit("05")
+    except: helpers.init_exit("05")
 
 # -- CHECK CAMERA DRIVE --------------------------------------------------------
 if config.camera_logging == True:
-    if not os.path.isdir(config.camera_drive): helpers.exit("06")
+    if not os.path.isdir(config.camera_drive): helpers.init_exit("06")
 
     free_space = helpers.remaining_space(config.camera_drive)
-    if free_space == None or free_space < 5: helpers.exit("07")
+    if free_space == None or free_space < 5: helpers.init_exit("07")
 
     # Check camera module is connected
     try:
         with picamera.PiCamera() as camera: pass
-    except: helpers.exit("08")
+    except: helpers.init_exit("08")
 
 # -- CHECK BACKUP DRVIE --------------------------------------------------------
 if config.backups == True:
-    if not os.path.isdir(config.backup_drive): helpers.exit("09")
+    if not os.path.isdir(config.backup_drive): helpers.init_exit("09")
 
     free_space = helpers.remaining_space(config.backup_drive)
-    if free_space == None or free_space < 5: helpers.exit("10")
+    if free_space == None or free_space < 5: helpers.init_exit("10")
 
 # -- RUN SUBPROCESSES ----------------------------------------------------------
 current_dir = os.path.dirname(os.path.realpath(__file__))
@@ -93,7 +95,7 @@ try:
     subprocess.Popen(["lxterminal", "-e", "python3",
                       os.path.join(current_dir, "aws_data.py")],
                      shell = True)
-except: helpers.exit("11")
+except: helpers.init_exit("11")
 
 if (config.report_uploading == True or
     config.environment_uploading == True or
@@ -106,7 +108,7 @@ if (config.report_uploading == True or
         subprocess.Popen(["lxterminal", "-e", "python3",
                           os.path.join(current_dir, "aws_support.py")],
                          shell = True)
-    except: helpers.exit("12")
+    except: helpers.init_exit("12")
 
 if config.local_network_server == True:
     try:
@@ -114,8 +116,4 @@ if config.local_network_server == True:
                           os.path.join(current_dir, "aws_access.py"),
                           software_start.strftime("%Y-%m-%dT%H:%M:%S")],
                          shell = True)
-    except: helpers.exit("13")
-
-# -- INIT SUCCESS --------------------------------------------------------------
-helpers.init_success()
-gpio.output(24, gpio.HIGH)
+    except: helpers.init_exit("13")
