@@ -78,8 +78,6 @@ if config.camera_logging == True:
     except: helpers.init_exit("08")
 
 # -- RUN SUBPROCESSES ----------------------------------------------------------
-current_dir = os.path.dirname(os.path.realpath(__file__))
-
 try:
     pass
 ##    subprocess.Popen([lxterminal -e python3 aws_data.py], shell = True)
