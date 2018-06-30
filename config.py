@@ -7,26 +7,20 @@ class ConfigData():
     def __init__(self):
         self.data_directory = None
         self.database_path = None
-        self.integrity_path = None
         self.camera_drive = None
-        self.backup_drive = None
-        self.environment_logging = None
+        self.envReports_logging = None
         self.camera_logging = None
-        self.statistic_generation = None
-        self.report_uploading = None
-        self.environment_uploading = None
-        self.statistic_uploading = None
+        self.dayStats_generation = None
+        self.reports_uploading = None
+        self.envReports_uploading = None
+        self.dayStats_uploading = None
         self.camera_uploading = None
-        self.integrity_checks = None
         self.local_network_server = None
-        self.backups = None
-        self.caws_identifier = None
-        self.caws_name = None
-        self.caws_location = None
-        self.caws_time_zone = None
-        self.caws_latitude = None
-        self.caws_longitude = None
-        self.caws_elevation = None
+        self.aws_location = None
+        self.aws_time_zone = None
+        self.aws_latitude = None
+        self.aws_longitude = None
+        self.aws_elevation = None
         self.remote_sql_server = None
         self.remote_ftp_server = None
         self.remote_ftp_username = None
@@ -43,66 +37,57 @@ class ConfigData():
             # Check required configuration options
             self.data_directory = parser.get("DataStores", "DataDirectory")
             if self.data_directory == "": return False
-            self.caws_name = parser.get("CAWSInfo", "CAWSName")
-            if self.caws_name == "": return False
-            self.caws_location = parser.get("CAWSInfo", "CAWSLocation")
-            if self.caws_location == "": return False
-            self.caws_time_zone = parser.get("CAWSInfo", "CAWSTimeZone")
-            if not self.caws_time_zone in pytz.all_timezones: return False
-            self.caws_time_zone = pytz.timezone(self.caws_time_zone)
-            self.caws_latitude = parser.getfloat("CAWSInfo", "CAWSLatitude")
-            self.caws_longitude = (parser
-                .getfloat("CAWSInfo", "CAWSLongitude"))
-            self.caws_elevation = (parser
-                .getfloat("CAWSInfo", "CAWSElevation"))
+            self.aws_location = parser.get("AWSInfo", "Location")
+            if self.aws_location == "": return False
+
+            self.aws_time_zone = parser.get("AWSInfo", "TimeZone")
+            if not self.aws_time_zone in pytz.all_timezones: return False
+            self.aws_time_zone = pytz.timezone(self.aws_time_zone)
+
+            self.aws_latitude = parser.getfloat("AWSInfo", "Latitude")
+            self.aws_longitude = parser.getfloat("AWSInfo", "Longitude")
+            self.aws_elevation = parser.getfloat("AWSInfo", "Elevation")
 
             # Derive directories and file paths
-            self.database_path = os.path.join(
-                self.data_directory, "records.sq3")
-            self.integrity_path = os.path.join(
-                self.data_directory, "integrity.xml")
+            self.database_path = os.path.join(self.data_directory,
+                "records.sq3")
             
             # Load non-required configuration options
             self.camera_drive = parser.get("DataStores", "CameraDrive")
             if self.camera_drive == "": self.camera_drive = None
-            self.backup_drive = parser.get("DataStores", "BackupDrive")
-            if self.backup_drive == "": self.backup_drive = None
+
+            self.remote_sql_server = (parser.get("DataEndpoints",
+                "RemoteSQLServer"))
+            if self.remote_sql_server == "": self.remote_sql_server = None
+            self.remote_ftp_server = (parser.get("DataEndpoints",
+                "RemoteFTPServer"))
+            if self.remote_ftp_server == "": self.remote_ftp_server = None
+            self.remote_ftp_username = (parser.get("DataEndpoints",
+                "RemoteFTPUsername"))
+            if self.remote_ftp_username == "": self.remote_ftp_username = None
+            self.remote_ftp_password = (parser.get("DataEndpoints",
+                "RemoteFTPPassword"))
+            if self.remote_ftp_password == "": self.remote_ftp_password = None
             
             # Load boolean configuration modifiers
-            self.environment_logging = (parser
-                .getboolean("ConfigModifiers", "EnvironmentLogging"))
+            self.envReports_logging = (parser
+                .getboolean("ConfigModifiers", "EnvReportsLogging"))
             self.camera_logging = (parser
                 .getboolean("ConfigModifiers", "CameraLogging"))
-            self.statistic_generation = (parser
-                .getboolean("ConfigModifiers", "StatisticGeneration"))
-            self.report_uploading = (parser
-                .getboolean("ConfigModifiers", "ReportUploading"))
-            self.environment_uploading = (parser
-                .getboolean("ConfigModifiers", "EnvironmentUploading"))
-            self.statistic_uploading = (parser
-                .getboolean("ConfigModifiers", "StatisticUploading"))
+            self.dayStats_generation = (parser
+                .getboolean("ConfigModifiers", "DayStatsGeneration"))
+            self.reports_uploading = (parser
+                .getboolean("ConfigModifiers", "ReportsUploading"))
+            self.envReports_uploading = (parser
+                .getboolean("ConfigModifiers", "EnvReportsUploading"))
+            self.dayStats_uploading = (parser
+                .getboolean("ConfigModifiers", "DayStatsUploading"))
             self.camera_uploading = (parser
                 .getboolean("ConfigModifiers", "CameraUploading"))
-            self.integrity_checks = (parser
-                .getboolean("ConfigModifiers", "IntegrityChecks"))
             self.local_network_server = (parser
                 .getboolean("ConfigModifiers", "LocalNetworkServer"))
-            self.backups = parser.getboolean("ConfigModifiers", "Backups")
-            
-            # Load non-required configuration options
-            self.remote_sql_server = (parser
-                .get("DataEndpoints", "RemoteSQLServer"))
-            if self.remote_sql_server == "": self.remote_sql_server = None
-            self.remote_ftp_server = (parser
-                .get("DataEndpoints", "RemoteFTPServer"))
-            if self.remote_ftp_server == "": self.remote_ftp_server = None
-            self.remote_ftp_username = (parser
-                .get("DataEndpoints", "RemoteFTPUsername"))
-            if self.remote_ftp_username == "": self.remote_ftp_username = None
-            self.remote_ftp_password = (parser
-                .get("DataEndpoints", "RemoteFTPPassword"))
-            if self.remote_ftp_password == "": self.remote_ftp_password = None
         except: return False
+
         return True
 
     def validate(self):
@@ -112,26 +97,21 @@ class ConfigData():
             self.camera_drive == None):
             return False
 
-        if (self.backups == True and
-            self.backup_drive == None):
-            return False
-
-        if ((self.environment_logging == False and
-            self.environment_uploading == True) or
+        if ((self.envReports_logging == False and
+            self.envReports_uploading == True) or
             (self.camera_logging == False and
             self.camera_uploading == True) or
-            (self.statistic_generation == False and
-            self.statistic_uploading == True)):
+            (self.dayStats_generation == False and
+            self.dayStats_uploading == True)):
             return False
 
-        if (self.report_uploading == True or
-            self.environment_uploading == True or
-            self.statistic_uploading == True):
-
+        if (self.reports_uploading == True or
+            self.envReports_uploading == True or
+            self.dayStats_uploading == True):
+            
             if self.remote_sql_server == None: return False
 
         if (self.camera_uploading == True):
-
             if (self.remote_ftp_server == None or
                 self.remote_ftp_username == None or
                 self.remote_ftp_password == None):
