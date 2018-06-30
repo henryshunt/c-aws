@@ -540,7 +540,7 @@ else: start_time = datetime.utcnow()
 print(start_time)
 
 # -- CREATE SERVER -------------------------------------------------------------
-server = flask.Flask(__name__, static_folder = "server",
+server = flask.Flask(__name__, static_folder = "server/res",
                      template_folder = "server")
 
 # -- ROUTE URLS ----------------------------------------------------------------
