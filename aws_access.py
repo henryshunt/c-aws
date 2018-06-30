@@ -27,16 +27,19 @@ print("")
 print("----------- DO NOT TERMINATE -----------")
 
 # GLOBAL VARIABLES -------------------------------------------------------------
-config = ConfigData()
-startup_time = None
+config = ConfigData(); config.load()
+
+if len(sys.argv) == 2:
+    startup_time = datetime.strptime(sys.argv[1], "%Y-%m-%dT%H:%M:%S")
+else: startup_time = datetime.utcnow()
 
 # PAGE SERVERS -----------------------------------------------------------------
 def page_now():
     AirT = "no data"; ExpT = "no data"; RelH = "no data"; DewP = "no data"
     WSpd = "no data"; WDir = "no data"; WGst = "no data"; SunD = "no data"
-    SunD_Phr = "no data"; Rain = "no data"; Rain_Phr = "no data"
-    StaP = "no data"; MSLP = "no data"; PTen = "no data"; ST10 = "no data"
-    ST30 = "no data"; ST00 = "no data"
+    SunD_PHr = "no data"; Rain = "no data"; Rain_PHr = "no data"
+    StaP = "no data"; StaP_PTH = "no data"; MSLP = "no data"; PTen = "no data"
+    ST10 = "no data"; ST30 = "no data"; ST00 = "no data"
 
     utc = datetime.utcnow(); utc_second = utc.second
     utc = utc.replace(second = 0, microsecond = 0)
@@ -50,7 +53,7 @@ def page_now():
         # Return to current minute if no record for previous minute
         if record == False or record == None:
               utc += timedelta(minutes = 1)
-            
+
     data_time = helpers.utc_to_local(config, utc).strftime("%H:%M")
 
     # Get values to display for each report parameter
@@ -68,38 +71,46 @@ def page_now():
         if record["WGst"] != None: WGst = str(record["WGst"]) + " mph"
         if record["SunD"] != None: SunD = str(record["SunD"]) + " sec"
         if record["Rain"] != None: Rain = str(round(record["Rain"], 2)) + " mm"
-        if record["StaP"] != None: StaP = str(record["StaP"]) + " hPa"
-        if record["MSLP"] != None: MSLP = str(record["MSLP"]) + " hPa"
+        if record["StaP"] != None:
+            StaP = str(record["StaP"]) + " hPa"
+
+            # Calculate three hour pressure tendency
+            StaP_PTH_record = analysis.record_for_time(config,
+                                                    utc - timedelta(hours - 3))
         
-        if record["PTen"] != None:
-            if record["PTen"] > 0:
-                PTen = "+" + str(record["PTen"]) + " hPa"
-            else: PTen = str(record["PTen"]) + " hPa"
-            
+            if StaP_PTH_record != False and StaP_PTH_record != None:
+                if StaP_PTH_record["StaP"] != None:
+                    StaP_PTH = record["StaP"] - StaP_PTH_record["StaP"]
+
+                    if StaP_PTH >= 0:
+                        StaP_PTH = "+" + str(StaP_PTH) + " hPa"
+                    else: StaP_PTH = str(StaP_PTH) + " hPa"
+                        
+        if record["MSLP"] != None: MSLP = str(record["MSLP"]) + " hPa"
         if record["ST10"] != None: ST10 = str(record["ST10"]) + "°C"
         if record["ST30"] != None: ST30 = str(record["ST30"]) + "°C"
         if record["ST00"] != None: ST00 = str(record["ST00"]) + "°C"
 
     # Calculate total sunshine duration over past hour
-    SunD_Phr_record = analysis.past_hour_total(config, utc, "SunD")
-    if SunD_Phr_record != False and SunD_Phr_record != None:
-        if SunD_Phr_record["SunD"] != None:
-            SunD_Phr = str(timedelta(seconds = SunD_Phr_record["SunD"]))
+    SunD_PHr_record = analysis.past_hour_total(config, utc, "SunD")
+    if SunD_PHr_record != False and SunD_PHr_record != None:
+        if SunD_PHr_record["SunD"] != None:
+            SunD_PHr = str(timedelta(seconds = SunD_PHr_record["SunD"]))
 
     # Calculate total rainfall over past hour
-    Rain_Phr_record = analysis.past_hour_total(config, utc, "Rain")
-    if Rain_Phr_record != False and Rain_Phr_record != None:
-        if Rain_Phr_record["Rain"] != None:
-            Rain_Phr = str(round(Rain_Phr_record["Rain"], 2)) + " mm"
+    Rain_PHr_record = analysis.past_hour_total(config, utc, "Rain")
+    if Rain_PHr_record != False and Rain_PHr_record != None:
+        if Rain_PHr_record["Rain"] != None:
+            Rain_PHr = str(round(Rain_PHr_record["Rain"], 2)) + " mm"
 
     return flask.render_template("index.html",
                                  aws_location = config.aws_location,
                                  AirT = AirT, ExpT = ExpT, RelH = RelH,
                                  DewP = DewP, WSpd = WSpd, WDir = WDir,
-                                 WGst = WGst, SunD = SunD, Rain = Rain,
-                                 StaP = StaP, MSLP = MSLP, PTen = PTen,
-                                 ST10 = ST10, ST30 = ST30, ST00 = ST00,
-                                 SunD_Phr = SunD_Phr, Rain_Phr = Rain_Phr,
+                                 WGst = WGst, SunD = SunD, SunD_PHr = SunD_PHr,
+                                 Rain = Rain, Rain_PHr = Rain_PHr, StaP = StaP,
+                                 MSLP = MSLP, StaP_PTH = StaP_PTH, ST10 = ST10,
+                                 ST30 = ST30, ST00 = ST00,
                                  data_time = data_time)
 
 def page_statistics():
@@ -529,20 +540,10 @@ def data_command(command):
 
     return flask.redirect("about.html")
 
-
-# ENTRY POINT ==================================================================
-config.load()
-
-# -- PROCESS ARGS ---------------------------------------------------------------
-if len(sys.argv) == 2:
-    startup_time = datetime.strptime(sys.argv[1], "%Y-%m-%dT%H:%M:%S")
-else: startup_time = datetime.utcnow()
-
 # -- CREATE SERVER -------------------------------------------------------------
 server = flask.Flask(__name__, static_folder = "server/res",
                      template_folder = "server")
 
-# -- ROUTE URLS ----------------------------------------------------------------
 server.add_url_rule("/", view_func = page_now)
 server.add_url_rule("/index.html", view_func = page_now)
 server.add_url_rule("/statistics.html", view_func = page_statistics)
