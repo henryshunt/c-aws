@@ -1,11 +1,29 @@
-* {
-    font-family: "Segoe UI", "-apple-system", "Helvetica Neue";
+html, body, div, span, applet, object, iframe,
+h1, h2, h3, h4, h5, h6, p, blockquote, pre,
+a, abbr, acronym, address, big, cite, code,
+del, dfn, em, font, img, ins, kbd, q, s, samp,
+small, strike, strong, sub, sup, tt, var,
+dl, dt, dd, ol, ul, li,
+fieldset, form, label, legend,
+table, caption, tbody, tfoot, thead, tr, th, td {
+	margin: 0; padding: 0; border: 0; outline: 0;
+	font-weight: inherit; font-style: inherit;
+	font-size: 100%; font-family: inherit;
+	vertical-align: baseline;
 }
+:focus { outline: 0; }
+body { line-height: 1; color: black; background: white; }
+ol, ul { list-style: none; }
+table { border-collapse: separate; border-spacing: 0; }
+caption, th, td { text-align: left; font-weight: normal; }
+blockquote:before, blockquote:after,
+q:before, q:after { content: ""; }
+blockquote, q { quotes: "" ""; }
+
+
 body {
-    margin: 0px;
-}
-td {
-    padding: 0px;
+    font-family: "Trebuchet MS";
+    -webkit-text-size-adjust: 100%;
 }
 tr {
     line-height: 1.5em;
@@ -14,7 +32,7 @@ tr {
 #header {
     width: 100%;
     height: 105px;
-    top: 0px;
+    top: 0;
     position: fixed;
     background: #2a2a2a;
 }
@@ -22,70 +40,73 @@ tr {
     max-width: 1050px;
     min-width: 570px;
     padding-right: 10px;
-    padding-bottom: 9px;
     padding-left: 10px;
-    padding-top: 1px;
-    font-size: 13;
-    position: center;
-    margin: 0px auto;
-    height: 63px;
+    margin: 0 auto;
+    width: 100%;
+    display: flex;
+    justify-content: space-between;
 }
 #header_left {
-    font-family: "Trebuchet MS";
     float: left;
-    font-size: 46;
+    font-size: 40px;
     color: white;
-    margin-top: 6px;
-    margin-bottom: 0px;
+    margin-top: 13px;
 }
 #header_right {
     float: right;
-    font-size: 35;
+    font-size: 30px;
     color: white;
-    margin-top: 10px;
+    margin-top: 22px;
     font-weight: bold;
-    margin-bottom: 0px;
 }
 
 #menu {
     width: 100%;
     background: #d0d0d0;
+    position: absolute;
+    bottom: 7px;
+    height: 25px;
 }
 #menu_items {
     max-width: 1050px;
     min-width: 570px;
-    height: 15px;
-
     padding-right: 10px;
-    padding-bottom: 8px;
     padding-left: 10px;
-    padding-top: 2px;
-    font-size: 13;
-    position: center;
-    margin: 0px auto;
+    margin: 0 auto;
+    display: flex;
+    justify-content: space-between;
+    font-size: 13px;
+    line-height: 24px;
+}
+#menu_items div * {
+    float: left;
+    margin-right: 15px;
+}
+#menu_items div span:first-of-type,
+#menu_items div span:last-of-type {
+    font-weight: bold;
+    line-height: 23px;
 }
 .menu_item {
     text-decoration: none;
-    float: left;
-    margin-right: 15px;
+    color: blue;
+}
+.menu_item:hover {
+    text-decoration: underline;
 }
 .menu_item:visited {
     color: blue;
 }
-.menu_item:not(.no_hover):hover {
-    color: #00819d;
+#ami {
+    font-weight: bold;
 }
 
 #main {
     max-width: 1050px;
-    margin: 0px auto;
+    margin: 0 auto;
     margin-top: 105px;
     margin-bottom: 34px;
-    position: center;
-    padding-right: 10px;
-    padding-left: 10px;
-    padding-top: 10px;
-    padding-bottom: 10px;
+    padding: 10px;
 }
 
 #scroller {
@@ -98,14 +119,10 @@ tr {
     width: 40px;
     text-align: center;
     background-color: #f2f7f8;
-    height: 100%;
-    font-size: 40;
-    line-height: 0.7;
+    font-size: 18px;
+    line-height: 40px;
     text-decoration: none;
     color: black;
-}
-.scroller_button:hover {
-    font-weight: bold;
 }
 .scroller_button:visited {
     color: black;
@@ -114,7 +131,7 @@ tr {
     display: table-cell;
     text-align: center;
     vertical-align: middle;
-    padding-bottom: 1px;
+    padding-bottom: 2px;
 }
 
 .group {
@@ -129,9 +146,8 @@ tr {
 }
 .group_title {
     margin-bottom: 7px;
-    font-size: 25;
-    font-family: "Trebuchet MS";
-    margin-top: 0px;
+    font-size: 25px;
+    margin-top: 0;
     margin-left: 10px;
     display: inline-block;
 }
@@ -139,9 +155,11 @@ tr {
     float: right;
     font-weight: bold;
     cursor: pointer;
-    font-size: 26;
-    margin-right: 12px;
-    line-height: 1em;
+    font-size: 26px;
+    margin-right: 5px;
+    text-align: center;
+    width: 27px;
+    height: 27px;
 }
 .group_open:hover {
     color: gray;
@@ -149,11 +167,10 @@ tr {
 
 .field_table {
     width: 100%;
-    margin-top: 10px;
+    margin-top: 12px;
     margin-bottom: 15px;
 }
 .field_label {
-    max-width: 1070px;
     margin-left: 35px;
     color: grey;
 }
@@ -162,63 +179,33 @@ tr {
     padding-right: 15px;
 }
 
-#control_sub_content {
-    margin-left: 38px;
-    margin-right: 17px;
-    margin-top: 15px;
-    margin-bottom: 17px;
-}
-#control_sub_group {
-    margin-top: -19px;
-    border: none;
-    margin-right: 1px;
-    margin-left: 1px;
-    margin-bottom: 0px;
-}
-#control_sub_table {
-    width: calc(100% + 7px);
-    margin-left: -4px;
-    height: 15px;
-}
-#command_field {
-    font-size: 14;
-    height: 22px;
-    margin-top: 4px;
-    width: 100%;
-}
-
 #footer {
     width: 100%;
     height: 34px;
-    margin-bottom: 0px auto;
-    bottom: 0px;
+    bottom: 0;
     position: fixed;
     background: #2a2a2a;
 }
 #footer_items {
     max-width: 1050px;
     min-width: 538px;
-    margin: 0px auto;
+    margin: 0 auto;
     padding-top: 3px;
     padding-right: 10px;
     padding-left: 10px;
-    position: center;
+    line-height: 26px
 }
-
 .footer_label {
-    margin-top: -4px;
-    padding-top: 7px;
     margin-right: 10px;
     float: left;
     color: #cbff31;
-    font-size: 14;
+    font-size: 14px;
+    line-height: 27px;
 }
 .footer_value {
-    margin-top: 0px;
-    width: 100%;
     color: white;
     text-align: center;
-    font-size: 18;
+    font-size: 18px;
     border: 1px solid #666666;
     box-sizing: border-box;
     height: 28px;
