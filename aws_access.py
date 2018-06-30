@@ -1,4 +1,4 @@
-""" CAWS Data Access Program
+""" C-AWS Data Access Program
       Responsible for enabling access to and control of the station, and for
       serving its data to devices accessing from within the local network
 """
@@ -20,15 +20,15 @@ from frames import DbTable
 
 # MESSAGE ----------------------------------------------------------------------
 print("--- Custom Automatic Weather Station ---")
-print("Program: Data Access Software")
+print("Program: Data Access Sub-System")
 print("Author:  Henry Hunt")
-print("Version: V4.0 (April 2018)")
+print("Version: V4C.1 (June 2018)")
 print("")
 print("----------- DO NOT TERMINATE -----------")
 
 # GLOBAL VARIABLES -------------------------------------------------------------
-config = None
-program_start = None
+config = ConfigData()
+start_time = None
 
 # PAGE SERVERS -----------------------------------------------------------------
 def page_now():
@@ -392,11 +392,11 @@ def page_about():
 
     utc = datetime.utcnow(); utc_second = utc.second
     utc = utc.replace(second = 0, microsecond = 0)
-    caws_elevation = str(config.caws_elevation) + " m asl."
+    caws_elevation = str(config.aws_elevation) + " m asl."
 
     # Format software startup time
-    if program_start != None:
-        startup_time = (helpers.utc_to_local(config, program_start)
+    if start_time != None:
+        startup_time = (helpers.utc_to_local(config, start_time)
                         .strftime("%d/%m/%Y at %H:%M:%S"))
 
     # Get computer environment data
@@ -431,23 +431,13 @@ def page_about():
         
         if _camera_space != None:
             camera_space = str(round(_camera_space, 2)) + " gb"
-
-    # Get remaining backup storage space
-    if not os.path.isdir(config.backup_drive):
-        backup_space = "no drive"
-    else:
-        _backup_space = helpers.remaining_space(config.backup_drive)
-        
-        if _backup_space != None:
-            backup_space = str(round(_backup_space, 2)) + " gb"
     
     return flask.render_template("about.html",
-                                 caws_name = config.caws_name,
-                                 caws_location = config.caws_location,
-                                 caws_time_zone = config.caws_time_zone,
-                                 caws_latitude = config.caws_latitude,
-                                 caws_longitude = config.caws_longitude,
-                                 caws_elevation = caws_elevation,
+                                 caws_location = config.aws_location,
+                                 caws_time_zone = config.aws_time_zone,
+                                 caws_latitude = config.aws_latitude,
+                                 caws_longitude = config.aws_longitude,
+                                 caws_elevation = aws_elevation,
                                  startup_time = startup_time,
                                  EncT = EncT, CPUT = CPUT,
                                  internal_space = internal_space,
@@ -543,14 +533,12 @@ def data_command(command):
 
 
 # ENTRY POINT ==================================================================
-# -- LOAD CONFIG ---------------------------------------------------------------
-config = ConfigData()
-if config.load() == False: sys.exit(1)
-if config.validate() == False: sys.exit(1)
+config = ConfigData().load()
 
+# -- PROCESS ARGS ---------------------------------------------------------------
 if len(sys.argv) == 2:
-    program_start = datetime.strptime(sys.argv[1], "%Y-%m-%dT%H:%M:%S")
-else: program_start = datetime.utcnow()
+    start_time = datetime.strptime(sys.argv[1], "%Y-%m-%dT%H:%M:%S")
+else: start_time = datetime.utcnow()
 
 # -- CREATE SERVER -------------------------------------------------------------
 server = flask.Flask(__name__, static_folder = "server",
@@ -571,8 +559,6 @@ server.add_url_rule("/graph/data", view_func = data_graph)
 server.add_url_rule("/command/<command>", view_func = data_command)
 
 # -- START SERVER --------------------------------------------------------------
-start_time = datetime.utcnow().replace(second = 0, microsecond = 0)
-
 server.config["SEND_FILE_MAX_AGE_DEFAULT"] = 0
 logging.getLogger("werkzeug").setLevel(logging.CRITICAL)
 server.run(host = "0.0.0.0", threaded = True)
