@@ -28,7 +28,7 @@ print("----------- DO NOT TERMINATE -----------")
 
 # GLOBAL VARIABLES -------------------------------------------------------------
 config = ConfigData()
-start_time = None
+startup_time = None
 
 # PAGE SERVERS -----------------------------------------------------------------
 def page_now():
@@ -386,7 +386,7 @@ def page_camera():
                                  override_update = override_update)
 
 def page_about():
-    startup_time = "no data"; EncT = "no data"; CPUT = "no data"
+    _startup_time = "no data"; EncT = "no data"; CPUT = "no data"
     internal_space = "no data"; camera_space = "no data"
 
     utc = datetime.utcnow(); utc_second = utc.second
@@ -394,8 +394,8 @@ def page_about():
     aws_elevation = str(config.aws_elevation) + " m asl."
 
     # Format software environment startup time
-    if start_time != None:
-        startup_time = (helpers.utc_to_local(config, start_time)
+    if startup_time != None:
+        _startup_time = (helpers.utc_to_local(config, startup_time)
                         .strftime("%d/%m/%Y at %H:%M:%S"))
 
     # Get hardware environment data
@@ -437,7 +437,7 @@ def page_about():
                                  aws_latitude = config.aws_latitude,
                                  aws_longitude = config.aws_longitude,
                                  aws_elevation = aws_elevation,
-                                 start_time = startup_time,
+                                 startup_time = _startup_time,
                                  EncT = EncT, CPUT = CPUT,
                                  internal_space = internal_space,
                                  camera_space = camera_space,
@@ -535,9 +535,8 @@ config.load()
 
 # -- PROCESS ARGS ---------------------------------------------------------------
 if len(sys.argv) == 2:
-    start_time = datetime.strptime(sys.argv[1], "%Y-%m-%dT%H:%M:%S")
-else: start_time = datetime.utcnow()
-print(start_time)
+    startup_time = datetime.strptime(sys.argv[1], "%Y-%m-%dT%H:%M:%S")
+else: startup_time = datetime.utcnow()
 
 # -- CREATE SERVER -------------------------------------------------------------
 server = flask.Flask(__name__, static_folder = "server/res",

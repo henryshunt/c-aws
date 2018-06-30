@@ -25,11 +25,7 @@ print("----------- DO NOT TERMINATE -----------")
 
 # GLOBAL VARIABLES -------------------------------------------------------------
 config = ConfigData()
-start_time = None
-
-
-# ENTRY POINT ==================================================================
-start_time = datetime.utcnow()
+startup_time = datetime.utcnow()
 
 # -- INIT GPIO AND LEDS --------------------------------------------------------
 try:
@@ -102,6 +98,6 @@ if (config.reports_uploading == True or
 if config.local_network_server == True:
     try:
         subprocess.Popen(["lxterminal -e python3 aws_access.py"
-                          + start_time.strftime(" %Y-%m-%dT%H:%M:%S")],
+                          + startup_time.strftime(" %Y-%m-%dT%H:%M:%S")],
                          shell = True)
     except: helpers.init_exit("13")
