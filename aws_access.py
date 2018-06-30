@@ -233,7 +233,7 @@ def page_statistics():
             ST00_Avg = str(round(record["ST00_Avg"], 1)) + "°C"
         
     return flask.render_template("statistics.html",
-                                 caws_location = config.aws_location,
+                                 aws_location = config.aws_location,
                                  scroller_prev = scroller_prev,
                                  scroller_time = scroller_time,
                                  scroller_next = scroller_next,
@@ -291,7 +291,7 @@ def page_graph_day():
     data_time = local_time.strftime("%H:%M")
 
     return flask.render_template("graph_day.html",
-                                 caws_location = config.aws_location,
+                                 aws_location = config.aws_location,
                                  start = start, end = end,
                                  low = low, high = high,
                                  scroller_prev = scroller_prev,
@@ -301,7 +301,7 @@ def page_graph_day():
 
 def page_graph_month():
     return flask.render_template("graph_month.html",
-                                 caws_location = config.aws_location)
+                                 aws_location = config.aws_location)
 
 def page_graph_year():
     utc = datetime.utcnow().replace(second = 0, microsecond = 0)
@@ -317,7 +317,7 @@ def page_graph_year():
     data_time = local_time.strftime("%H:%M")
 
     return flask.render_template("graph_year.html",
-                                 caws_location = config.aws_location,
+                                 aws_location = config.aws_location,
                                  start = start, end = end,
                                  low = low, high = high,
                                  data_time = data_time)
@@ -383,7 +383,7 @@ def page_camera():
     override_update = str(override_update).lower()
 
     return flask.render_template("camera.html",
-                                 caws_location = config.aws_location,
+                                 aws_location = config.aws_location,
                                  scroller_prev = scroller_prev,
                                  scroller_time = scroller_time,
                                  scroller_next = scroller_next,
