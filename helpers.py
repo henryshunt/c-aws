@@ -4,8 +4,6 @@ from datetime import datetime, timedelta
 import RPi.GPIO as gpio
 import pytz
 
-from config import ConfigData
-
 def init_exit(code):
     try:
         with open("init.txt", "w+") as file:
@@ -40,6 +38,7 @@ def remaining_space(directory):
         return non_root_space / 1024 / 1024 / 1024
     except: return None
 
+
 def utc_to_local(config, utc):
     localised = pytz.utc.localize(utc.replace(tzinfo = None))
     return localised.astimezone(config.aws_time_zone).replace(tzinfo = None)
@@ -61,6 +60,16 @@ def day_bounds_utc(config, local, inclusive):
     # Convert start and end to UTC
     return local_to_utc(config, start), local_to_utc(config, end)
 
+def last_five_mins(utc):
+    minute = str(utc.minute)
+    
+    while not minute.endswith("0") and not minute.endswith("5"):
+        utc -= timedelta(minutes = 1)
+        minute = str(utc.minute)
+
+    return utc
+
+
 def degrees_to_compass(degrees):
     if degrees >= 338 or degrees < 23: return "N"
     elif degrees >= 23 and degrees < 68: return "NE"
@@ -70,15 +79,6 @@ def degrees_to_compass(degrees):
     elif degrees >= 203 and degrees < 248: return "SW"
     elif degrees >= 248 and degrees < 293: return "W"
     elif degrees >= 293 and degrees < 338: return "NW"
-
-def last_five_mins(utc):
-    minute = str(utc.minute)
-    
-    while not minute.endswith("0") and not minute.endswith("5"):
-        utc -= timedelta(minutes = 1)
-        minute = str(utc.minute)
-
-    return utc
 
 def none_to_null(value):
     if value == None:
