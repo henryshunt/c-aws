@@ -64,7 +64,7 @@ def do_read_temp(address):
     """ Reads value of specific temperature probe into its global variable
     """
     if not os.path.isdir("/sys/bus/w1/devices/" + address):
-        return #gpio.output(23, gpio.HIGH); return
+        return #gpio.output(24, gpio.HIGH); return
 
     try:
         with open("/sys/bus/w1/devices/" + address + "/w1_slave", "r") as probe:
@@ -72,7 +72,7 @@ def do_read_temp(address):
             temp = int(data[1][data[1].find("t=") + 2:]) / 1000
 
             # Check for error value
-            if temp == -127 or temp == 85: gpio.output(23, gpio.HIGH); return
+            if temp == -127 or temp == 85: gpio.output(24, gpio.HIGH); return
 
             # Store value in respective global variable
             if os.path.basename(address) == "28-04167053d6ff":
@@ -87,7 +87,7 @@ def do_read_temp(address):
                 global ST00_value; ST00_value = round(temp, 1)
             elif os.path.basename(address) == "28-8000001f88fa":
                 global EncT_value; EncT_value = round(temp, 1)
-    except: gpio.output(23, gpio.HIGH)
+    except: gpio.output(24, gpio.HIGH)
 
 # OPERATIONS -------------------------------------------------------------------
 def do_log_report(utc):
@@ -132,7 +132,7 @@ def do_log_report(utc):
         ST10_thread.join(); frame.soil_temperature_10 = ST10_value
         ST30_thread.join(); frame.soil_temperature_30 = ST30_value
         ST00_thread.join(); frame.soil_temperature_00 = ST00_value
-    except: gpio.output(23, gpio.HIGH)
+    except: gpio.output(24, gpio.HIGH)
 
     AirT_value = None; ExpT_value = None; ST10_value = None
     ST30_value = None; ST00_value = None
@@ -141,7 +141,7 @@ def do_log_report(utc):
     try:
         frame.relative_humidity = round(
             sht31d.SHT31(address = 0x44).read_humidity(), 1)
-    except: gpio.output(23, gpio.HIGH)
+    except: gpio.output(24, gpio.HIGH)
 
     # -- STATION PRESSURE ------------------------------------------------------
     try:
@@ -150,7 +150,7 @@ def do_log_report(utc):
         # Temperature must be read first or pressure will not return
         discard_StaP_temp = StaP_sensor.read_temperature()
         frame.station_pressure = round(StaP_sensor.read_pressure() / 100, 1)
-    except: gpio.output(23, gpio.HIGH)
+    except: gpio.output(24, gpio.HIGH)
         
     # -- WIND SPEED ------------------------------------------------------------
     ten_mins_ago = frame.time - timedelta(minutes = 10)
@@ -165,7 +165,7 @@ def do_log_report(utc):
         # Calculate wind speed only if 10 minutes of data is available
         if ten_mins_ago >= data_start:
             frame.wind_speed = round((len(past_WSpd_ticks) * 2.5) / 600, 1)
-    except: gpio.output(23, gpio.HIGH)
+    except: gpio.output(24, gpio.HIGH)
 
     # -- WIND DIRECTION --------------------------------------------------------
     try:
@@ -183,7 +183,7 @@ def do_log_report(utc):
 
                 frame.wind_direction = int(round(WDir_total
                                                  / len(past_WDir_samples)))
-    except: gpio.output(23, gpio.HIGH)
+    except: gpio.output(24, gpio.HIGH)
 
     # -- WIND GUST -------------------------------------------------------------
     try:
@@ -207,17 +207,17 @@ def do_log_report(utc):
                     if WGst_sample > WGst_value: WGst_value = WGst_sample
                     
                 frame.wind_gust = round(WGst_value, 1)
-    except: gpio.output(23, gpio.HIGH)
+    except: gpio.output(24, gpio.HIGH)
 
     # -- SUNSHINE DURATION -----------------------------------------------------
     try:
         frame.sunshine_duration = new_SunD_ticks
-    except: gpio.output(23, gpio.HIGH)
+    except: gpio.output(24, gpio.HIGH)
 
     # -- RAINFALL --------------------------------------------------------------
     try:
         frame.rainfall = new_Rain_ticks * 0.254
-    except: gpio.output(23, gpio.HIGH)
+    except: gpio.output(24, gpio.HIGH)
 
     # -- DEW POINT -------------------------------------------------------------
     try:
@@ -231,7 +231,7 @@ def do_log_report(utc):
             DewP_d = math.sqrt((8.0813 - DewP_c) ** 2 - (1.842 * DewP_c))
             
             frame.dew_point = round(278.04 * ((8.0813 - DewP_c) - DewP_d), 1)
-    except: gpio.output(23, gpio.HIGH)
+    except: gpio.output(24, gpio.HIGH)
 
     # -- MEAN SEA LEVEL PRESSURE -----------------------------------------------
     try:
@@ -241,18 +241,18 @@ def do_log_report(utc):
 
             MSLP_a = 6.11 * 10 ** ((7.5 * frame.dew_point) / (237.3 +
                                                              frame.dew_point))
-            MSLP_b = (9.80665 / 287.3) * config.caws_elevation
-            MSLP_c = ((0.0065 * config.caws_elevation) / 2) 
+            MSLP_b = (9.80665 / 287.3) * config.aws_elevation
+            MSLP_c = ((0.0065 * config.aws_elevation) / 2) 
             MSLP_d = frame.air_temperature + 273.15 + MSLP_c + MSLP_a * 0.12
             
             frame.mean_sea_level_pressure = round(
                 frame.station_pressure * math.exp(MSLP_b / MSLP_d), 1)
-    except: gpio.output(23, gpio.HIGH)
+    except: gpio.output(24, gpio.HIGH)
 
     # ADD TO DATABASE ----------------------------------------------------------
     free_space = helpers.remaining_space("/")
     if free_space == None or free_space < 0.1:
-        gpio.output(23, gpio.HIGH); return
+        gpio.output(24, gpio.HIGH); return
         
     try:
         with sqlite3.connect(config.database_path) as database:
@@ -275,7 +275,7 @@ def do_log_report(utc):
                                 frame.soil_temperature_00))
             
             database.commit()
-    except: gpio.output(23, gpio.HIGH)
+    except: gpio.output(24, gpio.HIGH)
 
 def do_log_environment(utc):
     """ Reads CAWS environment sensors and saves the data to the database
@@ -288,19 +288,19 @@ def do_log_environment(utc):
     try:
         do_read_temp("28-8000001f88fa")
         frame.enclosure_temperature = EncT_value
-    except: pass #gpio.output(23, gpio.HIGH)
+    except: pass #gpio.output(24, gpio.HIGH)
 
     # -- CPU TEMPERATURE -------------------------------------------------------
     try:
         frame.cpu_temperature = CPUT_value
-    except: gpio.output(23, gpio.HIGH)
+    except: gpio.output(24, gpio.HIGH)
 
     EncT_value = None; CPUT_value = None
 
     # -- SAVE DATA -------------------------------------------------------------
     free_space = helpers.remaining_space("/")
     if free_space == None or free_space < 0.1:
-        gpio.output(23, gpio.HIGH); return
+        gpio.output(24, gpio.HIGH); return
 
     try:
         with sqlite3.connect(config.database_path) as database:
@@ -311,7 +311,7 @@ def do_log_environment(utc):
                                 frame.cpu_temperature))
             
             database.commit()
-    except: gpio.output(23, gpio.HIGH)
+    except: gpio.output(24, gpio.HIGH)
 
 def do_log_camera(utc):
     """ Takes an image every if it is currently a five minute interval, on the
@@ -322,8 +322,8 @@ def do_log_camera(utc):
 
     # Get sunrise and sunset times for current date
     location = astral.Location(
-        ("", "", config.caws_latitude, config.caws_longitude, "UTC",
-         config.caws_elevation))
+        ("", "", config.aws_latitude, config.aws_longitude, "UTC",
+         config.aws_elevation))
     solar = location.sun(date = utc, local = False)
     
     sunset_threshold = solar["sunset"] + timedelta(minutes = 60)
@@ -334,12 +334,12 @@ def do_log_camera(utc):
         utc <= sunset_threshold.replace(tzinfo = None)):
 
         if not os.path.isdir(config.camera_drive):
-            gpio.output(23, gpio.HIGH); return
+            gpio.output(24, gpio.HIGH); return
 
         # Check free space
         free_space = helpers.remaining_space(config.camera_drive)
         if free_space == None or free_space < 0.1:
-            gpio.output(23, gpio.HIGH); return
+            gpio.output(24, gpio.HIGH); return
 
         try:
             image_dir = os.path.join(config.camera_drive,
@@ -353,7 +353,7 @@ def do_log_camera(utc):
                 time.sleep(2)
 
                 camera.capture(os.path.join(image_dir, image_name + ".jpg"))
-        except: gpio.output(23, gpio.HIGH)
+        except: gpio.output(24, gpio.HIGH)
 
 def do_generate_stats(utc):
     """ Generates statistics for the local current day from logged records and
@@ -375,16 +375,16 @@ def do_generate_stats(utc):
                             bounds[1].strftime("%Y-%m-%d %H:%M:%S")))
                             
             new_stats = cursor.fetchone()
-    except: gpio.output(23, gpio.HIGH); return
+    except: gpio.output(24, gpio.HIGH); return
 
     # -- GET CURRENT STATS -----------------------------------------------------
     cur_stats = analysis.record_for_time(config, local_time, DbTable.LOCALSTATS)
-    if cur_stats == False: gpio.output(23, gpio.HIGH); return
+    if cur_stats == False: gpio.output(24, gpio.HIGH); return
 
     # -- SAVE DATA -------------------------------------------------------------
     free_space = helpers.remaining_space("/")
     if free_space == None or free_space < 0.1:
-        gpio.output(23, gpio.HIGH); return
+        gpio.output(24, gpio.HIGH); return
 
     try:
         with sqlite3.connect(config.database_path) as database:
@@ -432,32 +432,31 @@ def do_generate_stats(utc):
                      local_time.strftime("%Y-%m-%d")))
             
             database.commit()
-    except: gpio.output(23, gpio.HIGH)
+    except: gpio.output(24, gpio.HIGH)
 
 # SCHEDULES -------------------------------------------------------------------
 def every_minute():
     """ Triggered every minute to generate a report, add it to the database,
         activate the camera and generate statistics
     """
-    gpio.output(23, gpio.LOW)
-    gpio.output(24, gpio.HIGH)
+    gpio.output(23, gpio.HIGH)
+    gpio.output(24, gpio.LOW)
     utc = datetime.utcnow().replace(second = 0, microsecond = 0)
     time.sleep(0.15)
 
     # Read CPU temperature before anything else happens. Considered idle temp
-    if config.environment_logging == True:
+    if config.envReports_logging == True:
         try:
             global CPUT_value
             CPUT_value = round(CPUTemperature().temperature, 1)
-        except: gpio.output(23, gpio.HIGH)
+        except: gpio.output(24, gpio.HIGH)
 
     # Run actions if relevant configuration modifiers are active
     do_log_report(utc)
     if config.camera_logging == True: do_log_camera(utc)
-    if config.environment_logging == True: do_log_environment(utc)
-    if config.statistic_generation == True: do_generate_stats(utc)
-
-    gpio.output(24, gpio.LOW)
+    if config.envReports_logging == True: do_log_environment(utc)
+    if config.dayStats_generation == True: do_generate_stats(utc)
+    gpio.output(23, gpio.LOW)
 
 def every_second():
     """ Triggered every second to read sensor values into a list for averaging
@@ -482,15 +481,15 @@ def every_second():
 
             # Add to sample list with timestamp
             WDir_samples.append((datetime.utcnow(), int(round(WDir_degrees))))
-        else: gpio.output(23, gpio.HIGH)
-    except: gpio.output(23, gpio.HIGH)
+        else: gpio.output(24, gpio.HIGH)
+    except: gpio.output(24, gpio.HIGH)
 
     if spi != None: spi.close()
 
     # -- SUNSHINE DURATION -----------------------------------------------------
     try:
         if gpio.input(22) == True: SunD_ticks += 1
-    except: gpio.output(23, gpio.HIGH)
+    except: gpio.output(24, gpio.HIGH)
 
 # INTERRUPTS -------------------------------------------------------------------
 def do_trigger_wspd(channel):
