@@ -40,10 +40,9 @@ print("")
 print("----------- DO NOT TERMINATE -----------")
 
 # GLOBAL VARIABLES -------------------------------------------------------------
-config = ConfigData()
-program_start = None
+config = ConfigData(); config.load()
 data_start = None
-disable_sampling = False
+disable_sampling = True
 
 WSpd_ticks = []
 past_WSpd_ticks = []
@@ -509,15 +508,16 @@ def do_trigger_rain(channel):
 
 # ENTRY POINT ==================================================================
 # -- INIT GPIO AND LEDS --------------------------------------------------------
-gpio.setwarnings(False)
-gpio.setmode(gpio.BCM)
-gpio.setup(23, gpio.OUT)
-gpio.setup(24, gpio.OUT)
-gpio.output(24, gpio.HIGH)
+gpio.setwarnings(False); gpio.setmode(gpio.BCM)
+gpio.setup(23, gpio.OUT); gpio.setup(24, gpio.OUT)
 
 # -- SET UP SENSORS ------------------------------------------------------------
 gpio.setup(17, gpio.IN, pull_up_down = gpio.PUD_DOWN)
+gpio.add_event_detect(17, gpio.FALLING, callback = do_trigger_wspd,
+                      bouncetime = 1)
 gpio.setup(27, gpio.IN, pull_up_down = gpio.PUD_DOWN)
+gpio.add_event_detect(27, gpio.FALLING, callback = do_trigger_rain,
+                      bouncetime = 150)
 gpio.setup(22, gpio.IN, pull_up_down = gpio.PUD_DOWN)
 
 # -- WAIT FOR MINUTE -----------------------------------------------------------
@@ -527,14 +527,9 @@ while True:
         gpio.output(23, gpio.LOW); time.sleep(0.1)
     else: break
 
-gpio.output(24, gpio.LOW)
-
 # -- START DATA LOGGING --------------------------------------------------------
 data_start = datetime.utcnow().replace(second = 0, microsecond = 0)
-gpio.add_event_detect(17, gpio.FALLING, callback = do_trigger_wspd,
-                      bouncetime = 1)
-gpio.add_event_detect(27, gpio.FALLING, callback = do_trigger_rain,
-                      bouncetime = 150)
+disable_sampling = False
 
 event_scheduler = BlockingScheduler()
 event_scheduler.add_job(every_minute, "cron", minute = "0-59")

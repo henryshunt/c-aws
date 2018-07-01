@@ -34,9 +34,9 @@ try:
     gpio.setup(24, gpio.OUT); gpio.output(24, gpio.LOW)
 except: helpers.init_exit_blind("00")
 
-gpio.output(24, gpio.HIGH)
+gpio.output(23, gpio.HIGH); gpio.output(24, gpio.HIGH)
 time.sleep(2.5)
-gpio.output(24, gpio.LOW)
+gpio.output(23, gpio.LOW); gpio.output(24, gpio.LOW)
 
 # -- CHECK CONFIG --------------------------------------------------------------
 if config.load() == False: helpers.init_exit("01")

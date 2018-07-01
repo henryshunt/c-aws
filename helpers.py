@@ -12,7 +12,7 @@ def init_exit(code):
                                .strftime("%Y-%m-%dT%H:%M:%S"), code))
     except: pass
 
-    gpio.output(23, gpio.HIGH)
+    gpio.output(24, gpio.HIGH)
     sys.exit(1)
 
 def init_exit_blind(code):
