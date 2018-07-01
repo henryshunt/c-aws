@@ -460,10 +460,10 @@ def data_camera(file_name):
 
         # Return error image if file does not exist
         if not os.path.isfile(os.path.join(image_dir, image_name)):
-            return flask.send_from_directory("server", "no_camera_image.png") 
+            return flask.send_from_directory("server/res", "no_camera_image.png") 
 
         return flask.send_from_directory(image_dir, image_name)
-    except: return flask.send_from_directory("server", "no_camera_image.png")
+    except: return flask.send_from_directory("server/res", "no_camera_image.png")
 
 def data_graph():
     try:
