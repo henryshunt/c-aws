@@ -33,14 +33,15 @@ import queries
 
 # MESSAGE ----------------------------------------------------------------------
 print("--- Custom Automatic Weather Station ---")
-print("Program: Data Acquisition Software")
+print("Program: Data Acquisition")
 print("Author:  Henry Hunt")
-print("Version: V4.0 (April 2018)")
+print("Version: V4.1 (July 2018)")
 print("")
 print("----------- DO NOT TERMINATE -----------")
 
 # GLOBAL VARIABLES -------------------------------------------------------------
-config = ConfigData(); config.load()
+config = ConfigData()
+config.load()
 data_start = None
 disable_sampling = True
 
@@ -221,22 +222,19 @@ def do_log_report(utc):
 
     # -- DEW POINT -------------------------------------------------------------
     try:
-        if (frame.air_temperature != None and
-            frame.relative_humidity != None):
-
+        if frame.air_temperature != None and frame.relative_humidity != None:
             DewP_a = 0.4343 * math.log(frame.relative_humidity / 100)
             DewP_b = ((8.082 - frame.air_temperature / 556.0)
                       * frame.air_temperature)
             DewP_c = DewP_a + (DewP_b) / (256.1 + frame.air_temperature)
             DewP_d = math.sqrt((8.0813 - DewP_c) ** 2 - (1.842 * DewP_c))
-            
+
             frame.dew_point = round(278.04 * ((8.0813 - DewP_c) - DewP_d), 1)
     except: gpio.output(24, gpio.HIGH)
 
     # -- MEAN SEA LEVEL PRESSURE -----------------------------------------------
     try:
-        if (frame.station_pressure != None and
-            frame.air_temperature != None and
+        if (frame.station_pressure != None and frame.air_temperature != None and
             frame.dew_point != None):
 
             MSLP_a = 6.11 * 10 ** ((7.5 * frame.dew_point) / (237.3 +
@@ -257,7 +255,7 @@ def do_log_report(utc):
     try:
         with sqlite3.connect(config.database_path) as database:
             cursor = database.cursor()
-            cursor.execute(queries.INSERT_SINGLE_UTCREPORTS,
+            cursor.execute(queries.INSERT_REPORT,
                                (frame.time.strftime("%Y-%m-%d %H:%M:%S"),
                                 frame.air_temperature,
                                 frame.exposed_temperature,
@@ -305,7 +303,7 @@ def do_log_environment(utc):
     try:
         with sqlite3.connect(config.database_path) as database:
             cursor = database.cursor()
-            cursor.execute(queries.INSERT_SINGLE_UTCENVIRON,
+            cursor.execute(queries.INSERT_ENVREPORT,
                                (frame.time.strftime("%Y-%m-%d %H:%M:%S"),
                                 frame.enclosure_temperature,
                                 frame.cpu_temperature))
@@ -370,7 +368,7 @@ def do_generate_stats(utc):
             database.row_factory = sqlite3.Row
             cursor = database.cursor()
 
-            cursor.execute(queries.GENERATE_STATS_UTCREPORTS,
+            cursor.execute(queries.GENERATE_DAYSTAT,
                            (bounds[0].strftime("%Y-%m-%d %H:%M:%S"),
                             bounds[1].strftime("%Y-%m-%d %H:%M:%S")))
                             
@@ -392,7 +390,7 @@ def do_generate_stats(utc):
 
             # Insert or update depending on status of current statistics
             if cur_stats == None:
-                cursor.execute(queries.INSERT_SINGLE_LOCALSTATS,
+                cursor.execute(queries.INSERT_DAYSTAT,
                     (local_time.strftime("%Y-%m-%d"),
                      new_stats["AirT_Min"], new_stats["AirT_Max"],
                      new_stats["AirT_Avg"], new_stats["RelH_Min"],
@@ -412,7 +410,7 @@ def do_generate_stats(utc):
                      new_stats["ST00_Max"], new_stats["ST00_Avg"]))
                 
             else:
-                cursor.execute(queries.UPDATE_SINGLE_LOCALSTATS,
+                cursor.execute(queries.UPDATE_DAYSTAT,
                     (new_stats["AirT_Min"], new_stats["AirT_Max"],
                      new_stats["AirT_Avg"], new_stats["RelH_Min"],
                      new_stats["RelH_Max"], new_stats["RelH_Avg"],

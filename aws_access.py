@@ -27,7 +27,8 @@ print("")
 print("----------- DO NOT TERMINATE -----------")
 
 # GLOBAL VARIABLES -------------------------------------------------------------
-config = ConfigData(); config.load()
+config = ConfigData()
+config.load()
 
 if len(sys.argv) == 2:
     startup_time = datetime.strptime(sys.argv[1], "%Y-%m-%dT%H:%M:%S")

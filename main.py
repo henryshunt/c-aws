@@ -17,9 +17,9 @@ import queries
 
 # MESSAGE ----------------------------------------------------------------------
 print("--- Custom Automatic Weather Station ---")
-print("Program: C-AWS Main Entry Point")
+print("Program: Software Entry Point")
 print("Author:  Henry Hunt")
-print("Version: 4C.1 (June 2018)")
+print("Version: 4C.1 (July 2018)")
 print("")
 print("----------- DO NOT TERMINATE -----------")
 
@@ -79,8 +79,7 @@ if config.camera_logging == True:
 
 # -- RUN SUBPROCESSES ----------------------------------------------------------
 try:
-    pass
-##    subprocess.Popen([lxterminal -e python3 aws_data.py], shell = True)
+    subprocess.Popen(["lxterminal -e python3 aws_data.py"], shell = True)
 except: helpers.init_exit("11")
 
 if (config.reports_uploading == True or
@@ -89,13 +88,11 @@ if (config.reports_uploading == True or
     config.camera_uploading == True):
 
     try:
-        pass
-##        subprocess.Popen([lxterminal -e python3 aws_support.py], shell = True)
+        subprocess.Popen(["lxterminal -e python3 aws_support.py"], shell = True)
     except: helpers.init_exit("12")
 
-if config.local_network_server == True:
-    try:
-        subprocess.Popen(["lxterminal -e python3 aws_access.py"
-                          + startup_time.strftime(" %Y-%m-%dT%H:%M:%S")],
-                         shell = True)
-    except: helpers.init_exit("13")
+try:
+    subprocess.Popen(["lxterminal -e python3 aws_access.py"
+                      + startup_time.strftime(" %Y-%m-%dT%H:%M:%S")],
+                     shell = True)
+except: helpers.init_exit("13")
