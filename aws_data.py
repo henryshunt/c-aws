@@ -250,20 +250,6 @@ def do_log_report(utc):
                 frame.station_pressure * math.exp(MSLP_b / MSLP_d), 1)
     except: gpio.output(23, gpio.HIGH)
 
-    # -- PRESSURE TENDENCY -----------------------------------------------------
-    try:
-        if frame.station_pressure != None:
-            three_hours_ago = frame.time - timedelta(hours = 3)
-            record_then = analysis.record_for_time(config, three_hours_ago,
-                                                   DbTable.UTCREPORTS)
-
-            # Calculate difference between pressure 3 hours ago
-            if record_then != False and record_then != None:
-                if record_then["StaP"] != None:
-                    frame.pressure_tendency = round(
-                        frame.station_pressure - record_then["StaP"], 1)
-    except: gpio.output(23, gpio.HIGH)
-
     # ADD TO DATABASE ----------------------------------------------------------
     free_space = helpers.remaining_space("/")
     if free_space == None or free_space < 0.1:
@@ -284,7 +270,6 @@ def do_log_report(utc):
                                 frame.sunshine_duration,
                                 frame.rainfall,
                                 frame.station_pressure,
-                                frame.pressure_tendency,
                                 frame.mean_sea_level_pressure,
                                 frame.soil_temperature_10,
                                 frame.soil_temperature_30,

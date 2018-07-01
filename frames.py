@@ -13,7 +13,6 @@ class DataUtcReport():
         self.sunshine_duration = None
         self.rainfall = None
         self.station_pressure = None
-        self.pressure_tendency = None
         self.mean_sea_level_pressure = None
         self.soil_temperature_10 = None
         self.soil_temperature_30 = None
