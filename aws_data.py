@@ -22,7 +22,7 @@ import astral
 from apscheduler.schedulers.blocking import BlockingScheduler
 import bme280
 import sht31d
-import Adafruit_MCP3008
+import mcp3008
 
 from config import ConfigData
 import helpers
