@@ -177,6 +177,9 @@ tr {
     text-align: right;
     padding-right: 15px;
 }
+.sep {
+    margin-top: 10px;
+}
 
 #footer {
     width: 100%;

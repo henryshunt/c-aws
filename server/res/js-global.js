@@ -1,4 +1,4 @@
-function display_local_time() {
+function displayLocalTime() {
     var timestamp = new Date();
     
     var now_date = zero_pad(timestamp.getDate());
@@ -10,7 +10,7 @@ function display_local_time() {
 
     var formatted = now_date + "/" + now_month + "/" + now_year + 
         " at " + now_hour + ":" + now_minute + ":" + now_second;
-    document.getElementById("local_time").innerHTML = formatted;
+    document.getElementById("status_local_time").innerHTML = formatted;
 }
 
 function zero_pad(value) {
