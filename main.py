@@ -1,5 +1,5 @@
 """ C-AWS Main Entry Point
-      Performs initial environment checks and starts the sub-systems
+      Performs the initial environment checks and starts sub-systems
 """
 
 # DEPENDENCIES -----------------------------------------------------------------
@@ -57,12 +57,11 @@ if not os.path.isfile(config.database_path):
     try:
         with sqlite3.connect(config.database_path) as database:
             cursor = database.cursor()
-
             cursor.execute(queries.CREATE_REPORTS_TABLE)
             cursor.execute(queries.CREATE_ENVREPORTS_TABLE)
             cursor.execute(queries.CREATE_DAYSTATS_TABLE)
+            
             database.commit()
-
     except: helpers.init_exit("05")
 
 # -- CHECK CAMERA DRIVE --------------------------------------------------------

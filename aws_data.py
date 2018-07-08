@@ -33,9 +33,9 @@ import queries
 
 # MESSAGE ----------------------------------------------------------------------
 print("--- Custom Automatic Weather Station ---")
-print("Program: Data Acquisition")
+print("Program: Data Sub-System")
 print("Author:  Henry Hunt")
-print("Version: V4.1 (July 2018)")
+print("Version: 4C.1 (July 2018)")
 print("")
 print("----------- DO NOT TERMINATE -----------")
 
@@ -276,7 +276,7 @@ def do_log_report(utc):
     except: gpio.output(24, gpio.HIGH)
 
 def do_log_environment(utc):
-    """ Reads CAWS environment sensors and saves the data to the database
+    """ Reads system environment sensors and saves the data to the database
     """
     global EncT_value, CPUT_value
     frame = frames.DataUtcEnviron()

@@ -20,9 +20,9 @@ from frames import DbTable
 
 # MESSAGE ----------------------------------------------------------------------
 print("--- Custom Automatic Weather Station ---")
-print("Program: Data Access Sub-System")
+print("Program: Access Sub-System")
 print("Author:  Henry Hunt")
-print("Version: V4C.1 (June 2018)")
+print("Version: 4C.1 (July 2018)")
 print("")
 print("----------- DO NOT TERMINATE -----------")
 

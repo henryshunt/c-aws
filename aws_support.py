@@ -18,9 +18,9 @@ from config import ConfigData
 
 # MESSAGE ----------------------------------------------------------------------
 print("--- Custom Automatic Weather Station ---")
-print("Program: Data Support Software")
+print("Program: Support Sub-System")
 print("Author:  Henry Hunt")
-print("Version: V4.0 (April 2018)")
+print("Version: 4C.1 (July 2018)")
 print("")
 print("----------- DO NOT TERMINATE -----------")
 
