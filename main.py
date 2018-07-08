@@ -60,7 +60,7 @@ if not os.path.isfile(config.database_path):
             cursor.execute(queries.CREATE_REPORTS_TABLE)
             cursor.execute(queries.CREATE_ENVREPORTS_TABLE)
             cursor.execute(queries.CREATE_DAYSTATS_TABLE)
-            
+
             database.commit()
     except: helpers.init_exit("05")
 
@@ -78,8 +78,10 @@ if config.camera_logging == True:
 
 # -- RUN SUBPROCESSES ----------------------------------------------------------
 try:
-    subprocess.Popen(["lxterminal -e python3 aws_data.py"], shell = True)
-except: helpers.init_exit("11")
+    subprocess.Popen(["lxterminal -e python3 aws_access.py"
+                      + startup_time.strftime(" %Y-%m-%dT%H:%M:%S")],
+                     shell = True)
+except: helpers.init_exit("09")
 
 if (config.reports_uploading == True or
     config.envReports_uploading == True or
@@ -88,10 +90,8 @@ if (config.reports_uploading == True or
 
     try:
         subprocess.Popen(["lxterminal -e python3 aws_support.py"], shell = True)
-    except: helpers.init_exit("12")
+    except: helpers.init_exit("10")
 
 try:
-    subprocess.Popen(["lxterminal -e python3 aws_access.py"
-                      + startup_time.strftime(" %Y-%m-%dT%H:%M:%S")],
-                     shell = True)
-except: helpers.init_exit("13")
+    subprocess.Popen(["lxterminal -e python3 aws_data.py"], shell = True)
+except: helpers.init_exit("11")
