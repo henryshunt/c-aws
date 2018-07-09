@@ -130,8 +130,7 @@ class BME280(object):
         try:
             self._device = i2c.get_i2c_device(address, **kwargs)
         except IOError:
-            print("Unable to communicate with sensor, check permissions.")
-            exit()
+            raise
         # Load calibration values.
         self._load_calibration()
         self._device.write8(BME280_REGISTER_CONTROL, 0x24)  # Sleep mode
