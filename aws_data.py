@@ -315,8 +315,8 @@ def do_log_camera(utc):
     """ Takes an image every if it is currently a five minute interval, on the
         connected camera, and saves it to the camera drive
     """
-    if not str(utc.minute).endswith("0") and not str(utc.minute).endswith("5"):
-        return
+    utc_minute = str(utc.minute)
+    if not utc_minute.endswith("0") and not utc_minute.endswith("5"): return
 
     # Get sunrise and sunset times for current date
     location = astral.Location(
