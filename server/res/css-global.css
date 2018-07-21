@@ -176,8 +176,6 @@ tr {
 .field_value {
     text-align: right;
     padding-right: 15px;
-}
-.field_value p {
     font-weight: bold;
 }
 .sep {
