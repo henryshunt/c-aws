@@ -1,16 +1,17 @@
 function displayLocalTime() {
-    var timestamp = new Date();
-    
-    var nowDate = zeroPad(timestamp.getDate());
-    var nowMonth = zeroPad(timestamp.getMonth() + 1);
-    var nowYear = zeroPad(timestamp.getFullYear());
-    var nowHour = zeroPad(timestamp.getHours());
-    var nowMinute = zeroPad(timestamp.getMinutes());
-    var nowSecond = zeroPad(timestamp.getSeconds());
+    var local_time = new Date();
+
+    var nowDate = zeroPad(local_time.getDate());
+    var nowMonth = zeroPad(local_time.getMonth() + 1);
+    var nowYear = zeroPad(local_time.getFullYear());
+    var nowHour = zeroPad(local_time.getHours());
+    var nowMinute = zeroPad(local_time.getMinutes());
+    var nowSecond = zeroPad(local_time.getSeconds());
 
     var formatted = nowDate + "/" + nowMonth + "/" + nowYear + 
         " at " + nowHour + ":" + nowMinute + ":" + nowSecond;
-    document.getElementById("item_local_time").innerHTML = formatted;
+    document.getElementById("item_local_time").innerHTML
+        = formatted;
 }
 
 function zeroPad(value) {

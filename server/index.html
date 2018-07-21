@@ -51,10 +51,10 @@
                                 document.getElementById("item_ST30").innerHTML = "no data";
                                 document.getElementById("item_ST00").innerHTML = "no data";
 
-                                var local_time = new Date();
+                                var localTime = new Date();
                                 document.getElementById("item_data_time").innerHTML
-                                    = zeroPad(local_time.getHours()) + ":"
-                                    + zeroPad(local_time).getMinutes();
+                                    = zeroPad(localTime.getHours()) + ":"
+                                    + zeroPad(localTime).getMinutes();
 
                             } else { processData(data); }
                         }
@@ -84,37 +84,6 @@
                 document.getElementById("item_ST00").innerHTML = data["ST00"];
             }
 
-            function page_load_js() {
-                
-
-                // var timestamp = new Date();
-                // var refresh_time = new Date(timestamp.getTime());
-
-                // if (timestamp.getSeconds() == 8 || timestamp.getSeconds() > 8) {
-                //     refresh_time.setMinutes(refresh_time.getMinutes() + 1);
-                // }
-
-                // refresh_time.setSeconds(8); refresh_time.setMilliseconds(0);
-                // var difference = refresh_time.getTime() - timestamp.getTime();
-                // setTimeout("location.reload()", difference);
-
-                // setInterval(function() {
-                //     var timestamp = new Date();
-                //     var refresh_time = new Date(timestamp.getTime());
-
-                //     if (timestamp.getSeconds() == 8 || timestamp.getSeconds() > 8) {
-                //         refresh_time.setMinutes(refresh_time.getMinutes() + 1);
-                //     }
-
-                //     refresh_time.setSeconds(8); refresh_time.setMilliseconds(0);
-                //     var difference = (refresh_time.getTime() - timestamp.getTime());
-                //     document.getElementById("update")
-                //         .innerHTML = parseInt((difference / 1000) + 1);
-
-                //     display_local_time();
-                // }, 100);
-            }
-
             function showErrorState() {
                 document.getElementById("item_AirT").innerHTML = "error";
                 document.getElementById("item_ExpT").innerHTML = "error";
@@ -134,7 +103,6 @@
                 document.getElementById("item_ST30").innerHTML = "error";
                 document.getElementById("item_ST00").innerHTML = "error";
                 document.getElementById("item_data_time").innerHTML = "ERR";
-
             }
         </script>
     </head>
