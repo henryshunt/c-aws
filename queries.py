@@ -44,7 +44,7 @@ GENERATE_DAYSTAT = ("SELECT MIN(AirT) AS AirT_Min, MAX(AirT) AS AirT_Max, ROUND(
     + "MIN(ST00) AS ST00_Min, MAX(ST00) AS ST00_Max, ROUND(AVG(ST00), 3) AS ST00_Avg "
     + "FROM utcReports WHERE Time BETWEEN ? AND ?")
 
-INSERT_REPORT = "INSERT INTO reports VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)"
+INSERT_REPORT = "INSERT INTO reports VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)"
 INSERT_ENVREPORT = "INSERT INTO envReports VALUES (?, ?, ?)"
 INSERT_DAYSTAT = ("INSERT INTO dayStats ("
     + "Date, AirT_Min, AirT_Max, AirT_Avg, RelH_Min, RelH_Max, RelH_Avg, DewP_Min, DewP_Max, "
