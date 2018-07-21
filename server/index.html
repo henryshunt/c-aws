@@ -65,23 +65,79 @@
             }
 
             function processData(data) {
-                document.getElementById("item_AirT").innerHTML = data["AirT"];
-                document.getElementById("item_ExpT").innerHTML = data["ExpT"];
-                document.getElementById("item_RelH").innerHTML = data["RelH"];
-                document.getElementById("item_DewP").innerHTML = data["DewP"];
-                document.getElementById("item_WSpd").innerHTML = data["WSpd"];
-                document.getElementById("item_WDir").innerHTML = data["WDir"];
-                document.getElementById("item_WGst").innerHTML = data["WGst"];
-                document.getElementById("item_SunD").innerHTML = data["SunD"];
+                if (data["AirT"] != null) {
+                    document.getElementById("item_AirT").innerHTML
+                        = data["AirT"] + "°C";
+                } else { document.getElementById("item_AirT").innerHTML = "no data"; }
+
+                if (data["ExpT"] != null) {
+                    document.getElementById("item_ExpT").innerHTML
+                        = data["ExpT"] + "°C";
+                } else { document.getElementById("item_ExpT").innerHTML = "no data"; }
+
+                if (data["RelH"] != null) {
+                    document.getElementById("item_RelH").innerHTML
+                        = data["RelH"] + "%";
+                } else { document.getElementById("item_RelH").innerHTML = "no data"; }
+
+                if (data["DewP"] != null) {
+                    document.getElementById("item_DewP").innerHTML
+                        = data["DewP"] + "°C";
+                } else { document.getElementById("item_DewP").innerHTML = "no data"; }
+
+                if (data["WSpd"] != null) {
+                    document.getElementById("item_WSpd").innerHTML
+                        = data["WSpd"] + " mph";
+                } else { document.getElementById("item_WSpd").innerHTML = "no data"; }
+
+                if (data["WDir"] != null) {
+                    document.getElementById("item_WDir").innerHTML
+                        = data["WDir"] + "°";
+                } else { document.getElementById("item_AirT").innerHTML = "no data"; }
+
+                if (data["WGst"] != null) {
+                    document.getElementById("item_WGst").innerHTML
+                        = data["WGst"] + " mph";
+                } else { document.getElementById("item_WGst").innerHTML = "no data"; }
+
+                if (data["SunD"] != null) {
+                    document.getElementById("item_SunD").innerHTML
+                        = data["SunD"] + " sec";
+                } else { document.getElementById("item_SunD").innerHTML = "no data"; }
+
+                if (data["Rain"] != null) {
+                    document.getElementById("item_Rain").innerHTML
+                        = data["Rain"] + " mm";
+                } else { document.getElementById("item_Rain").innerHTML = "no data"; }
+
+                if (data["StaP"] != null) {
+                    document.getElementById("item_StaP").innerHTML
+                        = data["StaP"] + " hPa";
+                } else { document.getElementById("item_StaP").innerHTML = "no data"; }
+
+                if (data["MSLP"] != null) {
+                    document.getElementById("item_MSLP").innerHTML
+                        = data["MSLP"] + " hPa";
+                } else { document.getElementById("item_MSLP").innerHTML = "no data"; }
+
+                if (data["ST10"] != null) {
+                    document.getElementById("item_ST10").innerHTML
+                        = data["ST10"] + "°C";
+                } else { document.getElementById("item_ST10").innerHTML = "no data"; }
+
+                if (data["ST30"] != null) {
+                    document.getElementById("item_ST30").innerHTML
+                        = data["ST30"] + "°C";
+                } else { document.getElementById("item_ST30").innerHTML = "no data"; }
+
+                if (data["ST00"] != null) {
+                    document.getElementById("item_ST00").innerHTML
+                        = data["ST00"] + "°C";
+                } else { document.getElementById("item_ST00").innerHTML = "no data"; }
+
                 document.getElementById("item_SunD_PHr").innerHTML = "no data";
-                document.getElementById("item_Rain").innerHTML = data["Rain"];
                 document.getElementById("item_Rain_PHr").innerHTML = "no data";
-                document.getElementById("item_StaP").innerHTML = data["StaP"];
-                document.getElementById("item_MSLP").innerHTML = data["MSLP"];
                 document.getElementById("item_StaP_PTH").innerHTML = "no data";
-                document.getElementById("item_ST10").innerHTML = data["ST10"];
-                document.getElementById("item_ST30").innerHTML = data["ST30"];
-                document.getElementById("item_ST00").innerHTML = data["ST00"];
             }
 
             function showErrorState() {
