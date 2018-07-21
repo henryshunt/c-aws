@@ -127,10 +127,20 @@
                         = data["SunD"] + " sec";
                 } else { document.getElementById("item_SunD").innerHTML = "no data"; }
 
+                if (data["SunD_PHr"] != null) {
+                    document.getElementById("item_SunD_PHr").innerHTML
+                        = data["SunD_PHr"];
+                } else { document.getElementById("item_SunD_PHr").innerHTML = "no data"; }
+
                 if (data["Rain"] != null) {
                     document.getElementById("item_Rain").innerHTML
                         = data["Rain"] + " mm";
                 } else { document.getElementById("item_Rain").innerHTML = "no data"; }
+
+                if (data["Rain_PHr"] != null) {
+                    document.getElementById("item_Rain_PHr").innerHTML
+                        = data["Rain_PHr"] + " mm";
+                } else { document.getElementById("item_Rain_PHr").innerHTML = "no data"; }
 
                 if (data["StaP"] != null) {
                     document.getElementById("item_StaP").innerHTML
@@ -141,6 +151,11 @@
                     document.getElementById("item_MSLP").innerHTML
                         = data["MSLP"] + " hPa";
                 } else { document.getElementById("item_MSLP").innerHTML = "no data"; }
+
+                if (data["StaP_PTH"] != null) {
+                    document.getElementById("item_StaP_PTH").innerHTML
+                        = data["StaP_PTH"];
+                } else { document.getElementById("item_StaP_PTH").innerHTML = "no data"; }
 
                 if (data["ST10"] != null) {
                     document.getElementById("item_ST10").innerHTML
