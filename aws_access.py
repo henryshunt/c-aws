@@ -89,7 +89,28 @@ def data_now():
     else: return "1"
 
 def data_statistics():
-    return flask.jsonify(None)
+    if flask.request.args.get("time") != None:
+        try:
+            url_time = datetime.strptime(flask.request.args.get("time"),
+                                         "%Y-%m-%dT%H-%M-%S")
+        except: return "1"
+        
+        record = analysis.record_for_time(config, url_time, DbTable.LOCALSTATS)
+
+        if record != False:
+            if record == None:
+                record = analysis.record_for_time(config,
+                    url_time - timedelta(minutes = 1), DbTable.LOCALSTATS)
+                
+                if record != False:
+                    if record == None:
+                        return flask.jsonify(None)
+                    else: return flask.jsonify(dict(zip(record.keys(), record)))
+                else: return "1"
+            else: return flask.jsonify(dict(zip(record.keys(), record)))
+        else: return "1"
+
+    else: return "1"
 
 def data_graph_day():
     return flask.jsonify(None)
