@@ -75,10 +75,12 @@ def get_data_now(record):
     SunD_PHr_record = analysis.past_hour_total(config, data_time, "SunD")
     if SunD_PHr_record != False and SunD_PHr_record != None:
         if SunD_PHr_record["SunD"] != None:
-            SunD_PHr = str(timedelta(seconds = SunD_PHr_record["SunD"]))
+            data["SunD_PHr"] = str(timedelta(seconds = SunD_PHr_record["SunD"]))
 
     data["Rain_PHr"] = None
     data["StaP_PTH"] = None
+
+    return data
 
 def data_now():
     if flask.request.args.get("time") != None:
