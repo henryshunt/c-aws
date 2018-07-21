@@ -84,17 +84,22 @@ def data_now():
                     
                     if record != False:
                         if record != None:
-                            record["Time"] = helpers.utc_to_local(config,
-                                record["Time"]).strftime("%Y-%m-%d %H:%M:%S")
-                            return flask.jsonify(dict(zip(record.keys(),
-                                                          record)))
+                            data = dict(zip(record.keys(), record))
+                            data_time = datetime.strptime(record["Time"],
+                                                          "%Y-%m-%d %H:%M:%S")
+                            data["Time"] = helpers.utc_to_local(
+                                config, data_time).strftime("%Y-%m-%d %H:%M:%S")
+                            return flask.jsonify(data)
                         else: return flask.jsonify(None)
                     else: return "1"
 
             else:
-                record["Time"] = helpers.utc_to_local(config,
-                    record["Time"]).strftime("%Y-%m-%d %H:%M:%S")
-                return flask.jsonify(dict(zip(record.keys(), record)))
+                data = dict(zip(record.keys(), record))
+                data_time = datetime.strptime(record["Time"],
+                                              "%Y-%m-%d %H:%M:%S")
+                data["Time"] = helpers.utc_to_local(
+                    config, data_time).strftime("%Y-%m-%d %H:%M:%S")
+                return flask.jsonify(data)
         else: return "1"
 
     else: return "1"
