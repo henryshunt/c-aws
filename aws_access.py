@@ -66,8 +66,11 @@ def page_about():
 # DATA PAGE SERVERS ------------------------------------------------------------
 def data_now():
     if flask.request.args.get("time") != None:
-        url_time = datetime.strptime(
-            flask.request.args.get("time"), "%Y-%m-%dT%H-%m-%s")
+        try:
+            url_time = datetime.strptime(flask.request.args.get("time"),
+                                         "%Y-%m-%dT%H-%M-%S")
+        except: return "1"
+        
         record = analysis.record_for_time(config, url_time, DbTable.UTCREPORTS)
 
         if record != False:
@@ -78,9 +81,9 @@ def data_now():
                 if record != False:
                     if record == None:
                         return flask.jsonify(None)
-                    else: return flask.jsonify(record)
+                    else: return flask.jsonify(dict(zip(record.keys(), record)))
                 else: return "1"
-            else: return flask.jsonify(record)
+            else: return flask.jsonify(dict(zip(record.keys(), record)))
         else: return "1"
 
     else: return "1"
