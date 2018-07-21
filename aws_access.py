@@ -82,7 +82,7 @@ def get_data_now(record):
     Rain_PHr_record = analysis.past_hour_total(config, data_time, "Rain")
     if Rain_PHr_record != False and Rain_PHr_record != None:
         if Rain_PHr_record["Rain"] != None:
-            data["Rain_PHr"] = str(round(Rain_PHr_record["Rain"], 2))
+            data["Rain_PHr"] = round(Rain_PHr_record["Rain"], 2)
 
     # Calculate three hour pressure tendency
     data["StaP_PTH"] = None
