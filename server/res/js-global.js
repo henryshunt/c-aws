@@ -1,4 +1,4 @@
-function displayLocalTime() {
+function display_local_time() {
     var timestamp = new Date();
     
     var now_date = zero_pad(timestamp.getDate());
@@ -10,7 +10,7 @@ function displayLocalTime() {
 
     var formatted = now_date + "/" + now_month + "/" + now_year + 
         " at " + now_hour + ":" + now_minute + ":" + now_second;
-    document.getElementById("status_local_time").innerHTML = formatted;
+    document.getElementById("item_local_time").innerHTML = formatted;
 }
 
 function zero_pad(value) {
@@ -19,4 +19,18 @@ function zero_pad(value) {
     }
 
     return value;
+}
+
+function epoch_now_to_time() {
+    var timestamp = new Date();
+
+    var now_date = zero_pad(timestamp.getDate());
+    var now_month = zero_pad(timestamp.getMonth() + 1);
+    var now_year = zero_pad(timestamp.getFullYear());
+    var now_hour = zero_pad(timestamp.getHours());
+    var now_minute = zero_pad(timestamp.getMinutes());
+    var now_second = zero_pad(timestamp.getSeconds());
+
+    return now_year + "-" + now_month + "-" + now_date + 
+        "T" + now_hour + "-" + now_minute + "-" + now_second;
 }

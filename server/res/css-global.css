@@ -177,6 +177,9 @@ tr {
     text-align: right;
     padding-right: 15px;
 }
+.field_value p {
+    font-weight: bold;
+}
 .sep {
     margin-top: 10px;
 }
