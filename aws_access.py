@@ -75,14 +75,19 @@ def data_now():
 
         if record != False:
             if record == None:
-                record = analysis.record_for_time(config,
-                    url_time - timedelta(minutes = 1), DbTable.UTCREPORTS)
-                
-                if record != False:
-                    if record == None:
-                        return flask.jsonify(None)
-                    else: return flask.jsonify(dict(zip(record.keys(), record)))
-                else: return "1"
+                if flask.request.args.get("abs") == "1":
+                    return flask.jsonify(None)
+
+                else:
+                    record = analysis.record_for_time(config,
+                        url_time - timedelta(minutes = 1), DbTable.UTCREPORTS)
+                    
+                    if record != False:
+                        if record != None:
+                            return flask.jsonify(dict(zip(record.keys(),
+                                                          record)))
+                        else: return flask.jsonify(None)
+                    else: return "1"
             else: return flask.jsonify(dict(zip(record.keys(), record)))
         else: return "1"
 
@@ -95,21 +100,24 @@ def data_statistics():
                                          "%Y-%m-%dT%H-%M-%S")
             url_time = helpers.utc_to_local(config, url_time)
         except: return "1"
-
-        print("received local: " + str(url_time))
         
         record = analysis.record_for_time(config, url_time, DbTable.LOCALSTATS)
 
         if record != False:
             if record == None:
-                record = analysis.record_for_time(config,
-                    url_time - timedelta(minutes = 1), DbTable.LOCALSTATS)
-                
-                if record != False:
-                    if record == None:
-                        return flask.jsonify(None)
-                    else: return flask.jsonify(dict(zip(record.keys(), record)))
-                else: return "1"
+                if flask.request.args.get("abs") == "1":
+                    return flask.jsonify(None)
+
+                else: 
+                    record = analysis.record_for_time(config,
+                        url_time - timedelta(minutes = 1), DbTable.LOCALSTATS)
+                    
+                    if record != False:
+                        if record != None:
+                            return flask.jsonify(dict(zip(record.keys(),
+                                                          record)))
+                        else: return flask.jsonify(None)
+                    else: return "1"
             else: return flask.jsonify(dict(zip(record.keys(), record)))
         else: return "1"
 
