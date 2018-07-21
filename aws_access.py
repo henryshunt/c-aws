@@ -93,7 +93,10 @@ def data_statistics():
         try:
             url_time = datetime.strptime(flask.request.args.get("time"),
                                          "%Y-%m-%dT%H-%M-%S")
+            url_time = helpers.utc_to_local(config, url_time)
         except: return "1"
+
+        print("received local: " + str(url_time))
         
         record = analysis.record_for_time(config, url_time, DbTable.LOCALSTATS)
 
