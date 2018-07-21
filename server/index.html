@@ -180,7 +180,11 @@
                 document.getElementById("item_ST10").innerHTML = "error";
                 document.getElementById("item_ST30").innerHTML = "error";
                 document.getElementById("item_ST00").innerHTML = "error";
-                document.getElementById("item_data_time").innerHTML = "ERR";
+
+                var localTime = new Date();
+                document.getElementById("item_data_time").innerHTML
+                    = zeroPad(localTime.getHours()) + ":"
+                    + zeroPad(localTime.getMinutes());
             }
         </script>
     </head>

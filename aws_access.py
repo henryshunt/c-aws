@@ -64,6 +64,22 @@ def page_about():
                                  aws_location = config.aws_location)
 
 # DATA PAGE SERVERS ------------------------------------------------------------
+def get_data_now(record):
+    data = dict(zip(record.keys(), record))
+    data_time = datetime.strptime(record["Time"], "%Y-%m-%d %H:%M:%S")
+    data["Time"] = helpers.utc_to_local(
+        config, data_time).strftime("%Y-%m-%d %H:%M:%S")
+
+    # Calculate total sunshine duration over past hour
+    data["SunD_PHr"] = None
+    SunD_PHr_record = analysis.past_hour_total(config, data_time, "SunD")
+    if SunD_PHr_record != False and SunD_PHr_record != None:
+        if SunD_PHr_record["SunD"] != None:
+            SunD_PHr = str(timedelta(seconds = SunD_PHr_record["SunD"]))
+
+    data["Rain_PHr"] = None
+    data["StaP_PTH"] = None
+
 def data_now():
     if flask.request.args.get("time") != None:
         try:
@@ -84,25 +100,16 @@ def data_now():
                     
                     if record != False:
                         if record != None:
-                            data = dict(zip(record.keys(), record))
-                            data_time = datetime.strptime(record["Time"],
-                                                          "%Y-%m-%d %H:%M:%S")
-                            data["Time"] = helpers.utc_to_local(
-                                config, data_time).strftime("%Y-%m-%d %H:%M:%S")
-                            return flask.jsonify(data)
+                            return flask.jsonify(get_data_now(record))
                         else: return flask.jsonify(None)
                     else: return "1"
-
-            else:
-                data = dict(zip(record.keys(), record))
-                data_time = datetime.strptime(record["Time"],
-                                              "%Y-%m-%d %H:%M:%S")
-                data["Time"] = helpers.utc_to_local(
-                    config, data_time).strftime("%Y-%m-%d %H:%M:%S")
-                return flask.jsonify(data)
+            else: return flask.jsonify(get_data_now(record))
         else: return "1"
 
     else: return "1"
+
+def get_data_statistics(data):
+    pass
 
 def data_statistics():
     if flask.request.args.get("time") != None:
