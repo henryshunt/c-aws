@@ -9,30 +9,38 @@
         <script src="{{ url_for('static', filename = 'js-jquery.js') }}" type="text/javascript"></script>
 
         <script>
-            var to_update = -1;
+            var time_to_update = 0;
+            var countdown_timeout = null;
+            var updater_timeout = null;
 
             $(document).ready(function() {
                 setInterval(function() {
                     displayLocalTime();
+                }, 100);
 
-                    if (to_update == -1) {
-                        document.getElementById("item_update").innerHTML = "";
-                    } else {
-                        document.getElementById("item_data_time").innerHTML
-                            = --to_update;
-                    }
+                onUpdate();
+            });
+
+            function onUpdate() {
+                clearTimeout(updater_timeout);
+                clearTimeout(countdown_timeout);
+
+                document.getElementById("item_update").innerHTML = 0;
+                time_to_update = 60;
+
+                updater_timeout = setInterval(function() {
+                    onUpdate();
+                }, 60000);
+                    
+                countdown_timeout = setInterval(function() {
+                    document.getElementById("item_update").innerHTML
+                        = --time_to_update;
                 }, 1000);
 
                 getAndProcessData();
-
-                setInterval(function() {
-                    getAndProcessData();
-                }, 60000);
-            });
+            }
 
             function getAndProcessData() {
-                to_update = 60;
-
                 $.ajax({
                     dataType: "json",
                     url: "data/now.json?time=" + 
@@ -76,6 +84,9 @@
             }
 
             function processData(data) {
+                document.getElementById("item_data_time").innerHTML
+                    = data["Time"].split(" ")[1].slice(0, -3);
+
                 if (data["AirT"] != null) {
                     document.getElementById("item_AirT").innerHTML
                         = data["AirT"] + "°C";
@@ -149,7 +160,6 @@
                 document.getElementById("item_SunD_PHr").innerHTML = "no data";
                 document.getElementById("item_Rain_PHr").innerHTML = "no data";
                 document.getElementById("item_StaP_PTH").innerHTML = "no data";
-                document.getElementById("item_data_time").innerHTML = data["Time"];
             }
 
             function showErrorState() {
