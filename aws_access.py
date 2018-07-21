@@ -77,8 +77,22 @@ def get_data_now(record):
         if SunD_PHr_record["SunD"] != None:
             data["SunD_PHr"] = str(timedelta(seconds = SunD_PHr_record["SunD"]))
 
+    # Calculate total rainfall over past hour
     data["Rain_PHr"] = None
+    Rain_PHr_record = analysis.past_hour_total(config, data_time, "Rain")
+    if Rain_PHr_record != False and Rain_PHr_record != None:
+        if Rain_PHr_record["Rain"] != None:
+            data["Rain_PHr"] = str(round(Rain_PHr_record["Rain"], 2))
+
+    # Calculate three hour pressure tendency
     data["StaP_PTH"] = None
+    if data["StaP"] != None:
+        StaP_PTH_record = analysis.record_for_time(config,
+            data_time - timedelta(hours = 3), DbTable.UTCREPORTS)
+    
+        if StaP_PTH_record != False and StaP_PTH_record != None:
+            if StaP_PTH_record["StaP"] != None:
+                data["StaP_PTH"] = data["StaP"] - StaP_PTH_record["StaP"]
 
     return data
 
