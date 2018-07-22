@@ -64,65 +64,72 @@ def page_about():
                                  aws_location = config.aws_location)
 
 # DATA PAGE SERVERS ------------------------------------------------------------
-def get_data_now(record):
-    data = dict(zip(record.keys(), record))
-    data_time = datetime.strptime(record["Time"], "%Y-%m-%d %H:%M:%S")
-    data["Time"] = helpers.utc_to_local(
-        config, data_time).strftime("%Y-%m-%d %H:%M:%S")
+def data_now():
+    data = dict.fromkeys(["Time", "AirT", "ExpT", "RelH", "DewP", "WSpd",
+                          "WDir", "WGst", "SunD", "SunD_PHr", "Rain",
+                          "Rain_PHr", "StaP", "MSLP", "StaP_PTH", "ST10",
+                          "ST30", "ST00"])
+
+    # Try parsing time specified in URL
+    if flask.request.args.get("time") == None: return flask.jsonify(data)
+    try:
+        url_time = datetime.strptime(
+            flask.request.args.get("time"), "%Y-%m-%dT%H-%M-%S")
+    except: return flask.jsonify(data)
+
+    # Get record for that time
+    record = analysis.record_for_time(config, url_time, DbTable.UTCREPORTS)
+
+    if record != False:
+        if record == None:
+            # Go back a minute if no record and not in absolute mode
+            if not flask.request.args.get("abs") == "1":
+                url_time -= timedelta(minutes = 1)
+                record = analysis.record_for_time(config, url_time,
+                                                  DbTable.UTCREPORTS)
+                
+                if record != False:
+                    if record != None:
+                        # Add record data to final data
+                        for key in dict(zip(record.keys(), record)):
+                            if key in data: data[key] = record[key]
+                    else: url_time += timedelta(minutes = 1)
+                    
+        else:
+            # Add record data to final data
+            for key in dict(zip(record.keys(), record)):
+                if key in data: data[key] = record[key]
 
     # Calculate total sunshine duration over past hour
-    data["SunD_PHr"] = None
-    SunD_PHr_record = analysis.past_hour_total(config, data_time, "SunD")
+    SunD_PHr_record = analysis.past_hour_total(config, url_time, "SunD")
     if SunD_PHr_record != False and SunD_PHr_record != None:
         if SunD_PHr_record["SunD"] != None:
             data["SunD_PHr"] = str(timedelta(seconds = SunD_PHr_record["SunD"]))
 
     # Calculate total rainfall over past hour
-    data["Rain_PHr"] = None
-    Rain_PHr_record = analysis.past_hour_total(config, data_time, "Rain")
+    Rain_PHr_record = analysis.past_hour_total(config, url_time, "Rain")
     if Rain_PHr_record != False and Rain_PHr_record != None:
         if Rain_PHr_record["Rain"] != None:
             data["Rain_PHr"] = round(Rain_PHr_record["Rain"], 2)
 
     # Calculate three hour pressure tendency
-    data["StaP_PTH"] = None
     if data["StaP"] != None:
         StaP_PTH_record = analysis.record_for_time(config,
-            data_time - timedelta(hours = 3), DbTable.UTCREPORTS)
+            url_time - timedelta(hours = 3), DbTable.UTCREPORTS)
     
         if StaP_PTH_record != False and StaP_PTH_record != None:
             if StaP_PTH_record["StaP"] != None:
                 data["StaP_PTH"] = data["StaP"] - StaP_PTH_record["StaP"]
 
-    return data
+    # Localise data time
+    if data["Time"] != None:
+        data["Time"] = helpers.utc_to_local(
+            config, url_time).strftime("%Y-%m-%d %H:%M:%S")
 
-def data_now():
-    if flask.request.args.get("time") != None:
-        try:
-            url_time = datetime.strptime(flask.request.args.get("time"),
-                                         "%Y-%m-%dT%H-%M-%S")
-        except: return "1"
-        
-        record = analysis.record_for_time(config, url_time, DbTable.UTCREPORTS)
+    return flask.jsonify(data)
 
-        if record != False:
-            if record == None:
-                if flask.request.args.get("abs") == "1":
-                    return flask.jsonify(None)
 
-                else:
-                    record = analysis.record_for_time(config,
-                        url_time - timedelta(minutes = 1), DbTable.UTCREPORTS)
-                    
-                    if record != False:
-                        if record != None:
-                            return flask.jsonify(get_data_now(record))
-                        else: return flask.jsonify(None)
-                    else: return "1"
-            else: return flask.jsonify(get_data_now(record))
-        else: return "1"
 
-    else: return "1"
 
 def data_statistics():
     if flask.request.args.get("time") != None:
