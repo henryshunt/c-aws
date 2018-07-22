@@ -1,0 +1,398 @@
+<html>
+    <head>
+        <title>C-AWS {{ aws_title }} [Local]</title>
+        <link href="{{ url_for('static', filename = 'css-trebuchet.ttf') }}" rel="stylesheet" type="text/css">
+        <link href="{{ url_for('static', filename = 'css-global.css') }}" rel="stylesheet" type="text/css">
+        <script src="{{ url_for('static', filename = 'js-global.js') }}" type="text/javascript"></script>
+        
+        <script src="{{ url_for('static', filename = 'jquery.js') }}" type="text/javascript"></script>
+        <script src="{{ url_for('static', filename = 'chartist.js') }}" type="text/javascript"></script>
+        <link href="{{ url_for('static', filename = 'chartist.css') }}" rel="stylesheet" type="text/css">
+        <script src="{{ url_for('static', filename = 'moment.js') }}" type="text/javascript"></script>
+
+        <script>
+            function page_load_js() {
+                if (window.location.href.includes("?date=") == false) {
+                    var timestamp = new Date();
+                    var refresh_time = new Date(timestamp.getTime());
+
+                    if (String(timestamp.getMinutes()).endsWith("0") ||
+                        String(timestamp.getMinutes()).endsWith("5")) {
+
+                        if (timestamp.getSeconds() == 8 || timestamp.getSeconds() > 8) {
+                            refresh_time.setMinutes(refresh_time.getMinutes() + 5);
+                        }
+
+                    } else {
+                        while (!String(refresh_time.getMinutes()).endsWith("0")
+                            && !String(refresh_time.getMinutes()).endsWith("5")) {
+
+                            refresh_time.setMinutes(refresh_time.getMinutes() + 1);
+                        }
+                    }
+
+                    refresh_time.setSeconds(8); refresh_time.setMilliseconds(0);
+                    var difference = refresh_time.getTime() - timestamp.getTime();
+                    setTimeout("location.reload()", difference);
+                }
+
+                setInterval(function() { display_local_time(); }, 100);
+            }
+
+
+            function open_graph_humidity() {
+                document.getElementById("open_graph_humidity").style.visibility = "hidden";
+
+                $.get("/graph/data?start={{ start }}&end={{ end }}&table=utcReports&fields=Time,RelH", function(response) {
+                    var data = { series: response };
+
+                    var options = {
+                        showPoint: false, lineSmooth: false, height: 300,
+                        axisY: { offset: 30 },
+
+                        axisX: {
+                            type: Chartist.FixedScaleAxis,
+                            low: {{ low }}, high: {{ high }}, divisor: 8, offset: 20,
+        
+                            labelInterpolationFnc: function(value) {
+                                return moment.unix(value).zone("+0000").format("HH:mm");
+                            }
+                        }
+                    };
+
+                    new Chartist.Line("#graph_humidity", data, options);
+                });
+            }
+
+            function open_graph_wind() {
+                document.getElementById("open_graph_wind").style.visibility = "hidden";
+
+                $.get("/graph/data?start={{ start }}&end={{ end }}&table=utcReports&fields=Time,WSpd,WGst", function(response) {
+                    var data = { series: response };
+
+                    var options = {
+                        showPoint: false, lineSmooth: false, height: 380,
+                        axisY: { offset: 30, low: 0 },
+
+                        axisX: {
+                            type: Chartist.FixedScaleAxis,
+                            low: {{ low }}, high: {{ high }}, divisor: 8, offset: 20,
+        
+                            labelInterpolationFnc: function(value) {
+                                return moment.unix(value).zone("+0000").format("HH:mm");
+                            }
+                        }
+                    };
+
+                    new Chartist.Line("#graph_wind", data, options);
+                });
+            }
+
+            function open_graph_wind_direction() {
+                document.getElementById("open_graph_wind_direction").style.visibility = "hidden";
+
+                $.get("/graph/data?start={{ start }}&end={{ end }}&table=utcReports&fields=Time,WDir", function(response) {
+                    var data = { series: response };
+
+                    var options = {
+                        showLine: false, lineSmooth: false, height: 380,
+                        axisY: { offset: 30, low: 0, high: 360 },
+
+                        axisX: {
+                            type: Chartist.FixedScaleAxis,
+                            low: {{ low }}, high: {{ high }}, divisor: 8, offset: 20,
+        
+                            labelInterpolationFnc: function(value) {
+                                return moment.unix(value).zone("+0000").format("HH:mm");
+                            }
+                        }
+                    };
+
+                    new Chartist.Line("#graph_wind_direction", data, options);
+                });
+            }
+
+            function open_graph_sunshine() {
+                document.getElementById("open_graph_sunshine").style.visibility = "hidden";
+
+                $.get("/graph/data?start={{ start }}&end={{ end }}&table=utcReports&fields=Time,SunD", function(response) {
+                    var data = { series: response };
+
+                    var options = {
+                        showPoint: false, lineSmooth: false, height: 300,
+                        axisY: {
+                            offset: 30,
+
+                            labelInterpolationFnc: function(value) {
+                                return moment.utc(value * 1000).format("HH:mm");
+                            }
+                        },
+
+                        axisX: {
+                            type: Chartist.FixedScaleAxis,
+                            low: {{ low }}, high: {{ high }}, divisor: 8, offset: 20,
+        
+                            labelInterpolationFnc: function(value) {
+                                return moment.unix(value).zone("+0000").format("HH:mm");
+                            }
+                        }
+                    };
+
+                    new Chartist.Line("#graph_sunshine", data, options);
+                });
+            }
+
+            function open_graph_rainfall() {
+                document.getElementById("open_graph_rainfall").style.visibility = "hidden";
+
+                $.get("/graph/data?start={{ start }}&end={{ end }}&table=utcReports&fields=Time,Rain", function(response) {
+                    var data = { series: response };
+
+                    var options = {
+                        showPoint: false, lineSmooth: false, height: 300,
+                        axisY: { offset: 30 },
+
+                        axisX: {
+                            type: Chartist.FixedScaleAxis,
+                            low: {{ low }}, high: {{ high }}, divisor: 8, offset: 20,
+        
+                            labelInterpolationFnc: function(value) {
+                                return moment.unix(value).zone("+0000").format("HH:mm");
+                            }
+                        }
+                    };
+
+                    new Chartist.Line("#graph_rainfall", data, options);
+                });
+            }
+
+            function open_graph_pressure() {
+                document.getElementById("open_graph_pressure").style.visibility = "hidden";
+
+                $.get("/graph/data?start={{ start }}&end={{ end }}&table=utcReports&fields=Time,MSLP", function(response) {
+                    var data = { series: response };
+
+                    var options = {
+                        showPoint: false, lineSmooth: false, height: 300,
+                        axisY: { offset: 30 },
+
+                        axisX: {
+                            type: Chartist.FixedScaleAxis,
+                            low: {{ low }}, high: {{ high }}, divisor: 8, offset: 20,
+        
+                            labelInterpolationFnc: function(value) {
+                                return moment.unix(value).zone("+0000").format("HH:mm");
+                            }
+                        }
+                    };
+
+                    new Chartist.Line("#graph_pressure", data, options);
+                });
+            }
+
+            function open_graph_soil_temperature() {
+                document.getElementById("open_graph_soil_temperature").style.visibility = "hidden";
+
+                $.get("/graph/data?start={{ start }}&end={{ end }}&table=utcReports&fields=Time,ST10,ST30,ST00", function(response) {
+                    var data = { series: response };
+
+                    var options = {
+                        showPoint: false, lineSmooth: false, height: 300,
+                        axisY: { offset: 30 },
+
+                        axisX: {
+                            type: Chartist.FixedScaleAxis,
+                            low: {{ low }}, high: {{ high }}, divisor: 8, offset: 20,
+        
+                            labelInterpolationFnc: function(value) {
+                                return moment.unix(value).zone("+0000").format("HH:mm");
+                            }
+                        }
+                    };
+
+                    new Chartist.Line("#graph_soil_temperature", data, options);
+                });
+            }
+        </script>
+
+        <style>
+            .ct-series .ct-line {
+                stroke-width: 1px;
+            }
+            .ct-series .ct-bar {
+                stroke-width: 2;
+            }
+            .ct-series .ct-point {
+                stroke-width: 3;
+            }
+            .ct-label {
+                color: rgba(0, 0, 0, 1);
+                font-size: 10;
+            }
+            .ct-label.ct-horizontal.ct-end {
+                transform: translateX(-9.8%);
+            }
+            .ct-label.ct-vertical.ct-start {
+                transform: translateY(10%);
+            }
+
+            .ct-series-a .ct-line {
+                stroke: #f35168;
+            }
+            .ct-series-a .ct-point {
+                stroke: #f35168;
+            }
+            .ct-series-b .ct-line {
+                stroke: #25a9fc;
+            }
+            .ct-series-c .ct-line {
+                stroke: #8ac85c;
+            }
+        </style>
+    </head>
+
+    <body onload="page_load_js()">
+        <div id="header">
+            <div id="header_items">
+                <h1 id="header_left">{{ aws_location }}</h1>
+                <h2 id="header_right">C-AWS</h2>
+            </div>
+
+            <div id="menu">
+                <div id="menu_items">
+                    <div>
+                        <a class="menu_item" href=".">Now</a>
+                        <a class="menu_item" href="statistics.html">Statistics</a>
+                        <span>|</span>
+    
+                        <span>Graph:</span>
+                        <a class="menu_item" id="ami" href="graph_day.html">Day</a>
+                        <a class="menu_item" href="graph_month.html">Month</a>
+                        <a class="menu_item" href="graph_year.html">Year</a>
+    
+                        <span>|</span>
+                        <a class="menu_item" href="camera.html">Camera</a>
+                        <a class="menu_item" href="about.html">About</a>
+                    </div>
+
+                    <span>Accessing <b>LOCAL</b> Data Stores</span>
+                </div>
+            </div>
+        </div>
+
+        <div id="main">
+            <div class="group" id="scroller">
+                <a class="scroller_button" href="graph_day.html?date={{ scroller_prev }}">◀</a>
+                <p id="scroller_time"><b>{{ scroller_time }}</b></p>
+                <a class="scroller_button" href="graph_day.html?date={{ scroller_next }}">▶</a>
+            </div>
+
+            <div class="group">
+                <div class="group_header">
+                    <p class="group_title">Ambient Temperature</p>
+                </div>
+
+                <div class="ct-chart" id="graph_ambient"></div>
+            </div>
+
+            <div class="group">
+                <div class="group_header">
+                    <p class="group_title">Relative Humidity</p>
+                    <a class="group_open" id="open_graph_humidity" onclick="open_graph_humidity()">+</a>
+                </div>
+
+                <div class="ct-chart" id="graph_humidity"></div>
+            </div>
+
+            <div class="group">
+                <div class="group_header">
+                    <p class="group_title">Ten Minute Wind</p>
+                    <a class="group_open" id="open_graph_wind" onclick="open_graph_wind()">+</a>
+                </div>
+    
+                <div class="ct-chart" id="graph_wind"></div>
+            </div>
+
+            <div class="group">
+                <div class="group_header">
+                    <p class="group_title">Ten Minute Wind Direction</p>
+                    <a class="group_open" id="open_graph_wind_direction" onclick="open_graph_wind_direction()">+</a>
+                </div>
+    
+                <div class="ct-chart" id="graph_wind_direction"></div>
+            </div>
+
+            <div class="group">
+                <div class="group_header">
+                    <p class="group_title">Sunshine Accumulation</p>
+                    <a class="group_open" id="open_graph_sunshine" onclick="open_graph_sunshine()">+</a>
+                </div>
+    
+                <div class="ct-chart" id="graph_sunshine"></div>
+            </div>
+
+            <div class="group">
+                <div class="group_header">
+                    <p class="group_title">Rainfall Accumulation</p>
+                    <a class="group_open" id="open_graph_rainfall" onclick="open_graph_rainfall()">+</a>
+                </div>
+    
+                <div class="ct-chart" id="graph_rainfall"></div>
+            </div>
+
+            <div class="group">
+                <div class="group_header">
+                    <p class="group_title">Mean Sea Level Pressure</p>
+                    <a class="group_open" id="open_graph_pressure" onclick="open_graph_pressure()">+</a>
+                </div>
+    
+                <div class="ct-chart" id="graph_pressure"></div>
+            </div>
+
+            <div class="group" style="margin-bottom: 0px">
+                <div class="group_header">
+                    <p class="group_title">Soil Temperature</p>
+                    <a class="group_open" id="open_graph_soil_temperature" onclick="open_graph_soil_temperature()">+</a>
+                </div>
+    
+                <div class="ct-chart" id="graph_soil_temperature"></div>
+            </div>
+        </div>
+
+        <div id="footer">
+            <div id="footer_items">
+                <p class="footer_label">Local Time:</p>
+                <p class="footer_value" id="local_time" style="width: 210px"></p>
+    
+                <div style="float: right; margin-left: 10px">
+                    <p class="footer_label">Data Time:</p>
+                    <p class="footer_value" style="width: 60px">{{ data_time }}</p>
+
+                    <p class="footer_label" style="margin-left: 10px; margin-right: 0px">Updates Every 5 Minutes</p>
+                </div>
+            </div>
+        </div>
+
+        <script>
+            $.get("/graph/data?start={{ start }}&end={{ end }}&table=utcReports&fields=Time,AirT,ExpT,DewP", function(response) {
+                var data = { series: response };
+
+                var options = {
+                    showPoint: false, lineSmooth: false, height: 380,
+                    axisY: { offset: 30 },
+
+                    axisX: {
+                        type: Chartist.FixedScaleAxis,
+                        low: {{ low }}, high: {{ high }}, divisor: 8, offset: 20,
+        
+                        labelInterpolationFnc: function(value) {
+                            return moment.unix(value).zone("+0000").format("HH:mm");
+                        }
+                    }
+                };
+
+                new Chartist.Line("#graph_ambient", data, options);
+            });
+        </script>
+    </body>
+</html>
