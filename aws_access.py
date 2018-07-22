@@ -37,31 +37,42 @@ else: startup_time = datetime.utcnow()
 # PAGE SERVERS -----------------------------------------------------------------
 def page_now():
     return flask.render_template("index.html",
+                                 aws_title = config.aws_location.split(",")[0],
                                  aws_location = config.aws_location)
 
 def page_statistics():
     return flask.render_template("statistics.html",
+                                 aws_title = config.aws_location.split(",")[0],
                                  aws_location = config.aws_location)
 
 def page_graph_day():
     return flask.render_template("graph-day.html",
+                                 aws_title = config.aws_location.split(",")[0],
                                  aws_location = config.aws_location)
 
 def page_graph_month():
     return flask.render_template("graph-month.html",
+                                 aws_title = config.aws_location.split(",")[0],
                                  aws_location = config.aws_location)
 
 def page_graph_year():
     return flask.render_template("graph-year.html",
+                                 aws_title = config.aws_location.split(",")[0],
                                  aws_location = config.aws_location)
 
 def page_camera():
     return flask.render_template("camera.html",
+                                 aws_title = config.aws_location.split(",")[0],
                                  aws_location = config.aws_location)
 
 def page_about():
     return flask.render_template("about.html",
-                                 aws_location = config.aws_location)
+                                 aws_title = config.aws_location.split(",")[0],
+                                 aws_location = config.aws_location,
+                                 aws_time_zone = config.aws_time_zone,
+                                 aws_elevation = config.aws_elevation,
+                                 aws_latitude = config.aws_latitude,
+                                 aws_longitude = config.aws_longitude)
 
 # DATA PAGE SERVERS ------------------------------------------------------------
 def data_now():
