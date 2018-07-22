@@ -124,9 +124,6 @@ def data_now():
 
     else: return "1"
 
-def get_data_statistics(data):
-    pass
-
 def data_statistics():
     if flask.request.args.get("time") != None:
         try:
