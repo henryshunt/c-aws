@@ -122,9 +122,8 @@ def data_now():
                 data["StaP_PTH"] = data["StaP"] - StaP_PTH_record["StaP"]
 
     # Localise data time
-    if data["Time"] != None:
-        data["Time"] = helpers.utc_to_local(
-            config, url_time).strftime("%Y-%m-%d %H:%M:%S")
+    data["Time"] = helpers.utc_to_local(
+        config, url_time).strftime("%Y-%m-%d %H:%M:%S")
 
     return flask.jsonify(data)
 
