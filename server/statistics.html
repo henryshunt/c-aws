@@ -1,51 +1,322 @@
 <html>
     <head>
         <title>C-AWS {{ aws_title }} [Local]</title>
-        <link href="{{ url_for('static', filename = 'css-trebuchet.ttf') }}" rel="stylesheet" type="text/css">
+        <link href="{{ url_for('static', filename = 'css-trebuchet.ttf') }}" rel="stylesheet">
         <link href="{{ url_for('static', filename = 'css-global.css') }}" rel="stylesheet" type="text/css">
         <script src="{{ url_for('static', filename = 'js-global.js') }}" type="text/javascript"></script>
+        <script src="{{ url_for('static', filename='js-jquery.js') }}" type="text/javascript"></script>
 
         <script>
-            function page_load_js() {
-                var override_update = {{ override_update }};
+            var requestedLocalTime = null;
+            var timeToUpdate = 0;
+            var countdownTimeout = null;
+            var updaterTimeout = null;
 
-                if (window.location.href.includes("?date=") == false ||
-                    override_update == true) {
+            $(document).ready(function() {
+                setInterval(function() {
+                    displayLocalTime();
+                }, 200);
 
-                    var timestamp = new Date();
-                    var refresh_time = new Date(timestamp.getTime());
+                updateData();
+            });
 
-                    if (timestamp.getSeconds() == 8 || timestamp.getSeconds() > 8) {
-                        refresh_time.setMinutes(refresh_time.getMinutes() + 1);
+            function updateData() {
+                clearTimeout(updaterTimeout);
+                clearTimeout(countdownTimeout);
+
+                if (queryParam("date") != null) {
+                    if (queryParam("date") == new Date().toISOString().split("T")[0]) {
+                        window.location.href.replace("statistics.html");
+                        updateData();
+                        
+                    } else {
+                        document.getElementById("item_update").innerHTML = "";
+                        timeToUpdate = 0;
+                        getAndProcessData();
                     }
 
-                    refresh_time.setSeconds(8); refresh_time.setMilliseconds(0);
-                    var difference = refresh_time.getTime() - timestamp.getTime();
-                    setTimeout("location.reload()", difference);
+                } else {
+                    document.getElementById("item_update").innerHTML = "0";
+                    timeToUpdate = 60;
+
+                    updaterTimeout = setInterval(function() {
+                        updateData();
+                    }, 60000);
+                        
+                    countdownTimeout = setInterval(function() {
+                        document.getElementById("item_update").innerHTML
+                            = --timeToUpdate;
+                    }, 1000);
+
+                    getAndProcessData();
+                }
+            }
+
+            function getAndProcessData() {
+                requestedLocalTime = new Date();
+
+                if (queryParam("date") != null) {
+                    requestedUtcTime = queryParam("date") + new Date()
+                        .toISOString().split("T")[1].split(".")[0].replace(/:/g, "-");
+
+                } else {
+                    requestedUtcTime = new Date()
+                        .toISOString().split(".")[0].replace(/:/g, "-");
                 }
 
-                setInterval(function() {
-                    if (window.location.href.includes("?date=") == false) {
-                        var timestamp = new Date();
-                        var refresh_time = new Date(timestamp.getTime());
+                var url = "data/statistics.json?time=" + requestedUtcTime;
+                if (queryParam("date") != null) { url += "&abs=1"; }
 
-                        if (timestamp.getSeconds() == 8 || timestamp.getSeconds() > 8) {
-                            refresh_time.setMinutes(refresh_time.getMinutes() + 1);
-                        }
+                $.ajax({
+                    dataType: "json", url: url,
 
-                        refresh_time.setSeconds(8); refresh_time.setMilliseconds(0);
-                        var difference = (refresh_time.getTime() - timestamp.getTime());
-                        document.getElementById("update")
-                            .innerHTML = parseInt((difference / 1000) + 1);
+                    success: function (data) { processData(data); },
+                    error: function() {
+                        document.getElementById("item_AirT_Avg").innerHTML = "no data";
+                        document.getElementById("item_AirT_Min").innerHTML = "no data";
+                        document.getElementById("item_AirT_Max").innerHTML = "no data";
+                        document.getElementById("item_ExpT_Avg").innerHTML = "no data";
+                        document.getElementById("item_ExpT_Min").innerHTML = "no data";
+                        document.getElementById("item_ExpT_Max").innerHTML = "no data";
+                        document.getElementById("item_RelH_Avg").innerHTML = "no data";
+                        document.getElementById("item_RelH_Min").innerHTML = "no data";
+                        document.getElementById("item_RelH_Max").innerHTML = "no data";
+                        document.getElementById("item_DewP_Avg").innerHTML = "no data";
+                        document.getElementById("item_DewP_Min").innerHTML = "no data";
+                        document.getElementById("item_DewP_Max").innerHTML = "no data";
+                        document.getElementById("item_WSpd_Avg").innerHTML = "no data";
+                        document.getElementById("item_WSpd_Min").innerHTML = "no data";
+                        document.getElementById("item_WSpd_Max").innerHTML = "no data";
+                        document.getElementById("item_WDir_Avg").innerHTML = "no data";
+                        document.getElementById("item_WDir_Min").innerHTML = "no data";
+                        document.getElementById("item_WDir_Max").innerHTML = "no data";
+                        document.getElementById("item_WGst_Avg").innerHTML = "no data";
+                        document.getElementById("item_WGst_Min").innerHTML = "no data";
+                        document.getElementById("item_WGst_Max").innerHTML = "no data";
+                        document.getElementById("item_SunD_Ttl").innerHTML = "no data";
+                        document.getElementById("item_Rain_Ttl").innerHTML = "no data";
+                        document.getElementById("item_MSLP_Avg").innerHTML = "no data";
+                        document.getElementById("item_MSLP_Min").innerHTML = "no data";
+                        document.getElementById("item_MSLP_Max").innerHTML = "no data";
+                        document.getElementById("item_ST10_Avg").innerHTML = "no data";
+                        document.getElementById("item_ST10_Min").innerHTML = "no data";
+                        document.getElementById("item_ST10_Max").innerHTML = "no data";
+                        document.getElementById("item_ST30_Avg").innerHTML = "no data";
+                        document.getElementById("item_ST30_Min").innerHTML = "no data";
+                        document.getElementById("item_ST30_Max").innerHTML = "no data";
+                        document.getElementById("item_ST00_Avg").innerHTML = "no data";
+                        document.getElementById("item_ST00_Min").innerHTML = "no data";
+                        document.getElementById("item_ST00_Max").innerHTML = "no data";
+
+                        document.getElementById("item_data_time").innerHTML
+                            = zeroPad(requestedLocalTime.getHours()) + ":"
+                            + zeroPad(requestedLocalTime.getMinutes());
                     }
+                });
+            }
 
-                    display_local_time();
-                }, 100);
+            function processData(data) {
+                if (data["Time"] != null) {
+                    document.getElementById("item_data_time").innerHTML
+                        = data["Time"].split(" ")[1].slice(0, -3);
+
+                } else {
+                    document.getElementById("item_data_time").innerHTML
+                        = zeroPad(requestedLocalTime.getHours()) + ":"
+                        + zeroPad(requestedLocalTime.getMinutes());
+                }
+
+                if (data["AirT_Avg"] != null) {
+                    document.getElementById("item_AirT_Avg").innerHTML
+                        = data["AirT_Avg"] + "°C";
+                } else { document.getElementById("item_AirT_Avg").innerHTML = "no data"; }
+
+                if (data["AirT_Min"] != null) {
+                    document.getElementById("item_AirT_Min").innerHTML
+                        = data["AirT_Min"] + "°C";
+                } else { document.getElementById("item_AirT_Min").innerHTML = "no data"; }
+
+                if (data["AirT_Max"] != null) {
+                    document.getElementById("item_AirT_Max").innerHTML
+                        = data["AirT_Max"] + "°C";
+                } else { document.getElementById("item_AirT_Max").innerHTML = "no data"; }
+
+
+                if (data["ExpT_Avg"] != null) {
+                    document.getElementById("item_ExpT_Avg").innerHTML
+                        = data["ExpT_Avg"] + "°C";
+                } else { document.getElementById("item_ExpT_Avg").innerHTML = "no data"; }
+
+                if (data["ExpT_Min"] != null) {
+                    document.getElementById("item_ExpT_Min").innerHTML
+                        = data["ExpT_Min"] + "°C";
+                } else { document.getElementById("item_ExpT_Min").innerHTML = "no data"; }
+
+                if (data["ExpT_Max"] != null) {
+                    document.getElementById("item_ExpT_Max").innerHTML
+                        = data["ExpT_Max"] + "°C";
+                } else { document.getElementById("item_ExpT_Max").innerHTML = "no data"; }
+
+
+                if (data["RelH_Avg"] != null) {
+                    document.getElementById("item_RelH_Avg").innerHTML
+                        = data["RelH_Avg"] + "%";
+                } else { document.getElementById("item_RelH_Avg").innerHTML = "no data"; }
+
+                if (data["RelH_Min"] != null) {
+                    document.getElementById("item_RelH_Min").innerHTML
+                        = data["RelH_Min"] + "%";
+                } else { document.getElementById("item_RelH_Min").innerHTML = "no data"; }
+
+                if (data["RelH_Max"] != null) {
+                    document.getElementById("item_RelH_Max").innerHTML
+                        = data["RelH_Max"] + "%";
+                } else { document.getElementById("item_RelH_Max").innerHTML = "no data"; }
+
+
+                if (data["DewP_Avg"] != null) {
+                    document.getElementById("item_DewP_Avg").innerHTML
+                        = data["DewP_Avg"] + "°C";
+                } else { document.getElementById("item_DewP_Avg").innerHTML = "no data"; }
+
+                if (data["DewP_Min"] != null) {
+                    document.getElementById("item_DewP_Min").innerHTML
+                        = data["DewP_Min"] + "°C";
+                } else { document.getElementById("item_DewP_Min").innerHTML = "no data"; }
+
+                if (data["DewP_Max"] != null) {
+                    document.getElementById("item_DewP_Max").innerHTML
+                        = data["DewP_Max"] + "°C";
+                } else { document.getElementById("item_DewP_Max").innerHTML = "no data"; }
+
+
+                if (data["WSpd_Avg"] != null) {
+                    document.getElementById("item_WSpd_Avg").innerHTML
+                        = data["WSpd_Avg"] + " mph";
+                } else { document.getElementById("item_WSpd_Avg").innerHTML = "no data"; }
+
+                if (data["WSpd_Min"] != null) {
+                    document.getElementById("item_WSpd_Min").innerHTML
+                        = data["WSpd_Min"] + " mph";
+                } else { document.getElementById("item_WSpd_Min").innerHTML = "no data"; }
+
+                if (data["WSpd_Max"] != null) {
+                    document.getElementById("item_WSpd_Max").innerHTML
+                        = data["WSpd_Max"] + " mph";
+                } else { document.getElementById("item_WSpd_Max").innerHTML = "no data"; }
+
+
+                if (data["WDir_Avg"] != null) {
+                    document.getElementById("item_WDir_Avg").innerHTML
+                        = data["WDir_Avg"] + "°";
+                } else { document.getElementById("item_WDir_Avg").innerHTML = "no data"; }
+
+                if (data["WDir_Min"] != null) {
+                    document.getElementById("item_WDir_Min").innerHTML
+                        = data["WDir_Min"] + "°";
+                } else { document.getElementById("item_WDir_Min").innerHTML = "no data"; }
+
+                if (data["WDir_Max"] != null) {
+                    document.getElementById("item_WDir_Max").innerHTML
+                        = data["WDir_Max"] + "°";
+                } else { document.getElementById("item_WDir_Max").innerHTML = "no data"; }
+
+
+                if (data["WGst_Avg"] != null) {
+                    document.getElementById("item_WGst_Avg").innerHTML
+                        = data["WGst_Avg"] + " mph";
+                } else { document.getElementById("item_WGst_Avg").innerHTML = "no data"; }
+
+                if (data["WGst_Min"] != null) {
+                    document.getElementById("item_WGst_Min").innerHTML
+                        = data["WGst_Min"] + " mph";
+                } else { document.getElementById("item_WGst_Min").innerHTML = "no data"; }
+
+                if (data["WGst_Max"] != null) {
+                    document.getElementById("item_WGst_Max").innerHTML
+                        = data["WGst_Max"] + " mph";
+                } else { document.getElementById("item_WGst_Max").innerHTML = "no data"; }
+
+
+                if (data["SunD_Ttl"] != null) {
+                    document.getElementById("item_SunD_Ttl").innerHTML
+                        = data["SunD_Ttl"] + " sec";
+                } else { document.getElementById("item_SunD_Ttl").innerHTML = "no data"; }
+
+                if (data["Rain_Ttl"] != null) {
+                    document.getElementById("item_Rain_Ttl").innerHTML
+                        = data["Rain_Ttl"] + " mm";
+                } else { document.getElementById("item_Rain_Ttl").innerHTML = "no data"; }
+
+
+                if (data["MSLP"] != null) {
+                    document.getElementById("item_MSLP").innerHTML
+                        = data["MSLP"] + " hPa";
+                } else { document.getElementById("item_MSLP").innerHTML = "no data"; }
+
+
+                if (data["ST10_Avg"] != null) {
+                    document.getElementById("item_ST10_Avg").innerHTML
+                        = data["ST10_Avg"] + "°C";
+                } else { document.getElementById("item_ST10_Avg").innerHTML = "no data"; }
+
+                if (data["ST10_Min"] != null) {
+                    document.getElementById("item_ST10_Min").innerHTML
+                        = data["ST10_Min"] + "°C";
+                } else { document.getElementById("item_ST10_Min").innerHTML = "no data"; }
+
+                if (data["ST10_Max"] != null) {
+                    document.getElementById("item_ST10_Max").innerHTML
+                        = data["ST10_Max"] + "°C";
+                } else { document.getElementById("item_ST10_Max").innerHTML = "no data"; }
+
+
+                if (data["ST30_Avg"] != null) {
+                    document.getElementById("item_ST30_Avg").innerHTML
+                        = data["ST30_Avg"] + "°C";
+                } else { document.getElementById("item_ST30_Avg").innerHTML = "no data"; }
+
+                if (data["ST30_Min"] != null) {
+                    document.getElementById("item_ST30_Min").innerHTML
+                        = data["ST30_Min"] + "°C";
+                } else { document.getElementById("item_ST30_Min").innerHTML = "no data"; }
+
+                if (data["ST30_Max"] != null) {
+                    document.getElementById("item_ST30_Max").innerHTML
+                        = data["ST30_Max"] + "°C";
+                } else { document.getElementById("item_ST30_Max").innerHTML = "no data"; }
+
+
+                if (data["ST00_Avg"] != null) {
+                    document.getElementById("item_ST00_Avg").innerHTML
+                        = data["ST00_Avg"] + "°C";
+                } else { document.getElementById("item_ST00_Avg").innerHTML = "no data"; }
+
+                if (data["ST00_Min"] != null) {
+                    document.getElementById("item_ST00_Min").innerHTML
+                        = data["ST00_Min"] + "°C";
+                } else { document.getElementById("item_ST00_Min").innerHTML = "no data"; }
+
+                if (data["ST00_Max"] != null) {
+                    document.getElementById("item_ST00_Max").innerHTML
+                        = data["ST00_Max"] + "°C";
+                } else { document.getElementById("item_ST00_Max").innerHTML = "no data"; }
+
+                //document.getElementById("scroller_left").onclick = 
+            }
+
+
+            function scroller_change(date) {
+                clearTimeout(updaterTimeout);
+                clearTimeout(countdownTimeout);
+                
+                window.location.href.replace("statistics.html?date=" + date);
+                updateData();
             }
         </script>
     </head>
 
-    <body onload="page_load_js()">
+    <body>
         <div id="header">
             <div id="header_items">
                 <h1 id="header_left">{{ aws_location }}</h1>
@@ -76,9 +347,9 @@
 
         <div id="main">
             <div class="group" id="scroller">
-                <a class="scroller_button" href="statistics.html?date={{ scroller_prev }}">◀</a>
+                <p id="scroller_left" class="scroller_button">◀</p>
                 <p id="scroller_time"><b>{{ scroller_time }}</b></p>
-                <a class="scroller_button" href="statistics.html?date={{ scroller_next }}">▶</a>
+                <p id="scroller_right" class="scroller_button">▶</p>
             </div>
 
             <div class="group">
@@ -94,9 +365,9 @@
                         <td>
                             <table style="width: 100%; border-collapse: collapse">
                                 <tr>
-                                    <td style="width: 33.3%"><p><b>AVG: </b>{{ AirT_Avg }}</p></td>
-                                    <td style="width: 33.3%"><p><b>MIN: </b>{{ AirT_Min }}</p></td>
-                                    <td style="width: 33.3%"><p><b>MAX: </b>{{ AirT_Max }}</p></td>
+                                    <td style="width: 33.3%"><p><b>AVG: </b><span id="item_AirT_Avg"></span></p></td>
+                                    <td style="width: 33.3%"><p><b>MIN: </b><span id="item_AirT_Min"></span></p></td>
+                                    <td style="width: 33.3%"><p><b>MAX: </b><span id="item_AirT_Max"></span></p></td>
                                 </tr>
                             </table>
                         </td>
@@ -117,9 +388,9 @@
                         <td>
                             <table style="width: 100%; border-collapse: collapse">
                                 <tr>
-                                    <td style="width: 33.3%"><p><b>AVG: </b>{{ RelH_Avg }}</p></td>
-                                    <td style="width: 33.3%"><p><b>MIN: </b>{{ RelH_Min }}</p></td>
-                                    <td style="width: 33.3%"><p><b>MAX: </b>{{ RelH_Max }}</p></td>
+                                    <td style="width: 33.3%"><p><b>AVG: </b><span id="item_RelH_Avg"></span></p></td>
+                                    <td style="width: 33.3%"><p><b>MIN: </b><span id="item_RelH_Min"></span></p></td>
+                                    <td style="width: 33.3%"><p><b>MAX: </b><span id="item_RelH_Max"></span></p></td>
                                 </tr>
                             </table>
                         </td>
@@ -131,9 +402,9 @@
                         <td>
                             <table style="width: 100%; border-collapse: collapse">
                                 <tr>
-                                    <td style="width: 33.3%"><p><b>AVG: </b>{{ DewP_Avg }}</p></td>
-                                    <td style="width: 33.3%"><p><b>MIN: </b>{{ DewP_Min }}</p></td>
-                                    <td style="width: 33.3%"><p><b>MAX: </b>{{ DewP_Max }}</p></td>
+                                    <td style="width: 33.3%"><p><b>AVG: </b><span id="item_DewP_Avg"></span></p></td>
+                                    <td style="width: 33.3%"><p><b>MIN: </b><span id="item_DewP_Min"></span></p></td>
+                                    <td style="width: 33.3%"><p><b>MAX: </b><span id="item_DewP_Max"></span></p></td>
                                 </tr>
                             </table>
                         </td>
@@ -154,9 +425,9 @@
                         <td>
                             <table style="width: 100%; border-collapse: collapse">
                                 <tr>
-                                    <td style="width: 33.3%"><p><b>AVG: </b>{{ WSpd_Avg }}</p></td>
-                                    <td style="width: 33.3%"><p><b>MIN: </b>{{ WSpd_Min }}</p></td>
-                                    <td style="width: 33.3%"><p><b>MAX: </b>{{ WSpd_Max }}</p></td>
+                                    <td style="width: 33.3%"><p><b>AVG: </b><span id="item_WSpd_Avg"></span></p></td>
+                                    <td style="width: 33.3%"><p><b>MIN: </b><span id="item_WSpd_Min"></span></p></td>
+                                    <td style="width: 33.3%"><p><b>MAX: </b><span id="item_WSpd_Max"></span></p></td>
                                 </tr>
                             </table>
                         </td>
@@ -168,9 +439,9 @@
                         <td>
                             <table style="width: 100%; border-collapse: collapse">
                                 <tr>
-                                    <td style="width: 33.3%"><p><b>AVG: </b>{{ WDir_Avg }}</p></td>
-                                    <td style="width: 33.3%"><p><b>MIN: </b>{{ WDir_Min }}</p></td>
-                                    <td style="width: 33.3%"><p><b>MAX: </b>{{ WDir_Max }}</p></td>
+                                    <td style="width: 33.3%"><p><b>AVG: </b><span id="item_WDir_Avg"></span></p></td>
+                                    <td style="width: 33.3%"><p><b>MIN: </b><span id="item_WDir_Min"></span></p></td>
+                                    <td style="width: 33.3%"><p><b>MAX: </b><span id="item_WDir_Max"></span></p></td>
                                 </tr>
                             </table>
                         </td>
@@ -182,9 +453,9 @@
                         <td>
                             <table style="width: 100%; border-collapse: collapse">
                                 <tr>
-                                    <td style="width: 33.3%"><p><b>AVG: </b>{{ WGst_Avg }}</p></td>
-                                    <td style="width: 33.3%"><p><b>MIN: </b>{{ WGst_Min }}</p></td>
-                                    <td style="width: 33.3%"><p><b>MAX: </b>{{ WGst_Max }}</p></td>
+                                    <td style="width: 33.3%"><p><b>AVG: </b><span id="item_WGst_Avg"></span></p></td>
+                                    <td style="width: 33.3%"><p><b>MIN: </b><span id="item_WGst_Min"></span></p></td>
+                                    <td style="width: 33.3%"><p><b>MAX: </b><span id="item_WGst_Max"></span></p></td>
                                 </tr>
                             </table>
                         </td>
@@ -205,7 +476,7 @@
                         <td>
                             <table style="width: 100%; border-collapse: collapse">
                                 <tr>
-                                    <td style="width: 33.3%"><p><b>TTL: </b>{{ SunD_Ttl }}</p></td>
+                                    <td style="width: 33.3%"><p><b>TTL: </b><span id="item_SunD_Ttl"></span></p></td>
                                 </tr>
                             </table>
                         </td>
@@ -226,7 +497,7 @@
                         <td>
                             <table style="width: 100%; border-collapse: collapse">
                                 <tr>
-                                    <td style="width: 33.3%"><p><b>TTL: </b>{{ Rain_Ttl }}</p></td>
+                                    <td style="width: 33.3%"><p><b>TTL: </b><span id="item_Rain_Ttl"></span></p></td>
                                 </tr>
                             </table>
                         </td>
@@ -247,9 +518,9 @@
                         <td>
                             <table style="width: 100%; border-collapse: collapse">
                                 <tr>
-                                    <td style="width: 33.3%"><p><b>AVG: </b>{{ MSLP_Avg }}</p></td>
-                                    <td style="width: 33.3%"><p><b>MIN: </b>{{ MSLP_Min }}</p></td>
-                                    <td style="width: 33.3%"><p><b>MAX: </b>{{ MSLP_Max }}</p></td>
+                                    <td style="width: 33.3%"><p><b>AVG: </b><span id="item_MSLP_Avg"></span></p></td>
+                                    <td style="width: 33.3%"><p><b>MIN: </b><span id="item_MSLP_Min"></span></p></td>
+                                    <td style="width: 33.3%"><p><b>MAX: </b><span id="item_MSLP_Max"></span></p></td>
                                 </tr>
                             </table>
                         </td>
@@ -270,9 +541,9 @@
                         <td>
                             <table style="width: 100%; border-collapse: collapse">
                                 <tr>
-                                    <td style="width: 33.3%"><p><b>AVG: </b>{{ ST10_Avg }}</p></td>
-                                    <td style="width: 33.3%"><p><b>MIN: </b>{{ ST10_Min }}</p></td>
-                                    <td style="width: 33.3%"><p><b>MAX: </b>{{ ST10_Max }}</p></td>
+                                    <td style="width: 33.3%"><p><b>AVG: </b><span id="item_ST10_Avg"></span></p></td>
+                                    <td style="width: 33.3%"><p><b>MIN: </b><span id="item_ST10_Min"></span></p></td>
+                                    <td style="width: 33.3%"><p><b>MAX: </b><span id="item_ST10_Max"></span></p></td>
                                 </tr>
                             </table>
                         </td>
@@ -284,9 +555,9 @@
                         <td>
                             <table style="width: 100%; border-collapse: collapse">
                                 <tr>
-                                    <td style="width: 33.3%"><p><b>AVG: </b>{{ ST30_Avg }}</p></td>
-                                    <td style="width: 33.3%"><p><b>MIN: </b>{{ ST30_Min }}</p></td>
-                                    <td style="width: 33.3%"><p><b>MAX: </b>{{ ST30_Max }}</p></td>
+                                    <td style="width: 33.3%"><p><b>AVG: </b><span id="item_ST30_Avg"></span></p></td>
+                                    <td style="width: 33.3%"><p><b>MIN: </b><span id="item_ST30_Min"></span></p></td>
+                                    <td style="width: 33.3%"><p><b>MAX: </b><span id="item_ST30_Max"></span></p></td>
                                 </tr>
                             </table>
                         </td>
@@ -298,9 +569,9 @@
                         <td>
                             <table style="width: 100%; border-collapse: collapse">
                                 <tr>
-                                    <td style="width: 33.3%"><p><b>AVG: </b>{{ ST00_Avg }}</p></td>
-                                    <td style="width: 33.3%"><p><b>MIN: </b>{{ ST00_Min }}</p></td>
-                                    <td style="width: 33.3%"><p><b>MAX: </b>{{ ST00_Max }}</p></td>
+                                    <td style="width: 33.3%"><p><b>AVG: </b><span id="item_ST00_Avg"></span></p></td>
+                                    <td style="width: 33.3%"><p><b>MIN: </b><span id="item_ST00_Min"></span></p></td>
+                                    <td style="width: 33.3%"><p><b>MAX: </b><span id="item_ST00_Max"></span></p></td>
                                 </tr>
                             </table>
                         </td>
@@ -312,14 +583,14 @@
         <div id="footer">
             <div id="footer_items">
                 <p class="footer_label">Local Time:</p>
-                <p class="footer_value" id="local_time" style="width: 210px"></p>
+                <p id="item_local_time" class="footer_value" style="width: 210px"></p>
     
                 <div style="float: right; margin-left: 10px">
                     <p class="footer_label">Data Time:</p>
-                    <p class="footer_value" style="width: 60px">{{ data_time }}</p>
+                    <p id="item_data_time" class="footer_value" style="width: 60px"></p>
 
                     <p class="footer_label" style="margin-left: 10px">Update:</p>
-                    <p class="footer_value" id="update" style="width: 35px"></p>
+                    <p id="item_update" class="footer_value" style="width: 35px"></p>
                 </div>
             </div>
         </div>
