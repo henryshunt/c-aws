@@ -198,7 +198,57 @@ def data_camera():
     return flask.jsonify(None)
 
 def data_about():
-    return flask.jsonify(None)
+    data = dict.fromkeys(["Time", "STim", "EncT", "CPUT", "IDRS", "CDRS"])
+
+    # Try parsing time specified in URL
+    if flask.request.args.get("time") == None: return flask.jsonify(data)
+    try:
+        url_time = datetime.strptime(
+            flask.request.args.get("time"), "%Y-%m-%dT%H-%M-%S")
+    except: return flask.jsonify(data)
+
+    # Get record for that time
+    record = analysis.record_for_time(config, url_time, DbTable.UTCENVIRON)
+
+    if record != False:
+        if record == None:
+            # Go back a minute if no record and not in absolute mode
+            if not flask.request.args.get("abs") == "1":
+                url_time -= timedelta(minutes = 1)
+                record = analysis.record_for_time(config, url_time,
+                                                  DbTable.UTCENVIRON)
+                
+                if record != False:
+                    if record != None:
+                        # Add record data to final data
+                        for key in dict(zip(record.keys(), record)):
+                            if key in data: data[key] = record[key]
+                    else: url_time += timedelta(minutes = 1)
+                else: url_time += timedelta(minutes = 1)
+                    
+        else:
+            # Add record data to final data
+            for key in dict(zip(record.keys(), record)):
+                if key in data: data[key] = record[key]
+
+    # Format software startup time
+    data["STim"] = (helpers.utc_to_local(config, startup_time)
+                   .strftime("%d/%m/%Y at %H:%M:%S"))
+    
+    # Get remaining internal storage space
+    data["IDRS"] = helpers.remaining_space("/")
+    if data["IDRS"] != None: data["IDRS"] = round(data["IDRS"], 2)
+
+    # Get remaining camera storage space
+    if config.camera_logging == True:
+        data["CDRS"] = helpers.remaining_space(config.camera_drive)
+        if data["CDRS"] != None: data["CDRS"] = round(data["CDRS"], 2)
+    else: data["CDRS"] = False
+
+    # Localise data time
+    data["Time"] = helpers.utc_to_local(
+        config, url_time).strftime("%Y-%m-%d %H:%M:%S")
+    return flask.jsonify(data)
 
 
 def ctrl_command():
