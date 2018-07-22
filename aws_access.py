@@ -94,6 +94,7 @@ def data_now():
                         for key in dict(zip(record.keys(), record)):
                             if key in data: data[key] = record[key]
                     else: url_time += timedelta(minutes = 1)
+                else: url_time += timedelta(minutes = 1)
                     
         else:
             # Add record data to final data
@@ -124,41 +125,53 @@ def data_now():
     # Localise data time
     data["Time"] = helpers.utc_to_local(
         config, url_time).strftime("%Y-%m-%d %H:%M:%S")
-
     return flask.jsonify(data)
 
-
-
-
 def data_statistics():
-    if flask.request.args.get("time") != None:
-        try:
-            url_time = datetime.strptime(flask.request.args.get("time"),
-                                         "%Y-%m-%dT%H-%M-%S")
-            url_time = helpers.utc_to_local(config, url_time)
-        except: return "1"
-        
-        record = analysis.record_for_time(config, url_time, DbTable.LOCALSTATS)
+    data = dict.fromkeys(["Time", "AirT_Min", "AirT_Max", "AirT_Avg" "RelH_Min",
+                          "RelH_Max", "RelH_Avg", "DewP_Min", "DewP_Max",
+                          "DewP_Avg", "WSpd_Min", "WSpd_Max", "WSpd_Avg",
+                          "WDir_Min", "WDir_Max", "WDir_Avg", "WGst_Min",
+                          "WGst_Max", "WGst_Avg" "SunD_Ttl", "Rain_Ttl",
+                          "MSLP_Min", "MSLP_Max", "MSLP_Avg", "ST10_Min",
+                          "ST10_Max", "ST10_Avg", "ST30_Min", "ST30_Max",
+                          "ST30_Avg", "ST00_Min", "ST00_Max", "ST00_Avg"])
 
-        if record != False:
-            if record == None:
-                if flask.request.args.get("abs") == "1":
-                    return flask.jsonify(None)
+    # Try parsing time specified in URL
+    if flask.request.args.get("time") == None: return flask.jsonify(data)
+    try:
+        url_time = datetime.strptime(
+            flask.request.args.get("time"), "%Y-%m-%dT%H-%M-%S")
+        url_time = helpers.utc_to_local(config, url_time)
+    except: return flask.jsonify(data)
 
-                else: 
-                    record = analysis.record_for_time(config,
-                        url_time - timedelta(minutes = 1), DbTable.LOCALSTATS)
+    # Get record for that time
+    record = analysis.record_for_time(config, url_time, DbTable.LOCALSTATS)
+
+    if record != False:
+        if record == None:
+            # Go back a minute if no record and not in absolute mode
+            if not flask.request.args.get("abs") == "1":
+                url_time -= timedelta(minutes = 1)
+                record = analysis.record_for_time(config, url_time,
+                                                  DbTable.LOCALSTATS)
+                
+                if record != False:
+                    if record != None:
+                        # Add record data to final data
+                        for key in dict(zip(record.keys(), record)):
+                            if key in data: data[key] = record[key]
+                    else: url_time += timedelta(minutes = 1)
+                else: url_time += timedelta(minutes = 1)
                     
-                    if record != False:
-                        if record != None:
-                            return flask.jsonify(dict(zip(record.keys(),
-                                                          record)))
-                        else: return flask.jsonify(None)
-                    else: return "1"
-            else: return flask.jsonify(dict(zip(record.keys(), record)))
-        else: return "1"
+        else:
+            # Add record data to final data
+            for key in dict(zip(record.keys(), record)):
+                if key in data: data[key] = record[key]
 
-    else: return "1"
+    data["Time"] = url_time.strftime("%Y-%m-%d %H:%M:%S")
+    return flask.jsonify(data)
+
 
 def data_graph_day():
     return flask.jsonify(None)
