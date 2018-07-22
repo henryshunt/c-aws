@@ -107,13 +107,13 @@
                 } else { document.getElementById("item_CDRS").innerHTML = "no data"; }
             }
 
-            function send_cmd(command) {
+            function send_command(command) {
                 var passphrase = prompt(
-                    "Authentication is required to issue commands to the CAWS computer. Enter the passphrase:");
+                    "Enter the passphrase to send the command to the C-AWS computer:");
 
-                if (passphrase == "weather station") {
-                    window.location.replace("command/" + command);
-                } else { alert("Incorrect passphrase, authentication failed."); }
+                if (passphrase == "password") {
+                    window.location.replace("ctrl/" + command);
+                } else { alert("Incorrect passphrase, command not sent."); }
             }
         </script>
     </head>
@@ -227,11 +227,11 @@
                 <table class="field_table">
                     <tr>
                         <td><p class="field_label">Shut Down C-AWS Computer:</p></td>
-                        <td><p class="field_value"><button onclick="send_cmd('shutdown')">Send Command</button></p></td>
+                        <td><p class="field_value"><button onclick="send_command('shutdown')">Send Command</button></p></td>
                     </tr>
                     <tr>
                         <td><p class="field_label">Restart C-AWS Computer:</p></td>
-                        <td><p class="field_value"><button onclick="send_cmd('restart')">Send Command</button></p></td>
+                        <td><p class="field_value"><button onclick="send_command('restart')">Send Command</button></p></td>
                     </tr>
                 </table>
             </div>

@@ -251,8 +251,14 @@ def data_about():
     return flask.jsonify(data)
 
 
-def ctrl_command():
-    return flask.jsonify(None)
+def do_power_cmd(command):
+    time.sleep(5)
+    if command == "shutdown": os.system("shutdown -h now")
+    elif command == "restart": os.system("shutdown -r now")
+
+def ctrl_command(command):
+    do_power_cmd(command)
+    return flask.redirect("about.html")
 
 # -- CREATE SERVER -------------------------------------------------------------
 server = flask.Flask(__name__, static_folder = "server/res",
