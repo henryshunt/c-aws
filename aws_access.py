@@ -128,14 +128,15 @@ def data_now():
     return flask.jsonify(data)
 
 def data_statistics():
-    data = dict.fromkeys(["Time", "AirT_Min", "AirT_Max", "AirT_Avg" "RelH_Min",
-                          "RelH_Max", "RelH_Avg", "DewP_Min", "DewP_Max",
-                          "DewP_Avg", "WSpd_Min", "WSpd_Max", "WSpd_Avg",
-                          "WDir_Min", "WDir_Max", "WDir_Avg", "WGst_Min",
-                          "WGst_Max", "WGst_Avg" "SunD_Ttl", "Rain_Ttl",
-                          "MSLP_Min", "MSLP_Max", "MSLP_Avg", "ST10_Min",
-                          "ST10_Max", "ST10_Avg", "ST30_Min", "ST30_Max",
-                          "ST30_Avg", "ST00_Min", "ST00_Max", "ST00_Avg"])
+    data = dict.fromkeys(["Time", "AirT_Min", "AirT_Max", "AirT_Avg",
+                          "RelH_Min", "RelH_Max", "RelH_Avg", "DewP_Min",
+                          "DewP_Max", "DewP_Avg", "WSpd_Min", "WSpd_Max",
+                          "WSpd_Avg", "WDir_Min", "WDir_Max", "WDir_Avg",
+                          "WGst_Min", "WGst_Max", "WGst_Avg", "SunD_Ttl",
+                          "Rain_Ttl", "MSLP_Min", "MSLP_Max", "MSLP_Avg",
+                          "ST10_Min", "ST10_Max", "ST10_Avg", "ST30_Min",
+                          "ST30_Max", "ST30_Avg", "ST00_Min", "ST00_Max",
+                          "ST00_Avg"])
 
     # Try parsing time specified in URL
     if flask.request.args.get("time") == None: return flask.jsonify(data)
