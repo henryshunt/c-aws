@@ -77,7 +77,7 @@
                 }
 
                 if (data["STim"] != null) {
-                    document.getElementById("item_AirT").innerHTML
+                    document.getElementById("item_STim").innerHTML
                         = data["STim"];
                 } else { document.getElementById("item_STim").innerHTML = "no data"; }
 
@@ -118,7 +118,7 @@
         </script>
     </head>
 
-    <body onload="page_load_js()">
+    <body>
         <div id="header">
             <div id="header_items">
                 <h1 id="header_left">{{ aws_location }}</h1>
@@ -219,7 +219,7 @@
                 </table>
             </div>
 
-            <div class="group" style="margin-bottom: 0px">
+            <div class="group">
                 <div class="group_header">
                     <p class="group_title">Power Controls</p>
                 </div>
@@ -235,19 +235,25 @@
                     </tr>
                 </table>
             </div>
+
+            <div class="group" style="margin-bottom: 0px">
+                <div class="group_header">
+                    <p class="group_title">AWS Command Line</p>
+                </div>
+            </div>
         </div>
 
         <div id="footer">
             <div id="footer_items">
                 <p class="footer_label">Local Time:</p>
-                <p class="footer_value" id="local_time" style="width: 210px"></p>
+                <p id="item_local_time" class="footer_value" style="width: 210px"></p>
     
                 <div style="float: right; margin-left: 10px">
                     <p class="footer_label">Data Time:</p>
-                    <p class="footer_value" style="width: 60px">{{ data_time }}</p>
+                    <p id="item_data_time" class="footer_value" style="width: 60px"></p>
 
                     <p class="footer_label" style="margin-left: 10px">Update:</p>
-                    <p class="footer_value" id="update" style="width: 35px"></p>
+                    <p id="item_update" class="footer_value" style="width: 35px"></p>
                 </div>
             </div>
         </div>
