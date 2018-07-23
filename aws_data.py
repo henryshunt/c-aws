@@ -13,6 +13,7 @@ import math
 import sqlite3
 import spidev
 
+import daemon
 import Adafruit_GPIO
 import RPi.GPIO as gpio
 import astral
@@ -504,31 +505,35 @@ def do_trigger_rain(channel):
 
 
 # ENTRY POINT ==================================================================
-# -- INIT GPIO AND LEDS --------------------------------------------------------
-gpio.setwarnings(False); gpio.setmode(gpio.BCM)
-gpio.setup(23, gpio.OUT); gpio.setup(24, gpio.OUT)
+def entry_point():
+    # -- INIT GPIO AND LEDS ----------------------------------------------------
+    gpio.setwarnings(False); gpio.setmode(gpio.BCM)
+    gpio.setup(23, gpio.OUT); gpio.setup(24, gpio.OUT)
 
-# -- SET UP SENSORS ------------------------------------------------------------
-gpio.setup(17, gpio.IN, pull_up_down = gpio.PUD_DOWN)
-gpio.add_event_detect(17, gpio.FALLING, callback = do_trigger_wspd,
-                      bouncetime = 1)
-gpio.setup(27, gpio.IN, pull_up_down = gpio.PUD_DOWN)
-gpio.add_event_detect(27, gpio.FALLING, callback = do_trigger_rain,
-                      bouncetime = 150)
-gpio.setup(22, gpio.IN, pull_up_down = gpio.PUD_DOWN)
+    # -- SET UP SENSORS --------------------------------------------------------
+    gpio.setup(17, gpio.IN, pull_up_down = gpio.PUD_DOWN)
+    gpio.add_event_detect(17, gpio.FALLING, callback = do_trigger_wspd,
+                        bouncetime = 1)
+    gpio.setup(27, gpio.IN, pull_up_down = gpio.PUD_DOWN)
+    gpio.add_event_detect(27, gpio.FALLING, callback = do_trigger_rain,
+                        bouncetime = 150)
+    gpio.setup(22, gpio.IN, pull_up_down = gpio.PUD_DOWN)
 
-# -- WAIT FOR MINUTE -----------------------------------------------------------
-while True:
-    if datetime.utcnow().second != 0:
-        gpio.output(23, gpio.HIGH); time.sleep(0.1)
-        gpio.output(23, gpio.LOW); time.sleep(0.1)
-    else: break
+    # -- WAIT FOR MINUTE -------------------------------------------------------
+    while True:
+        if datetime.utcnow().second != 0:
+            gpio.output(23, gpio.HIGH); time.sleep(0.1)
+            gpio.output(23, gpio.LOW); time.sleep(0.1)
+        else: break
 
-# -- START DATA LOGGING --------------------------------------------------------
-data_start = datetime.utcnow().replace(second = 0, microsecond = 0)
-disable_sampling = False
+    # -- START DATA LOGGING ----------------------------------------------------
+    data_start = datetime.utcnow().replace(second = 0, microsecond = 0)
+    disable_sampling = False
 
-event_scheduler = BlockingScheduler()
-event_scheduler.add_job(every_minute, "cron", minute = "0-59")
-event_scheduler.add_job(every_second, "cron", second = "0-59")
-event_scheduler.start()
+    event_scheduler = BlockingScheduler()
+    event_scheduler.add_job(every_minute, "cron", minute = "0-59")
+    event_scheduler.add_job(every_second, "cron", second = "0-59")
+    event_scheduler.start()
+
+if __name__ == "__main__":
+    with daemon.DaemonContext(): entry_point()
