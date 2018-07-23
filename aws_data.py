@@ -32,14 +32,6 @@ from frames import DbTable
 import analysis
 import queries
 
-# MESSAGE ----------------------------------------------------------------------
-print("--- Custom Automatic Weather Station ---")
-print("Program: Data Sub-System")
-print("Author:  Henry Hunt")
-print("Version: 4C.1 (July 2018)")
-print("")
-print("----------- DO NOT TERMINATE -----------")
-
 # GLOBAL VARIABLES -------------------------------------------------------------
 config = ConfigData()
 config.load()
@@ -506,6 +498,13 @@ def do_trigger_rain(channel):
 
 # ENTRY POINT ==================================================================
 def entry_point():
+    print("--- Custom Automatic Weather Station ---")
+    print("Program: Data Sub-System")
+    print("Author:  Henry Hunt")
+    print("Version: 4C.1 (July 2018)")
+    print("")
+    print("----------- DO NOT TERMINATE -----------")
+
     # -- INIT GPIO AND LEDS ----------------------------------------------------
     gpio.setwarnings(False); gpio.setmode(gpio.BCM)
     gpio.setup(23, gpio.OUT); gpio.setup(24, gpio.OUT)
