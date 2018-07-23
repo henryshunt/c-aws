@@ -8,6 +8,7 @@ from datetime import datetime
 import time
 import sqlite3
 import subprocess
+import hashlib
 
 import RPi.GPIO as gpio
 import picamera
@@ -48,15 +49,22 @@ gpio.output(23, gpio.LOW); gpio.output(24, gpio.LOW)
 if config.load() == False: helpers.init_exit("01", True)
 if config.validate() == False: helpers.init_exit("02", True)
 
+try:
+    config_hasher = hashlib.md5()
+    with open("__config.ini", "rb") as file: config_hasher.update(file.read())
+    config_hash = config_hasher.hexdigest()
+    print(config_hash)
+except: helpers.init_exit("03", True)
+
 # -- CHECK INTERNAL DRIVE ------------------------------------------------------
 free_space = helpers.remaining_space("/")
-if free_space == None or free_space < 1: helpers.init_exit("03", True)
+if free_space == None or free_space < 1: helpers.init_exit("04", True)
 
 # -- CHECK DATA DIRECTORY ------------------------------------------------------
 if not os.path.isdir(config.data_directory):
     try:
         os.makedirs(config.data_directory)
-    except: helpers.init_exit("04", True)
+    except: helpers.init_exit("05", True)
 
 # -- MAKE DATABASE -------------------------------------------------------------
 if not os.path.isfile(config.database_path):
@@ -68,19 +76,19 @@ if not os.path.isfile(config.database_path):
             cursor.execute(queries.CREATE_DAYSTATS_TABLE)
 
             database.commit()
-    except: helpers.init_exit("05", True)
+    except: helpers.init_exit("06", True)
 
 # -- CHECK CAMERA DRIVE --------------------------------------------------------
 if config.camera_logging == True:
-    if not os.path.isdir(config.camera_drive): helpers.init_exit("06", True)
+    if not os.path.isdir(config.camera_drive): helpers.init_exit("07", True)
 
     free_space = helpers.remaining_space(config.camera_drive)
-    if free_space == None or free_space < 5: helpers.init_exit("07", True)
+    if free_space == None or free_space < 5: helpers.init_exit("08", True)
 
     # Check camera module is connected
     try:
         with picamera.PiCamera() as camera: pass
-    except: helpers.init_exit("08", True)
+    except: helpers.init_exit("09", True)
 
 # -- RUN SUBPROCESSES ----------------------------------------------------------
 try:
@@ -88,7 +96,7 @@ try:
         subprocess.Popen(["sudo python3 aws_access.py "
                           + startup_time.strftime("%Y-%m-%dT%H:%M:%S")],
                          shell = True)
-except: helpers.init_exit("09", True)
+except: helpers.init_exit("10", True)
 
 if (config.reports_uploading == True or
     config.envReports_uploading == True or
@@ -97,8 +105,8 @@ if (config.reports_uploading == True or
 
     try:
         subprocess.Popen(["sudo python3 aws_support.py"], shell = True)
-    except: helpers.init_exit("10", True)
+    except: helpers.init_exit("11", True)
 
 try:
     subprocess.Popen(["sudo python3 aws_data.py"], shell = True)
-except: helpers.init_exit("11", True)
+except: helpers.init_exit("12", True)
