@@ -11,7 +11,6 @@ from datetime import datetime, timedelta
 import time
 import pytz
 from threading import Thread
-from gpiozero import CPUTemperature
 import math
 import sqlite3
 import RPi.GPIO as gpio
@@ -23,6 +22,7 @@ from apscheduler.schedulers.blocking import BlockingScheduler
 import bme280
 import sht31d
 import mcp3008
+from gpiozero import CPUTemperature
 
 from config import ConfigData
 import helpers
