@@ -8,7 +8,6 @@ from datetime import datetime
 import time
 import sqlite3
 import subprocess
-import hashlib
 
 import RPi.GPIO as gpio
 import picamera
@@ -48,13 +47,6 @@ gpio.output(23, gpio.LOW); gpio.output(24, gpio.LOW)
 # -- CHECK CONFIG --------------------------------------------------------------
 if config.load() == False: helpers.init_exit("01", True)
 if config.validate() == False: helpers.init_exit("02", True)
-
-try:
-    config_hasher = hashlib.md5()
-    with open("__config.ini", "rb") as file: config_hasher.update(file.read())
-    config_hash = config_hasher.hexdigest()
-    print(config_hash)
-except: helpers.init_exit("03", True)
 
 # -- CHECK INTERNAL DRIVE ------------------------------------------------------
 free_space = helpers.remaining_space("/")
