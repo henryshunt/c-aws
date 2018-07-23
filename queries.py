@@ -20,7 +20,7 @@ CREATE_DAYSTATS_TABLE = ("CREATE TABLE dayStats ("
 
 SELECT_SINGLE_UTCREPORTS = "SELECT * FROM reports WHERE Time = ?"
 SELECT_SINGLE_UTCENVIRON = "SELECT * FROM envReports WHERE Time = ?"
-SELECT_SINGLE_LOCALSTATS = "SELECT * FROM dayStats WHERE Date = ?"
+SELECT_SINGLE_LOCALSTATS = "SELECT * FROM dayStats WHERE Date LIKE ?"
 
 SELECT_RANGE_UTCREPORTS = "SELECT * FROM reports WHERE Time BETWEEN ? AND ?"
 SELECT_PAST_HOUR_UTCREPORTS = "SELECT SUM({0}) AS {0} FROM reports WHERE Time BETWEEN ? AND ?"
@@ -42,7 +42,7 @@ GENERATE_DAYSTAT = ("SELECT MIN(AirT) AS AirT_Min, MAX(AirT) AS AirT_Max, ROUND(
     + "MIN(ST10) AS ST10_Min, MAX(ST10) AS ST10_Max, ROUND(AVG(ST10), 3) AS ST10_Avg, "
     + "MIN(ST30) AS ST30_Min, MAX(ST30) AS ST30_Max, ROUND(AVG(ST30), 3) AS ST30_Avg, "
     + "MIN(ST00) AS ST00_Min, MAX(ST00) AS ST00_Max, ROUND(AVG(ST00), 3) AS ST00_Avg "
-    + "FROM utcReports WHERE Time BETWEEN ? AND ?")
+    + "FROM reports WHERE Time BETWEEN ? AND ?")
 
 INSERT_REPORT = "INSERT INTO reports VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)"
 INSERT_ENVREPORT = "INSERT INTO envReports VALUES (?, ?, ?)"
@@ -58,4 +58,4 @@ UPDATE_DAYSTAT = ("UPDATE dayStats SET Date = ?, AirT_Min = ?, AirT_Max = ?, Air
     + "WSpd_Max = ?, WSpd_Avg = ?, WDir_Min = ?, WDir_Max = ?, WDir_Avg = ?, WGst_Min = ?, "
     + "WGst_Max = ?, WGst_Avg = ?, SunD_Ttl = ?, Rain_Ttl = ?, MSLP_Min = ?, MSLP_Max = ?, "
     + "MSLP_Avg = ?, ST10_Min = ?, ST10_Max = ?, ST10_Avg = ?, ST30_Min = ?, ST30_Max = ?, "
-    + "ST30_Avg = ?, ST00_Min = ?, ST00_Max = ?, ST00_Avg = ? WHERE Date LIKE ?%")
+    + "ST30_Avg = ?, ST00_Min = ?, ST00_Max = ?, ST00_Avg = ? WHERE Date LIKE ?")
