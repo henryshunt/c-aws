@@ -459,7 +459,7 @@ def every_second():
 
     try:
         spi = Adafruit_GPIO.SPI.SpiDev(0, 0)
-        adc = Adafruit_MCP3008.MCP3008(spi = spi)
+        adc = mcp3008.MCP3008(spi = spi)
 
         # Read sensor value from analog to digital converter
         adc_value = adc.read_adc(1)
