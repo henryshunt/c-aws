@@ -1,6 +1,5 @@
 """ CAWS Data Support Program
-      Responsible for generating various data products, uploading data to
-      internet services, and generating backups and database metrics
+      Responsible for uploading data to various internet services
 """
 
 # DEPENDENCIES -----------------------------------------------------------------
@@ -9,6 +8,7 @@ import os
 import threading
 import requests
 
+import daemon
 from apscheduler.schedulers.blocking import BlockingScheduler
 
 import analysis
@@ -16,16 +16,8 @@ import helpers
 from frames import DbTable
 from config import ConfigData
 
-# MESSAGE ----------------------------------------------------------------------
-print("--- Custom Automatic Weather Station ---")
-print("Program: Support Sub-System")
-print("Author:  Henry Hunt")
-print("Version: 4C.1 (July 2018)")
-print("")
-print("----------- DO NOT TERMINATE -----------")
-
 # GLOBAL VARIABLES -------------------------------------------------------------
-config = None
+config = ConfigData()
 
 is_processing_data = False
 is_processing_camera = True
@@ -164,12 +156,19 @@ def every_minute():
     
 
 # ENTRY POINT ==================================================================
-# -- LOAD CONFIG ---------------------------------------------------------------
-config = ConfigData()
-if config.load() == False: sys.exit(1)
-if config.validate() == False: sys.exit(1)
+def entry_point():
+    print("--- Custom Automatic Weather Station ---")
+    print("Program: Support Sub-System")
+    print("Author:  Henry Hunt")
+    print("Version: 4C.1 (July 2018)")
+    print("")
+    print("----------- DO NOT TERMINATE -----------")
+    config.load()
 
-# -- START SCHEDULES -----------------------------------------------------------
-event_scheduler = BlockingScheduler()
-event_scheduler.add_job(every_minute, "cron", minute = "0-59", second = 8)
-event_scheduler.start()
+    # -- START SCHEDULERS ------------------------------------------------------
+    event_scheduler = BlockingScheduler()
+    event_scheduler.add_job(every_minute, "cron", minute = "0-59", second = 8)
+    event_scheduler.start()
+
+if __name__ == "__main__":
+    with daemon.DaemonContext(): entry_point()

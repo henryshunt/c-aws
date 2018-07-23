@@ -8,9 +8,9 @@ import time
 from datetime import datetime, timedelta
 import os
 import sys
-import subprocess
 import logging
 
+import daemon
 import flask
 
 import analysis
@@ -18,21 +18,9 @@ import helpers
 from config import ConfigData
 from frames import DbTable
 
-# MESSAGE ----------------------------------------------------------------------
-print("--- Custom Automatic Weather Station ---")
-print("Program: Access Sub-System")
-print("Author:  Henry Hunt")
-print("Version: 4C.1 (July 2018)")
-print("")
-print("----------- DO NOT TERMINATE -----------")
-
 # GLOBAL VARIABLES -------------------------------------------------------------
 config = ConfigData()
-config.load()
-
-if len(sys.argv) == 2:
-    startup_time = datetime.strptime(sys.argv[1], "%Y-%m-%dT%H:%M:%S")
-else: startup_time = datetime.utcnow()
+startup_time = None
 
 # PAGE SERVERS -----------------------------------------------------------------
 def page_now():
@@ -261,29 +249,46 @@ def ctrl_command(command):
     do_power_cmd(command)
     return flask.redirect("about.html")
 
-# -- CREATE SERVER -------------------------------------------------------------
-server = flask.Flask(__name__, static_folder = "server/res",
-                     template_folder = "server")
+# ENTRY POINT ==================================================================
+def entry_point():
+    print("--- Custom Automatic Weather Station ---")
+    print("Program: Access Sub-System")
+    print("Author:  Henry Hunt")
+    print("Version: 4C.1 (July 2018)")
+    print("")
+    print("----------- DO NOT TERMINATE -----------")
+    config.load()
 
-server.add_url_rule("/", view_func = page_now)
-server.add_url_rule("/index.html", view_func = page_now)
-server.add_url_rule("/statistics.html", view_func = page_statistics)
-server.add_url_rule("/graph_day.html", view_func = page_graph_day)
-server.add_url_rule("/graph_month.html", view_func = page_graph_month)
-server.add_url_rule("/graph_year.html", view_func = page_graph_year)
-server.add_url_rule("/camera.html", view_func = page_camera)
-server.add_url_rule("/about.html", view_func = page_about)
+    if len(sys.argv) == 2:
+        startup_time = datetime.strptime(sys.argv[1], "%Y-%m-%dT%H:%M:%S")
+    else: startup_time = datetime.utcnow()
 
-server.add_url_rule("/data/now.json", view_func = data_now)
-server.add_url_rule("/data/statistics.json", view_func = data_statistics)
-server.add_url_rule("/data/graph-day.json", view_func = data_graph_day)
-server.add_url_rule("/data/graph-month.json", view_func = data_graph_month)
-server.add_url_rule("/data/graph-year.json", view_func = data_graph_year)
-server.add_url_rule("/data/camera/<file_name>", view_func = data_camera)
-server.add_url_rule("/data/about.json", view_func = data_about)
-server.add_url_rule("/ctrl/<command>", view_func = ctrl_command)
+    # -- CREATE SERVER ---------------------------------------------------------
+    server = flask.Flask(__name__, static_folder = "server/res",
+                        template_folder = "server")
 
-# -- START SERVER --------------------------------------------------------------
-server.config["SEND_FILE_MAX_AGE_DEFAULT"] = 0
-logging.getLogger("werkzeug").setLevel(logging.CRITICAL)
-server.run(host = "0.0.0.0", threaded = True)
+    server.add_url_rule("/", view_func = page_now)
+    server.add_url_rule("/index.html", view_func = page_now)
+    server.add_url_rule("/statistics.html", view_func = page_statistics)
+    server.add_url_rule("/graph_day.html", view_func = page_graph_day)
+    server.add_url_rule("/graph_month.html", view_func = page_graph_month)
+    server.add_url_rule("/graph_year.html", view_func = page_graph_year)
+    server.add_url_rule("/camera.html", view_func = page_camera)
+    server.add_url_rule("/about.html", view_func = page_about)
+
+    server.add_url_rule("/data/now.json", view_func = data_now)
+    server.add_url_rule("/data/statistics.json", view_func = data_statistics)
+    server.add_url_rule("/data/graph-day.json", view_func = data_graph_day)
+    server.add_url_rule("/data/graph-month.json", view_func = data_graph_month)
+    server.add_url_rule("/data/graph-year.json", view_func = data_graph_year)
+    server.add_url_rule("/data/camera/<file_name>", view_func = data_camera)
+    server.add_url_rule("/data/about.json", view_func = data_about)
+    server.add_url_rule("/ctrl/<command>", view_func = ctrl_command)
+
+    # -- START SERVER ----------------------------------------------------------
+    server.config["SEND_FILE_MAX_AGE_DEFAULT"] = 0
+    logging.getLogger("werkzeug").setLevel(logging.CRITICAL)
+    server.run(host = "0.0.0.0", threaded = True)
+
+if __name__ == "__main__":
+    with daemon.DaemonContext(): entry_point()
