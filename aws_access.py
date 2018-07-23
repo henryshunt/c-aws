@@ -139,7 +139,7 @@ def data_now():
     return flask.jsonify(data)
 
 def data_statistics():
-    data = dict.fromkeys(["Time", "AirT_Min", "AirT_Max", "AirT_Avg",
+    data = dict.fromkeys(["Date", "AirT_Min", "AirT_Max", "AirT_Avg",
                           "RelH_Min", "RelH_Max", "RelH_Avg", "DewP_Min",
                           "DewP_Max", "DewP_Avg", "WSpd_Min", "WSpd_Max",
                           "WSpd_Avg", "WDir_Min", "WDir_Max", "WDir_Avg",
@@ -147,14 +147,13 @@ def data_statistics():
                           "Rain_Ttl", "MSLP_Min", "MSLP_Max", "MSLP_Avg",
                           "ST10_Min", "ST10_Max", "ST10_Avg", "ST30_Min",
                           "ST30_Max", "ST30_Avg", "ST00_Min", "ST00_Max",
-                          "ST00_Avg"])
+                          "ST00_Avg", "SLft", "SRgt"])
 
     # Try parsing time specified in URL
-    if flask.request.args.get("time") == None: return flask.jsonify(data)
+    if flask.request.args.get("date") == None: return flask.jsonify(data)
     try:
         url_time = datetime.strptime(
-            flask.request.args.get("time"), "%Y-%m-%dT%H-%M-%S")
-        url_time = helpers.utc_to_local(config, url_time)
+            flask.request.args.get("date"), "%Y-%m-%d")
     except: return flask.jsonify(data)
 
     # Get record for that time
@@ -181,7 +180,9 @@ def data_statistics():
             for key in dict(zip(record.keys(), record)):
                 if key in data: data[key] = record[key]
 
-    data["Time"] = url_time.strftime("%Y-%m-%d %H:%M:%S")
+    data["SLft"] = (url_time - timedelta(days = 1)).strftime("%Y-%m-%d")
+    data["Date"] = url_time.strftime("%Y-%m-%d")
+    data["SRgt"] = (url_time + timedelta(days = 1)).strftime("%Y-%m-%d")
     return flask.jsonify(data)
 
 

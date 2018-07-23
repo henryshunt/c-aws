@@ -427,7 +427,7 @@ def do_generate_stats(utc):
                      new_stats["ST30_Min"], new_stats["ST30_Max"],
                      new_stats["ST30_Avg"], new_stats["ST00_Min"],
                      new_stats["ST00_Max"], new_stats["ST00_Avg"],
-                     local_time.strftime("%Y-%m-%d")))
+                     local_time.strftime("%Y-%m-%d"))
             
             database.commit()
     except: gpio.output(24, gpio.HIGH)
