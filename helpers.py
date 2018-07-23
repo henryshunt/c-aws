@@ -1,28 +1,20 @@
 import sys
 import os
 from datetime import datetime, timedelta
+
 import RPi.GPIO as gpio
 import pytz
 
-def init_exit(code):
+
+def init_exit(code, visual):
     try:
-        with open("init.txt", "w+") as file:
-            file.write("initialisation failure at {} UTC with exit code {}"
-                       .format(datetime.utcnow()
-                               .strftime("%Y-%m-%dT%H:%M:%S"), code))
+        with open("__init.txt", "w+") as file:
+            file.write("init failure at {} utc with exit code {}"
+                .format(datetime.utcnow().strftime("%Y-%m-%dT%H:%M:%S"), code))
     except: pass
 
-    gpio.output(24, gpio.HIGH)
-    sys.exit(1)
-
-def init_exit_blind(code):
-    try:
-        with open("init.txt", "w+") as file:
-            file.write("initialisation failure at {} UTC with exit code {}"
-                       .format(datetime.utcnow()
-                               .strftime("%Y-%m-%dT%H:%M:%S"), code))
-    except: pass
-
+    print("error: exit code " + code)
+    if visual == True: gpio.output(24, gpio.HIGH)
     sys.exit(1)
 
 
