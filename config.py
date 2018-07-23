@@ -1,5 +1,6 @@
 import os
 from configparser import ConfigParser
+
 import pytz
 
 class ConfigData():

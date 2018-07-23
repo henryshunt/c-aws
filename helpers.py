@@ -5,7 +5,6 @@ from datetime import datetime, timedelta
 import RPi.GPIO as gpio
 import pytz
 
-
 def init_exit(code, visual):
     try:
         with open("__init.txt", "w+") as file:
