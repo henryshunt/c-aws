@@ -4,7 +4,6 @@ from configparser import ConfigParser
 import pytz
 
 class ConfigData():
-
     def __init__(self):
         self.data_directory = None
         self.database_path = None
@@ -19,16 +18,16 @@ class ConfigData():
         self.local_network_server = None
         self.aws_location = None
         self.aws_time_zone = None
+        self.aws_elevation = None
         self.aws_latitude = None
         self.aws_longitude = None
-        self.aws_elevation = None
         self.remote_sql_server = None
         self.remote_ftp_server = None
         self.remote_ftp_username = None
         self.remote_ftp_password = None
 
     def load(self):
-        """ Loads data from the config.ini file in the current directory
+        """ Loads data from the __config.ini file in the current directory
         """
         if not os.path.isfile("__config.ini"): return False
 
@@ -45,9 +44,9 @@ class ConfigData():
             if not self.aws_time_zone in pytz.all_timezones: return False
             self.aws_time_zone = pytz.timezone(self.aws_time_zone)
 
+            self.aws_elevation = parser.getfloat("AWSInfo", "Elevation")
             self.aws_latitude = parser.getfloat("AWSInfo", "Latitude")
             self.aws_longitude = parser.getfloat("AWSInfo", "Longitude")
-            self.aws_elevation = parser.getfloat("AWSInfo", "Elevation")
 
             # Derive directories and file paths
             self.database_path = os.path.join(self.data_directory,
