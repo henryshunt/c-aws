@@ -83,11 +83,11 @@ if config.camera_logging == True:
     except: helpers.init_exit("09", True)
 
 # -- RUN SUBPROCESSES ----------------------------------------------------------
-try:
-    if config.local_network_server == True:
+if config.local_network_server == True:
+    try:
         subprocess.Popen(["sudo", "python3", "aws_access.py",
                           startup_time.strftime("%Y-%m-%dT%H:%M:%S")])
-except: helpers.init_exit("10", True)
+    except: helpers.init_exit("10", True)
 
 if (config.reports_uploading == True or
     config.envReports_uploading == True or
