@@ -9,6 +9,7 @@
         <script src="{{ url_for('static', filename='js-jquery.js') }}" type="text/javascript"></script>
 
         <script>
+            var requestedUtcTime = null;
             var requestedLocalTime = null;
             var timeToUpdate = 0;
             var countdownTimeout = null;
