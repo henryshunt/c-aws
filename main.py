@@ -80,12 +80,12 @@ if config.camera_logging == True:
     # Check camera module is connected
     try:
         with picamera.PiCamera() as camera: pass
-    except: helpers.init_exit("08")
+    except: helpers.init_exit("08", True)
 
 # -- RUN SUBPROCESSES ----------------------------------------------------------
 try:
-    subprocess.Popen(["lxterminal -e python3 aws_access.py"
-                      + startup_time.strftime(" %Y-%m-%dT%H:%M:%S")],
+    subprocess.Popen(["lxterminal -e python3 aws_access.py "
+                      + startup_time.strftime("%Y-%m-%dT%H:%M:%S")],
                      shell = True)
 except: helpers.init_exit("09", True)
 
