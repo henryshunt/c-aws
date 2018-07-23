@@ -85,9 +85,8 @@ if config.camera_logging == True:
 # -- RUN SUBPROCESSES ----------------------------------------------------------
 try:
     if config.local_network_server == True:
-        subprocess.Popen(["sudo python3 aws_access.py "
-                          + startup_time.strftime("%Y-%m-%dT%H:%M:%S")],
-                         shell = True)
+        subprocess.Popen(["sudo", "python3", "aws_access.py",
+                          startup_time.strftime("%Y-%m-%dT%H:%M:%S")])
 except: helpers.init_exit("10", True)
 
 if (config.reports_uploading == True or
@@ -96,9 +95,9 @@ if (config.reports_uploading == True or
     config.camera_uploading == True):
 
     try:
-        subprocess.Popen(["sudo python3 aws_support.py"], shell = True)
+        subprocess.Popen(["sudo", "python3", "aws_support.py"])
     except: helpers.init_exit("11", True)
 
 try:
-    subprocess.Popen(["sudo python3 aws_data.py"], shell = True)
+    subprocess.Popen(["sudo", "python3", "aws_data.py"])
 except: helpers.init_exit("12", True)
