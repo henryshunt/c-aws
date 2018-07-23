@@ -6,23 +6,23 @@
 import sys
 import subprocess
 import os
-import picamera
 from datetime import datetime, timedelta
 import time
-import pytz
 from threading import Thread
 import math
 import sqlite3
-import RPi.GPIO as gpio
 import spidev
-import Adafruit_GPIO
 
+import Adafruit_GPIO
+import RPi.GPIO as gpio
 import astral
 from apscheduler.schedulers.blocking import BlockingScheduler
 import bme280
 import sht31d
 import mcp3008
 from gpiozero import CPUTemperature
+import pytz
+import picamera
 
 from config import ConfigData
 import helpers
