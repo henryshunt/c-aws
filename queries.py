@@ -20,7 +20,7 @@ CREATE_DAYSTATS_TABLE = ("CREATE TABLE dayStats ("
 
 SELECT_SINGLE_UTCREPORTS = "SELECT * FROM reports WHERE Time = ?"
 SELECT_SINGLE_UTCENVIRON = "SELECT * FROM envReports WHERE Time = ?"
-SELECT_SINGLE_LOCALSTATS = "SELECT * FROM dayStats WHERE Date LIKE ?"
+SELECT_SINGLE_LOCALSTATS = "SELECT * FROM dayStats WHERE Date = ?"
 
 SELECT_RANGE_UTCREPORTS = "SELECT * FROM reports WHERE Time BETWEEN ? AND ?"
 SELECT_PAST_HOUR_UTCREPORTS = "SELECT SUM({0}) AS {0} FROM reports WHERE Time BETWEEN ? AND ?"
@@ -53,9 +53,9 @@ INSERT_DAYSTAT = ("INSERT INTO dayStats ("
     + "ST30_Min, ST30_Max, ST30_Avg, ST00_Min, ST00_Max, ST00_Avg) VALUES (?, ?, ?, ?, ?, ?, "
     + "?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)")
 
-UPDATE_DAYSTAT = ("UPDATE dayStats SET Date = ?, AirT_Min = ?, AirT_Max = ?, AirT_Avg = ?, RelH_Min = ?, "
+UPDATE_DAYSTAT = ("UPDATE dayStats SET AirT_Min = ?, AirT_Max = ?, AirT_Avg = ?, RelH_Min = ?, "
     + "RelH_Max = ?, RelH_Avg = ?, DewP_Min = ?, DewP_Max = ?, DewP_Avg = ?, WSpd_Min = ?, "
     + "WSpd_Max = ?, WSpd_Avg = ?, WDir_Min = ?, WDir_Max = ?, WDir_Avg = ?, WGst_Min = ?, "
     + "WGst_Max = ?, WGst_Avg = ?, SunD_Ttl = ?, Rain_Ttl = ?, MSLP_Min = ?, MSLP_Max = ?, "
     + "MSLP_Avg = ?, ST10_Min = ?, ST10_Max = ?, ST10_Avg = ?, ST30_Min = ?, ST30_Max = ?, "
-    + "ST30_Avg = ?, ST00_Min = ?, ST00_Max = ?, ST00_Avg = ? WHERE Date LIKE ?")
+    + "ST30_Avg = ?, ST00_Min = ?, ST00_Max = ?, ST00_Avg = ? WHERE Date = ?")

@@ -24,7 +24,7 @@ def record_for_time(config, time, table):
 
             elif table == DbTable.LOCALSTATS:
                 cursor.execute(queries.SELECT_SINGLE_LOCALSTATS,
-                               (time.strftime("%Y-%m-%d") + "%",))
+                               (time.strftime("%Y-%m-%d"),))
 
             return cursor.fetchone()
     except: return False
@@ -51,8 +51,8 @@ def records_in_range(config, start, end, table):
 
             elif table == DbTable.LOCALSTATS:
                 cursor.execute(queries.SELECT_RANGE_LOCALSTATS,
-                               (start.strftime("%Y-%m-%d") + "%",
-                                end.strftime("%Y-%m-%d") + "%"))
+                               (start.strftime("%Y-%m-%d"),
+                                end.strftime("%Y-%m-%d")))
 
             return cursor.fetchall()
     except: return False
@@ -82,8 +82,8 @@ def fields_in_range(config, start, end, fields, table):
             elif table == DbTable.LOCALSTATS:
                 cursor.execute(queries.SELECT_FIELDS_LOCALSTATS
                                .format(fields),
-                               (start.strftime("%Y-%m-%d") + "%",
-                                end.strftime("%Y-%m-%d") + "%"))
+                               (start.strftime("%Y-%m-%d"),
+                                end.strftime("%Y-%m-%d")))
 
             return cursor.fetchall()
     except: return False

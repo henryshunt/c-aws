@@ -391,7 +391,7 @@ def do_generate_stats(utc):
             # Insert or update depending on status of current statistics
             if cur_stats == None:
                 cursor.execute(queries.INSERT_DAYSTAT,
-                    (local_time.strftime("%Y-%m-%d %H:%M:%S"),
+                    (local_time.strftime("%Y-%m-%d"),
                      new_stats["AirT_Min"], new_stats["AirT_Max"],
                      new_stats["AirT_Avg"], new_stats["RelH_Min"],
                      new_stats["RelH_Max"], new_stats["RelH_Avg"],
@@ -411,7 +411,6 @@ def do_generate_stats(utc):
                 
             else:
                 cursor.execute(queries.UPDATE_DAYSTAT,
-                    (local_time.strftime("%Y-%m-%d %H:%M:%S"),
                      new_stats["AirT_Min"], new_stats["AirT_Max"],
                      new_stats["AirT_Avg"], new_stats["RelH_Min"],
                      new_stats["RelH_Max"], new_stats["RelH_Avg"],
@@ -428,7 +427,7 @@ def do_generate_stats(utc):
                      new_stats["ST30_Min"], new_stats["ST30_Max"],
                      new_stats["ST30_Avg"], new_stats["ST00_Min"],
                      new_stats["ST00_Max"], new_stats["ST00_Avg"],
-                     local_time.strftime("%Y-%m-%d") + "%"))
+                     local_time.strftime("%Y-%m-%d")))
             
             database.commit()
     except: gpio.output(24, gpio.HIGH)
