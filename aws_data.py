@@ -391,7 +391,7 @@ def do_generate_stats(utc):
             # Insert or update depending on status of current statistics
             if cur_stats == None:
                 cursor.execute(queries.INSERT_DAYSTAT,
-                    (local_time.strftime("%Y-%m-%d"),
+                    (local_time.strftime("%Y-%m-%d %H:%M:%S"),
                      new_stats["AirT_Min"], new_stats["AirT_Max"],
                      new_stats["AirT_Avg"], new_stats["RelH_Min"],
                      new_stats["RelH_Max"], new_stats["RelH_Avg"],
@@ -411,7 +411,8 @@ def do_generate_stats(utc):
                 
             else:
                 cursor.execute(queries.UPDATE_DAYSTAT,
-                    (new_stats["AirT_Min"], new_stats["AirT_Max"],
+                    (local_time.strftime("%Y-%m-%d %H:%M:%S"),
+                     new_stats["AirT_Min"], new_stats["AirT_Max"],
                      new_stats["AirT_Avg"], new_stats["RelH_Min"],
                      new_stats["RelH_Max"], new_stats["RelH_Avg"],
                      new_stats["DewP_Min"], new_stats["DewP_Max"],
