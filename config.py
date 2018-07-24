@@ -27,12 +27,12 @@ class ConfigData():
         self.remote_ftp_password = None
 
     def load(self):
-        """ Loads data from the __config.ini file in the current directory
+        """ Loads data from the config.ini file in the current directory
         """
-        if not os.path.isfile("__config.ini"): return False
+        if not os.path.isfile("config.ini"): return False
 
         try:
-            parser = ConfigParser(); parser.read("__config.ini")
+            parser = ConfigParser(); parser.read("config.ini")
 
             # Check required configuration options
             self.data_directory = parser.get("DataStores", "DataDirectory")
