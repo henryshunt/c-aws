@@ -91,7 +91,7 @@ def do_log_report(utc):
     """
     global config, WSpd_ticks, past_WSpd_ticks, WDir_samples, past_WDir_samples
     global SunD_ticks, Rain_ticks, AirT_value, ExpT_value, ST10_value
-    global ST30_value, ST00_value, disable_sampling
+    global ST30_value, ST00_value, disable_sampling, data_start
 
     # Create a frame to store the data and set its time
     frame = frames.DataUtcReport()
@@ -249,28 +249,31 @@ def do_log_report(utc):
     if free_space == None or free_space < 0.1:
         gpio.output(24, gpio.HIGH); return
         
-    try:
-        with sqlite3.connect(config.database_path) as database:
-            cursor = database.cursor()
-            cursor.execute(queries.INSERT_REPORT,
-                               (frame.time.strftime("%Y-%m-%d %H:%M:%S"),
-                                frame.air_temperature,
-                                frame.exposed_temperature,
-                                frame.relative_humidity,
-                                frame.dew_point,
-                                frame.wind_speed,
-                                frame.wind_direction,
-                                frame.wind_gust,
-                                frame.sunshine_duration,
-                                frame.rainfall,
-                                frame.station_pressure,
-                                frame.mean_sea_level_pressure,
-                                frame.soil_temperature_10,
-                                frame.soil_temperature_30,
-                                frame.soil_temperature_00))
-            
-            database.commit()
-    except: gpio.output(24, gpio.HIGH)
+    #try:
+    print(config)
+    print(config.database_path)
+    with sqlite3.connect(config.database_path) as database:
+        cursor = database.cursor()
+        cursor.execute(queries.INSERT_REPORT,
+                            (frame.time.strftime("%Y-%m-%d %H:%M:%S"),
+                            frame.air_temperature,
+                            frame.exposed_temperature,
+                            frame.relative_humidity,
+                            frame.dew_point,
+                            frame.wind_speed,
+                            frame.wind_direction,
+                            frame.wind_gust,
+                            frame.sunshine_duration,
+                            frame.rainfall,
+                            frame.station_pressure,
+                            frame.mean_sea_level_pressure,
+                            frame.soil_temperature_10,
+                            frame.soil_temperature_30,
+                            frame.soil_temperature_00))
+        
+        database.commit()
+        print("saved")
+    #except: gpio.output(24, gpio.HIGH)
 
 def do_log_environment(utc):
     """ Reads computer environment sensors and saves the data to the database
@@ -546,4 +549,5 @@ def entry_point():
     event_scheduler.start()
 
 if __name__ == "__main__":
-    with daemon.DaemonContext(): entry_point()
+    err = open("stderr.txt", "w+")
+    with daemon.DaemonContext(stderr = err): entry_point()
