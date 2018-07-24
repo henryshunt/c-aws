@@ -133,7 +133,7 @@ def do_process_data():
 def do_process_camera():
     pass
 
-# SCHEDULES --------------------------------------------------------------------
+# SCHEDULERS -------------------------------------------------------------------
 def every_minute():
     utc = datetime.utcnow().replace(second = 0, microsecond = 0)
     local_time = helpers.utc_to_local(config, utc)

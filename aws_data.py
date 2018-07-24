@@ -1,5 +1,5 @@
 """ CAWS Data Acquisition Program
-      Responsible for logging data parameters and generating statistics.
+      Responsible for logging data parameters and generating statistics
 """
 
 # DEPENDENCIES -----------------------------------------------------------------
@@ -54,12 +54,14 @@ CPUT_value = None
 
 # HELPERS ----------------------------------------------------------------------
 def read_temperature(address):
-    """ Reads value of specific temperature probe into its global variable
+    """ Reads the value of a DS18B20 temperature probe via its address, into its
+        global variable
     """
     if not os.path.isdir("/sys/bus/w1/devices/" + address):
         return #gpio.output(24, gpio.HIGH); return
 
     try:
+        # Read the probe and convert its value to a degC float
         with open("/sys/bus/w1/devices/" + address + "/w1_slave", "r") as probe:
             data = probe.readlines()
             temp = int(data[1][data[1].find("t=") + 2:]) / 1000
@@ -84,13 +86,14 @@ def read_temperature(address):
 
 # OPERATIONS -------------------------------------------------------------------
 def do_log_report(utc):
-    """ Reads all sensors, calculates derived parameters and saves the data to
-        the database
+    """ Reads all sensors, calculates derived and averaged parameters, and saves
+        the data to the database
     """
     global WSpd_ticks, past_WSpd_ticks, WDir_samples, past_WDir_samples
     global SunD_ticks, Rain_ticks, AirT_value, ExpT_value, ST10_value
     global ST30_value, ST00_value, disable_sampling
 
+    # Create a frame to store the data and set its time
     frame = frames.DataUtcReport()
     frame.time = utc
     
@@ -108,18 +111,18 @@ def do_log_report(utc):
 
     # -- TEMPERATURE -----------------------------------------------------------
     try:
-        AirT_thread = Thread(target =
-            read_temperature, args = ("28-04167053d6ff",)); AirT_thread.start()
-        ExpT_thread = Thread(target =
-            read_temperature, args = ("28-0416704a38ff",)); ExpT_thread.start()
-        ST10_thread = Thread(target =
-            read_temperature, args = ("28-0416705d66ff",)); ST10_thread.start()
-        ST30_thread = Thread(target =
-            read_temperature, args = ("28-04167055d5ff",)); ST30_thread.start()
-        ST00_thread = Thread(target =
-            read_temperature, args = ("28-0516704dc0ff",)); ST00_thread.start()
+        AirT_thread = Thread(target = read_temperature,
+            args = ("28-04167053d6ff",)); AirT_thread.start()
+        ExpT_thread = Thread(target = read_temperature,
+            args = ("28-0416704a38ff",)); ExpT_thread.start()
+        ST10_thread = Thread(target = read_temperature,
+            args = ("28-0416705d66ff",)); ST10_thread.start()
+        ST30_thread = Thread(target = read_temperature,
+            args = ("28-04167055d5ff",)); ST30_thread.start()
+        ST00_thread = Thread(target = read_temperature,
+            args = ("28-0516704dc0ff",)); ST00_thread.start()
 
-        # Read all sensors in separate threads to reduce wait time
+        # Read each temp sensor in separate thread to reduce wait time
         AirT_thread.join(); frame.air_temperature = AirT_value
         ExpT_thread.join(); frame.exposed_temperature = ExpT_value
         ST10_thread.join(); frame.soil_temperature_10 = ST10_value
@@ -149,6 +152,7 @@ def do_log_report(utc):
     ten_mins_ago = frame.time - timedelta(minutes = 10)
     
     try:
+        # Add new minute ticks to end of past ten minute tick list
         past_WSpd_ticks.extend(new_WSpd_ticks)
 
         # Remove ticks older than 10 minutes
@@ -162,6 +166,7 @@ def do_log_report(utc):
 
     # -- WIND DIRECTION --------------------------------------------------------
     try:
+        # Add new minute samples to end of past ten minute sample list
         past_WDir_samples.extend(new_WDir_samples)
 
         # Remove samples older than 10 minutes
@@ -169,37 +174,37 @@ def do_log_report(utc):
             if sample[0] < ten_mins_ago: past_WDir_samples.remove(sample)
 
         # Calculate wind direction only if there is positive wind speed
-        if frame.wind_speed != None:
-            if frame.wind_speed > 0 and len(past_WDir_samples) > 0:
-                WDir_total = 0
-                for sample in past_WDir_samples: WDir_total += sample[1]
+        if (frame.wind_speed != None and frame.wind_speed > 0
+            and len(past_WDir_samples) > 0):
+            
+            WDir_total = 0
+            for sample in past_WDir_samples: WDir_total += sample[1]
 
-                frame.wind_direction = int(round(WDir_total
-                                                 / len(past_WDir_samples)))
+            frame.wind_direction = int(
+                round(WDir_total / len(past_WDir_samples)))
     except: gpio.output(24, gpio.HIGH)
 
     # -- WIND GUST -------------------------------------------------------------
     try:
         # Calculate wind gust only if there is positive wind speed
-        if frame.wind_speed != None:
-            if frame.wind_speed > 0:
-                WGst_value = 0
+        if frame.wind_speed != None and frame.wind_speed > 0:
+            WGst_value = 0
 
-                # Iterate over each second in three second samples
-                for second in range(0, 598):
-                    WGst_start = ten_mins_ago + timedelta(seconds = second)
-                    WGst_end = WGst_start + timedelta(seconds = 3)
-                    ticks_in_WGst_sample = 0
+            # Iterate over each second in three second samples
+            for second in range(0, 598):
+                WGst_start = ten_mins_ago + timedelta(seconds = second)
+                WGst_end = WGst_start + timedelta(seconds = 3)
+                ticks_in_WGst_sample = 0
 
-                    # Calculate three second average wind speed
-                    for tick in past_WSpd_ticks:
-                        if tick >= WGst_start and tick < WGst_end:
-                            ticks_in_WGst_sample += 1
+                # Calculate three second average wind speed and check if highest
+                for tick in past_WSpd_ticks:
+                    if tick >= WGst_start and tick < WGst_end:
+                        ticks_in_WGst_sample += 1
 
-                    WGst_sample = (ticks_in_WGst_sample * 2.5) / 3
-                    if WGst_sample > WGst_value: WGst_value = WGst_sample
-                    
-                frame.wind_gust = round(WGst_value, 1)
+                WGst_sample = (ticks_in_WGst_sample * 2.5) / 3
+                if WGst_sample > WGst_value: WGst_value = WGst_sample
+                
+            frame.wind_gust = round(WGst_value, 1)
     except: gpio.output(24, gpio.HIGH)
 
     # -- SUNSHINE DURATION -----------------------------------------------------
@@ -268,9 +273,11 @@ def do_log_report(utc):
     except: gpio.output(24, gpio.HIGH)
 
 def do_log_environment(utc):
-    """ Reads system environment sensors and saves the data to the database
+    """ Reads computer environment sensors and saves the data to the database
     """
     global EncT_value, CPUT_value
+    
+    # Create a frame to store the data and set its time
     frame = frames.DataUtcEnviron()
     frame.time = utc
 
@@ -304,8 +311,8 @@ def do_log_environment(utc):
     except: gpio.output(24, gpio.HIGH)
 
 def do_log_camera(utc):
-    """ Takes an image every if it is currently a five minute interval, on the
-        connected camera, and saves it to the camera drive
+    """ Takes an image on the camera if it is currently a five minute interval
+        of the hour, and saves it to the camera drive
     """
     utc_minute = str(utc.minute)
     if not utc_minute.endswith("0") and not utc_minute.endswith("5"): return
@@ -380,7 +387,7 @@ def do_generate_stats(utc):
         with sqlite3.connect(config.database_path) as database:
             cursor = database.cursor()
 
-            # Insert or update depending on status of current statistics
+            # Insert or update depending on status of current statistic
             if cur_stats == None:
                 cursor.execute(queries.INSERT_DAYSTAT,
                     (local_time.strftime("%Y-%m-%d"),
@@ -424,10 +431,10 @@ def do_generate_stats(utc):
             database.commit()
     except: gpio.output(24, gpio.HIGH)
 
-# SCHEDULES -------------------------------------------------------------------
+# SCHEDULERS -------------------------------------------------------------------
 def every_minute():
-    """ Triggered every minute to generate a report, add it to the database,
-        activate the camera and generate statistics
+    """ Triggered every minute to generate a report and environment report, add
+        them to the database, activate the camera and generate statistics
     """
     gpio.output(23, gpio.HIGH)
     gpio.output(24, gpio.LOW)
