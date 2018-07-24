@@ -504,6 +504,7 @@ def do_trigger_rain(channel):
 
 # ENTRY POINT ==================================================================
 def entry_point():
+    global config, data_start, disable_sampling
     print("--- Custom Automatic Weather Station ---")
     print("Program: Data Sub-System")
     print("Author:  Henry Hunt")
