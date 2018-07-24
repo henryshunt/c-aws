@@ -517,7 +517,7 @@ def entry_point():
     print("Version: 4C.1 (July 2018)")
     print("")
     print("----------- DO NOT TERMINATE -----------")
-    print(config.load())
+    print("load: " + str(config.load()))
 
     # -- INIT GPIO AND LEDS ----------------------------------------------------
     gpio.setwarnings(False); gpio.setmode(gpio.BCM)
