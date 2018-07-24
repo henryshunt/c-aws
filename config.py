@@ -31,62 +31,62 @@ class ConfigData():
         """
         if not os.path.isfile("config.ini"): return False
 
-        try:
-            parser = ConfigParser(); parser.read("config.ini")
+        #try:
+        parser = ConfigParser(); parser.read("config.ini")
 
-            # Check required configuration options
-            self.data_directory = parser.get("DataStores", "DataDirectory")
-            if self.data_directory == "": return False
-            self.aws_location = parser.get("AWSInfo", "Location")
-            if self.aws_location == "": return False
+        # Check required configuration options
+        self.data_directory = parser.get("DataStores", "DataDirectory")
+        if self.data_directory == "": return False
+        self.aws_location = parser.get("AWSInfo", "Location")
+        if self.aws_location == "": return False
 
-            self.aws_time_zone = parser.get("AWSInfo", "TimeZone")
-            if not self.aws_time_zone in pytz.all_timezones: return False
-            self.aws_time_zone = pytz.timezone(self.aws_time_zone)
+        self.aws_time_zone = parser.get("AWSInfo", "TimeZone")
+        if not self.aws_time_zone in pytz.all_timezones: return False
+        self.aws_time_zone = pytz.timezone(self.aws_time_zone)
 
-            self.aws_elevation = parser.getfloat("AWSInfo", "Elevation")
-            self.aws_latitude = parser.getfloat("AWSInfo", "Latitude")
-            self.aws_longitude = parser.getfloat("AWSInfo", "Longitude")
+        self.aws_elevation = parser.getfloat("AWSInfo", "Elevation")
+        self.aws_latitude = parser.getfloat("AWSInfo", "Latitude")
+        self.aws_longitude = parser.getfloat("AWSInfo", "Longitude")
 
-            # Derive directories and file paths
-            self.database_path = os.path.join(self.data_directory,
-                "records.sq3")
-            
-            # Load non-required configuration options
-            self.camera_drive = parser.get("DataStores", "CameraDrive")
-            if self.camera_drive == "": self.camera_drive = None
+        # Derive directories and file paths
+        self.database_path = os.path.join(self.data_directory,
+            "records.sq3")
+        
+        # Load non-required configuration options
+        self.camera_drive = parser.get("DataStores", "CameraDrive")
+        if self.camera_drive == "": self.camera_drive = None
 
-            self.remote_sql_server = (parser.get("DataEndpoints",
-                "RemoteSQLServer"))
-            if self.remote_sql_server == "": self.remote_sql_server = None
-            self.remote_ftp_server = (parser.get("DataEndpoints",
-                "RemoteFTPServer"))
-            if self.remote_ftp_server == "": self.remote_ftp_server = None
-            self.remote_ftp_username = (parser.get("DataEndpoints",
-                "RemoteFTPUsername"))
-            if self.remote_ftp_username == "": self.remote_ftp_username = None
-            self.remote_ftp_password = (parser.get("DataEndpoints",
-                "RemoteFTPPassword"))
-            if self.remote_ftp_password == "": self.remote_ftp_password = None
-            
-            # Load boolean configuration modifiers
-            self.envReports_logging = (parser
-                .getboolean("ConfigModifiers", "EnvReportsLogging"))
-            self.camera_logging = (parser
-                .getboolean("ConfigModifiers", "CameraLogging"))
-            self.dayStats_generation = (parser
-                .getboolean("ConfigModifiers", "DayStatsGeneration"))
-            self.reports_uploading = (parser
-                .getboolean("ConfigModifiers", "ReportsUploading"))
-            self.envReports_uploading = (parser
-                .getboolean("ConfigModifiers", "EnvReportsUploading"))
-            self.dayStats_uploading = (parser
-                .getboolean("ConfigModifiers", "DayStatsUploading"))
-            self.camera_uploading = (parser
-                .getboolean("ConfigModifiers", "CameraUploading"))
-            self.local_network_server = (parser
-                .getboolean("ConfigModifiers", "LocalNetworkServer"))
-        except: return False
+        self.remote_sql_server = (parser.get("DataEndpoints",
+            "RemoteSQLServer"))
+        if self.remote_sql_server == "": self.remote_sql_server = None
+        self.remote_ftp_server = (parser.get("DataEndpoints",
+            "RemoteFTPServer"))
+        if self.remote_ftp_server == "": self.remote_ftp_server = None
+        self.remote_ftp_username = (parser.get("DataEndpoints",
+            "RemoteFTPUsername"))
+        if self.remote_ftp_username == "": self.remote_ftp_username = None
+        self.remote_ftp_password = (parser.get("DataEndpoints",
+            "RemoteFTPPassword"))
+        if self.remote_ftp_password == "": self.remote_ftp_password = None
+        
+        # Load boolean configuration modifiers
+        self.envReports_logging = (parser
+            .getboolean("ConfigModifiers", "EnvReportsLogging"))
+        self.camera_logging = (parser
+            .getboolean("ConfigModifiers", "CameraLogging"))
+        self.dayStats_generation = (parser
+            .getboolean("ConfigModifiers", "DayStatsGeneration"))
+        self.reports_uploading = (parser
+            .getboolean("ConfigModifiers", "ReportsUploading"))
+        self.envReports_uploading = (parser
+            .getboolean("ConfigModifiers", "EnvReportsUploading"))
+        self.dayStats_uploading = (parser
+            .getboolean("ConfigModifiers", "DayStatsUploading"))
+        self.camera_uploading = (parser
+            .getboolean("ConfigModifiers", "CameraUploading"))
+        self.local_network_server = (parser
+            .getboolean("ConfigModifiers", "LocalNetworkServer"))
+        #except: return False
 
         return True
 
