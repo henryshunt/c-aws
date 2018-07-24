@@ -18,9 +18,9 @@ import Adafruit_GPIO
 import RPi.GPIO as gpio
 import astral
 from apscheduler.schedulers.blocking import BlockingScheduler
-import bme280
-import sht31d
-import mcp3008
+import sensors.bme280 as bme280
+import sensors.sht31d as sht31d
+import sensors.mcp3008 as mcp3008
 from gpiozero import CPUTemperature
 import pytz
 import picamera
@@ -53,7 +53,7 @@ EncT_value = None
 CPUT_value = None
 
 # HELPERS ----------------------------------------------------------------------
-def do_read_temp(address):
+def read_temperature(address):
     """ Reads value of specific temperature probe into its global variable
     """
     if not os.path.isdir("/sys/bus/w1/devices/" + address):
@@ -109,15 +109,15 @@ def do_log_report(utc):
     # -- TEMPERATURE -----------------------------------------------------------
     try:
         AirT_thread = Thread(target =
-            do_read_temp, args = ("28-04167053d6ff",)); AirT_thread.start()
+            read_temperature, args = ("28-04167053d6ff",)); AirT_thread.start()
         ExpT_thread = Thread(target =
-            do_read_temp, args = ("28-0416704a38ff",)); ExpT_thread.start()
+            read_temperature, args = ("28-0416704a38ff",)); ExpT_thread.start()
         ST10_thread = Thread(target =
-            do_read_temp, args = ("28-0416705d66ff",)); ST10_thread.start()
+            read_temperature, args = ("28-0416705d66ff",)); ST10_thread.start()
         ST30_thread = Thread(target =
-            do_read_temp, args = ("28-04167055d5ff",)); ST30_thread.start()
+            read_temperature, args = ("28-04167055d5ff",)); ST30_thread.start()
         ST00_thread = Thread(target =
-            do_read_temp, args = ("28-0516704dc0ff",)); ST00_thread.start()
+            read_temperature, args = ("28-0516704dc0ff",)); ST00_thread.start()
 
         # Read all sensors in separate threads to reduce wait time
         AirT_thread.join(); frame.air_temperature = AirT_value
@@ -276,7 +276,7 @@ def do_log_environment(utc):
 
     # -- ENCLOSURE TEMPERATURE -------------------------------------------------
     try:
-        do_read_temp("28-8000001f88fa")
+        read_temperature("28-8000001f88fa")
         frame.enclosure_temperature = EncT_value
     except: pass #gpio.output(24, gpio.HIGH)
 
