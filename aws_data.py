@@ -89,7 +89,7 @@ def do_log_report(utc):
     """ Reads all sensors, calculates derived and averaged parameters, and saves
         the data to the database
     """
-    global WSpd_ticks, past_WSpd_ticks, WDir_samples, past_WDir_samples
+    global config, WSpd_ticks, past_WSpd_ticks, WDir_samples, past_WDir_samples
     global SunD_ticks, Rain_ticks, AirT_value, ExpT_value, ST10_value
     global ST30_value, ST00_value, disable_sampling
 
@@ -275,7 +275,7 @@ def do_log_report(utc):
 def do_log_environment(utc):
     """ Reads computer environment sensors and saves the data to the database
     """
-    global EncT_value, CPUT_value
+    global config, EncT_value, CPUT_value
     
     # Create a frame to store the data and set its time
     frame = frames.DataUtcEnviron()
@@ -314,6 +314,7 @@ def do_log_camera(utc):
     """ Takes an image on the camera if it is currently a five minute interval
         of the hour, and saves it to the camera drive
     """
+    global config
     utc_minute = str(utc.minute)
     if not utc_minute.endswith("0") and not utc_minute.endswith("5"): return
 
@@ -356,6 +357,7 @@ def do_generate_stats(utc):
     """ Generates statistics for the local current day from logged records and
         saves them to the database
     """
+    global config
     local_time = helpers.utc_to_local(config, utc)
 
     # -- GET NEW STATS ---------------------------------------------------------
@@ -436,6 +438,7 @@ def every_minute():
     """ Triggered every minute to generate a report and environment report, add
         them to the database, activate the camera and generate statistics
     """
+    global config
     gpio.output(23, gpio.HIGH)
     gpio.output(24, gpio.LOW)
     utc = datetime.utcnow().replace(second = 0, microsecond = 0)
