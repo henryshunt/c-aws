@@ -30,8 +30,8 @@ startup_time = datetime.utcnow()
 
 # CLEAR STATE ------------------------------------------------------------------
 try:
-    if os.path.isfile("__init.txt"): os.remove("__init.txt")
-except: print("state clear failure")
+    if os.path.isfile("init.txt"): os.remove("init.txt")
+except: pass
 
 # -- INIT GPIO AND LEDS --------------------------------------------------------
 try:

@@ -89,9 +89,9 @@ def do_log_report(utc):
     """ Reads all sensors, calculates derived and averaged parameters, and saves
         the data to the database
     """
-    global config, WSpd_ticks, past_WSpd_ticks, WDir_samples, past_WDir_samples
-    global SunD_ticks, Rain_ticks, AirT_value, ExpT_value, ST10_value
-    global ST30_value, ST00_value, disable_sampling, data_start
+    global config, disable_sampling, data_start, WSpd_ticks, past_WSpd_ticks
+    global WDir_samples, past_WDir_samples, SunD_ticks, Rain_ticks, AirT_value
+    global ExpT_value, ST10_value, ST30_value, ST00_value
 
     # Create a frame to store the data and set its time
     frame = frames.DataUtcReport()
@@ -314,8 +314,7 @@ def do_log_camera(utc):
     """ Takes an image on the camera if it is currently a five minute interval
         of the hour, and saves it to the camera drive
     """
-    global config
-    utc_minute = str(utc.minute)
+    global config; utc_minute = str(utc.minute)
     if not utc_minute.endswith("0") and not utc_minute.endswith("5"): return
 
     # Get sunrise and sunset times for current date
