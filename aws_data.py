@@ -517,7 +517,7 @@ def entry_point():
     print("Version: 4C.1 (July 2018)")
     print("")
     print("----------- DO NOT TERMINATE -----------")
-    config.load()
+    print(config.load())
 
     # -- INIT GPIO AND LEDS ----------------------------------------------------
     gpio.setwarnings(False); gpio.setmode(gpio.BCM)
@@ -549,5 +549,6 @@ def entry_point():
     event_scheduler.start()
 
 if __name__ == "__main__":
+    out = open("stdout.txt", "w+")
     err = open("stderr.txt", "w+")
-    with daemon.DaemonContext(stderr = err): entry_point()
+    with daemon.DaemonContext(stderr = err, stdout = out): entry_point()
