@@ -82,7 +82,7 @@ def read_temperature(address):
                 global ST00_value; ST00_value = round(temp, 1)
             elif os.path.basename(address) == "28-8000001f88fa":
                 global EncT_value; EncT_value = round(temp, 1)
-    except: gpio.output(24, gpio.HIGH); print("0")
+    except: gpio.output(24, gpio.HIGH)
 
 # OPERATIONS -------------------------------------------------------------------
 def do_log_report(utc):
@@ -128,7 +128,7 @@ def do_log_report(utc):
         ST10_thread.join(); frame.soil_temperature_10 = ST10_value
         ST30_thread.join(); frame.soil_temperature_30 = ST30_value
         ST00_thread.join(); frame.soil_temperature_00 = ST00_value
-    except: gpio.output(24, gpio.HIGH); print("1")
+    except: gpio.output(24, gpio.HIGH)
 
     AirT_value = None; ExpT_value = None; ST10_value = None
     ST30_value = None; ST00_value = None
@@ -137,7 +137,7 @@ def do_log_report(utc):
     try:
         frame.relative_humidity = round(
             sht31d.SHT31(address = 0x44).read_humidity(), 1)
-    except: gpio.output(24, gpio.HIGH); print("2")
+    except: gpio.output(24, gpio.HIGH)
 
     # -- STATION PRESSURE ------------------------------------------------------
     try:
@@ -146,7 +146,7 @@ def do_log_report(utc):
         # Temperature must be read first or pressure will not return
         discard_StaP_temp = StaP_sensor.read_temperature()
         frame.station_pressure = round(StaP_sensor.read_pressure() / 100, 1)
-    except: gpio.output(24, gpio.HIGH); print("3")
+    except: gpio.output(24, gpio.HIGH)
         
     # -- WIND SPEED ------------------------------------------------------------
     ten_mins_ago = frame.time - timedelta(minutes = 10)
@@ -162,7 +162,7 @@ def do_log_report(utc):
         # Calculate wind speed only if 10 minutes of data is available
         if ten_mins_ago >= data_start:
             frame.wind_speed = round((len(past_WSpd_ticks) * 2.5) / 600, 1)
-    except: gpio.output(24, gpio.HIGH); print("4")
+    except: gpio.output(24, gpio.HIGH)
 
     # -- WIND DIRECTION --------------------------------------------------------
     try:
@@ -182,7 +182,7 @@ def do_log_report(utc):
 
             frame.wind_direction = int(
                 round(WDir_total / len(past_WDir_samples)))
-    except: gpio.output(24, gpio.HIGH); print("5")
+    except: gpio.output(24, gpio.HIGH)
 
     # -- WIND GUST -------------------------------------------------------------
     try:
@@ -205,17 +205,17 @@ def do_log_report(utc):
                 if WGst_sample > WGst_value: WGst_value = WGst_sample
                 
             frame.wind_gust = round(WGst_value, 1)
-    except: gpio.output(24, gpio.HIGH); print("6")
+    except: gpio.output(24, gpio.HIGH)
 
     # -- SUNSHINE DURATION -----------------------------------------------------
     try:
         frame.sunshine_duration = new_SunD_ticks
-    except: gpio.output(24, gpio.HIGH); print("7")
+    except: gpio.output(24, gpio.HIGH)
 
     # -- RAINFALL --------------------------------------------------------------
     try:
         frame.rainfall = new_Rain_ticks * 0.254
-    except: gpio.output(24, gpio.HIGH); print("8")
+    except: gpio.output(24, gpio.HIGH)
 
     # -- DEW POINT -------------------------------------------------------------
     try:
@@ -227,7 +227,7 @@ def do_log_report(utc):
             DewP_d = math.sqrt((8.0813 - DewP_c) ** 2 - (1.842 * DewP_c))
 
             frame.dew_point = round(278.04 * ((8.0813 - DewP_c) - DewP_d), 1)
-    except: gpio.output(24, gpio.HIGH); print("9")
+    except: gpio.output(24, gpio.HIGH)
 
     # -- MEAN SEA LEVEL PRESSURE -----------------------------------------------
     try:
@@ -242,7 +242,7 @@ def do_log_report(utc):
             
             frame.mean_sea_level_pressure = round(
                 frame.station_pressure * math.exp(MSLP_b / MSLP_d), 1)
-    except: gpio.output(24, gpio.HIGH); print("10")
+    except: gpio.output(24, gpio.HIGH)
 
     # ADD TO DATABASE ----------------------------------------------------------
     free_space = helpers.remaining_space("/")
@@ -270,7 +270,7 @@ def do_log_report(utc):
                                 frame.soil_temperature_00))
             
             database.commit()
-    except: gpio.output(24, gpio.HIGH); print("11")
+    except: gpio.output(24, gpio.HIGH)
 
 def do_log_environment(utc):
     """ Reads computer environment sensors and saves the data to the database
