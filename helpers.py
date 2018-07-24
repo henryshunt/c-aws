@@ -7,7 +7,7 @@ import pytz
 
 def init_exit(code, visual):
     try:
-        with open("__init.txt", "w+") as file:
+        with open("init.txt", "w+") as file:
             file.write("init failure at {} utc with exit code {}"
                 .format(datetime.utcnow().strftime("%Y-%m-%dT%H:%M:%S"), code))
     except: pass
