@@ -1,20 +1,22 @@
 import sys
 import os
 from datetime import datetime, timedelta
+import time
 
 import RPi.GPIO as gpio
 import pytz
 
 def init_exit(code, visual):
-    try:
-        with open("init.txt", "w+") as file:
-            file.write("init failure at {} utc with exit code {}"
-                .format(datetime.utcnow().strftime("%Y-%m-%dT%H:%M:%S"), code))
-    except: pass
-
     print("error: exit code " + code)
-    if visual == True: gpio.output(24, gpio.HIGH)
-    sys.exit(1)
+    
+    if visual == False:
+        while True: pass
+
+    else:
+        while True:
+            for i in range(1, code):
+                gpio.output(24, gpio.HIGH); time.sleep(0.2)
+                gpio.output(24, gpio.LOW); time.sleep(1)
 
 
 def remaining_space(directory):

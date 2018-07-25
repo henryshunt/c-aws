@@ -28,35 +28,30 @@ print("----------- DO NOT TERMINATE -----------")
 config = ConfigData()
 startup_time = datetime.utcnow()
 
-# CLEAR STATE ------------------------------------------------------------------
-try:
-    if os.path.isfile("init.txt"): os.remove("init.txt")
-except: pass
-
 # -- INIT GPIO AND LEDS --------------------------------------------------------
 try:
     gpio.setwarnings(False); gpio.setmode(gpio.BCM)
     gpio.setup(23, gpio.OUT); gpio.output(23, gpio.LOW)
     gpio.setup(24, gpio.OUT); gpio.output(24, gpio.LOW)
-except: helpers.init_exit("00", False)
+except: helpers.init_exit(0, False)
 
 gpio.output(23, gpio.HIGH); gpio.output(24, gpio.HIGH)
 time.sleep(2.5)
 gpio.output(23, gpio.LOW); gpio.output(24, gpio.LOW)
 
 # -- CHECK CONFIG --------------------------------------------------------------
-if config.load() == False: helpers.init_exit("01", True)
-if config.validate() == False: helpers.init_exit("02", True)
+if config.load() == False: helpers.init_exit(1, True)
+if config.validate() == False: helpers.init_exit(2, True)
 
 # -- CHECK INTERNAL DRIVE ------------------------------------------------------
 free_space = helpers.remaining_space("/")
-if free_space == None or free_space < 1: helpers.init_exit("04", True)
+if free_space == None or free_space < 1: helpers.init_exit(3, True)
 
 # -- CHECK DATA DIRECTORY ------------------------------------------------------
 if not os.path.isdir(config.data_directory):
     try:
         os.makedirs(config.data_directory)
-    except: helpers.init_exit("05", True)
+    except: helpers.init_exit(4, True)
 
 # -- MAKE DATABASE -------------------------------------------------------------
 if not os.path.isfile(config.database_path):
@@ -68,26 +63,26 @@ if not os.path.isfile(config.database_path):
             cursor.execute(queries.CREATE_DAYSTATS_TABLE)
 
             database.commit()
-    except: helpers.init_exit("06", True)
+    except: helpers.init_exit(5, True)
 
 # -- CHECK CAMERA DRIVE --------------------------------------------------------
 if config.camera_logging == True:
-    if not os.path.isdir(config.camera_drive): helpers.init_exit("07", True)
+    if not os.path.isdir(config.camera_drive): helpers.init_exit(6, True)
 
     free_space = helpers.remaining_space(config.camera_drive)
-    if free_space == None or free_space < 5: helpers.init_exit("08", True)
+    if free_space == None or free_space < 5: helpers.init_exit(7, True)
 
     # Check camera module is connected
     try:
         with picamera.PiCamera() as camera: pass
-    except: helpers.init_exit("09", True)
+    except: helpers.init_exit(8, True)
 
 # -- RUN SUBPROCESSES ----------------------------------------------------------
 if config.local_network_server == True:
     try:
         subprocess.Popen(["sudo", "python3", "aws_access.py",
                           startup_time.strftime("%Y-%m-%dT%H:%M:%S")])
-    except: helpers.init_exit("10", True)
+    except: helpers.init_exit(9, True)
 
 if (config.reports_uploading == True or
     config.envReports_uploading == True or
@@ -96,8 +91,8 @@ if (config.reports_uploading == True or
 
     try:
         subprocess.Popen(["sudo", "python3", "aws_support.py"])
-    except: helpers.init_exit("11", True)
+    except: helpers.init_exit(10, True)
 
 try:
     subprocess.Popen(["sudo", "python3", "aws_data.py"])
-except: helpers.init_exit("12", True)
+except: helpers.init_exit(11, True)
