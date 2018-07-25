@@ -28,6 +28,10 @@ print("----------- DO NOT TERMINATE -----------")
 config = ConfigData()
 startup_time = datetime.utcnow()
 
+proc_data = None
+proc_support = None
+proc_access = None
+
 # -- INIT GPIO AND LEDS --------------------------------------------------------
 try:
     gpio.setwarnings(False); gpio.setmode(gpio.BCM)
@@ -80,8 +84,8 @@ if config.camera_logging == True:
 # -- RUN SUBPROCESSES ----------------------------------------------------------
 if config.local_network_server == True:
     try:
-        subprocess.Popen(["sudo", "python3", "aws_access.py",
-                          startup_time.strftime("%Y-%m-%dT%H:%M:%S")])
+        proc_access = subprocess.Popen(["sudo", "python3", "aws_access.py",
+            startup_time.strftime("%Y-%m-%dT%H:%M:%S")])
     except: helpers.init_exit(9, True)
 
 if (config.reports_uploading == True or
@@ -90,9 +94,16 @@ if (config.reports_uploading == True or
     config.camera_uploading == True):
 
     try:
-        subprocess.Popen(["sudo", "python3", "aws_support.py"])
-    except: helpers.init_exit(10, True)
+        proc_support = subprocess.Popen(["sudo", "python3", "aws_support.py"])
+        
+    except:
+        if proc_access != None: proc_access.terminate()
+        helpers.init_exit(10, True)
 
 try:
-    subprocess.Popen(["sudo", "python3", "aws_data.py"])
-except: helpers.init_exit(11, True)
+    proc_data = subprocess.Popen(["sudo", "python3", "aws_data.py"])
+
+except:
+    if proc_access != None: proc_access.terminate()
+    if proc_support != None: proc_support.terminate()
+    helpers.init_exit(11, True)
