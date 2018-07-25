@@ -250,13 +250,7 @@ def ctrl_command(command):
 
 # ENTRY POINT ==================================================================
 def entry_point():
-    print("--- Custom Automatic Weather Station ---")
-    print("Program: Access Sub-System")
-    print("Author:  Henry Hunt")
-    print("Version: 4C.1 (July 2018)")
-    print("")
-    print("----------- DO NOT TERMINATE -----------")
-    config.load()
+    global config; config.load()
 
     if len(sys.argv) == 2:
         startup_time = datetime.strptime(sys.argv[1], "%Y-%m-%dT%H:%M:%S")
@@ -264,7 +258,7 @@ def entry_point():
 
     # -- CREATE SERVER ---------------------------------------------------------
     server = flask.Flask(__name__, static_folder = "server/res",
-                        template_folder = "server")
+                         template_folder = "server")
 
     server.add_url_rule("/", view_func = page_now)
     server.add_url_rule("/index.html", view_func = page_now)
@@ -290,4 +284,6 @@ def entry_point():
     server.run(host = "0.0.0.0", threaded = True)
 
 if __name__ == "__main__":
-    with daemon.DaemonContext(): entry_point()
+    current_dir = os.path.dirname(os.path.realpath(__file__))
+    with daemon.DaemonContext(working_directory = current_dir):
+        entry_point()

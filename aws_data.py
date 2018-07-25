@@ -506,14 +506,8 @@ def do_trigger_rain(channel):
 
 # ENTRY POINT ==================================================================
 def entry_point():
-    global config, data_start, disable_sampling
-    print("--- Custom Automatic Weather Station ---")
-    print("Program: Data Sub-System")
-    print("Author:  Henry Hunt")
-    print("Version: 4C.1 (July 2018)")
-    print("")
-    print("----------- DO NOT TERMINATE -----------")
-    config.load()
+    global config; config.load()
+    global data_start, disable_sampling
 
     # -- INIT GPIO AND LEDS ----------------------------------------------------
     gpio.setwarnings(False); gpio.setmode(gpio.BCM)
@@ -546,4 +540,5 @@ def entry_point():
 
 if __name__ == "__main__":
     current_dir = os.path.dirname(os.path.realpath(__file__))
-    with daemon.DaemonContext(working_directory = current_dir): entry_point()
+    with daemon.DaemonContext(working_directory = current_dir):
+        entry_point()

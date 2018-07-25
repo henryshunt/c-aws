@@ -81,13 +81,14 @@ if config.camera_logging == True:
         with picamera.PiCamera() as camera: pass
     except: helpers.init_exit(8, True)
 
-# -- RUN SUBPROCESSES ----------------------------------------------------------
+# -- RUN ACCESS ----------------------------------------------------------------
 if config.local_network_server == True:
     try:
         proc_access = subprocess.Popen(["sudo", "python3", "aws_access.py",
             startup_time.strftime("%Y-%m-%dT%H:%M:%S")])
     except: helpers.init_exit(9, True)
 
+# -- RUN SUPPORT ---------------------------------------------------------------
 if (config.reports_uploading == True or
     config.envReports_uploading == True or
     config.dayStats_uploading == True or
@@ -95,14 +96,13 @@ if (config.reports_uploading == True or
 
     try:
         proc_support = subprocess.Popen(["sudo", "python3", "aws_support.py"])
-        
     except:
         if proc_access != None: proc_access.terminate()
         helpers.init_exit(10, True)
 
+# -- RUN DATA ------------------------------------------------------------------
 try:
     proc_data = subprocess.Popen(["sudo", "python3", "aws_data.py"])
-
 except:
     if proc_access != None: proc_access.terminate()
     if proc_support != None: proc_support.terminate()

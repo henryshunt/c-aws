@@ -157,18 +157,14 @@ def every_minute():
 
 # ENTRY POINT ==================================================================
 def entry_point():
-    print("--- Custom Automatic Weather Station ---")
-    print("Program: Support Sub-System")
-    print("Author:  Henry Hunt")
-    print("Version: 4C.1 (July 2018)")
-    print("")
-    print("----------- DO NOT TERMINATE -----------")
-    config.load()
+    global config; config.load()
 
-    # -- START SCHEDULERS ------------------------------------------------------
+    # -- START WATCHING DATA ---------------------------------------------------
     event_scheduler = BlockingScheduler()
     event_scheduler.add_job(every_minute, "cron", minute = "0-59", second = 8)
     event_scheduler.start()
 
 if __name__ == "__main__":
-    with daemon.DaemonContext(): entry_point()
+    current_dir = os.path.dirname(os.path.realpath(__file__))
+    with daemon.DaemonContext(working_directory = current_dir):
+        entry_point()
