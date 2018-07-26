@@ -7,16 +7,14 @@ import RPi.GPIO as gpio
 import pytz
 
 def init_exit(code, visual):
-    print("error: exit code " + code)
-    
-    if visual == False:
-        while True: pass
-
-    else:
+    if visual == True:
         while True:
-            for i in range(1, code):
-                gpio.output(24, gpio.HIGH); time.sleep(0.2)
-                gpio.output(24, gpio.LOW); time.sleep(1)
+            for i in range(code):
+                gpio.output(24, gpio.HIGH); time.sleep(0.16)
+                gpio.output(24, gpio.LOW); time.sleep(0.16)
+
+            time.sleep(1.1)
+    else: sys.exit(1)
 
 
 def remaining_space(directory):
