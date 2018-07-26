@@ -523,11 +523,9 @@ def entry_point():
     gpio.setup(22, gpio.IN, pull_up_down = gpio.PUD_DOWN)
 
     # -- WAIT FOR MINUTE -------------------------------------------------------
-    while True:
-        if datetime.utcnow().second != 0:
-            gpio.output(23, gpio.HIGH); time.sleep(0.1)
-            gpio.output(23, gpio.LOW); time.sleep(0.1)
-        else: break
+    while datetime.utcnow().second != 0:
+        gpio.output(23, gpio.HIGH); time.sleep(0.1)
+        gpio.output(23, gpio.LOW); time.sleep(0.1)
 
     # -- START DATA LOGGING ----------------------------------------------------
     data_start = datetime.utcnow().replace(second = 0, microsecond = 0)

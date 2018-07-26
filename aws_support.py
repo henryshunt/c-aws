@@ -138,21 +138,30 @@ def every_minute():
     utc = datetime.utcnow().replace(second = 0, microsecond = 0)
     local_time = helpers.utc_to_local(config, utc)
 
-    # Add data to upload queue
-    report = analysis.record_for_time(config, utc, DbTable.UTCREPORTS)
-    stat = analysis.record_for_time(config, local_time, DbTable.LOCALSTATS)
-    environ = analysis.record_for_time(config, utc, DbTable.UTCENVIRON)
+    # Add data to upload queue if config modifiers are active
+    if config.reports_uploading == True:
+        report = analysis.record_for_time(config, utc, DbTable.UTCREPORTS)
+    else: report == None
 
-    if ((report != False and report != None) or
-        (stat != False and stat != None) or
-        (environ != False and environ != None)):
+    if config.envReports_uploading == True:
+        envReport = analysis.record_for_time(config, utc, DbTable.UTCENVIRON)
+    else: envReport = None
 
-        do_upload_data((report, stat, environ))
+    if config.dayStats_uploading == True:
+        dayStat = analysis.record_for_time(config, local_time,
+                                           DbTable.LOCALSTATS)
+    else: dayStat = None
 
-    # Add camera to upload queue
-    image_path = os.path.join(config.camera_drive, utc.strftime("%Y/%m/%d"),
-                              utc.strftime("%Y-%m-%dT%H-%M-%S"))
-    if os.path.isfile(image_path): do_upload_camera(image_path)
+    do_upload_data((report, envReport, dayStat))
+
+    # Add camera image to upload queue if config modifier is active
+    if config.camera_uploading == True:
+        utc_minute = str(utc.minute)
+
+        if utc_minute.endswith("0") or utc_minute.endswith("5"):
+            image_path = os.path.join(config.camera_drive,
+                utc.strftime("%Y/%m/%d/%Y-%m-%dT%H-%M-%S") + ".jpg")
+            if os.path.isfile(image_path): do_upload_camera(image_path)
     
 
 # ENTRY POINT ==================================================================
