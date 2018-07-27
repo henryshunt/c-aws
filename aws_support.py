@@ -29,7 +29,7 @@ def do_process_data_queue():
     global data_queue
 
     # Process while there are items in the queue
-    while len(data_queue > 0):
+    while len(data_queue) > 0:
         try: data = data_queue.popleft()
         except: return
 
@@ -37,6 +37,9 @@ def do_process_data_queue():
         has_report = False if data[0] == False or data[0] == None else True
         has_envReport = False if data[1] == False or data[1] == None else True
         has_dayStat = False if data[2] == False or data[2] == None else True
+
+        if has_report == False and has_envReport == False and has_dayStat == False:
+            continue
 
         to_upload = {
             "has_report": 1 if has_report == True else 0,
@@ -114,7 +117,7 @@ def do_process_camera_queue():
     global camera_queue
 
     # Process while there are items in the queue
-    while len(camera_queue > 0):
+    while len(camera_queue) > 0:
         try: data = camera_queue.popleft()
         except: return
 
