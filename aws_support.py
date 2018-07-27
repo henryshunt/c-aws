@@ -116,21 +116,27 @@ def do_process_camera_queue():
 
     # Process while there are items in the queue
     while len(camera_queue) > 0:
-        try: data = camera_queue.popleft()
-        except: return
+        data = camera_queue.popleft()
+        if not os.path.isfile(data): continue
 
         # Upload image to camera folder on FTP server
-        if os.path.isfile(data):
-            try:
-                ftp_server = ftplib.FTP(config.remote_ftp_server,
-                    config.remote_ftp_username, config.remote_ftp_password,
-                    timeout = 45)
-                ftp_server.set_pasv(False)
+        try:
+            ftp = ftplib.FTP(config.remote_ftp_server,
+                config.remote_ftp_username, config.remote_ftp_password,
+                timeout = 45)
+            ftp.set_pasv(False); ftp.cwd("camera")
 
-                with open(data, "rb") as file:
-                    ftp_server.storbinary("STOR data/camera/" + os.path, file)
-            except: return
-        else: return
+            image_date = data.split("T")[0].split("-")
+            if image_date[0] not in ftp.nlst(): ftp.mkd(image_date[0])
+            ftp.cwd(image_date[0])
+            if image_date[1] not in ftp.nlst(): ftp.mkd(image_date[1])
+            ftp.cwd(image_date[1])
+            if image_date[2] not in ftp.nlst(): ftp.mkd(image_date[2])
+            ftp.cwd(image_date[2])
+
+            with open(data, "rb") as file:
+                ftp.storbinary("STOR camera/" + os.path.basename(data), file)
+        except: camera_queue.appendleft(data); return
 
 # SCHEDULERS -------------------------------------------------------------------
 def every_minute():
@@ -169,13 +175,13 @@ def every_minute():
     do_process_data_queue()
 
 
-    # Add camera image to upload queue if config modifier is active
+    # Add camera image to queue if config modifier is active
     if config.camera_uploading == True:
         utc_minute = str(utc.minute)
 
         if utc_minute.endswith("0") or utc_minute.endswith("5"):
-            image_path = os.path.join(config.camera_drive, utc.strftime(
-                "%Y/%m/%d/%Y-%m-%dT%H-%M-%S") + ".jpg")
+            image_path = os.path.join(config.camera_drive,
+                utc.strftime("%Y/%m/%d/%Y-%m-%dT%H-%M-%S") + ".jpg")
             camera_queue.append(image_path)
             do_process_camera_queue()
     
