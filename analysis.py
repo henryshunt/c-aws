@@ -88,6 +88,20 @@ def fields_in_range(config, start, end, fields, table):
             return cursor.fetchall()
     except: return False
 
+def stats_for_date(config, bounds):
+    try:
+        with sqlite3.connect(config.database_path) as database:
+            database.row_factory = sqlite3.Row
+            cursor = database.cursor()
+
+            # Generate the statistics
+            cursor.execute(queries.GENERATE_DAYSTAT,
+                           (bounds[0].strftime("%Y-%m-%d %H:%M:%S"),
+                            bounds[1].strftime("%Y-%m-%d %H:%M:%S")))
+                            
+            return cursor.fetchone()
+    except: return False
+
 def past_hour_total(config, now, column):
     start = now.replace(second = 0, microsecond = 0) - timedelta(minutes = 59)
     end = now.replace(second = 0, microsecond = 0)

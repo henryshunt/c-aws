@@ -58,7 +58,7 @@ def read_temperature(address):
         global variable
     """
     if not os.path.isdir("/sys/bus/w1/devices/" + address):
-        return #gpio.output(24, gpio.HIGH); return
+        gpio.output(24, gpio.HIGH); return
 
     try:
         # Read the probe and convert its value to a degC float
@@ -285,7 +285,7 @@ def do_log_environment(utc):
     try:
         read_temperature("28-8000001f88fa")
         frame.enclosure_temperature = EncT_value
-    except: pass #gpio.output(24, gpio.HIGH)
+    except: gpio.output(24, gpio.HIGH)
 
     # -- CPU TEMPERATURE -------------------------------------------------------
     try:
@@ -296,8 +296,7 @@ def do_log_environment(utc):
 
     # -- SAVE DATA -------------------------------------------------------------
     free_space = helpers.remaining_space("/")
-    if free_space == None or free_space < 0.1:
-        gpio.output(24, gpio.HIGH); return
+    if free_space == None or free_space < 0.1: return
 
     try:
         with sqlite3.connect(config.database_path) as database:
@@ -344,9 +343,9 @@ def do_log_camera(utc):
             if not os.path.exists(image_dir): os.makedirs(image_dir)
             image_name = utc.strftime("%Y-%m-%dT%H-%M-%S")
         
-            # Set image resolution and capture image
+            # Set image resolution, wait for auto settings, and capture
             with picamera.PiCamera() as camera:
-                camera.resolution = (1280, 960); time.sleep(2)
+                camera.resolution = (1280, 960); time.sleep(2.5)
                 camera.capture(os.path.join(image_dir, image_name + ".jpg"))
         except: gpio.output(24, gpio.HIGH)
 
@@ -359,28 +358,23 @@ def do_generate_stats(utc):
 
     # -- GET NEW STATS ---------------------------------------------------------
     bounds = helpers.day_bounds_utc(config, local_time, False)
-    new_stats = None
-    
-    try:
-        with sqlite3.connect(config.database_path) as database:
-            database.row_factory = sqlite3.Row
-            cursor = database.cursor()
+    new_stats = analysis.stats_for_date(config, bounds)
 
-            cursor.execute(queries.GENERATE_DAYSTAT,
-                           (bounds[0].strftime("%Y-%m-%d %H:%M:%S"),
-                            bounds[1].strftime("%Y-%m-%d %H:%M:%S")))
-                            
-            new_stats = cursor.fetchone()
-    except: gpio.output(24, gpio.HIGH); return
+    if new_stats == False:
+        new_stats = analysis.stats_for_date(config, bounds)
+        if new_stats == False: gpio.output(24, gpio.HIGH); return
 
     # -- GET CURRENT STATS -----------------------------------------------------
     cur_stats = analysis.record_for_time(config, local_time, DbTable.LOCALSTATS)
-    if cur_stats == False: gpio.output(24, gpio.HIGH); return
+    
+    if cur_stats == False:
+        cur_stats = analysis.record_for_time(config, local_time,
+                                             DbTable.LOCALSTATS)
+        if cur_stats == False: gpio.output(24, gpio.HIGH); return
 
     # -- SAVE DATA -------------------------------------------------------------
     free_space = helpers.remaining_space("/")
-    if free_space == None or free_space < 0.1:
-        gpio.output(24, gpio.HIGH); return
+    if free_space == None or free_space < 0.1: return
 
     try:
         with sqlite3.connect(config.database_path) as database:
@@ -450,8 +444,8 @@ def every_minute():
 
     # Run actions if relevant configuration modifiers are active
     do_log_report(utc)
-    if config.camera_logging == True: do_log_camera(utc)
     if config.envReports_logging == True: do_log_environment(utc)
+    if config.camera_logging == True: do_log_camera(utc)
     if config.dayStats_generation == True: do_generate_stats(utc)
     gpio.output(23, gpio.LOW)
 
