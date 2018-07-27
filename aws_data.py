@@ -359,18 +359,12 @@ def do_generate_stats(utc):
     # -- GET NEW STATS ---------------------------------------------------------
     bounds = helpers.day_bounds_utc(config, local_time, False)
     new_stats = analysis.stats_for_date(config, bounds)
-
-    if new_stats == False:
-        new_stats = analysis.stats_for_date(config, bounds)
-        if new_stats == False: gpio.output(24, gpio.HIGH); return
+    
+    if new_stats == False: gpio.output(24, gpio.HIGH); return
 
     # -- GET CURRENT STATS -----------------------------------------------------
     cur_stats = analysis.record_for_time(config, local_time, DbTable.LOCALSTATS)
-    
-    if cur_stats == False:
-        cur_stats = analysis.record_for_time(config, local_time,
-                                             DbTable.LOCALSTATS)
-        if cur_stats == False: gpio.output(24, gpio.HIGH); return
+    if cur_stats == False: gpio.output(24, gpio.HIGH); return
 
     # -- SAVE DATA -------------------------------------------------------------
     free_space = helpers.remaining_space("/")

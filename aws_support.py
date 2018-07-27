@@ -157,28 +157,17 @@ def every_minute():
     # Get report data if config modifier is active
     if config.reports_uploading == True:
         report = analysis.record_for_time(config, utc, DbTable.UTCREPORTS)
-
-        if report == False:
-            report = analysis.record_for_time(config, utc, DbTable.UTCREPORTS)
     else: report == None
 
     # Get envReport data if config modifier is active
     if config.envReports_uploading == True:
         envReport = analysis.record_for_time(config, utc, DbTable.UTCENVIRON)
-
-        if envReport == False:
-            envReport = analysis.record_for_time(config, utc,
-                                                 DbTable.UTCENVIRON)
     else: envReport = None
 
     # Get dayStat data is config modifier is active
     if config.dayStats_uploading == True:
         dayStat = analysis.record_for_time(config, local_time,
                                            DbTable.LOCALSTATS)
-
-        if dayStat == False:
-            dayStat = analysis.record_for_time(config, local_time,
-                                               DbTable.LOCALSTATS)
     else: dayStat = None
 
     # Add data to queue and process the queue
