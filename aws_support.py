@@ -22,11 +22,15 @@ from config import ConfigData
 config = ConfigData()
 
 data_queue = deque(maxlen = 7200)
-camera_queue = deque(maxlen = 7200)
+camera_queue = deque(maxlen = 1000)
+is_processing_data = False
+is_processing_camera = False
 
 # OPERATIONS -------------------------------------------------------------------
 def do_process_data_queue():
-    global data_queue
+    global data_queue, is_processing_data
+    if is_processing_data == True: return
+    else: is_processing_data = True
 
     # Process while there are items in the queue
     while len(data_queue) > 0:
@@ -111,21 +115,25 @@ def do_process_data_queue():
             if request.text != "0": data_queue.appendleft(data); return
         except: data_queue.appendleft(data); return
 
+    is_processing_data = False
+
 def do_process_camera_queue():
-    global camera_queue
+    global camera_queue, is_processing_camera
+    if is_processing_camera == True: return
+    else: is_processing_camera = True
 
     # Process while there are items in the queue
     while len(camera_queue) > 0:
         data = camera_queue.popleft()
         if not os.path.isfile(data): continue
 
-        # Upload image to camera folder on FTP server
         try:
             ftp = ftplib.FTP(config.remote_ftp_server,
                 config.remote_ftp_username, config.remote_ftp_password,
                 timeout = 45)
             ftp.set_pasv(False); ftp.cwd("camera")
 
+            # Create nested folders for image date if necessary
             image_date = os.path.basename(data).split("T")[0].split("-")
             if image_date[0] not in ftp.nlst(): ftp.mkd(image_date[0])
             ftp.cwd(image_date[0])
@@ -134,9 +142,12 @@ def do_process_camera_queue():
             if image_date[2] not in ftp.nlst(): ftp.mkd(image_date[2])
             ftp.cwd(image_date[2])
 
+            # Upload the image
             with open(data, "rb") as file:
                 ftp.storbinary("STOR " + os.path.basename(data), file)
         except: camera_queue.appendleft(data); return
+
+    is_processing_camera = False
 
 # SCHEDULERS -------------------------------------------------------------------
 def every_minute():
