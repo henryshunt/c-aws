@@ -346,9 +346,7 @@ def do_log_camera(utc):
         
             # Set image resolution and capture image
             with picamera.PiCamera() as camera:
-                camera.resolution = (1280, 960)
-                time.sleep(2)
-
+                camera.resolution = (1280, 960); time.sleep(2)
                 camera.capture(os.path.join(image_dir, image_name + ".jpg"))
         except: gpio.output(24, gpio.HIGH)
 

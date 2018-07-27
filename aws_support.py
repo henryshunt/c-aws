@@ -21,8 +21,8 @@ from config import ConfigData
 # GLOBAL VARIABLES -------------------------------------------------------------
 config = ConfigData()
 
-data_queue = deque()
-camera_queue = deque()
+data_queue = deque(maxlen = 7200)
+camera_queue = deque(maxlen = 7200)
 
 # OPERATIONS -------------------------------------------------------------------
 def do_process_data_queue():
@@ -173,8 +173,8 @@ def every_minute():
         utc_minute = str(utc.minute)
 
         if utc_minute.endswith("0") or utc_minute.endswith("5"):
-            image_path = os.path.join(config.camera_drive,
-                utc.strftime("%Y/%m/%d/%Y-%m-%dT%H-%M-%S") + ".jpg")
+            image_path = os.path.join(config.camera_drive, utc.strftime(
+                "%Y/%m/%d/%Y-%m-%dT%H-%M-%S") + ".jpg")
             camera_queue.append(image_path)
             do_process_camera_queue()
     
