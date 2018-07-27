@@ -30,16 +30,13 @@ def do_process_data_queue():
 
     # Process while there are items in the queue
     while len(data_queue) > 0:
-        try: data = data_queue.popleft()
-        except: return
-
-        # Generate record status booleans
+        data = data_queue.popleft()
         has_report = False if data[0] == False or data[0] == None else True
         has_envReport = False if data[1] == False or data[1] == None else True
         has_dayStat = False if data[2] == False or data[2] == None else True
 
-        if has_report == False and has_envReport == False and has_dayStat == False:
-            continue
+        if (has_report == False and has_envReport == False
+            and has_dayStat == False): continue
 
         to_upload = {
             "has_report": 1 if has_report == True else 0,
@@ -49,61 +46,62 @@ def do_process_data_queue():
 
         # Add report data to data to upload
         if has_report == True:
-            to_upload["Time"] = data[0]["Time"],
-            to_upload["AirT"] = helpers.none_to_null(data[0]["AirT"]),
-            to_upload["ExpT"] = helpers.none_to_null(data[0]["ExpT"]),
-            to_upload["RelH"] = helpers.none_to_null(data[0]["RelH"]),
-            to_upload["DewP"] = helpers.none_to_null(data[0]["DewP"]),
-            to_upload["WSpd"] = helpers.none_to_null(data[0]["WSpd"]),
-            to_upload["WDir"] = helpers.none_to_null(data[0]["WDir"]),
-            to_upload["WGst"] = helpers.none_to_null(data[0]["WGst"]),
-            to_upload["SunD"] = helpers.none_to_null(data[0]["SunD"]),
-            to_upload["Rain"] = helpers.none_to_null(data[0]["Rain"]),
-            to_upload["StaP"] = helpers.none_to_null(data[0]["StaP"]),
-            to_upload["MSLP"] = helpers.none_to_null(data[0]["MSLP"]),
-            to_upload["ST10"] = helpers.none_to_null(data[0]["ST10"]),
-            to_upload["ST30"] = helpers.none_to_null(data[0]["ST30"]),
+            to_upload["Time"] = data[0]["Time"]
+            to_upload["AirT"] = helpers.none_to_null(data[0]["AirT"])
+            to_upload["ExpT"] = helpers.none_to_null(data[0]["ExpT"])
+            to_upload["RelH"] = helpers.none_to_null(data[0]["RelH"])
+            to_upload["DewP"] = helpers.none_to_null(data[0]["DewP"])
+            to_upload["WSpd"] = helpers.none_to_null(data[0]["WSpd"])
+            to_upload["WDir"] = helpers.none_to_null(data[0]["WDir"])
+            to_upload["WGst"] = helpers.none_to_null(data[0]["WGst"])
+            to_upload["SunD"] = helpers.none_to_null(data[0]["SunD"])
+            to_upload["Rain"] = helpers.none_to_null(data[0]["Rain"])
+            to_upload["StaP"] = helpers.none_to_null(data[0]["StaP"])
+            to_upload["MSLP"] = helpers.none_to_null(data[0]["MSLP"])
+            to_upload["ST10"] = helpers.none_to_null(data[0]["ST10"])
+            to_upload["ST30"] = helpers.none_to_null(data[0]["ST30"])
             to_upload["ST00"] = helpers.none_to_null(data[0]["ST00"])
 
         # Add environment data to data to upload
         if has_envReport == True:
-            to_upload["EncT"] = helpers.none_to_null(data[1]["EncT"]),
+            to_upload["Time"] = data[1]["Time"]
+            to_upload["EncT"] = helpers.none_to_null(data[1]["EncT"])
             to_upload["CPUT"] = helpers.none_to_null(data[1]["CPUT"])
 
         # Add statistic data to data to upload
         if has_dayStat == True:
             to_upload["Date"] = data[2]["Date"],
-            to_upload["AirT_Min"] = helpers.none_to_null(data[2]["AirT_Min"]),
-            to_upload["AirT_Max"] = helpers.none_to_null(data[2]["AirT_Max"]),
-            to_upload["AirT_Avg"] = helpers.none_to_null(data[2]["AirT_Avg"]),
-            to_upload["RelH_Min"] = helpers.none_to_null(data[2]["RelH_Min"]),
-            to_upload["RelH_Max"] = helpers.none_to_null(data[2]["RelH_Max"]),
-            to_upload["RelH_Avg"] = helpers.none_to_null(data[2]["RelH_Avg"]),
-            to_upload["DewP_Min"] = helpers.none_to_null(data[2]["DewP_Min"]),
-            to_upload["DewP_Max"] = helpers.none_to_null(data[2]["DewP_Max"]),
-            to_upload["DewP_Avg"] = helpers.none_to_null(data[2]["DewP_Avg"]),
-            to_upload["WSpd_Min"] = helpers.none_to_null(data[2]["WSpd_Min"]),
-            to_upload["WSpd_Max"] = helpers.none_to_null(data[2]["WSpd_Max"]),
-            to_upload["WSpd_Avg"] = helpers.none_to_null(data[2]["WSpd_Avg"]),
-            to_upload["WDir_Min"] = helpers.none_to_null(data[2]["WDir_Min"]),
-            to_upload["WDir_Max"] = helpers.none_to_null(data[2]["WDir_Max"]),
-            to_upload["WDir_Avg"] = helpers.none_to_null(data[2]["WDir_Avg"]),
-            to_upload["WGst_Min"] = helpers.none_to_null(data[2]["WGst_Min"]),
-            to_upload["WGst_Max"] = helpers.none_to_null(data[2]["WGst_Max"]),
-            to_upload["WGst_Avg"] = helpers.none_to_null(data[2]["WGst_Avg"]),
-            to_upload["SunD_Ttl"] = helpers.none_to_null(data[2]["SunD_Ttl"]),
-            to_upload["Rain_Ttl"] = helpers.none_to_null(data[2]["Rain_Ttl"]),
-            to_upload["MSLP_Min"] = helpers.none_to_null(data[2]["MSLP_Min"]),
-            to_upload["MSLP_Max"] = helpers.none_to_null(data[2]["MSLP_Max"]),
-            to_upload["MSLP_Avg"] = helpers.none_to_null(data[2]["MSLP_Avg"]),
-            to_upload["ST10_Min"] = helpers.none_to_null(data[2]["ST10_Min"]),
-            to_upload["ST10_Max"] = helpers.none_to_null(data[2]["ST10_Max"]),
-            to_upload["ST10_Avg"] = helpers.none_to_null(data[2]["ST10_Avg"]),
-            to_upload["ST30_Min"] = helpers.none_to_null(data[2]["ST30_Min"]),
-            to_upload["ST30_Max"] = helpers.none_to_null(data[2]["ST30_Max"]),
-            to_upload["ST30_Avg"] = helpers.none_to_null(data[2]["ST30_Avg"]),
-            to_upload["ST00_Min"] = helpers.none_to_null(data[2]["ST00_Min"]),
-            to_upload["ST00_Max"] = helpers.none_to_null(data[2]["ST00_Max"]),
+            to_upload["AirT_Min"] = helpers.none_to_null(data[2]["AirT_Min"])
+            to_upload["AirT_Max"] = helpers.none_to_null(data[2]["AirT_Max"])
+            to_upload["AirT_Avg"] = helpers.none_to_null(data[2]["AirT_Avg"])
+            to_upload["RelH_Min"] = helpers.none_to_null(data[2]["RelH_Min"])
+            to_upload["RelH_Max"] = helpers.none_to_null(data[2]["RelH_Max"])
+            to_upload["RelH_Avg"] = helpers.none_to_null(data[2]["RelH_Avg"])
+            to_upload["DewP_Min"] = helpers.none_to_null(data[2]["DewP_Min"])
+            to_upload["DewP_Max"] = helpers.none_to_null(data[2]["DewP_Max"])
+            to_upload["DewP_Avg"] = helpers.none_to_null(data[2]["DewP_Avg"])
+            to_upload["WSpd_Min"] = helpers.none_to_null(data[2]["WSpd_Min"])
+            to_upload["WSpd_Max"] = helpers.none_to_null(data[2]["WSpd_Max"])
+            to_upload["WSpd_Avg"] = helpers.none_to_null(data[2]["WSpd_Avg"])
+            to_upload["WDir_Min"] = helpers.none_to_null(data[2]["WDir_Min"])
+            to_upload["WDir_Max"] = helpers.none_to_null(data[2]["WDir_Max"])
+            to_upload["WDir_Avg"] = helpers.none_to_null(data[2]["WDir_Avg"])
+            to_upload["WGst_Min"] = helpers.none_to_null(data[2]["WGst_Min"])
+            to_upload["WGst_Max"] = helpers.none_to_null(data[2]["WGst_Max"])
+            to_upload["WGst_Avg"] = helpers.none_to_null(data[2]["WGst_Avg"])
+            to_upload["SunD_Ttl"] = helpers.none_to_null(data[2]["SunD_Ttl"])
+            to_upload["Rain_Ttl"] = helpers.none_to_null(data[2]["Rain_Ttl"])
+            to_upload["MSLP_Min"] = helpers.none_to_null(data[2]["MSLP_Min"])
+            to_upload["MSLP_Max"] = helpers.none_to_null(data[2]["MSLP_Max"])
+            to_upload["MSLP_Avg"] = helpers.none_to_null(data[2]["MSLP_Avg"])
+            to_upload["ST10_Min"] = helpers.none_to_null(data[2]["ST10_Min"])
+            to_upload["ST10_Max"] = helpers.none_to_null(data[2]["ST10_Max"])
+            to_upload["ST10_Avg"] = helpers.none_to_null(data[2]["ST10_Avg"])
+            to_upload["ST30_Min"] = helpers.none_to_null(data[2]["ST30_Min"])
+            to_upload["ST30_Max"] = helpers.none_to_null(data[2]["ST30_Max"])
+            to_upload["ST30_Avg"] = helpers.none_to_null(data[2]["ST30_Avg"])
+            to_upload["ST00_Min"] = helpers.none_to_null(data[2]["ST00_Min"])
+            to_upload["ST00_Max"] = helpers.none_to_null(data[2]["ST00_Max"])
             to_upload["ST00_Avg"] = helpers.none_to_null(data[2]["ST00_Avg"])
 
         # Upload the data
