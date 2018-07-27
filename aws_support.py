@@ -126,7 +126,7 @@ def do_process_camera_queue():
                 timeout = 45)
             ftp.set_pasv(False); ftp.cwd("camera")
 
-            image_date = data.split("T")[0].split("-")
+            image_date = os.path.basename(data).split("T")[0].split("-")
             if image_date[0] not in ftp.nlst(): ftp.mkd(image_date[0])
             ftp.cwd(image_date[0])
             if image_date[1] not in ftp.nlst(): ftp.mkd(image_date[1])
@@ -135,7 +135,7 @@ def do_process_camera_queue():
             ftp.cwd(image_date[2])
 
             with open(data, "rb") as file:
-                ftp.storbinary("STOR camera/" + os.path.basename(data), file)
+                ftp.storbinary("STOR " + os.path.basename(data), file)
         except: camera_queue.appendleft(data); return
 
 # SCHEDULERS -------------------------------------------------------------------
