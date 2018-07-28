@@ -27,3 +27,9 @@ function queryParam(key) {
     var match = location.search.match(new RegExp("[?&]" + key + "=([^&]+)(&|$)"));
     return match && decodeURIComponent(match[1].replace(/\+/g, " "));
 }
+
+function display_value(value, id, units) {
+    if (value != null) {
+        document.getElementById(id).innerHTML = value + units;
+    } else { document.getElementById(id).innerHTML = "no data"; }
+}
