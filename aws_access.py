@@ -207,16 +207,25 @@ def data_graph_day():
 
     # Fill in missing times in data range
     date_loop = bounds[0]
-    while date_loop <= bounds[1]:
-        for i in records:
-            if i["Time"] == date_loop:
-                data[i.strftime("%Y-%m-%d %H:%M:%S")] == i
 
-        #if 
-    for i in range(bounds[0], bounds[1]):
-        if any(d["Time"] == i.strftime("%Y-%m-%d %H:%M:%S") for d in records):
-            data[i.strftime("%Y-%m-%d %H:%M:%S")] = d
-        else: data[i.strftime("%Y-%m-%d %H:%M:%S")] = dict()
+    while date_loop <= bounds[1]:
+        if any(d["Time"] == date_loop.strftime("%Y-%m-%d %H:%M:%S")
+            for d in records):
+        
+            record_dict = dict()
+            for i in flask.request.args.get("fields").split(","):
+                if i in records[date_loop.strftime("%Y-%m-%d %H:%M:%S")]:
+                    record_dict[i] = records[i]
+
+            data[date_loop.strftime("%Y-%m-%d %H:%M:%S")] = record_dict
+
+        else:
+            record_dict = dict()
+            for i in flask.request.args.get("fields").split(","):
+                record_dict[i] = None
+            data[date_loop.strftime("%Y-%m-%d %H:%M:%S")] = record_dict
+
+        date_loop += timedelta(minutes = 1)
     return flask.jsonify(data)
 
 def data_graph_month():
