@@ -270,7 +270,7 @@ def data_camera():
 
 def file_camera(year, month, day, file_name):
     return flask.send_from_directory(os.path.join(config.camera_drive, year,
-        month, day, file_name))
+        month, day), file_name)
 
 def data_about():
     global config, startup_time
@@ -360,8 +360,7 @@ def entry_point():
     server.add_url_rule("/data/graph-month.json", view_func = data_graph_month)
     server.add_url_rule("/data/graph-year.json", view_func = data_graph_year)
     server.add_url_rule("/data/camera.json", view_func = data_camera)
-    server.add_url_rule(
-        "/data/camera/<int:year>/<int:month>/<int:day>/<file_name>",
+    server.add_url_rule("/data/camera/<year>/<month>/<day>/<file_name>",
         view_func = file_camera)
     server.add_url_rule("/data/about.json", view_func = data_about)
     server.add_url_rule("/ctrl/<command>", view_func = ctrl_command)
