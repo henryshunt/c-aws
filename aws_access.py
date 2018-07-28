@@ -23,36 +23,50 @@ startup_time = None
 
 # PAGE SERVERS -----------------------------------------------------------------
 def page_now():
+    global config
+
     return flask.render_template("index.html",
                                  aws_title = config.aws_location.split(",")[0],
                                  aws_location = config.aws_location)
 
 def page_statistics():
+    global config
+
     return flask.render_template("statistics.html",
                                  aws_title = config.aws_location.split(",")[0],
                                  aws_location = config.aws_location)
 
 def page_graph_day():
+    global config
+
     return flask.render_template("graph-day.html",
                                  aws_title = config.aws_location.split(",")[0],
                                  aws_location = config.aws_location)
 
 def page_graph_month():
+    global config
+
     return flask.render_template("graph-month.html",
                                  aws_title = config.aws_location.split(",")[0],
                                  aws_location = config.aws_location)
 
 def page_graph_year():
+    global config
+
     return flask.render_template("graph-year.html",
                                  aws_title = config.aws_location.split(",")[0],
                                  aws_location = config.aws_location)
 
 def page_camera():
+    global config
+
     return flask.render_template("camera.html",
                                  aws_title = config.aws_location.split(",")[0],
                                  aws_location = config.aws_location)
 
 def page_about():
+    global config
+
     return flask.render_template("about.html",
                                  aws_title = config.aws_location.split(",")[0],
                                  aws_location = config.aws_location,
@@ -63,6 +77,7 @@ def page_about():
 
 # DATA PAGE SERVERS ------------------------------------------------------------
 def data_now():
+    global config
     data = dict.fromkeys(["Time", "AirT", "ExpT", "RelH", "DewP", "WSpd",
                           "WDir", "WGst", "SunD", "SunD_PHr", "Rain",
                           "Rain_PHr", "StaP", "MSLP", "StaP_PTH", "ST10",
@@ -118,13 +133,12 @@ def data_now():
             if StaP_PTH_record["StaP"] != None:
                 data["StaP_PTH"] = data["StaP"] - StaP_PTH_record["StaP"]
 
-    # Localise data time
-    data["Time"] = helpers.utc_to_local(
-        config, url_time).strftime("%Y-%m-%d %H:%M:%S")
+    data["Time"] = url_time.strftime("%Y-%m-%d %H:%M:%S")
     return flask.jsonify(data)
 
 def data_statistics():
-    data = dict.fromkeys(["Time", "UTCT", "AirT_Min", "AirT_Max", "AirT_Avg",
+    global config
+    data = dict.fromkeys(["Time", "AirT_Min", "AirT_Max", "AirT_Avg",
                           "RelH_Min", "RelH_Max", "RelH_Avg", "DewP_Min",
                           "DewP_Max", "DewP_Avg", "WSpd_Min", "WSpd_Max",
                           "WSpd_Avg", "WDir_Min", "WDir_Max", "WDir_Avg",
@@ -166,14 +180,36 @@ def data_statistics():
             for key in dict(zip(record.keys(), record)):
                 if key in data: data[key] = record[key]
 
-    data["UTCT"] = url_time.strftime("%Y-%m-%d %H:%M:%S")
-    data["Time"] = helpers.utc_to_local(
-        config, url_time).strftime("%d/%m/%Y %H:%M:%S")
+    data["Time"] = url_time.strftime("%Y-%m-%d %H:%M:%S")
     return flask.jsonify(data)
 
 
 def data_graph_day():
-    return flask.jsonify(None)
+    global config; data = []
+
+    # Try parsing time specified in URL
+    if flask.request.args.get("time") == None: return flask.jsonify(data)
+    try:
+        url_time = datetime.strptime(
+            flask.request.args.get("time"), "%Y-%m-%dT%H-%M-%S")
+        local_time = helpers.utc_to_local(config, url_time)
+    except: return flask.jsonify(data)
+    
+    bounds = helpers.day_bounds_utc(config, local_time, True)
+
+    # Get data in range for specified parameters
+    records = analysis.fields_in_range(
+        config, bounds[0], bounds[1], flask.request.args.get("fields"),
+        DbTable[flask.request.args.get("table")])
+
+    if records == False or len(records) == 0: return flask.jsonify(data)
+
+    # Fill in missing times in data range
+    for i in range(bounds[0], bounds[1]):
+        if any(d["Time"] == i.strftime("%Y-%m-%d %H:%M:%S") for d in records):
+            data[i.strftime("%Y-%m-%d %H:%M:%S")] = d
+        else: data[i.strftime("%Y-%m-%d %H:%M:%S")] = dict()
+    return flask.jsonify(data)
 
 def data_graph_month():
     return flask.jsonify(None)
@@ -186,7 +222,7 @@ def data_camera():
     return flask.jsonify(None)
 
 def data_about():
-    global startup_time
+    global config, startup_time
     data = dict.fromkeys(["Time", "STim", "EncT", "CPUT", "IDRS", "CDRS"])
 
     # Try parsing time specified in URL
@@ -221,8 +257,7 @@ def data_about():
                 if key in data: data[key] = record[key]
 
     # Format software startup time
-    data["STim"] = (helpers.utc_to_local(config, startup_time)
-                   .strftime("%d/%m/%Y at %H:%M:%S"))
+    data["STim"] = startup_time.strftime("%Y-%m-%d %H:%M:%S")
     
     # Get remaining internal storage space
     data["IDRS"] = helpers.remaining_space("/")
@@ -234,9 +269,7 @@ def data_about():
         if data["CDRS"] != None: data["CDRS"] = round(data["CDRS"], 2)
     else: data["CDRS"] = False
 
-    # Localise data time
-    data["Time"] = helpers.utc_to_local(
-        config, url_time).strftime("%Y-%m-%d %H:%M:%S")
+    data["Time"] = url_time.strftime("%Y-%m-%d %H:%M:%S")
     return flask.jsonify(data)
 
 
