@@ -258,11 +258,15 @@ def data_camera():
          config.aws_elevation))
     solar = location.sun(date = url_time, local = False)
     
-    data["SRis"] = solar["sunrise"]
-    data["SSet"] = solar["sunset"]
+    data["SRis"] = solar["sunrise"].strftime("%Y-%m-%d %H:%M:%S")
+    data["SSet"] = solar["sunset"].strftime("%Y-%m-%d %H:%M:%S")
     
     data["Time"] = url_time.strftime("%Y-%m-%d %H:%M:%S")
     return flask.jsonify(data)
+
+def file_camera(file_path):
+    return flask.send_from_directory(
+        os.path.dirname(file_path), os.path.basename(file_path))
 
 def data_about():
     global config, startup_time
@@ -351,7 +355,8 @@ def entry_point():
     server.add_url_rule("/data/graph-day.json", view_func = data_graph_day)
     server.add_url_rule("/data/graph-month.json", view_func = data_graph_month)
     server.add_url_rule("/data/graph-year.json", view_func = data_graph_year)
-    server.add_url_rule("/data/camera/<file_name>", view_func = data_camera)
+    server.add_url_rule("/data/camera.json", view_func = data_camera)
+    server.add_url_rule("/data/camera/<file_path>", view_func = file_camera)
     server.add_url_rule("/data/about.json", view_func = data_about)
     server.add_url_rule("/ctrl/<command>", view_func = ctrl_command)
 
