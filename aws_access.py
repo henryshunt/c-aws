@@ -250,7 +250,7 @@ def ctrl_command(command):
 
 # ENTRY POINT ==================================================================
 def entry_point():
-    global config; config.load()
+    global config, startup_time; config.load()
 
     if len(sys.argv) == 2:
         startup_time = datetime.strptime(sys.argv[1], "%Y-%m-%dT%H:%M:%S")
