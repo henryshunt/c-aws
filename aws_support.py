@@ -131,7 +131,7 @@ def do_process_camera_queue():
             ftp = ftplib.FTP(config.remote_ftp_server,
                 config.remote_ftp_username, config.remote_ftp_password,
                 timeout = 45)
-            ftp.set_pasv(False); ftp.cwd("camera")
+            ftp.set_pasv(False); ftp.cwd("data"); ftp.cwd("camera")
 
             # Create nested folders for image date if necessary
             image_date = os.path.basename(data).split("T")[0].split("-")

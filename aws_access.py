@@ -102,14 +102,12 @@ def data_now():
     # Calculate total sunshine duration over past hour
     SunD_PHr_record = analysis.past_hour_total(config, url_time, "SunD")
     if SunD_PHr_record != False and SunD_PHr_record != None:
-        if SunD_PHr_record["SunD"] != None:
-            data["SunD_PHr"] = str(timedelta(seconds = SunD_PHr_record["SunD"]))
+        data["SunD_PHr"] = str(timedelta(seconds = SunD_PHr_record["SunD"]))
 
     # Calculate total rainfall over past hour
     Rain_PHr_record = analysis.past_hour_total(config, url_time, "Rain")
     if Rain_PHr_record != False and Rain_PHr_record != None:
-        if Rain_PHr_record["Rain"] != None:
-            data["Rain_PHr"] = round(Rain_PHr_record["Rain"], 2)
+        data["Rain_PHr"] = round(Rain_PHr_record["Rain"], 2)
 
     # Calculate three hour pressure tendency
     if data["StaP"] != None:
@@ -181,6 +179,7 @@ def data_graph_month():
 
 def data_graph_year():
     return flask.jsonify(None)
+
 
 def data_camera():
     return flask.jsonify(None)
