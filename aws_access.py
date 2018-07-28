@@ -139,10 +139,11 @@ def data_statistics():
     try:
         url_time = datetime.strptime(
             flask.request.args.get("date"), "%Y-%m-%d")
+        local_time = helpers.utc_to_local(config, url_time)
     except: return flask.jsonify(data)
 
     # Get record for that time
-    record = analysis.record_for_time(config, url_time, DbTable.DAYSTATS)
+    record = analysis.record_for_time(config, local_time, DbTable.DAYSTATS)
 
     if record != False:
         if record == None:
