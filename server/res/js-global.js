@@ -10,8 +10,7 @@ function displayLocalTime() {
 
     var formatted = nowDate + "/" + nowMonth + "/" + nowYear + 
         " at " + nowHour + ":" + nowMinute + ":" + nowSecond;
-    document.getElementById("item_local_time").innerHTML
-        = formatted;
+    document.getElementById("item_local_time").innerHTML = formatted;
 }
 
 function zeroPad(value) {

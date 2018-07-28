@@ -116,9 +116,9 @@
             }
 
             function processData(data) {
-                if (data["Time"] != null) {
+                if (data["Date"] != null) {
                     document.getElementById("item_data_time").innerHTML
-                        = data["Time"].split(" ")[1].slice(0, -3);
+                        = data["Date"].split(" ")[1].slice(0, -3);
 
                 } else {
                     document.getElementById("item_data_time").innerHTML
@@ -126,177 +126,40 @@
                         + zeroPad(requestedLocalTime.getMinutes());
                 }
 
-                if (data["AirT_Avg"] != null) {
-                    document.getElementById("item_AirT_Avg").innerHTML
-                        = data["AirT_Avg"] + "°C";
-                } else { document.getElementById("item_AirT_Avg").innerHTML = "no data"; }
+                display_value(data["AirT_Avg"], "item_AirT_Avg", "°C");
+                display_value(data["AirT_Min"], "item_AirT_Min", "°C");
+                display_value(data["AirT_Max"], "item_AirT_Max", "°C");
+                display_value(data["RelH_Avg"], "item_RelH_Avg", "%");
+                display_value(data["RelH_Min"], "item_RelH_Min", "%");
+                display_value(data["RelH_Max"], "item_RelH_Max", "%");
+                display_value(data["DewP_Avg"], "item_DewP_Avg", "°C");
+                display_value(data["DewP_Min"], "item_DewP_Min", "°C");
+                display_value(data["DewP_Max"], "item_DewP_Max", "°C");
+                display_value(data["WSpd_Avg"], "item_WSpd_Avg", " mph");
+                display_value(data["WSpd_Min"], "item_WSpd_Min", " mph");
+                display_value(data["WSpd_Max"], "item_WSpd_Max", " mph");
+                display_value(data["WDir_Avg"], "item_WDir_Avg", "°");
+                display_value(data["WDir_Min"], "item_WDir_Min", "°");
+                display_value(data["WDir_Max"], "item_WDir_Max", "°");
+                display_value(data["WGst_Avg"], "item_WGst_Avg", " mph");
+                display_value(data["WGst_Min"], "item_WGst_Min", " mph");
+                display_value(data["WGst_Max"], "item_WGst_Max", " mph");
+                display_value(data["SunD_Ttl"], "item_SunD_Ttl", "");
+                display_value(data["Rain_Ttl"], "item_Rain_Ttl", " mm");
+                display_value(data["MSLP_Avg"], "item_MSLP_Avg", " hPa");
+                display_value(data["MSLP_Min"], "item_MSLP_Min", " hPa");
+                display_value(data["MSLP_Max"], "item_MSLP_Max", " hPa");
+                display_value(data["ST10_Avg"], "item_ST10_Avg", "°C");
+                display_value(data["ST10_Min"], "item_ST10_Min", "°C");
+                display_value(data["ST10_Max"], "item_ST10_Max", "°C");
+                display_value(data["ST30_Avg"], "item_ST30_Avg", "°C");
+                display_value(data["ST30_Min"], "item_ST30_Min", "°C");
+                display_value(data["ST30_Max"], "item_ST30_Max", "°C");
+                display_value(data["ST00_Avg"], "item_ST00_Avg", "°C");
+                display_value(data["ST00_Min"], "item_ST00_Min", "°C");
+                display_value(data["ST00_Max"], "item_ST00_Max", "°C");
 
-                if (data["AirT_Min"] != null) {
-                    document.getElementById("item_AirT_Min").innerHTML
-                        = data["AirT_Min"] + "°C";
-                } else { document.getElementById("item_AirT_Min").innerHTML = "no data"; }
-
-                if (data["AirT_Max"] != null) {
-                    document.getElementById("item_AirT_Max").innerHTML
-                        = data["AirT_Max"] + "°C";
-                } else { document.getElementById("item_AirT_Max").innerHTML = "no data"; }
-
-
-                if (data["RelH_Avg"] != null) {
-                    document.getElementById("item_RelH_Avg").innerHTML
-                        = data["RelH_Avg"] + "%";
-                } else { document.getElementById("item_RelH_Avg").innerHTML = "no data"; }
-
-                if (data["RelH_Min"] != null) {
-                    document.getElementById("item_RelH_Min").innerHTML
-                        = data["RelH_Min"] + "%";
-                } else { document.getElementById("item_RelH_Min").innerHTML = "no data"; }
-
-                if (data["RelH_Max"] != null) {
-                    document.getElementById("item_RelH_Max").innerHTML
-                        = data["RelH_Max"] + "%";
-                } else { document.getElementById("item_RelH_Max").innerHTML = "no data"; }
-
-
-                if (data["DewP_Avg"] != null) {
-                    document.getElementById("item_DewP_Avg").innerHTML
-                        = data["DewP_Avg"] + "°C";
-                } else { document.getElementById("item_DewP_Avg").innerHTML = "no data"; }
-
-                if (data["DewP_Min"] != null) {
-                    document.getElementById("item_DewP_Min").innerHTML
-                        = data["DewP_Min"] + "°C";
-                } else { document.getElementById("item_DewP_Min").innerHTML = "no data"; }
-
-                if (data["DewP_Max"] != null) {
-                    document.getElementById("item_DewP_Max").innerHTML
-                        = data["DewP_Max"] + "°C";
-                } else { document.getElementById("item_DewP_Max").innerHTML = "no data"; }
-
-
-                if (data["WSpd_Avg"] != null) {
-                    document.getElementById("item_WSpd_Avg").innerHTML
-                        = data["WSpd_Avg"] + " mph";
-                } else { document.getElementById("item_WSpd_Avg").innerHTML = "no data"; }
-
-                if (data["WSpd_Min"] != null) {
-                    document.getElementById("item_WSpd_Min").innerHTML
-                        = data["WSpd_Min"] + " mph";
-                } else { document.getElementById("item_WSpd_Min").innerHTML = "no data"; }
-
-                if (data["WSpd_Max"] != null) {
-                    document.getElementById("item_WSpd_Max").innerHTML
-                        = data["WSpd_Max"] + " mph";
-                } else { document.getElementById("item_WSpd_Max").innerHTML = "no data"; }
-
-
-                if (data["WDir_Avg"] != null) {
-                    document.getElementById("item_WDir_Avg").innerHTML
-                        = data["WDir_Avg"] + "°";
-                } else { document.getElementById("item_WDir_Avg").innerHTML = "no data"; }
-
-                if (data["WDir_Min"] != null) {
-                    document.getElementById("item_WDir_Min").innerHTML
-                        = data["WDir_Min"] + "°";
-                } else { document.getElementById("item_WDir_Min").innerHTML = "no data"; }
-
-                if (data["WDir_Max"] != null) {
-                    document.getElementById("item_WDir_Max").innerHTML
-                        = data["WDir_Max"] + "°";
-                } else { document.getElementById("item_WDir_Max").innerHTML = "no data"; }
-
-
-                if (data["WGst_Avg"] != null) {
-                    document.getElementById("item_WGst_Avg").innerHTML
-                        = data["WGst_Avg"] + " mph";
-                } else { document.getElementById("item_WGst_Avg").innerHTML = "no data"; }
-
-                if (data["WGst_Min"] != null) {
-                    document.getElementById("item_WGst_Min").innerHTML
-                        = data["WGst_Min"] + " mph";
-                } else { document.getElementById("item_WGst_Min").innerHTML = "no data"; }
-
-                if (data["WGst_Max"] != null) {
-                    document.getElementById("item_WGst_Max").innerHTML
-                        = data["WGst_Max"] + " mph";
-                } else { document.getElementById("item_WGst_Max").innerHTML = "no data"; }
-
-
-                if (data["SunD_Ttl"] != null) {
-                    document.getElementById("item_SunD_Ttl").innerHTML
-                        = data["SunD_Ttl"] + " sec";
-                } else { document.getElementById("item_SunD_Ttl").innerHTML = "no data"; }
-
-                if (data["Rain_Ttl"] != null) {
-                    document.getElementById("item_Rain_Ttl").innerHTML
-                        = data["Rain_Ttl"] + " mm";
-                } else { document.getElementById("item_Rain_Ttl").innerHTML = "no data"; }
-
-
-                if (data["MSLP_Avg"] != null) {
-                    document.getElementById("item_MSLP_Avg").innerHTML
-                        = data["MSLP_Avg"] + " hPa";
-                } else { document.getElementById("item_MSLP_Avg").innerHTML = "no data"; }
-
-                if (data["MSLP_Min"] != null) {
-                    document.getElementById("item_MSLP_Min").innerHTML
-                        = data["MSLP_Min"] + " hPa";
-                } else { document.getElementById("item_MSLP_Min").innerHTML = "no data"; }
-
-                if (data["MSLP_Max"] != null) {
-                    document.getElementById("item_MSLP_Max").innerHTML
-                        = data["MSLP_Max"] + " hPa";
-                } else { document.getElementById("item_MSLP_Max").innerHTML = "no data"; }
-
-
-                if (data["ST10_Avg"] != null) {
-                    document.getElementById("item_ST10_Avg").innerHTML
-                        = data["ST10_Avg"] + "°C";
-                } else { document.getElementById("item_ST10_Avg").innerHTML = "no data"; }
-
-                if (data["ST10_Min"] != null) {
-                    document.getElementById("item_ST10_Min").innerHTML
-                        = data["ST10_Min"] + "°C";
-                } else { document.getElementById("item_ST10_Min").innerHTML = "no data"; }
-
-                if (data["ST10_Max"] != null) {
-                    document.getElementById("item_ST10_Max").innerHTML
-                        = data["ST10_Max"] + "°C";
-                } else { document.getElementById("item_ST10_Max").innerHTML = "no data"; }
-
-
-                if (data["ST30_Avg"] != null) {
-                    document.getElementById("item_ST30_Avg").innerHTML
-                        = data["ST30_Avg"] + "°C";
-                } else { document.getElementById("item_ST30_Avg").innerHTML = "no data"; }
-
-                if (data["ST30_Min"] != null) {
-                    document.getElementById("item_ST30_Min").innerHTML
-                        = data["ST30_Min"] + "°C";
-                } else { document.getElementById("item_ST30_Min").innerHTML = "no data"; }
-
-                if (data["ST30_Max"] != null) {
-                    document.getElementById("item_ST30_Max").innerHTML
-                        = data["ST30_Max"] + "°C";
-                } else { document.getElementById("item_ST30_Max").innerHTML = "no data"; }
-
-
-                if (data["ST00_Avg"] != null) {
-                    document.getElementById("item_ST00_Avg").innerHTML
-                        = data["ST00_Avg"] + "°C";
-                } else { document.getElementById("item_ST00_Avg").innerHTML = "no data"; }
-
-                if (data["ST00_Min"] != null) {
-                    document.getElementById("item_ST00_Min").innerHTML
-                        = data["ST00_Min"] + "°C";
-                } else { document.getElementById("item_ST00_Min").innerHTML = "no data"; }
-
-                if (data["ST00_Max"] != null) {
-                    document.getElementById("item_ST00_Max").innerHTML
-                        = data["ST00_Max"] + "°C";
-                } else { document.getElementById("item_ST00_Max").innerHTML = "no data"; }
-
-                document.getElementById("scroller_time").innerHTML = data["Time"].split(" ")[0];
+                document.getElementById("scroller_time").innerHTML = data["Date"].split(" ")[0];
             }
 
 
