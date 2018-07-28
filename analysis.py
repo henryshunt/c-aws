@@ -14,16 +14,16 @@ def record_for_time(config, time, table):
             cursor = database.cursor()
 
             # Query respective database table
-            if table == DbTable.UTCREPORTS:
-                cursor.execute(queries.SELECT_SINGLE_UTCREPORTS,
+            if table == DbTable.REPORTS:
+                cursor.execute(queries.SELECT_SINGLE_REPORT,
                                (time.strftime("%Y-%m-%d %H:%M:%S"),))
 
-            elif table == DbTable.UTCENVIRON:
-                cursor.execute(queries.SELECT_SINGLE_UTCENVIRON,
+            elif table == DbTable.ENVREPORTS:
+                cursor.execute(queries.SELECT_SINGLE_ENVREPORT,
                                (time.strftime("%Y-%m-%d %H:%M:%S"),))
 
-            elif table == DbTable.LOCALSTATS:
-                cursor.execute(queries.SELECT_SINGLE_LOCALSTATS,
+            elif table == DbTable.DAYSTATS:
+                cursor.execute(queries.SELECT_SINGLE_DAYSTAT,
                                (time.strftime("%Y-%m-%d"),))
 
             return cursor.fetchone()
@@ -39,18 +39,18 @@ def records_in_range(config, start, end, table):
             cursor = database.cursor()
 
             # Query respective database table
-            if table == DbTable.UTCREPORTS:
-                cursor.execute(queries.SELECT_RANGE_UTCREPORTS,
+            if table == DbTable.REPORTS:
+                cursor.execute(queries.SELECT_RANGE_REPORT,
                                (start.strftime("%Y-%m-%d %H:%M:%S"),
                                 end.strftime("%Y-%m-%d %H:%M:%S")))
 
-            elif table == DbTable.UTCENVIRON:
-                cursor.execute(queries.SELECT_RANGE_UTCENVIRON,
+            elif table == DbTable.ENVREPORTS:
+                cursor.execute(queries.SELECT_RANGE_ENVREPORT,
                                (start.strftime("%Y-%m-%d %H:%M:%S"),
                                 end.strftime("%Y-%m-%d %H:%M:%S")))
 
-            elif table == DbTable.LOCALSTATS:
-                cursor.execute(queries.SELECT_RANGE_LOCALSTATS,
+            elif table == DbTable.DAYSTATS:
+                cursor.execute(queries.SELECT_RANGE_DAYSTAT,
                                (start.strftime("%Y-%m-%d"),
                                 end.strftime("%Y-%m-%d")))
 
@@ -67,20 +67,20 @@ def fields_in_range(config, start, end, fields, table):
             cursor = database.cursor()
 
             # Query respective database table
-            if table == DbTable.UTCREPORTS:
-                cursor.execute(queries.SELECT_FIELDS_UTCREPORTS
+            if table == DbTable.REPORTS:
+                cursor.execute(queries.SELECT_FIELDS_REPORT
                                .format(fields),
                                (start.strftime("%Y-%m-%d %H:%M:%S"),
                                 end.strftime("%Y-%m-%d %H:%M:%S")))
 
-            elif table == DbTable.UTCENVIRON:
-                cursor.execute(queries.SELECT_FIELDS_UTCENVIRON
+            elif table == DbTable.ENVREPORTS:
+                cursor.execute(queries.SELECT_FIELDS_ENVREPORT
                                .format(fields),
                                (start.strftime("%Y-%m-%d %H:%M:%S"),
                                 end.strftime("%Y-%m-%d %H:%M:%S")))
 
-            elif table == DbTable.LOCALSTATS:
-                cursor.execute(queries.SELECT_FIELDS_LOCALSTATS
+            elif table == DbTable.DAYSTATS:
+                cursor.execute(queries.SELECT_FIELDS_DAYSTAT
                                .format(fields),
                                (start.strftime("%Y-%m-%d"),
                                 end.strftime("%Y-%m-%d")))
@@ -111,7 +111,7 @@ def past_hour_total(config, now, column):
             database.row_factory = sqlite3.Row
             cursor = database.cursor()
 
-            cursor.execute(queries.SELECT_PAST_HOUR_UTCREPORTS
+            cursor.execute(queries.SELECT_PAST_HOUR_REPORT
                            .format(column),
                            (start.strftime("%Y-%m-%d %H:%M:%S"),
                             end.strftime("%Y-%m-%d %H:%M:%S")))

@@ -363,7 +363,7 @@ def do_generate_stats(utc):
     if new_stats == False: gpio.output(24, gpio.HIGH); return
 
     # -- GET CURRENT STATS -----------------------------------------------------
-    cur_stats = analysis.record_for_time(config, local_time, DbTable.LOCALSTATS)
+    cur_stats = analysis.record_for_time(config, local_time, DbTable.DAYSTATS)
     if cur_stats == False: gpio.output(24, gpio.HIGH); return
 
     # -- SAVE DATA -------------------------------------------------------------
@@ -430,7 +430,7 @@ def every_minute():
     time.sleep(0.15)
 
     # Read CPU temperature before anything else happens. Considered idle temp
-    if config.envReports_logging == True:
+    if config.envReport_logging == True:
         try:
             global CPUT_value
             CPUT_value = round(CPUTemperature().temperature, 1)
@@ -438,9 +438,9 @@ def every_minute():
 
     # Run actions if relevant configuration modifiers are active
     do_log_report(utc)
-    if config.envReports_logging == True: do_log_environment(utc)
+    if config.envReport_logging == True: do_log_environment(utc)
     if config.camera_logging == True: do_log_camera(utc)
-    if config.dayStats_generation == True: do_generate_stats(utc)
+    if config.dayStat_generation == True: do_generate_stats(utc)
     gpio.output(23, gpio.LOW)
 
 def every_second():

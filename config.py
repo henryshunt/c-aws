@@ -8,12 +8,12 @@ class ConfigData():
         self.data_directory = None
         self.database_path = None
         self.camera_drive = None
-        self.envReports_logging = None
+        self.envReport_logging = None
         self.camera_logging = None
-        self.dayStats_generation = None
-        self.reports_uploading = None
-        self.envReports_uploading = None
-        self.dayStats_uploading = None
+        self.dayStat_generation = None
+        self.report_uploading = None
+        self.envReport_uploading = None
+        self.dayStat_uploading = None
         self.camera_uploading = None
         self.local_network_server = None
         self.aws_location = None
@@ -70,18 +70,18 @@ class ConfigData():
             if self.remote_ftp_password == "": self.remote_ftp_password = None
             
             # Load boolean configuration modifiers
-            self.envReports_logging = (parser
-                .getboolean("ConfigModifiers", "EnvReportsLogging"))
+            self.envReport_logging = (parser
+                .getboolean("ConfigModifiers", "EnvReportLogging"))
             self.camera_logging = (parser
                 .getboolean("ConfigModifiers", "CameraLogging"))
-            self.dayStats_generation = (parser
-                .getboolean("ConfigModifiers", "DayStatsGeneration"))
-            self.reports_uploading = (parser
-                .getboolean("ConfigModifiers", "ReportsUploading"))
-            self.envReports_uploading = (parser
-                .getboolean("ConfigModifiers", "EnvReportsUploading"))
-            self.dayStats_uploading = (parser
-                .getboolean("ConfigModifiers", "DayStatsUploading"))
+            self.dayStat_generation = (parser
+                .getboolean("ConfigModifiers", "DayStatGeneration"))
+            self.report_uploading = (parser
+                .getboolean("ConfigModifiers", "ReportUploading"))
+            self.envReport_uploading = (parser
+                .getboolean("ConfigModifiers", "EnvReportUploading"))
+            self.dayStat_uploading = (parser
+                .getboolean("ConfigModifiers", "DayStatUploading"))
             self.camera_uploading = (parser
                 .getboolean("ConfigModifiers", "CameraUploading"))
             self.local_network_server = (parser
@@ -97,17 +97,17 @@ class ConfigData():
             self.camera_drive == None):
             return False
 
-        if ((self.envReports_logging == False and
-            self.envReports_uploading == True) or
+        if ((self.envReport_logging == False and
+            self.envReport_uploading == True) or
             (self.camera_logging == False and
             self.camera_uploading == True) or
-            (self.dayStats_generation == False and
-            self.dayStats_uploading == True)):
+            (self.dayStat_generation == False and
+            self.dayStat_uploading == True)):
             return False
 
-        if (self.reports_uploading == True or
-            self.envReports_uploading == True or
-            self.dayStats_uploading == True):
+        if (self.report_uploading == True or
+            self.envReport_uploading == True or
+            self.dayStat_uploading == True):
             
             if self.remote_sql_server == None: return False
 

@@ -76,7 +76,7 @@ def data_now():
     except: return flask.jsonify(data)
 
     # Get record for that time
-    record = analysis.record_for_time(config, url_time, DbTable.UTCREPORTS)
+    record = analysis.record_for_time(config, url_time, DbTable.REPORTS)
 
     if record != False:
         if record == None:
@@ -84,7 +84,7 @@ def data_now():
             if not flask.request.args.get("abs") == "1":
                 url_time -= timedelta(minutes = 1)
                 record = analysis.record_for_time(config, url_time,
-                                                  DbTable.UTCREPORTS)
+                                                  DbTable.REPORTS)
                 
                 if record != False:
                     if record != None:
@@ -114,7 +114,7 @@ def data_now():
     # Calculate three hour pressure tendency
     if data["StaP"] != None:
         StaP_PTH_record = analysis.record_for_time(config,
-            url_time - timedelta(hours = 3), DbTable.UTCREPORTS)
+            url_time - timedelta(hours = 3), DbTable.REPORTS)
     
         if StaP_PTH_record != False and StaP_PTH_record != None:
             if StaP_PTH_record["StaP"] != None:
@@ -144,7 +144,7 @@ def data_statistics():
     except: return flask.jsonify(data)
 
     # Get record for that time
-    record = analysis.record_for_time(config, url_time, DbTable.LOCALSTATS)
+    record = analysis.record_for_time(config, url_time, DbTable.DAYSTATS)
 
     if record != False:
         if record == None:
@@ -152,7 +152,7 @@ def data_statistics():
             if not flask.request.args.get("abs") == "1":
                 url_time -= timedelta(minutes = 1)
                 record = analysis.record_for_time(config, url_time,
-                                                  DbTable.LOCALSTATS)
+                                                  DbTable.DAYSTATS)
                 
                 if record != False:
                     if record != None:
@@ -196,7 +196,7 @@ def data_about():
     except: return flask.jsonify(data)
 
     # Get record for that time
-    record = analysis.record_for_time(config, url_time, DbTable.UTCENVIRON)
+    record = analysis.record_for_time(config, url_time, DbTable.ENVREPORTS)
 
     if record != False:
         if record == None:
@@ -204,7 +204,7 @@ def data_about():
             if not flask.request.args.get("abs") == "1":
                 url_time -= timedelta(minutes = 1)
                 record = analysis.record_for_time(config, url_time,
-                                                  DbTable.UTCENVIRON)
+                                                  DbTable.ENVREPORTS)
                 
                 if record != False:
                     if record != None:

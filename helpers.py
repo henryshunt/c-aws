@@ -72,6 +72,4 @@ def degrees_to_compass(degrees):
     elif degrees >= 293 and degrees < 338: return "NW"
 
 def none_to_null(value):
-    if value == None:
-        return "NULL"
-    else: return value
+    return "NULL" if value == None else value

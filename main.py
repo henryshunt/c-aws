@@ -89,9 +89,9 @@ if config.local_network_server == True:
     except: helpers.init_exit(9, True)
 
 # -- RUN SUPPORT ---------------------------------------------------------------
-if (config.reports_uploading == True or
-    config.envReports_uploading == True or
-    config.dayStats_uploading == True or
+if (config.report_uploading == True or
+    config.envReport_uploading == True or
+    config.dayStat_uploading == True or
     config.camera_uploading == True):
 
     try:

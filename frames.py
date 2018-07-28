@@ -25,6 +25,6 @@ class DataUtcEnviron():
         self.cpu_temperature = None
 
 class DbTable(Enum):
-    UTCREPORTS = 1
-    UTCENVIRON = 2
-    LOCALSTATS = 3
+    REPORTS = 1
+    ENVREPORTS = 2
+    DAYSTATS = 3
