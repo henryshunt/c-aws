@@ -11,6 +11,7 @@ import logging
 
 import daemon
 import flask
+import astral
 
 import analysis
 import helpers
@@ -205,6 +206,13 @@ def data_graph_day():
     if records == False or len(records) == 0: return flask.jsonify(data)
 
     # Fill in missing times in data range
+    date_loop = bounds[0]
+    while date_loop <= bounds[1]:
+        for i in records:
+            if i["Time"] == date_loop:
+                data[i.strftime("%Y-%m-%d %H:%M:%S")] == i
+
+        #if 
     for i in range(bounds[0], bounds[1]):
         if any(d["Time"] == i.strftime("%Y-%m-%d %H:%M:%S") for d in records):
             data[i.strftime("%Y-%m-%d %H:%M:%S")] = d
@@ -219,7 +227,42 @@ def data_graph_year():
 
 
 def data_camera():
-    return flask.jsonify(None)
+    global config
+    data = dict.fromkeys(["Time", "ImgP", "SRis", "SSet"])
+
+    # Try parsing time specified in URL
+    if flask.request.args.get("time") == None: return flask.jsonify(data)
+    try:
+        url_time = datetime.strptime(
+            flask.request.args.get("time"), "%Y-%m-%dT%H-%M-%S")
+    except: return flask.jsonify(data)
+
+    # Get image for that time
+    image_path = os.path.join(config.camera_drive,
+        url_time.strftime("%Y/%m/%d/%Y-%m-%dT%H-%M-%S") + ".jpg")
+
+    # Go back five minutes if no image and not in absolute mode
+    if not os.path.isfile(image_path):
+        if not flask.request.args.get("abs") == "1":
+            url_time -= timedelta(minutes = 5)
+            image_path = os.path.join(config.camera_drive,
+                url_time.strftime("%Y/%m/%d/%Y-%m-%dT%H-%M-%S") + ".jpg")
+
+            if os.path.isfile(image_path): data["ImgP"] = image_path
+            else: url_time += timedelta(minutes = 1)
+    else: data["ImgP"] = image_path
+
+    # Calculate sunrise and sunset times
+    location = astral.Location(
+        ("", "", config.aws_latitude, config.aws_longitude, "UTC",
+         config.aws_elevation))
+    solar = location.sun(date = url_time, local = False)
+    
+    data["SRis"] = solar["sunrise"]
+    data["SSet"] = solar["sunset"]
+    
+    data["Time"] = url_time.strftime("%Y-%m-%d %H:%M:%S")
+    return flask.jsonify(data)
 
 def data_about():
     global config, startup_time
