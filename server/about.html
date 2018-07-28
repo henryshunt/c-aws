@@ -77,25 +77,10 @@
                         + zeroPad(requestedLocalTime.getMinutes());
                 }
 
-                if (data["STim"] != null) {
-                    document.getElementById("item_STim").innerHTML
-                        = data["STim"];
-                } else { document.getElementById("item_STim").innerHTML = "no data"; }
-
-                if (data["EncT"] != null) {
-                    document.getElementById("item_EncT").innerHTML
-                        = data["EncT"] + "°C";
-                } else { document.getElementById("item_EncT").innerHTML = "no data"; }
-
-                if (data["CPUT"] != null) {
-                    document.getElementById("item_CPUT").innerHTML
-                        = data["CPUT"] + "°C";
-                } else { document.getElementById("item_CPUT").innerHTML = "no data"; }
-
-                if (data["IDRS"] != null) {
-                    document.getElementById("item_IDRS").innerHTML
-                        = data["IDRS"] + " gb";
-                } else { document.getElementById("item_IDRS").innerHTML = "no data"; }
+                display_value(data["STim"], "item_STim", "");
+                display_value(data["EncT"], "item_EncT", "°C");
+                display_value(data["CPUT"], "item_CPUT", "°C");
+                display_value(data["IDRS"], "item_IDRS", " gb");
 
                 if (data["CDRS"] != null) {
                     if (data["CDRS"] == false) {

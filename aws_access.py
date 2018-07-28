@@ -185,6 +185,7 @@ def data_camera():
     return flask.jsonify(None)
 
 def data_about():
+    global startup_time
     data = dict.fromkeys(["Time", "STim", "EncT", "CPUT", "IDRS", "CDRS"])
 
     # Try parsing time specified in URL
