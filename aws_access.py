@@ -135,10 +135,10 @@ def data_statistics():
                           "ST00_Avg", "SLft", "SRgt"])
 
     # Try parsing time specified in URL
-    if flask.request.args.get("date") == None: return flask.jsonify(data)
+    if flask.request.args.get("time") == None: return flask.jsonify(data)
     try:
         url_time = datetime.strptime(
-            flask.request.args.get("date"), "%Y-%m-%d")
+            flask.request.args.get("time"), "%Y-%m-%dT%H-%M-%S")
         local_time = helpers.utc_to_local(config, url_time)
     except: return flask.jsonify(data)
 
