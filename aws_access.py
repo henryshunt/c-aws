@@ -213,12 +213,14 @@ def data_graph_day():
     for field in range(1, len(fields)): data.append([])
 
 
-    date_loop = bounds[0]
+    date_loop = helpers.local_to_utc(config, bounds[0])
 
-    while date_loop <= bounds[1]:
+    while date_loop <= helpers.local_to_utc(config, bounds[1]):
         record = None
         for i in records:
-            if i["Time"] == date_loop.strftime("%Y-%m-%d %H:%M:%S"): record = i
+            if i["Time"] == date_loop.strftime("%Y-%m-%d %H:%M:%S"):
+                record = dict()
+                for j in i: record[j] = i[j]
 
         record_time = helpers.utc_to_local(
             config, date_loop.strftime("%Y-%m-%d %H:%M:%S"))
