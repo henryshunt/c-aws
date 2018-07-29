@@ -498,6 +498,7 @@ def entry_point():
     # -- INIT GPIO AND LEDS ----------------------------------------------------
     gpio.setwarnings(False); gpio.setmode(gpio.BCM)
     gpio.setup(23, gpio.OUT); gpio.setup(24, gpio.OUT)
+    gpio.output(23, gpio.LOW); gpio.output(24, gpio.LOW)
 
     # -- SET UP SENSORS --------------------------------------------------------
     gpio.setup(17, gpio.IN, pull_up_down = gpio.PUD_DOWN)

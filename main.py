@@ -103,6 +103,8 @@ if (config.report_uploading == True or
 # -- RUN DATA ------------------------------------------------------------------
 try:
     proc_data = subprocess.Popen(["sudo", "python3", "aws_data.py"])
+    gpio.output(23, gpio.HIGH); gpio.output(24, gpio.HIGH)
+    
 except:
     if proc_access != None: proc_access.terminate()
     if proc_support != None: proc_support.terminate()
