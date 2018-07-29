@@ -233,9 +233,6 @@ def data_graph_day():
         date_loop += timedelta(minutes = 1)
     return flask.jsonify(data)
 
-def data_graph_month():
-    return flask.jsonify(None)
-
 def data_graph_year():
     return flask.jsonify(None)
 
@@ -363,7 +360,6 @@ def entry_point():
     server.add_url_rule("/index.html", view_func = page_now)
     server.add_url_rule("/statistics.html", view_func = page_statistics)
     server.add_url_rule("/graph_day.html", view_func = page_graph_day)
-    server.add_url_rule("/graph_month.html", view_func = page_graph_month)
     server.add_url_rule("/graph_year.html", view_func = page_graph_year)
     server.add_url_rule("/camera.html", view_func = page_camera)
     server.add_url_rule("/about.html", view_func = page_about)
@@ -371,7 +367,6 @@ def entry_point():
     server.add_url_rule("/data/now.json", view_func = data_now)
     server.add_url_rule("/data/statistics.json", view_func = data_statistics)
     server.add_url_rule("/data/graph-day.json", view_func = data_graph_day)
-    server.add_url_rule("/data/graph-month.json", view_func = data_graph_month)
     server.add_url_rule("/data/graph-year.json", view_func = data_graph_year)
     server.add_url_rule("/data/camera.json", view_func = data_camera)
     server.add_url_rule("/data/camera/<year>/<month>/<day>/<file_name>",
