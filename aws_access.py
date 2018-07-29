@@ -223,17 +223,12 @@ def data_graph_day():
             if i["Time"] == date_loop.strftime("%Y-%m-%d %H:%M:%S"):
                 for j in i.keys():
                     if j != "Time": record[j] = i[j]
+                break
 
-        record_time = date_loop.strftime("%Y-%m-%d %H:%M:%S")
-
-        if len(record) == 0:
-            for field in range(1, len(fields)):
-                point = { "x": record_time, "y": None }
-                data[field - 1].append(point)
-        else:
-            for field in range(1, len(fields)):
-                point = { "x": record_time, "y": record[fields[field]] }
-                data[field - 1].append(point)
+        for field in range(1, len(fields)):
+            value = None if len(record) == 0 else record[fields[field]]
+            point = { "x": date_loop.strftime("%Y-%m-%d %H:%M:%S"), "y": value }
+            data[field - 1].append(point)
 
         date_loop += timedelta(minutes = 1)
     return flask.jsonify(data)
