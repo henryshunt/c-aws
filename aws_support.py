@@ -112,8 +112,8 @@ def do_process_data_queue():
         try:
             request = requests.post(
                 config.remote_sql_server, to_upload, timeout = 8)
-            if request.text != "0": data_queue.appendleft(data); return
-        except: data_queue.appendleft(data); return
+            if request.text != "0": data_queue.appendleft(data); break
+        except: data_queue.appendleft(data); break
 
     is_processing_data = False
 
@@ -145,7 +145,7 @@ def do_process_camera_queue():
             # Upload the image
             with open(data, "rb") as file:
                 ftp.storbinary("STOR " + os.path.basename(data), file)
-        except: camera_queue.appendleft(data); return
+        except: camera_queue.appendleft(data); break
 
     is_processing_camera = False
 
