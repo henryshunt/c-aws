@@ -202,11 +202,12 @@ def data_graph_day():
     except: return flask.jsonify(data)
     
     bounds = helpers.day_bounds_utc(config, local_time, True)
-    fields = flask.request.args.get("fields").split(",")
+    fields = flask.request.args.get("fields")
 
     # Get data in range for specified parameters
     records = analysis.fields_in_range(config,
         bounds[0], bounds[1], fields, DbTable[flask.request.args.get("table")])
+    fields = fields.split(",")
 
     if records == False or len(records) == 0: return flask.jsonify(data)
     for field in range(1, len(fields)): data.append([])
