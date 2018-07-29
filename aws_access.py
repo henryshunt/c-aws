@@ -183,8 +183,8 @@ def data_statistics():
             for key in dict(zip(record.keys(), record)):
                 if key in data: data[key] = record[key]
 
-    if record["SunD_Ttl"] != None:
-        record["SunD_Ttl"] = str(timedelta(seconds = record["SunD_Ttl"]))
+    if data["SunD_Ttl"] != None:
+        data["SunD_Ttl"] = str(timedelta(seconds = data["SunD_Ttl"]))
 
     data["Time"] = url_time.strftime("%Y-%m-%d %H:%M:%S")
     return flask.jsonify(data)
