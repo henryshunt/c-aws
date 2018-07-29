@@ -202,32 +202,30 @@ def data_graph_day():
     except: return flask.jsonify(data)
     
     bounds = helpers.day_bounds_utc(config, local_time, True)
+    fields = flask.request.args.get("fields").split(",")
 
     # Get data in range for specified parameters
-    records = analysis.fields_in_range(
-        config, bounds[0], bounds[1], flask.request.args.get("fields"),
-        DbTable[flask.request.args.get("table")])
+    records = analysis.fields_in_range(config,
+        bounds[0], bounds[1], fields, DbTable[flask.request.args.get("table")])
 
     if records == False or len(records) == 0: return flask.jsonify(data)
-    fields = flask.request.args.get("fields").split(",")
     for field in range(1, len(fields)): data.append([])
 
-
+    # Iterate over each minute of the day
     date_loop = helpers.local_to_utc(config, bounds[0])
 
     while date_loop <= helpers.local_to_utc(config, bounds[1]):
-        record = None
+        record = dict()
+
+        # Check for record for current time, copy values if exists
         for i in records:
             if i["Time"] == date_loop.strftime("%Y-%m-%d %H:%M:%S"):
-                record = dict()
                 for j in i.keys():
-                    print(i[j])
                     if j != "Time": record[j] = i[j]
 
-        record_time = helpers.utc_to_local(
-            config, date_loop).strftime("%Y-%m-%d %H:%M:%S")
+        record_time = date_loop.strftime("%Y-%m-%d %H:%M:%S")
 
-        if record == None:
+        if len(record) == 0:
             for field in range(1, len(fields)):
                 point = { "x": record_time, "y": None }
                 data[field - 1].append(point)
