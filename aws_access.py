@@ -209,26 +209,28 @@ def data_graph_day():
         DbTable[flask.request.args.get("table")])
 
     if records == False or len(records) == 0: return flask.jsonify(data)
+    fields = flask.request.args.get("fields").split(",")
+    for field in range(1, len(fields)): data.append([])
 
-    # Fill in missing times in data range
+
     date_loop = bounds[0]
 
     while date_loop <= bounds[1]:
-        if any(d["Time"] == date_loop.strftime("%Y-%m-%d %H:%M:%S")
-            for d in records):
-        
-            record_dict = dict()
-            for i in flask.request.args.get("fields").split(","):
-                if i in records[date_loop.strftime("%Y-%m-%d %H:%M:%S")]:
-                    record_dict[i] = records[i]
+        record = None
+        for i in records:
+            if i["Time"] == date_loop.strftime("%Y-%m-%d %H:%M:%S"): record = i
 
-            data[date_loop.strftime("%Y-%m-%d %H:%M:%S")] = record_dict
+        record_time = helpers.utc_to_local(
+            config, date_loop.strftime("%Y-%m-%d %H:%M:%S"))
 
+        if record == None:
+            for field in range(1, len(fields)):
+                point = { "x": record_time, "y": None }
+                data[field - 1].append(point)
         else:
-            record_dict = dict()
-            for i in flask.request.args.get("fields").split(","):
-                record_dict[i] = None
-            data[date_loop.strftime("%Y-%m-%d %H:%M:%S")] = record_dict
+            for field in range(1, len(fields)):
+                point = { "x": record_time, "y": record[fields[field]] }
+                data[field - 1].append(point)
 
         date_loop += timedelta(minutes = 1)
     return flask.jsonify(data)
