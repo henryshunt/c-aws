@@ -198,10 +198,10 @@ def data_graph_day():
     try:
         url_time = datetime.strptime(
             flask.request.args.get("time"), "%Y-%m-%dT%H-%M-%S")
-        local_time = helpers.utc_to_local(config, url_time)
     except: return flask.jsonify(data)
     
-    bounds = helpers.day_bounds_utc(config, local_time, True)
+    bounds = helpers.day_bounds_utc(
+        config, helpers.utc_to_local(config, url_time), True)
     fields = flask.request.args.get("fields")
 
     # Get data in range for specified parameters
