@@ -220,10 +220,12 @@ def data_graph_day():
         for i in records:
             if i["Time"] == date_loop.strftime("%Y-%m-%d %H:%M:%S"):
                 record = dict()
-                for j in i: record[j] = i[j]
+                for j in i.keys():
+                    print(i[j])
+                    if j != "Time": record[j] = i[j]
 
         record_time = helpers.utc_to_local(
-            config, date_loop.strftime("%Y-%m-%d %H:%M:%S"))
+            config, date_loop).strftime("%Y-%m-%d %H:%M:%S")
 
         if record == None:
             for field in range(1, len(fields)):
@@ -388,7 +390,7 @@ def entry_point():
     logging.getLogger("werkzeug").setLevel(logging.CRITICAL)
     server.run(host = "0.0.0.0", threaded = True)
 
-if __name__ == "__main__":
-    current_dir = os.path.dirname(os.path.realpath(__file__))
-    with daemon.DaemonContext(working_directory = current_dir):
-        entry_point()
+#if __name__ == "__main__":
+ #   current_dir = os.path.dirname(os.path.realpath(__file__))
+#    with daemon.DaemonContext(working_directory = current_dir):
+entry_point()
