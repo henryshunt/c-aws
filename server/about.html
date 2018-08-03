@@ -98,7 +98,7 @@
                     "Enter the passphrase to send the command to the C-AWS computer:");
 
                 if (passphrase == "password") {
-                    window.location.replace("ctrl/" + command);
+                    $.get("ctrl/command?cmd=" + command);
                 } else { alert("Incorrect passphrase, command not sent."); }
             }
         </script>
