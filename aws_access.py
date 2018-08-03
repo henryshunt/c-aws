@@ -189,7 +189,6 @@ def data_statistics():
     data["Time"] = url_time.strftime("%Y-%m-%d %H:%M:%S")
     return flask.jsonify(data)
 
-
 def data_graph_day():
     global config; data = []
 
@@ -235,7 +234,6 @@ def data_graph_day():
 
 def data_graph_year():
     return flask.jsonify(None)
-
 
 def data_camera():
     global config
@@ -334,15 +332,15 @@ def data_about():
     data["Time"] = url_time.strftime("%Y-%m-%d %H:%M:%S")
     return flask.jsonify(data)
 
+def ctrl_command():
+    if flask.request.args.get("cmd") == None: return
 
-def do_power_cmd(command):
-    time.sleep(5)
-    if command == "shutdown": os.system("shutdown -h now")
-    elif command == "restart": os.system("shutdown -r now")
-
-def ctrl_command(command):
-    do_power_cmd(command)
-    return flask.redirect("about.html")
+    if flask.request.args.get("cmd") == "shutdown":
+        os.system("shutdown -h now")
+    elif flask.request.args.get("cmd") == "restart":
+        os.system("shutdown -r now")
+    else: return
+    
 
 # ENTRY POINT ==================================================================
 def entry_point():
@@ -372,7 +370,7 @@ def entry_point():
     server.add_url_rule("/data/camera/<year>/<month>/<day>/<file_name>",
         view_func = file_camera)
     server.add_url_rule("/data/about.json", view_func = data_about)
-    server.add_url_rule("/ctrl/<command>", view_func = ctrl_command)
+    server.add_url_rule("/ctrl/command", view_func = ctrl_command)
 
     # -- START SERVER ----------------------------------------------------------
     server.config["SEND_FILE_MAX_AGE_DEFAULT"] = 0
