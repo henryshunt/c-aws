@@ -75,7 +75,24 @@
                 <a class="scroller_button" href="camera.html?time={{ scroller_next }}">▶</a>
             </div>
 
-            <img src="{{ image_path }}" style="width: 100%">
+            <div class="group">
+                <div class="group_header">
+                    <p class="group_title">Astronomical Info</p>
+                </div>
+
+                <table class="field_table">
+                    <tr>
+                        <td><p class="field_label">Sunrise Time:</p></td>
+                        <td><p id="item_SRis" class="field_value"></p></td>
+                    </tr>
+                    <tr>
+                        <td><p class="field_label">Sunset Time:</p></td>
+                        <td><p id="item_SSet" class="field_value"></p></td>
+                    </tr>
+                </table>
+            </div>
+
+            <img src="data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7" style="width: 100%">
         </div>
 
         <div id="footer">
