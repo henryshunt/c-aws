@@ -8,6 +8,7 @@ from datetime import datetime, timedelta
 import os
 import sys
 import logging
+import RPi.GPIO as gpio
 
 import daemon
 import flask
@@ -21,6 +22,13 @@ from frames import DbTable
 # GLOBAL VARIABLES -------------------------------------------------------------
 config = ConfigData()
 startup_time = None
+
+# INTERRUPTS -------------------------------------------------------------------
+def do_shutdown():
+    print("shutdown")
+
+def do_restart():
+    print("restart")
 
 # PAGE SERVERS -----------------------------------------------------------------
 def page_now():
@@ -349,6 +357,15 @@ def entry_point():
     if len(sys.argv) == 2:
         startup_time = datetime.strptime(sys.argv[1], "%Y-%m-%dT%H:%M:%S")
     else: startup_time = datetime.utcnow()
+
+    # SETUP POWER BUTTONS ------------------------------------------------------
+    gpio.setwarnings(False); gpio.setmode(gpio.BCM)
+    gpio.setup(17, gpio.IN, gpio.PUD_DOWN)
+    gpio.add_event_detect(17, gpio.FALLING, callback = do_shutdown,
+                          bouncetime = 500)
+    gpio.setup(18, gpio.IN, gpio.PUD_DOWN)
+    gpio.add_event_detect(18, gpio.FALLING, callback = do_restart,
+                          bouncetime = 500)
 
     # -- CREATE SERVER ---------------------------------------------------------
     server = flask.Flask(__name__, static_folder = "server/res",

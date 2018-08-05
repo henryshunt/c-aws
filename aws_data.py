@@ -492,8 +492,7 @@ def do_trigger_rain(channel):
 
 # ENTRY POINT ==================================================================
 def entry_point():
-    global config; config.load()
-    global data_start, disable_sampling
+    global config, data_start, disable_sampling; config.load()
 
     # -- INIT GPIO AND LEDS ----------------------------------------------------
     gpio.setwarnings(False); gpio.setmode(gpio.BCM)
