@@ -392,7 +392,7 @@ def entry_point():
     server.config["SEND_FILE_MAX_AGE_DEFAULT"] = 0
     logging.getLogger("werkzeug").setLevel(logging.CRITICAL)
     threading.Thread(target = 
-                     lambda: server.run(host = "0.0.0.0", threaded = True))
+        lambda: server.run(host = "0.0.0.0", threaded = True)).start()
 
     # Prevent main thread from ending, to sustain interrupt monitoring
     while True: time.sleep(900)
