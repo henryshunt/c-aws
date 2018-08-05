@@ -20,7 +20,7 @@ import queries
 print("--- Custom Automatic Weather Station ---")
 print("Program: Software Entry Point")
 print("Author:  Henry Hunt")
-print("Version: 4C.1 (July 2018)")
+print("Version: 5D (August 2018)")
 print("")
 print("----------- DO NOT TERMINATE -----------")
 
