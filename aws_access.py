@@ -394,6 +394,9 @@ def entry_point():
     threading.Thread(target = 
                      lambda: server.run(host = "0.0.0.0", threaded = True))
 
+    # Prevent main thread from ending, to sustain interrupt monitoring
+    while True: time.sleep(900)
+
 if __name__ == "__main__":
     current_dir = os.path.dirname(os.path.realpath(__file__))
     with daemon.DaemonContext(working_directory = current_dir):
