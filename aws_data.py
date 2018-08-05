@@ -473,7 +473,7 @@ def every_second():
 
     # -- SUNSHINE DURATION -----------------------------------------------------
     try:
-        if gpio.input(22) == True: SunD_ticks += 1
+        if gpio.input(25) == True: SunD_ticks += 1
     except: gpio.output(24, gpio.HIGH)
 
 # INTERRUPTS -------------------------------------------------------------------
@@ -500,13 +500,13 @@ def entry_point():
     gpio.output(23, gpio.LOW); gpio.output(24, gpio.LOW)
 
     # -- SET UP SENSORS --------------------------------------------------------
-    gpio.setup(17, gpio.IN, pull_up_down = gpio.PUD_DOWN)
-    gpio.add_event_detect(17, gpio.FALLING, callback = do_trigger_wspd,
-                        bouncetime = 1)
     gpio.setup(27, gpio.IN, pull_up_down = gpio.PUD_DOWN)
-    gpio.add_event_detect(27, gpio.FALLING, callback = do_trigger_rain,
-                        bouncetime = 150)
+    gpio.add_event_detect(27, gpio.FALLING, callback = do_trigger_wspd,
+                        bouncetime = 1)
     gpio.setup(22, gpio.IN, pull_up_down = gpio.PUD_DOWN)
+    gpio.add_event_detect(22, gpio.FALLING, callback = do_trigger_rain,
+                        bouncetime = 150)
+    gpio.setup(25, gpio.IN, pull_up_down = gpio.PUD_DOWN)
 
     # -- WAIT FOR MINUTE -------------------------------------------------------
     while datetime.utcnow().second != 0:
