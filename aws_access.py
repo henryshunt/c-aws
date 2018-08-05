@@ -26,10 +26,10 @@ startup_time = None
 
 # INTERRUPTS -------------------------------------------------------------------
 def do_shutdown():
-    print("shutdown")
+    os.system("shutdown -h now")
 
 def do_restart():
-    print("restart")
+    os.system("shutdown -r now")
 
 # PAGE SERVERS -----------------------------------------------------------------
 def page_now():
@@ -344,10 +344,8 @@ def data_about():
 def ctrl_command():
     if flask.request.args.get("cmd") == None: return
 
-    if flask.request.args.get("cmd") == "shutdown":
-        os.system("shutdown -h now")
-    elif flask.request.args.get("cmd") == "restart":
-        os.system("shutdown -r now")
+    if flask.request.args.get("cmd") == "shutdown": do_shutdown
+    elif flask.request.args.get("cmd") == "restart": do_restart
     else: return
     
 
@@ -361,10 +359,10 @@ def entry_point():
 
     # SETUP POWER BUTTONS ------------------------------------------------------
     gpio.setwarnings(False); gpio.setmode(gpio.BCM)
-    gpio.setup(17, gpio.IN, gpio.PUD_DOWN)
+    gpio.setup(17, gpio.IN, gpio.PUD_UP)
     gpio.add_event_detect(17, gpio.FALLING, callback = do_shutdown,
                           bouncetime = 300)
-    gpio.setup(18, gpio.IN, gpio.PUD_DOWN)
+    gpio.setup(18, gpio.IN, gpio.PUD_UP)
     gpio.add_event_detect(18, gpio.FALLING, callback = do_restart,
                           bouncetime = 300)
 
@@ -396,7 +394,7 @@ def entry_point():
     threading.Thread(target = 
                      lambda: server.run(host = "0.0.0.0", threaded = True))
 
-#if __name__ == "__main__":
- #   current_dir = os.path.dirname(os.path.realpath(__file__))
-#    with daemon.DaemonContext(working_directory = current_dir):
-entry_point()
+if __name__ == "__main__":
+    current_dir = os.path.dirname(os.path.realpath(__file__))
+    with daemon.DaemonContext(working_directory = current_dir):
+        entry_point()
