@@ -8,26 +8,12 @@ import pytz
 
 def init_exit(code, visual):
     if visual == True:
-        gpio.setup(17, gpio.IN, gpio.PUD_DOWN)
-        gpio.setup(27, gpio.IN, gpio.PUD_DOWN)
-
         while True:
-            in_shutdown = gpio.input(17); in_restart = gpio.input(27)
-
-            if in_shutdown == True or in_restart == True:
-                gpio.output(23, gpio.HIGH); gpio.output(24, gpio.HIGH)
-                time.sleep(1)
-                gpio.output(23, gpio.LOW); gpio.output(24, gpio.LOW)
-
-                if in_shutdown == True: os.system("shutdown -h now")
-                elif in_restart == True: os.system("shutdown -r now")
-                break
-                
             for i in range(code):
-                gpio.output(24, gpio.HIGH); time.sleep(0.16)
-                gpio.output(24, gpio.LOW); time.sleep(0.16)
+                gpio.output(24, gpio.HIGH); time.sleep(0.15)
+                gpio.output(24, gpio.LOW); time.sleep(0.15)
 
-            time.sleep(1.1)
+            time.sleep(1)
     else: sys.exit(1)
 
 
