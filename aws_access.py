@@ -25,10 +25,10 @@ config = ConfigData()
 startup_time = None
 
 # INTERRUPTS -------------------------------------------------------------------
-def do_shutdown():
+def do_shutdown(channel):
     os.system("shutdown -h now")
 
-def do_restart():
+def do_restart(channel):
     os.system("shutdown -r now")
 
 # PAGE SERVERS -----------------------------------------------------------------
@@ -344,8 +344,8 @@ def data_about():
 def ctrl_command():
     if flask.request.args.get("cmd") == None: return
 
-    if flask.request.args.get("cmd") == "shutdown": do_shutdown
-    elif flask.request.args.get("cmd") == "restart": do_restart
+    if flask.request.args.get("cmd") == "shutdown": do_shutdown(None)
+    elif flask.request.args.get("cmd") == "restart": do_restart(None)
     else: return
     
 
