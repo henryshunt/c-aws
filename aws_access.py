@@ -9,6 +9,7 @@ import os
 import sys
 import logging
 import RPi.GPIO as gpio
+import threading
 
 import daemon
 import flask
@@ -362,10 +363,10 @@ def entry_point():
     gpio.setwarnings(False); gpio.setmode(gpio.BCM)
     gpio.setup(17, gpio.IN, gpio.PUD_DOWN)
     gpio.add_event_detect(17, gpio.FALLING, callback = do_shutdown,
-                          bouncetime = 500)
+                          bouncetime = 300)
     gpio.setup(18, gpio.IN, gpio.PUD_DOWN)
     gpio.add_event_detect(18, gpio.FALLING, callback = do_restart,
-                          bouncetime = 500)
+                          bouncetime = 300)
 
     # -- CREATE SERVER ---------------------------------------------------------
     server = flask.Flask(__name__, static_folder = "server/res",
@@ -392,7 +393,8 @@ def entry_point():
     # -- START SERVER ----------------------------------------------------------
     server.config["SEND_FILE_MAX_AGE_DEFAULT"] = 0
     logging.getLogger("werkzeug").setLevel(logging.CRITICAL)
-    server.run(host = "0.0.0.0", threaded = True)
+    threading.Thread(target = 
+                     lambda: server.run(host = "0.0.0.0", threaded = True))
 
 #if __name__ == "__main__":
  #   current_dir = os.path.dirname(os.path.realpath(__file__))
