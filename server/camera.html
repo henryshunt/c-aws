@@ -136,9 +136,17 @@
             }
 
             function scroller_change(time) {
-                if (requestedTime != moment().utc().millisecond(0)) {
-                    updateData(false)
-                } else { updateData(true); }
+                var utc = moment().utc().millisecond(0).second(0);
+                utcMinute = utc.get("minute").toString();
+
+                while (!utcMinute.endsWith("0") && !utcMinute.endsWith("5")) {
+                    utc.subtract(1, "minute");
+                    utcMinute = utc.get("minute").toString();
+                }
+
+                if (requestedTime == utc) {
+                    updateData(true)
+                } else { updateData(false); }
             }
         </script>
     </head>
