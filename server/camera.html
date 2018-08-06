@@ -26,7 +26,7 @@
             });
 
             function updateData(restartTimers) {
-                isLoading == true;
+                isLoading = true;
                 clearTimeout(updaterTimeout);
                 clearTimeout(countTimeout);
 
@@ -66,8 +66,8 @@
 
                 $.ajax({
                     dataType: "json", url: url,
-
                     success: function (data) { processData(data); },
+                    
                     error: function() {
                         document.getElementById("item_SRis").innerHTML = "no data";
                         document.getElementById("item_SSet").innerHTML = "no data";
