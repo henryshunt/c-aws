@@ -11,22 +11,24 @@
         <script src="{{ url_for('static', filename='js-moment-tz.js') }}" type="text/javascript"></script>
 
         <script>
-            var timeToUpdate = 0;
-            var countdownTimeout = null;
-            var updaterTimeout = null;
+            var isLoading = true;
             var requestedTime = null;
+            var updaterTimeout = null;
+            var countTimeout = null;
+            var timeToUpdate = 0;
 
             $(document).ready(function() {
                 setInterval(function() {
                     displayLocalTime();
-                }, 200);
+                }, 250);
 
                 updateData();
             });
 
             function updateData() {
+                isLoading == true;
                 clearTimeout(updaterTimeout);
-                clearTimeout(countdownTimeout);
+                clearTimeout(countTimeout);
 
                 document.getElementById("item_update").innerHTML = "0";
                 timeToUpdate = 300;
@@ -35,7 +37,7 @@
                     updateData();
                 }, 300000);
                     
-                countdownTimeout = setInterval(function() {
+                countTimeout = setInterval(function() {
                     document.getElementById("item_update").innerHTML
                         = --timeToUpdate;
                 }, 1000);
@@ -44,6 +46,8 @@
             }
 
             function getAndProcessData(setTime) {
+                isLoading = true;
+
                 if (setTime == true) {
                     requestedTime = moment().utc();
                     requestedMinute = requestedTime.get("minute").toString();
@@ -68,6 +72,7 @@
 
                         document.getElementById("item_data_time").innerHTML
                             = requestedTime.tz("Europe/London").format("HH:mm");
+                        isLoading = false;
                     }
                 });
             }
@@ -107,20 +112,27 @@
                 if (data["ImgP"] != null) {
                     document.getElementById("item_CImg").src = data["ImgP"];
                 } else { document.getElementById("item_CImg").src = "res/no-camera.png"; }
+
+                isLoading = false;
             }
         
             function scroller_left() {
-                requestedTime.subtract(5, "minutes");
-                scroller_change();
+                if (isLoading == false) {
+                    requestedTime.subtract(5, "minutes");
+                    scroller_change();
+                }
             }
+
             function scroller_right() {
-                requestedTime.add(5, "minutes");
-                scroller_change();
+                if (isLoading == false) {
+                    requestedTime.add(5, "minutes");
+                    scroller_change();
+                }
             }
 
             function scroller_change(time) {
                 clearTimeout(updaterTimeout);
-                clearTimeout(countdownTimeout);
+                clearTimeout(countTimeout);
 
                 document.getElementById("item_update").innerHTML = "0";                
                 getAndProcessData(false);
