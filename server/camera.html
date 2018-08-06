@@ -107,19 +107,19 @@
                 if (data["SRis"] != null) {
                     var utc = moment.utc(data["SRis"], "YYYY-MM-DD HH:mm:ss");
                     document.getElementById("item_SRis").innerHTML
-                        = utc.tz("Europe/London").format("DD/MM/YYYY [at] HH:mm");
+                        = utc.tz("Europe/London").format("HH:mm");
                 } else { document.getElementById("item_SRis").innerHTML = "no data"; }
 
                 if (data["SSet"] != null) {
                     var utc = moment.utc(data["SSet"], "YYYY-MM-DD HH:mm:ss");
                     document.getElementById("item_SSet").innerHTML
-                        = utc.tz("Europe/London").format("DD/MM/YYYY [at] HH:mm");
+                        = utc.tz("Europe/London").format("HH:mm");
                 } else { document.getElementById("item_SSet").innerHTML = "no data"; }
 
                 if (data["Noon"] != null) {
                     var utc = moment.utc(data["Noon"], "YYYY-MM-DD HH:mm:ss");
                     document.getElementById("item_Noon").innerHTML
-                        = utc.tz("Europe/London").format("DD/MM/YYYY [at] HH:mm");
+                        = utc.tz("Europe/London").format("HH:mm");
                 } else { document.getElementById("item_Noon").innerHTML = "no data"; }
 
                 if (data["ImgP"] != null) {
@@ -201,11 +201,11 @@
 
                 <table class="field_table">
                     <tr>
-                        <td><p class="field_label">Sunrise Time:</p></td>
+                        <td><p class="field_label">Time of Sunrise:</p></td>
                         <td><p id="item_SRis" class="field_value"></p></td>
                     </tr>
                     <tr>
-                        <td><p class="field_label">Sunset Time:</p></td>
+                        <td><p class="field_label">Time of Sunset:</p></td>
                         <td><p id="item_SSet" class="field_value"></p></td>
                     </tr>
                     <tr>
