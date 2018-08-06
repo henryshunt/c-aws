@@ -14,11 +14,8 @@ function displayLocalTime() {
 }
 
 function zeroPad(value) {
-    if (value < 10) {
-        value = "0" + value;
-    }
-
-    return value;
+    if (value < 10) { value = "0" + value; }
+    return value.toString();
 }
 
 function queryParam(key) {
