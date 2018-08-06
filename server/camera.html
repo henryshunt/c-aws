@@ -82,17 +82,17 @@
                 }
 
                 if (data["SRis"] != null) {
-                    var utc = moment.utc(data["SRis"], "YYYY-MM-DD HH:mm");
+                    var utc = moment.utc(data["SRis"], "YYYY-MM-DD HH:mm:ss");
 
                     document.getElementById("item_SRis").innerHTML
-                        = utc.tz("Europe/London").format("DD/MM/YYYY [at] HH:mm:ss");
+                        = utc.tz("Europe/London").format("DD/MM/YYYY [at] HH:mm");
                 } else { document.getElementById("item_SRis").innerHTML = "no data"; }
 
                 if (data["SSet"] != null) {
-                    var utc = moment.utc(data["SSet"], "YYYY-MM-DD HH:mm");
+                    var utc = moment.utc(data["SSet"], "YYYY-MM-DD HH:mm:ss");
 
                     document.getElementById("item_SSet").innerHTML
-                        = utc.tz("Europe/London").format("DD/MM/YYYY [at] HH:mm:ss");
+                        = utc.tz("Europe/London").format("DD/MM/YYYY [at] HH:mm");
                 } else { document.getElementById("item_SSet").innerHTML = "no data"; }
 
                 if (data["ImgP"] != null) {
@@ -160,14 +160,14 @@
         <div id="footer">
             <div id="footer_items">
                 <p class="footer_label">Local Time:</p>
-                <p class="footer_value" id="local_time" style="width: 210px"></p>
+                <p id="item_local_time" class="footer_value" style="width: 210px"></p>
     
                 <div style="float: right; margin-left: 10px">
                     <p class="footer_label">Data Time:</p>
-                    <p class="footer_value" style="width: 60px">{{ data_time }}</p>
+                    <p id="item_data_time" class="footer_value" style="width: 60px"></p>
 
                     <p class="footer_label" style="margin-left: 10px">Update:</p>
-                    <p id="item_update" class="footer_value" style="width: 35px"></p>
+                    <p id="item_update" class="footer_value" style="width: 45px"></p>
                 </div>
             </div>
         </div>
