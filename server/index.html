@@ -82,8 +82,8 @@
 
             function processData(data) {
                 if (data["Time"] != null) {
-                    var utc = moment.utc(data["Time"], "YYYY-MM-DD'T'HH:mm:ss").toDate();
-                    var local_time = moment.tz(utc, "HH:mm", "Europe/London");
+                    var utc = moment.utc(data["Time"], "YYYY-MM-DD'T'HH:mm:ss");
+                    var local_time = utc.tz("Europe/London").format("HH:mm");
                     document.getElementById("item_data_time").innerHTML = local_time;
 
                 } else {
