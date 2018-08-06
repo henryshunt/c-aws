@@ -106,7 +106,10 @@ tr {
     margin: 0 auto;
     margin-top: 90px;
     margin-bottom: 34px;
-    padding: 10px;
+    padding-top: 15px;
+    padding-left: 10px;
+    padding-right: 10px;
+    padding-bottom: 15px;
 }
 
 #scroller {
