@@ -73,12 +73,19 @@
             function processData(data) {
                 if (data["Time"] != null) {
                     var utc = moment.utc(data["Time"], "YYYY-MM-DD HH:mm:ss");
+                    var local_time = utc.tz("Europe/London");
+
                     document.getElementById("item_data_time").innerHTML
-                        = utc.tz("Europe/London").format("HH:mm");
+                        = local_time.format("HH:mm");
+                    document.getElementById("scroller_time").innerHTML
+                        = local_time.format("DD/MM/YYYY");
 
                 } else {
+                    var local_time = requestedTime.tz("Europe/London");
                     document.getElementById("item_data_time").innerHTML
-                        = requestedTime.tz("Europe/London").format("HH:mm");
+                        = local_time.format("HH:mm");
+                    document.getElementById("scroller_time").innerHTML
+                        = local_time.format("DD/MM/YYYY");
                 }
 
                 if (data["SRis"] != null) {
