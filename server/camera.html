@@ -67,7 +67,7 @@
                 $.ajax({
                     dataType: "json", url: url,
                     success: function (data) { processData(data); },
-                    
+
                     error: function() {
                         document.getElementById("item_SRis").innerHTML = "no data";
                         document.getElementById("item_SSet").innerHTML = "no data";
@@ -94,6 +94,7 @@
                         = local_time.format("HH:mm");
                     document.getElementById("scroller_time").innerHTML
                         = local_time.format("DD/MM/YYYY [at] HH:mm");
+                    requestedTime = utc;
 
                 } else {
                     var local_time = requestedTime.tz("Europe/London");

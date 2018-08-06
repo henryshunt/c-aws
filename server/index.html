@@ -82,6 +82,7 @@
                     var utc = moment.utc(data["Time"], "YYYY-MM-DD HH:mm:ss");
                     document.getElementById("item_data_time").innerHTML
                         = utc.tz("Europe/London").format("HH:mm");
+                    requestedTime = utc;
 
                 } else {
                     document.getElementById("item_data_time").innerHTML
