@@ -78,14 +78,14 @@
                     document.getElementById("item_data_time").innerHTML
                         = local_time.format("HH:mm");
                     document.getElementById("scroller_time").innerHTML
-                        = local_time.format("DD/MM/YYYY");
+                        = local_time.format("DD/MM/YYYY at HH:mm");
 
                 } else {
                     var local_time = requestedTime.tz("Europe/London");
                     document.getElementById("item_data_time").innerHTML
                         = local_time.format("HH:mm");
                     document.getElementById("scroller_time").innerHTML
-                        = local_time.format("DD/MM/YYYY");
+                        = local_time.format("DD/MM/YYYY at HH:mm");
                 }
 
                 if (data["SRis"] != null) {
