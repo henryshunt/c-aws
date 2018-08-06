@@ -49,7 +49,7 @@
                 $.ajax({
                     dataType: "json",
                     url: "data/now.json?time=" + requestedTime.format(
-                        "YYYY-MM-DD'T'HH:mm:ss"),
+                        "YYYY-MM-DD[T]HH-mm-[00]"),
 
                     success: function (data) { processData(data); },
                     error: function() {
