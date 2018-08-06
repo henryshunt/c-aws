@@ -51,7 +51,7 @@
 
             function getAndProcessData(setTime) {
                 if (setTime == true) {
-                    requestedTime = moment().utc().millisecond(0);
+                    requestedTime = moment().utc().millisecond(0).second(0);
                     requestedMinute = requestedTime.get("minute").toString();
 
                     while (!requestedMinute.endsWith("0") && !requestedMinute.endsWith("5")) {
@@ -60,10 +60,12 @@
                     }
                 }
 
+                var url = "data/camera.json?time=" + requestedTime.format(
+                    "YYYY-MM-DD[T]HH-mm-[00]");
+                if (setTime == false) { url += "&abs=1"; }
+
                 $.ajax({
-                    dataType: "json",
-                    url: "data/camera.json?time=" + requestedTime.format(
-                        "YYYY-MM-DD[T]HH-mm-[00]"),
+                    dataType: "json", url: url,
 
                     success: function (data) { processData(data); },
                     error: function() {
@@ -144,7 +146,7 @@
                     utcMinute = utc.get("minute").toString();
                 }
 
-                if (requestedTime == utc) {
+                if (requestedTime.toString() == utc.toString()) {
                     updateData(true)
                 } else { updateData(false); }
             }
