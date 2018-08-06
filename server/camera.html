@@ -22,34 +22,36 @@
                     displayLocalTime();
                 }, 250);
 
-                updateData();
+                updateData(true);
             });
 
-            function updateData() {
+            function updateData(restartTimers) {
                 isLoading == true;
                 clearTimeout(updaterTimeout);
                 clearTimeout(countTimeout);
 
-                document.getElementById("item_update").innerHTML = "0";
+                if (restartTimers == true) {
+                    document.getElementById("item_update").innerHTML = "0";
+                } else { document.getElementById("item_update").innerHTML = ""; }
                 timeToUpdate = 300;
 
-                updaterTimeout = setInterval(function() {
-                    updateData();
-                }, 300000);
-                    
-                countTimeout = setInterval(function() {
-                    document.getElementById("item_update").innerHTML
-                        = --timeToUpdate;
-                }, 1000);
+                if (restartTimers == true) {
+                    updaterTimeout = setInterval(function() {
+                        updateData();
+                    }, 300000);
+                        
+                    countTimeout = setInterval(function() {
+                        document.getElementById("item_update").innerHTML
+                            = --timeToUpdate;
+                    }, 1000);
+                }
 
-                getAndProcessData(true);
+                getAndProcessData(restartTimers);
             }
 
             function getAndProcessData(setTime) {
-                isLoading = true;
-
                 if (setTime == true) {
-                    requestedTime = moment().utc();
+                    requestedTime = moment().utc().millisecond(0);
                     requestedMinute = requestedTime.get("minute").toString();
 
                     while (!requestedMinute.endsWith("0") && !requestedMinute.endsWith("5")) {
@@ -70,8 +72,11 @@
                         document.getElementById("item_CImg").src
                             = "data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7";
 
+                        var local_time = requestedTime.tz("Europe/London");
                         document.getElementById("item_data_time").innerHTML
-                            = requestedTime.tz("Europe/London").format("HH:mm");
+                            = local_time.format("HH:mm");
+                        document.getElementById("item_data_time").innerHTML
+                            = local_time.format("DD/MM/YYYY [at] HH:mm");
                         isLoading = false;
                     }
                 });
@@ -131,11 +136,9 @@
             }
 
             function scroller_change(time) {
-                clearTimeout(updaterTimeout);
-                clearTimeout(countTimeout);
-
-                document.getElementById("item_update").innerHTML = "0";                
-                getAndProcessData(false);
+                if (requestedTime != moment().utc().millisecond(0)) {
+                    updateData(false)
+                } else { updateData(true); }
             }
         </script>
     </head>
