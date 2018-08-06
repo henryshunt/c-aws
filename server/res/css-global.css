@@ -126,6 +126,7 @@ tr {
     line-height: 40px;
     text-decoration: none;
     color: black;
+    cursor: pointer;
 }
 .scroller_button:visited {
     color: black;
@@ -135,6 +136,7 @@ tr {
     text-align: center;
     vertical-align: middle;
     padding-bottom: 2px;
+    font-weight: bold;
 }
 
 .group {

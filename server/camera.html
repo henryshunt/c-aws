@@ -40,16 +40,18 @@
                         = --timeToUpdate;
                 }, 1000);
 
-                getAndProcessData();
+                getAndProcessData(true);
             }
 
-            function getAndProcessData() {
-                requestedTime = moment().utc();
-                requestedMinute = requestedTime.get("minute").toString();
-
-                while (!requestedMinute.endsWith("0") && !requestedMinute.endsWith("5")) {
-                    requestedTime.subtract(1, "minute");
+            function getAndProcessData(setTime) {
+                if (setTime == true) {
+                    requestedTime = moment().utc();
                     requestedMinute = requestedTime.get("minute").toString();
+
+                    while (!requestedMinute.endsWith("0") && !requestedMinute.endsWith("5")) {
+                        requestedTime.subtract(1, "minute");
+                        requestedMinute = requestedTime.get("minute").toString();
+                    }
                 }
 
                 $.ajax({
@@ -106,6 +108,23 @@
                     document.getElementById("item_CImg").src = data["ImgP"];
                 } else { document.getElementById("item_CImg").src = "res/no-camera.png"; }
             }
+        
+            function scroller_left() {
+                requestedTime.subtract(5, "minutes");
+                scroller_change();
+            }
+            function scroller_right() {
+                requestedTime.add(5, "minutes");
+                scroller_change();
+            }
+
+            function scroller_change(time) {
+                clearTimeout(updaterTimeout);
+                clearTimeout(countdownTimeout);
+
+                document.getElementById("item_update").innerHTML = "0";                
+                getAndProcessData(false);
+            }
         </script>
     </head>
 
@@ -138,10 +157,10 @@
         </div>
 
         <div id="main">
-            <div class="group" id="scroller" style="margin-bottom: 10px">
-                <a class="scroller_button" href="camera.html?time={{ scroller_prev }}">◀</a>
-                <p id="scroller_time"><b>{{ scroller_time }}</b></p>
-                <a class="scroller_button" href="camera.html?time={{ scroller_next }}">▶</a>
+            <div class="group" id="scroller">
+                <p id="scroller_left" class="scroller_button" onclick="scroller_left()">◀</p>
+                <p id="scroller_time"></p>
+                <p id="scroller_right" class="scroller_button" onclick="scroller_right()">▶</p>
             </div>
 
             <div class="group">
@@ -161,7 +180,8 @@
                 </table>
             </div>
 
-            <img id="item_CImg" src="data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7" style="width: 100%">
+            <img id="item_CImg" style="width: 100%"
+                src="data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7">
         </div>
 
         <div id="footer">
