@@ -94,7 +94,7 @@
                         = local_time.format("HH:mm");
                     document.getElementById("scroller_time").innerHTML
                         = local_time.format("DD/MM/YYYY [at] HH:mm");
-                    requestedTime = utc;
+                    requestedTime = moment.utc(data["Time"], "YYYY-MM-DD HH:mm:ss");
 
                 } else {
                     var local_time = requestedTime.tz("Europe/London");
