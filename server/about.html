@@ -80,7 +80,7 @@
                     var utc = moment.utc(data["STim"], "YYYY-MM-DD HH:mm:ss");
 
                     document.getElementById("item_STim").innerHTML
-                        = utc.tz("Europe/London").format("DD/MM/YYYY [at] HH:mm:ss");
+                        = utc.tz("Europe/London").format("DD/MM/YYYY [at] HH:mm");
                 } else { document.getElementById("item_STim").innerHTML = "no data"; }
 
                 display_value(data["EncT"], "item_EncT", "°C");
