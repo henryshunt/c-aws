@@ -282,6 +282,7 @@ def data_camera():
     
     data["SRis"] = solar["sunrise"].strftime("%Y-%m-%d %H:%M:%S")
     data["SSet"] = solar["sunset"].strftime("%Y-%m-%d %H:%M:%S")
+    data["Noon"] = solar["noon"].strftime("%Y-%m-%d %H:%M:%S")
     
     data["Time"] = url_time.strftime("%Y-%m-%d %H:%M:%S")
     return flask.jsonify(data)

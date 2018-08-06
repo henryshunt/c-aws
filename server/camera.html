@@ -71,6 +71,7 @@
                     error: function() {
                         document.getElementById("item_SRis").innerHTML = "no data";
                         document.getElementById("item_SSet").innerHTML = "no data";
+                        document.getElementById("item_Noon").innerHTML = "no data";
                         document.getElementById("item_CImg").src
                             = "data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7";
 
@@ -104,17 +105,21 @@
 
                 if (data["SRis"] != null) {
                     var utc = moment.utc(data["SRis"], "YYYY-MM-DD HH:mm:ss");
-
                     document.getElementById("item_SRis").innerHTML
                         = utc.tz("Europe/London").format("DD/MM/YYYY [at] HH:mm");
                 } else { document.getElementById("item_SRis").innerHTML = "no data"; }
 
                 if (data["SSet"] != null) {
                     var utc = moment.utc(data["SSet"], "YYYY-MM-DD HH:mm:ss");
-
                     document.getElementById("item_SSet").innerHTML
                         = utc.tz("Europe/London").format("DD/MM/YYYY [at] HH:mm");
                 } else { document.getElementById("item_SSet").innerHTML = "no data"; }
+
+                if (data["Noon"] != null) {
+                    var utc = moment.utc(data["Noon"], "YYYY-MM-DD HH:mm:ss");
+                    document.getElementById("item_Noon").innerHTML
+                        = utc.tz("Europe/London").format("DD/MM/YYYY [at] HH:mm");
+                } else { document.getElementById("item_Noon").innerHTML = "no data"; }
 
                 if (data["ImgP"] != null) {
                     document.getElementById("item_CImg").src = data["ImgP"];
@@ -201,6 +206,10 @@
                     <tr>
                         <td><p class="field_label">Sunset Time:</p></td>
                         <td><p id="item_SSet" class="field_value"></p></td>
+                    </tr>
+                    <tr>
+                        <td><p class="field_label" style="margin-top: 10px">Solar Noon:</p></td>
+                        <td><p id="item_Noon" class="field_value" style="margin-top: 10px"></p></td>
                     </tr>
                 </table>
             </div>
