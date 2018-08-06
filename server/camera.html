@@ -37,7 +37,7 @@
 
                 if (restartTimers == true) {
                     updaterTimeout = setInterval(function() {
-                        updateData();
+                        updateData(true);
                     }, 300000);
                         
                     countTimeout = setInterval(function() {
