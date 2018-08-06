@@ -76,6 +76,13 @@
                         = requestedTime.tz("Europe/London").format("HH:mm");
                 }
 
+                if (data["STim"] != null) {
+                    var utc = moment.utc(data["STim"], "YYYY-MM-DD HH:mm:ss");
+                    
+                    document.getElementById("item_STim").innerHTML
+                        = utc.tz("Europe/London").format("DD/MM/YYYY [at] HH:mm:ss");
+                } else { document.getElementById("item_STim").innerHTML = "no data"; }
+
                 display_value(data["STim"], "item_STim", "");
                 display_value(data["EncT"], "item_EncT", "°C");
                 display_value(data["CPUT"], "item_CPUT", "°C");
