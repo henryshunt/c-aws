@@ -17,6 +17,7 @@
             var isLoading = true;
             var requestedTime = null;
             var openGraphs = [];
+            var graphsLoaded = 0;
             var updaterTimeout = null;
             var countTimeout = null;
             var timeToUpdate = 0;
@@ -26,6 +27,8 @@
                     displayLocalTime();
                 }, 250);
 
+                toggleGraph('ambient', 'AirT,ExpT,DewP',
+                    false, document.getElementById("intitial"));
                 updateData(true);
             });
 
@@ -63,9 +66,9 @@
                     = local_time.format("HH:mm");
                 document.getElementById("scroller_time").innerHTML
                     = local_time.format("DD/MM/YYYY");
-                isLoading = false;
                 
-                loadGraphData("ambient", "AirT,ExpT,DewP");
+                if ($.inArray("ambient", openGraphs) != -1)
+                { loadGraphData("ambient", "AirT,ExpT,DewP"); }
                 if ($.inArray("humidity", openGraphs) != -1)
                 { loadGraphData("humidity", "RelH"); }
                 if ($.inArray("wind", openGraphs) != -1)
@@ -114,10 +117,15 @@
                     };
 
                     new Chartist.Line("#graph_" + graph, data, options);
+
+                    graphsLoaded += 1;
+                    if (graphsLoaded == openGraphs.length) {
+                        isLoading = false; graphsLoaded = 0;
+                    }
                 });
             }
 
-            function toggleGraph(graph, fields, button) {
+            function toggleGraph(graph, fields, loadData, button) {
                 if (button.innerHTML == "-") {
                     button.innerHTML = "+";
                     openGraphs.splice(openGraphs.indexOf("graph"), 1);
@@ -128,7 +136,7 @@
                     openGraphs.push(graph);
 
                     if (document.getElementById("graph_" + graph).childElementCount == 0) {
-                        loadGraphData(graph, fields);
+                        if (loadData == true) { loadGraphData(graph, fields); }
                     } else { document.getElementById("graph_" + graph).style.display = "block"; }
                 }
             }
@@ -176,7 +184,7 @@
 
                     <div>
                         <span class="group_key">(<span>Air Temp</span>, <span>Exposed Temp</span>, <span>Dew Point</span>) [°C]</span>
-                        <a class="group_toggle" onclick="toggleGraph('ambient', 'AirT,ExpT,DewP', this)">-</a>
+                        <a id="initial" class="group_toggle" onclick="toggleGraph('ambient', 'AirT,ExpT,DewP', true, this)">+</a>
                     </div>
                 </div>
 
@@ -189,7 +197,7 @@
 
                     <div>
                         <span class="group_key">[%]</span>
-                        <a class="group_toggle" onclick="toggleGraph('humidity', 'RelH', this)">+</a>
+                        <a class="group_toggle" onclick="toggleGraph('humidity', 'RelH', true, this)">+</a>
                     </div>
                 </div>
 
@@ -202,7 +210,7 @@
                     
                     <div>
                         <span class="group_key">(<span>Wind Speed</span>, <span>Wind Gust</span>) [mph]</span>
-                        <a class="group_toggle" onclick="toggleGraph('wind', 'WSpd,WGst', this)">+</a>
+                        <a class="group_toggle" onclick="toggleGraph('wind', 'WSpd,WGst', true, this)">+</a>
                     </div>
                 </div>
 
@@ -215,7 +223,7 @@
                     
                     <div>
                         <span class="group_key">[°]</span>
-                        <a class="group_toggle" onclick="toggleGraph('direction', 'WDir', this)">+</a>
+                        <a class="group_toggle" onclick="toggleGraph('direction', 'WDir', true, this)">+</a>
                     </div>
                 </div>
 
@@ -228,7 +236,7 @@
                     
                     <div>
                         <span class="group_key">[h:m:s]</span>
-                        <a class="group_toggle" onclick="toggleGraph('sunshine', 'SunD', this)">+</a>
+                        <a class="group_toggle" onclick="toggleGraph('sunshine', 'SunD', true, this)">+</a>
                     </div>
                 </div>
 
@@ -241,7 +249,7 @@
                     
                     <div>
                         <span class="group_key">[mm]</span>
-                        <a class="group_toggle" onclick="toggleGraph('rainfall', 'Rain', this)">+</a>
+                        <a class="group_toggle" onclick="toggleGraph('rainfall', 'Rain', true, this)">+</a>
                     </div>
                 </div>
 
@@ -254,7 +262,7 @@
                     
                     <div>
                         <span class="group_key">[hPa]</span>
-                        <a class="group_toggle" onclick="toggleGraph('pressure', 'MSLP', this)">+</a>
+                        <a class="group_toggle" onclick="toggleGraph('pressure', 'MSLP', true, this)">+</a>
                     </div>
                 </div>
 
@@ -267,7 +275,7 @@
                     
                     <div>
                         <span class="group_key">(<span>10CM</span>, <span>30CM</span>, <span>1M</span>) [°C]</span>
-                        <a class="group_toggle" onclick="toggleGraph('soil', 'ST10,ST30,ST00', this)">+</a>
+                        <a class="group_toggle" onclick="toggleGraph('soil', 'ST10,ST30,ST00', true, this)">+</a>
                     </div>
                 </div>
 
