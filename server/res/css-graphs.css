@@ -13,7 +13,7 @@
 .group_key:nth-child(3) {
     color: green;
 }
-.group_open {
+.group_toggle {
     float: right;
     font-weight: bold;
     cursor: pointer;
@@ -23,7 +23,7 @@
     width: 27px;
     height: 27px;
 }
-.group_open:hover {
+.group_toggle:hover {
     color: gray;
 }
 
