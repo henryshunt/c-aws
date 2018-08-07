@@ -78,7 +78,7 @@
                         var local_time = moment(requestedTime).tz("Europe/London");
                         document.getElementById("item_data_time").innerHTML
                             = local_time.format("HH:mm");
-                        document.getElementById("item_data_time").innerHTML
+                        document.getElementById("scroller_time").innerHTML
                             = local_time.format("DD/MM/YYYY [at] HH:mm");
                         isLoading = false;
                     }
