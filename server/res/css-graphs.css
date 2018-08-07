@@ -3,14 +3,14 @@
     font-size: 11px;
     line-height: 25px;
 }
-.group_key:nth-child(1) {
-    color: red;
+.group_key > span:nth-of-type(1) {
+    color: #f35168;
 }
-.group_key:nth-child(2) {
-    color: blue;
+.group_key > span:nth-of-type(2) {
+    color: #25a9fc;
 }
-.group_key:nth-child(3) {
-    color: green;
+.group_key > span:nth-of-type(3) {
+    color: #8ac85c;
 }
 .group_toggle {
     float: right;
