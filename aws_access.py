@@ -374,8 +374,8 @@ def entry_point():
     server.add_url_rule("/", view_func = page_now)
     server.add_url_rule("/index.html", view_func = page_now)
     server.add_url_rule("/statistics.html", view_func = page_statistics)
-    server.add_url_rule("/graph_day.html", view_func = page_graph_day)
-    server.add_url_rule("/graph_year.html", view_func = page_graph_year)
+    server.add_url_rule("/graph-day.html", view_func = page_graph_day)
+    server.add_url_rule("/graph-year.html", view_func = page_graph_year)
     server.add_url_rule("/camera.html", view_func = page_camera)
     server.add_url_rule("/about.html", view_func = page_about)
 
