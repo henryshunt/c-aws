@@ -115,9 +115,7 @@
                 if (button.innerHTML == "-") {
                     button.innerHTML = "+";
                     openGraphs.splice(openGraphs.indexOf("graph"), 1);
-
                     document.getElementById("graph_" + graph).style.display = "none";
-                    button.previousSibling.style.display = "none";
 
                 } else {
                     button.innerHTML = "-";
@@ -126,7 +124,6 @@
                     if (document.getElementById("graph_" + graph).childElementCount == 0) {
                         loadGraphData(graph, fields);
                     } else { document.getElementById("graph_" + graph).style.display = "block"; }
-                    button.previousSibling.style.display = "block";
                 }
             }
         </script>

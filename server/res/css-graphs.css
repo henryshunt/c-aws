@@ -2,7 +2,6 @@
     margin-right: 5px;
     font-size: 11px;
     line-height: 25px;
-    display: none;
 }
 .group_key:nth-child(1) {
     color: red;
