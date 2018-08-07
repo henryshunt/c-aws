@@ -126,7 +126,7 @@
             function toggleGraph(graph, fields, button) {
                 if (button.innerHTML == "-") {
                     button.innerHTML = "+";
-                    openGraphs.splice(openGraphs.indexOf("graph"), 1);
+                    openGraphs.splice(openGraphs.indexOf(graph), 1);
                     document.getElementById("graph_" + graph).style.display = "none";
 
                 } else {
