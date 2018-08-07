@@ -1,3 +1,32 @@
+.group_key {
+    margin-right: 5px;
+    font-size: 11px;
+    line-height: 25px;
+    display: none;
+}
+.group_key:nth-child(1) {
+    color: red;
+}
+.group_key:nth-child(2) {
+    color: blue;
+}
+.group_key:nth-child(3) {
+    color: green;
+}
+.group_open {
+    float: right;
+    font-weight: bold;
+    cursor: pointer;
+    font-size: 26px;
+    margin-right: 5px;
+    text-align: center;
+    width: 27px;
+    height: 27px;
+}
+.group_open:hover {
+    color: gray;
+}
+
 .ct-series .ct-line {
     stroke-width: 1px;
 }

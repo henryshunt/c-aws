@@ -148,25 +148,15 @@ tr {
     border-bottom: 1px solid #cccccc;
     padding-top: 5px;
 }
+.group_header div {
+    float: right;
+}
 .group_title {
     margin-bottom: 7px;
     font-size: 25px;
     margin-top: 0;
     margin-left: 10px;
     display: inline-block;
-}
-.group_open {
-    float: right;
-    font-weight: bold;
-    cursor: pointer;
-    font-size: 26px;
-    margin-right: 5px;
-    text-align: center;
-    width: 27px;
-    height: 27px;
-}
-.group_open:hover {
-    color: gray;
 }
 
 .field_table {

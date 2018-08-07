@@ -111,10 +111,23 @@
                 });
             }
 
-            function openGraph(graph, fields, button) {
-                button.style.visibility = "hidden";
-                openGraphs.push(graph);
-                loadGraphData(graph, fields)
+            function toggleGraph(graph, fields, button) {
+                if (button.innerHTML == "-") {
+                    button.innerHTML = "+";
+                    openGraphs.splice(openGraphs.indexOf("graph"), 1);
+
+                    document.getElementById("graph_" + graph).display = "none";
+                    button.parentElement.firstChild.display = "none";
+
+                } else {
+                    button.innerHTML = "-";
+                    openGraphs.push(graph);
+
+                    if (document.getElementById("graph_" + graph).childElementCount == 0) {
+                        loadGraphData(graph, fields);
+                    } else { document.getElementById("graph_" + graph).display = "block"; }
+                    button.parentElement.firstChild.display = "block";
+                }
             }
         </script>
     </head>
@@ -159,13 +172,22 @@
                     <p class="group_title">Ambient Temperature</p>
                 </div>
 
+                <div>
+                    <span class="group_key">(<span>Air Temp</span>, <span>Exposed Temp</span>, <span>Dew Point</span>) [°C]</span>
+                    <a class="group_toggle" onclick="toggleGraph('ambient', 'AirT,ExpT,DewP', this)">-</a>
+                </div>
+
                 <div id="graph_ambient" class="ct-chart"></div>
             </div>
 
             <div class="group">
                 <div class="group_header">
                     <p class="group_title">Relative Humidity</p>
-                    <a class="group_open" onclick="openGraph('humidity', 'RelH', this)">+</a>
+
+                    <div>
+                        <span class="group_key">[%]</span>
+                        <a class="group_toggle" onclick="toggleGraph('humidity', 'RelH', this)">+</a>
+                    </div>
                 </div>
 
                 <div id="graph_humidity" class="ct-chart"></div>
@@ -174,7 +196,11 @@
             <div class="group">
                 <div class="group_header">
                     <p class="group_title">Ten Minute Wind</p>
-                    <a class="group_open" onclick="openGraph('wind', 'WSpd,WGst', this)">+</a>
+                    
+                    <div>
+                        <span class="group_key">(<span>Wind Speed</span>, <span>Wind Gust</span>) [mph]</span>
+                        <a class="group_toggle" onclick="toggleGraph('wind', 'WSpd,WGst', this)">+</a>
+                    </div>
                 </div>
 
                 <div id="graph_wind" class="ct-chart"></div>
@@ -183,7 +209,11 @@
             <div class="group">
                 <div class="group_header">
                     <p class="group_title">Ten Minute Wind Direction</p>
-                    <a class="group_open" onclick="openGraph('direction', 'WDir', this)">+</a>
+                    
+                    <div>
+                        <span class="group_key">[°]</span>
+                        <a class="group_toggle" onclick="toggleGraph('direction', 'WDir', this)">+</a>
+                    </div>
                 </div>
 
                 <div id="graph_direction" class="ct-chart"></div>
@@ -192,7 +222,11 @@
             <div class="group">
                 <div class="group_header">
                     <p class="group_title">Sunshine Accumulation</p>
-                    <a class="group_open" onclick="openGraph('sunshine', 'SunD', this)">+</a>
+                    
+                    <div>
+                        <span class="group_key">[h:m:s]</span>
+                        <a class="group_toggle" onclick="toggleGraph('sunshine', 'SunD', this)">+</a>
+                    </div>
                 </div>
 
                 <div id="graph_sunshine" class="ct-chart"></div>
@@ -201,7 +235,11 @@
             <div class="group">
                 <div class="group_header">
                     <p class="group_title">Rainfall Accumulation</p>
-                    <a class="group_open" onclick="openGraph('rainfall', 'Rain', this)">+</a>
+                    
+                    <div>
+                        <span class="group_key">[mm]</span>
+                        <a class="group_toggle" onclick="toggleGraph('rainfall', 'Rain', this)">+</a>
+                    </div>
                 </div>
 
                 <div id="graph_rainfall" class="ct-chart"></div>
@@ -210,7 +248,11 @@
             <div class="group">
                 <div class="group_header">
                     <p class="group_title">Mean Sea Level Pressure</p>
-                    <a class="group_open" onclick="openGraph('pressure', 'MSLP', this)">+</a>
+                    
+                    <div>
+                        <span class="group_key">[hPa]</span>
+                        <a class="group_toggle" onclick="toggleGraph('pressure', 'MSLP', this)">+</a>
+                    </div>
                 </div>
 
                 <div id="graph_pressure" class="ct-chart"></div>
@@ -219,7 +261,11 @@
             <div class="group">
                 <div class="group_header">
                     <p class="group_title">Soil Temperature</p>
-                    <a class="group_open" onclick="openGraph('soil', 'ST10,ST30,ST00', this)">+</a>
+                    
+                    <div>
+                        <span class="group_key">(<span>10CM</span>, <span>30CM</span>, <span>1M</span>) [°C]</span>
+                        <a class="group_toggle" onclick="toggleGraph('soil', 'ST10,ST30,ST00', this)">+</a>
+                    </div>
                 </div>
 
                 <div id="graph_soil" class="ct-chart"></div>
