@@ -152,7 +152,7 @@
                     utcMinute = utc.get("minute").toString();
                 }
 
-                if (requestedTime.toString() == utc.toString()) {
+                if (requestedTime == utc) {
                     updateData(true)
                 } else { updateData(false); }
             }

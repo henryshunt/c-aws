@@ -175,9 +175,9 @@
             }
 
             function scroller_change(time) {
-                var utc = moment().utc().millisecond(0).second(0);
+                var utc = moment().utc().millisecond(0).second(0).minute(0).hour(0);
 
-                if (requestedTime.format("DD/MM/YYYY") == utc.format("DD/MM/YYYY")) {
+                if (moment(requestedTime).minute(0).hour(0) == utc) {
                     updateData(true)
                 } else { updateData(false); }
             }
