@@ -253,7 +253,6 @@ def data_camera():
     try:
         url_time = datetime.strptime(
             flask.request.args.get("time"), "%Y-%m-%dT%H-%M-%S")
-        local_time = helpers.utc_to_local(config, url_time)
     except: return flask.jsonify(data)
 
     # Get image for that time
@@ -276,9 +275,10 @@ def data_camera():
         + url_time.strftime("%Y/%m/%d/%Y-%m-%dT%H-%M-%S") + ".jpg")
 
     # Calculate sunrise and sunset times
-    location = astral.Location(("", "", config.aws_latitude,
-        config.aws_longitude, config.aws_time_zone, config.aws_elevation))
-    solar = location.sun(date = local_time, local = False)
+    location = astral.Location(
+        ("", "", config.aws_latitude, config.aws_longitude, "UTC",
+         config.aws_elevation))
+    solar = location.sun(date = url_time, local = False)
     
     data["SRis"] = solar["sunrise"].strftime("%Y-%m-%d %H:%M:%S")
     data["SSet"] = solar["sunset"].strftime("%Y-%m-%d %H:%M:%S")
