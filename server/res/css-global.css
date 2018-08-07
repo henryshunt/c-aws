@@ -128,8 +128,8 @@ tr {
     color: black;
     cursor: pointer;
 }
-.scroller_button:visited {
-    color: black;
+.scroller_button:hover {
+    color: gray;
 }
 #scroller_time {
     display: table-cell;

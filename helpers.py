@@ -16,7 +16,6 @@ def init_exit(code, visual):
             time.sleep(1)
     else: sys.exit(1)
 
-
 def remaining_space(directory):
     """ Returns the amount of remaining space in gigabytes, for non-root users,
         for the specified directory to a device
@@ -28,7 +27,6 @@ def remaining_space(directory):
         non_root_space = float(disk.f_bsize * disk.f_bavail)
         return non_root_space / 1024 / 1024 / 1024
     except: return None
-
 
 def utc_to_local(config, utc):
     localised = pytz.utc.localize(utc.replace(tzinfo = None))
@@ -50,16 +48,6 @@ def day_bounds_utc(config, local, inclusive):
 
     # Convert start and end to UTC
     return local_to_utc(config, start), local_to_utc(config, end)
-
-def last_five_mins(utc):
-    minute = str(utc.minute)
-    
-    while not minute.endswith("0") and not minute.endswith("5"):
-        utc -= timedelta(minutes = 1)
-        minute = str(utc.minute)
-
-    return utc
-
 
 def degrees_to_compass(degrees):
     if degrees >= 338 or degrees < 23: return "N"
