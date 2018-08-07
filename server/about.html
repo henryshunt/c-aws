@@ -60,7 +60,7 @@
                         document.getElementById("item_CDRS").innerHTML = "no data";
 
                         document.getElementById("item_data_time").innerHTML
-                            = requestedTime.tz("Europe/London").format("HH:mm");
+                            = moment(requestedTime).tz("Europe/London").format("HH:mm");
                     }
                 });
             }
@@ -69,12 +69,12 @@
                 if (data["Time"] != null) {
                     var utc = moment.utc(data["Time"], "YYYY-MM-DD HH:mm:ss");
                     document.getElementById("item_data_time").innerHTML
-                        = utc.tz("Europe/London").format("HH:mm");
-                    requestedTime = utc;
+                        = moment(utc).tz("Europe/London").format("HH:mm");
+                    requestedTime = moment(utc);
 
                 } else {
                     document.getElementById("item_data_time").innerHTML
-                        = requestedTime.tz("Europe/London").format("HH:mm");
+                        = moment(requestedTime).tz("Europe/London").format("HH:mm");
                 }
 
                 if (data["STim"] != null) {

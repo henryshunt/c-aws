@@ -75,7 +75,7 @@
                         document.getElementById("item_CImg").src
                             = "data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7";
 
-                        var local_time = requestedTime.tz("Europe/London");
+                        var local_time = moment(requestedTime).tz("Europe/London");
                         document.getElementById("item_data_time").innerHTML
                             = local_time.format("HH:mm");
                         document.getElementById("item_data_time").innerHTML
@@ -88,16 +88,16 @@
             function processData(data) {
                 if (data["Time"] != null) {
                     var utc = moment.utc(data["Time"], "YYYY-MM-DD HH:mm:ss");
-                    var local_time = utc.tz("Europe/London");
+                    var local_time = moment(utc).tz("Europe/London");
 
                     document.getElementById("item_data_time").innerHTML
                         = local_time.format("HH:mm");
                     document.getElementById("scroller_time").innerHTML
                         = local_time.format("DD/MM/YYYY [at] HH:mm");
-                    requestedTime = moment.utc(data["Time"], "YYYY-MM-DD HH:mm:ss");
+                    requestedTime = moment(utc);
 
                 } else {
-                    var local_time = requestedTime.tz("Europe/London");
+                    var local_time = moment(requestedTime).tz("Europe/London");
                     document.getElementById("item_data_time").innerHTML
                         = local_time.format("HH:mm");
                     document.getElementById("scroller_time").innerHTML
