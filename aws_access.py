@@ -26,10 +26,10 @@ startup_time = None
 
 # INTERRUPTS -------------------------------------------------------------------
 def do_shutdown(channel):
-    os.system("shutdown -h now")
+    os.system("sudo halt")
 
 def do_restart(channel):
-    os.system("shutdown -r now")
+    os.system("sudo reboot")
 
 # PAGE SERVERS -----------------------------------------------------------------
 def page_now():
