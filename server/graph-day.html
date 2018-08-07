@@ -16,7 +16,7 @@
         <script>
             var isLoading = true;
             var requestedTime = null;
-            var openGraphs = [];
+            var openGraphs = ["ambient"];
             var graphsLoaded = 0;
             var updaterTimeout = null;
             var countTimeout = null;
@@ -27,8 +27,6 @@
                     displayLocalTime();
                 }, 250);
 
-                toggleGraph('ambient', 'AirT,ExpT,DewP',
-                    false, document.getElementById("initial"));
                 updateData(true);
             });
 
@@ -125,7 +123,7 @@
                 });
             }
 
-            function toggleGraph(graph, fields, loadData, button) {
+            function toggleGraph(graph, fields, button) {
                 if (button.innerHTML == "-") {
                     button.innerHTML = "+";
                     openGraphs.splice(openGraphs.indexOf("graph"), 1);
@@ -136,7 +134,7 @@
                     openGraphs.push(graph);
 
                     if (document.getElementById("graph_" + graph).childElementCount == 0) {
-                        if (loadData == true) { loadGraphData(graph, fields); }
+                        loadGraphData(graph, fields);
                     } else { document.getElementById("graph_" + graph).style.display = "block"; }
                 }
             }
@@ -184,7 +182,7 @@
 
                     <div>
                         <span class="group_key">(<span>Air Temp</span>, <span>Exposed Temp</span>, <span>Dew Point</span>) [°C]</span>
-                        <a id="initial" class="group_toggle" onclick="toggleGraph('ambient', 'AirT,ExpT,DewP', true, this)">+</a>
+                        <p class="group_toggle" onclick="toggleGraph('ambient', 'AirT,ExpT,DewP', this)">-</p>
                     </div>
                 </div>
 
@@ -197,7 +195,7 @@
 
                     <div>
                         <span class="group_key">[%]</span>
-                        <a class="group_toggle" onclick="toggleGraph('humidity', 'RelH', true, this)">+</a>
+                        <p class="group_toggle" onclick="toggleGraph('humidity', 'RelH', this)">+</p>
                     </div>
                 </div>
 
@@ -210,7 +208,7 @@
                     
                     <div>
                         <span class="group_key">(<span>Wind Speed</span>, <span>Wind Gust</span>) [mph]</span>
-                        <a class="group_toggle" onclick="toggleGraph('wind', 'WSpd,WGst', true, this)">+</a>
+                        <p class="group_toggle" onclick="toggleGraph('wind', 'WSpd,WGst', this)">+</p>
                     </div>
                 </div>
 
@@ -223,7 +221,7 @@
                     
                     <div>
                         <span class="group_key">[°]</span>
-                        <a class="group_toggle" onclick="toggleGraph('direction', 'WDir', true, this)">+</a>
+                        <p class="group_toggle" onclick="toggleGraph('direction', 'WDir', this)">+</p>
                     </div>
                 </div>
 
@@ -236,7 +234,7 @@
                     
                     <div>
                         <span class="group_key">[h:m:s]</span>
-                        <a class="group_toggle" onclick="toggleGraph('sunshine', 'SunD', true, this)">+</a>
+                        <p class="group_toggle" onclick="toggleGraph('sunshine', 'SunD', this)">+</p>
                     </div>
                 </div>
 
@@ -249,7 +247,7 @@
                     
                     <div>
                         <span class="group_key">[mm]</span>
-                        <a class="group_toggle" onclick="toggleGraph('rainfall', 'Rain', true, this)">+</a>
+                        <p class="group_toggle" onclick="toggleGraph('rainfall', 'Rain', this)">+</p>
                     </div>
                 </div>
 
@@ -262,7 +260,7 @@
                     
                     <div>
                         <span class="group_key">[hPa]</span>
-                        <a class="group_toggle" onclick="toggleGraph('pressure', 'MSLP', true, this)">+</a>
+                        <p class="group_toggle" onclick="toggleGraph('pressure', 'MSLP', this)">+</p>
                     </div>
                 </div>
 
@@ -275,7 +273,7 @@
                     
                     <div>
                         <span class="group_key">(<span>10CM</span>, <span>30CM</span>, <span>1M</span>) [°C]</span>
-                        <a class="group_toggle" onclick="toggleGraph('soil', 'ST10,ST30,ST00', true, this)">+</a>
+                        <p class="group_toggle" onclick="toggleGraph('soil', 'ST10,ST30,ST00', this)">+</p>
                     </div>
                 </div>
 
