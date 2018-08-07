@@ -58,7 +58,7 @@
                     requestedTime = moment().utc().millisecond(0).second(0);
                 }
 
-                var local_time = requestedTime.tz("Europe/London");
+                var local_time = moment(requestedTime).tz("Europe/London");
                 document.getElementById("item_data_time").innerHTML
                     = local_time.format("HH:mm");
                 document.getElementById("scroller_time").innerHTML
@@ -86,9 +86,9 @@
                 var url = "/data/graph-day.json?time=" + requestedTime.format(
                     "YYYY-MM-DD[T]HH-mm-[00]") + "&fields=Time," + fields;
                 
-                var local_time = requestedTime.tz("Europe/London");
-                var start = local_time.hour(0).minute(0).unix();
-                var end = local_time.add(1, "day").hour(0).minute(0).unix();
+                var local_time = moment(requestedTime).tz("Europe/London");
+                var x_start = moment(local_time).hour(0).minute(0).unix();
+                var x_end = moment(local_time).add(1, "day").hour(0).minute(0).unix();
 
                 $.get(url, function(response) {
                     var data = { series: response };
@@ -99,10 +99,10 @@
 
                         axisX: {
                             type: Chartist.FixedScaleAxis,
-                            low: start, high: end, divisor: 8, offset: 20,
+                            low: x_start, x_end: end, divisor: 8, offset: 20,
         
                             labelInterpolationFnc: function(value) {
-                                return moment.unix(value).tz("Europe/London").format("HH:mm");
+                                return moment.unix(value).utc().tz("Europe/London").format("HH:mm");
                             }
                         }
                     };
