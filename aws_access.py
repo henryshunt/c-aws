@@ -200,45 +200,45 @@ def data_statistics():
 
 def data_graph_day():
     global config; data = []
-
-    # Try parsing time specified in URL
     if flask.request.args.get("time") == None: return flask.jsonify(data)
     try:
         url_time = datetime.strptime(
             flask.request.args.get("time"), "%Y-%m-%dT%H-%M-%S")
     except: return flask.jsonify(data)
-    
+
     bounds = helpers.day_bounds_utc(
         config, helpers.utc_to_local(config, url_time), True)
     fields = flask.request.args.get("fields")
 
     # Get data in range for specified parameters
-    records = analysis.fields_in_range(config,
-        bounds[0], bounds[1], fields, DbTable[flask.request.args.get("table")])
-    fields = fields.split(",")
+    records = analysis.fields_in_range(config, bounds[0], bounds[1], fields,
+        DbTable.REPORTS)
 
     if records == False or len(records) == 0: return flask.jsonify(data)
+    fields = fields.split(",")
     for field in range(1, len(fields)): data.append([])
 
-    # Iterate over each minute of the day
-    date_loop = helpers.local_to_utc(config, bounds[0])
+    if "Rain" in fields: Rain_Ttl = 0
+    if "SunD" in fields: SunD_Ttl = 0
 
-    while date_loop <= helpers.local_to_utc(config, bounds[1]):
-        record = dict()
+    # Generate each series from retrieved records 
+    for record in records:
+        utc = datetime.strptime(record["Time"], "%Y-%m-%d %H:%M:%S").timestamp()
 
-        # Check for record for current time, copy values if exists
-        for i in records:
-            if i["Time"] == date_loop.strftime("%Y-%m-%d %H:%M:%S"):
-                for j in i.keys():
-                    if j != "Time": record[j] = i[j]
-                break
-
+        # Create point and add to relevant series
         for field in range(1, len(fields)):
-            value = None if len(record) == 0 else record[fields[field]]
-            point = { "x": date_loop.strftime("%Y-%m-%d %H:%M:%S"), "y": value }
-            data[field - 1].append(point)
+            if fields[field] == "Rain":
+                if record[fields[field]] != None:
+                    Rain_Ttl += record[fields[field]]
+                point = { "x": utc, "y": round(Rain_Ttl, 2) }
 
-        date_loop += timedelta(minutes = 1)
+            elif fields[field] == "SunD":
+                if record[fields[field]] != None:
+                    SunD_Ttl += record[fields[field]]
+                point = { "x": utc, "y": round(SunD_Ttl, 2) }
+            else: point = { "x": utc, "y": record[fields[field]] }
+
+            data[field - 1].append(point)
     return flask.jsonify(data)
 
 def data_graph_year():
