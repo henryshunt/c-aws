@@ -116,8 +116,8 @@
                     button.innerHTML = "+";
                     openGraphs.splice(openGraphs.indexOf("graph"), 1);
 
-                    document.getElementById("graph_" + graph).display = "none";
-                    button.parentElement.firstChild.display = "none";
+                    document.getElementById("graph_" + graph).style.display = "none";
+                    button.parentElement.firstChild.style.display = "none";
 
                 } else {
                     button.innerHTML = "-";
@@ -125,8 +125,8 @@
 
                     if (document.getElementById("graph_" + graph).childElementCount == 0) {
                         loadGraphData(graph, fields);
-                    } else { document.getElementById("graph_" + graph).display = "block"; }
-                    button.parentElement.firstChild.display = "block";
+                    } else { document.getElementById("graph_" + graph).style.display = "block"; }
+                    button.parentElement.firstChild.style.display = "block";
                 }
             }
         </script>
