@@ -88,8 +88,8 @@
                     "YYYY-MM-DD[T]HH-mm-[00]") + "&fields=" + fields;
                 
                 var local_time = moment(requestedTime).tz("Europe/London");
-                var x_start = moment(local_time).hour(0).minute(0).unix();
                 var x_end = moment(local_time).add(1, "day").hour(0).minute(0).unix();
+                var x_start = moment(local_time).hour(0).minute(0).unix();
 
                 $.get(url, function(response) {
                     var data = { series: response };
