@@ -16,7 +16,7 @@
         <script>
             var isLoading = true;
             var requestedTime = null;
-            var openGraphs = ["ambient"];
+            var openGraphs = ["temperature"];
             var graphsLoaded = 0;
 
             $(document).ready(function() {
@@ -83,7 +83,7 @@
                             low: x_start, high: x_end, divisor: 8, offset: 20,
         
                             labelInterpolationFnc: function(value) {
-                                return moment.unix(value).utc().tz("Europe/London").format("DD/MM/YYYY");
+                                return moment.unix(value).utc().tz("Europe/London").format("DD/MMM");
                             }
                         }
                     };
