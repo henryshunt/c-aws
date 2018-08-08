@@ -96,6 +96,22 @@
                     }
                 });
             }
+
+            function toggleGraph(graph, fields, button) {
+                if (button.innerHTML == "-") {
+                    button.innerHTML = "+";
+                    openGraphs.splice(openGraphs.indexOf(graph), 1);
+                    document.getElementById("graph_" + graph).style.display = "none";
+
+                } else {
+                    button.innerHTML = "-";
+                    openGraphs.push(graph);
+
+                    if (document.getElementById("graph_" + graph).childElementCount == 0) {
+                        loadGraphData(graph, fields);
+                    } else { document.getElementById("graph_" + graph).style.display = "block"; }
+                }
+            }
         </script>
     </head>
 
@@ -237,16 +253,16 @@
 
                 <div id="graph_soil" class="ct-chart"></div>
             </div>
+        </div>
 
-            <div id="footer">
-                <div id="footer_items">
-                    <p class="footer_label">Local Time:</p>
-                    <p id="item_local_time" class="footer_value" style="width: 210px"></p>
-        
-                    <div style="float: right; margin-left: 10px">
-                        <p class="footer_label">Data Time:</p>
-                        <p id="item_data_time" class="footer_value" style="width: 60px"></p>
-                    </div>
+        <div id="footer">
+            <div id="footer_items">
+                <p class="footer_label">Local Time:</p>
+                <p id="item_local_time" class="footer_value" style="width: 210px"></p>
+    
+                <div style="float: right; margin-left: 10px">
+                    <p class="footer_label">Data Time:</p>
+                    <p id="item_data_time" class="footer_value" style="width: 60px"></p>
                 </div>
             </div>
         </div>
