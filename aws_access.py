@@ -265,8 +265,8 @@ def data_graph_year():
 
     # Generate each series from retrieved records 
     for record in records:
-        local_time = datetime.strptime(record["Date"], "%Y-%m-%d %H:%M:%S")
-        utc = helpers.utc_to_local(config, local_time).timestamp()
+        local_time = datetime.strptime(record["Date"], "%Y-%m-%d")
+        utc = helpers.local_to_utc(config, local_time).timestamp()
 
         # Create point and add to relevant series
         for field in range(1, len(fields)):
