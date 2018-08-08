@@ -85,7 +85,7 @@
 
             function loadGraphData(graph, fields) {
                 var url = "/data/graph-day.json?time=" + requestedTime.format(
-                    "YYYY-MM-DD[T]HH-mm-[00]") + "&fields=Time," + fields;
+                    "YYYY-MM-DD[T]HH-mm-[00]") + "&fields=" + fields;
                 
                 var local_time = moment(requestedTime).tz("Europe/London");
                 var x_start = moment(local_time).hour(0).minute(0).unix();
