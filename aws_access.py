@@ -208,7 +208,7 @@ def data_graph_day():
 
     bounds = helpers.day_bounds_utc(
         config, helpers.utc_to_local(config, url_time), True)
-    fields = "Time" + flask.request.args.get("fields")
+    fields = "Time," + flask.request.args.get("fields")
 
     # Get data in range for specified parameters
     records = analysis.fields_in_range(config, bounds[0], bounds[1], fields,
@@ -253,7 +253,7 @@ def data_graph_year():
         config, helpers.utc_to_local(config, url_time), True)
     range_end = bounds[0] - timedelta(minutes = 1)
     range_start = range_end - timedelta(days = 365)
-    fields = "Date" + flask.request.args.get("fields")
+    fields = "Date," + flask.request.args.get("fields")
 
     # Get data in range for specified parameters
     records = analysis.fields_in_range(config, range_start, range_end, fields,
