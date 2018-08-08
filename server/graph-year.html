@@ -112,6 +112,25 @@
                     } else { document.getElementById("graph_" + graph).style.display = "block"; }
                 }
             }
+
+            function scroller_left() {
+                if (isLoading == false) {
+                    requestedTime.subtract(365, "days");
+                    scroller_change();
+                }
+            }
+            
+            function scroller_right() {
+                if (isLoading == false) {
+                    requestedTime.add(365, "days");
+                    scroller_change();
+                }
+            }
+
+            function scroller_change(time) {
+                var utc = moment().utc().millisecond(0).second(0);
+                getAndProcessData(false);
+            }
         </script>
     </head>
 
