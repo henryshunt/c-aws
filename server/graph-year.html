@@ -80,10 +80,10 @@
 
                         axisX: {
                             type: Chartist.FixedScaleAxis,
-                            low: x_start, high: x_end, divisor: 8, offset: 20,
+                            low: x_start, high: x_end, divisor: 12, offset: 20,
         
                             labelInterpolationFnc: function(value) {
-                                return moment.unix(value).utc().tz("Europe/London").format("DD/MMM");
+                                return moment.unix(value).utc().tz("Europe/London").format("MMM DD");
                             }
                         }
                     };
