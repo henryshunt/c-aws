@@ -366,7 +366,7 @@ def data_about():
 
     # Get remaining camera storage space
     if config.camera_logging == True:
-        data["CDRS"] = helpers.remaining_space(config.camera_drive)
+        data["CDRS"] = helpers.remaining_space("/mnt/" + config.camera_drive)
         if data["CDRS"] != None: data["CDRS"] = round(data["CDRS"], 2)
     else: data["CDRS"] = False
 

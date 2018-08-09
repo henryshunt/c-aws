@@ -333,7 +333,7 @@ def do_log_camera(utc):
             gpio.output(24, gpio.HIGH); return
 
         # Check free space
-        free_space = helpers.remaining_space(config.camera_drive)
+        free_space = helpers.remaining_space("/mnt/" + config.camera_drive)
         if free_space == None or free_space < 0.1:
             gpio.output(24, gpio.HIGH); return
 
