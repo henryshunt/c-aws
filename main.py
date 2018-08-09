@@ -74,7 +74,7 @@ if config.camera_logging == True:
     blocks = subprocess.Popen(["sudo", "blkid"], stdout = subprocess.PIPE,
         stderr = subprocess.DEVNULL); blocks.wait()
 
-    if config.camera_drive not in blocks.stdout.read():
+    if config.camera_drive not in str(blocks.stdout.read()):
         helpers.init_exit(6, True)
     
     try:
