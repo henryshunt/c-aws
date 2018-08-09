@@ -329,10 +329,7 @@ def do_log_camera(utc):
     if (utc >= sunrise_threshold.replace(tzinfo = None) and
         utc <= sunset_threshold.replace(tzinfo = None)):
 
-        if not os.path.isdir(config.camera_drive):
-            gpio.output(24, gpio.HIGH); return
-
-        # Check free space
+        # Check free space on camera drive
         free_space = helpers.remaining_space(config.camera_drive)
         if free_space == None or free_space < 0.1:
             gpio.output(24, gpio.HIGH); return
