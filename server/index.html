@@ -11,6 +11,8 @@
         <script src="{{ url_for('static', filename='js-moment-tz.js') }}" type="text/javascript"></script>
 
         <script>
+            const awsTimeZone = "{{ aws_time_zone }}";
+
             var requestedTime = null;
             var updaterTimeout = null;
             var countTimeout = null;
@@ -72,7 +74,7 @@
                         document.getElementById("item_ST00").innerHTML = "no data";
 
                         document.getElementById("item_data_time").innerHTML
-                            = moment(requestedTime).tz("Europe/London").format("HH:mm");
+                            = moment(requestedTime).tz(awsTimeZone).format("HH:mm");
                     }
                 });
             }
@@ -81,12 +83,12 @@
                 if (data["Time"] != null) {
                     var utc = moment.utc(data["Time"], "YYYY-MM-DD HH:mm:ss");
                     document.getElementById("item_data_time").innerHTML
-                        = moment(utc).tz("Europe/London").format("HH:mm");
+                        = moment(utc).tz(awsTimeZone).format("HH:mm");
                     requestedTime = moment(utc);
 
                 } else {
                     document.getElementById("item_data_time").innerHTML
-                        = moment(requestedTime).tz("Europe/London").format("HH:mm");
+                        = moment(requestedTime).tz(awsTimeZone).format("HH:mm");
                 }
 
                 display_value(data["AirT"], "item_AirT", "°C", 1);

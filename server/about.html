@@ -11,6 +11,8 @@
         <script src="{{ url_for('static', filename='js-moment-tz.js') }}" type="text/javascript"></script>
 
         <script>
+            const awsTimeZone = "{{ aws_time_zone }}";
+
             var requestedTime = null;
             var updaterTimeout = null;
             var countTimeout = null;
@@ -60,7 +62,7 @@
                         document.getElementById("item_CDRS").innerHTML = "no data";
 
                         document.getElementById("item_data_time").innerHTML
-                            = moment(requestedTime).tz("Europe/London").format("HH:mm");
+                            = moment(requestedTime).tz(awsTimeZone).format("HH:mm");
                     }
                 });
             }
@@ -69,17 +71,17 @@
                 if (data["Time"] != null) {
                     var utc = moment.utc(data["Time"], "YYYY-MM-DD HH:mm:ss");
                     document.getElementById("item_data_time").innerHTML
-                        = moment(utc).tz("Europe/London").format("HH:mm");
+                        = moment(utc).tz(awsTimeZone).format("HH:mm");
                     requestedTime = moment(utc);
 
                 } else {
                     document.getElementById("item_data_time").innerHTML
-                        = moment(requestedTime).tz("Europe/London").format("HH:mm");
+                        = moment(requestedTime).tz(awsTimeZone).format("HH:mm");
                 }
 
                 if (data["STim"] != null) {
                     var utc = moment.utc(data["STim"], "YYYY-MM-DD HH:mm:ss");
-                    var formatted = utc.tz("Europe/London").format("DD/MM/YYYY [at] HH:mm");
+                    var formatted = utc.tz(awsTimeZone).format("DD/MM/YYYY [at] HH:mm");
                     display_value(formatted, "item_STim", "", null);
                 } else { document.getElementById("item_STim").innerHTML = "no data"; }
 

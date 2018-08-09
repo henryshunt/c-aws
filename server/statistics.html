@@ -11,6 +11,8 @@
         <script src="{{ url_for('static', filename='js-moment-tz.js') }}" type="text/javascript"></script>
 
         <script>
+            const awsTimeZone = "{{ aws_time_zone }}";
+
             var isLoading = true;
             var requestedTime = null;
             var updaterTimeout = null;
@@ -96,7 +98,7 @@
                         document.getElementById("item_ST00_Min").innerHTML = "no data";
                         document.getElementById("item_ST00_Max").innerHTML = "no data";
 
-                        var local_time = moment(requestedTime).tz("Europe/London");
+                        var local_time = moment(requestedTime).tz(awsTimeZone);
                         document.getElementById("item_data_time").innerHTML
                             = local_time.format("HH:mm");
                         document.getElementById("scroller_time").innerHTML
@@ -109,7 +111,7 @@
             function processData(data) {
                 if (data["Time"] != null) {
                     var utc = moment.utc(data["Time"], "YYYY-MM-DD HH:mm:ss");
-                    var local_time = moment(utc).tz("Europe/London");
+                    var local_time = moment(utc).tz(awsTimeZone);
 
                     document.getElementById("item_data_time").innerHTML
                         = local_time.format("HH:mm");
@@ -118,7 +120,7 @@
                     requestedTime = moment(utc);
 
                 } else {
-                    var local_time = moment(requestedTime).tz("Europe/London");
+                    var local_time = moment(requestedTime).tz(awsTimeZone);
                     document.getElementById("item_data_time").innerHTML
                         = local_time.format("HH:mm");
                     document.getElementById("scroller_time").innerHTML

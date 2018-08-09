@@ -37,42 +37,48 @@ def page_now():
 
     return flask.render_template("index.html",
                                  aws_title = config.aws_location.split(",")[0],
-                                 aws_location = config.aws_location)
+                                 aws_location = config.aws_location,
+                                 aws_time_zone = config.aws_time_zone)
 
 def page_statistics():
     global config
 
     return flask.render_template("statistics.html",
                                  aws_title = config.aws_location.split(",")[0],
-                                 aws_location = config.aws_location)
+                                 aws_location = config.aws_location,
+                                 aws_time_zone = config.aws_time_zone)
 
 def page_graph_day():
     global config
 
     return flask.render_template("graph-day.html",
                                  aws_title = config.aws_location.split(",")[0],
-                                 aws_location = config.aws_location)
+                                 aws_location = config.aws_location,
+                                 aws_time_zone = config.aws_time_zone)
 
 def page_graph_month():
     global config
 
     return flask.render_template("graph-month.html",
                                  aws_title = config.aws_location.split(",")[0],
-                                 aws_location = config.aws_location)
+                                 aws_location = config.aws_location,
+                                 aws_time_zone = config.aws_time_zone)
 
 def page_graph_year():
     global config
 
     return flask.render_template("graph-year.html",
                                  aws_title = config.aws_location.split(",")[0],
-                                 aws_location = config.aws_location)
+                                 aws_location = config.aws_location,
+                                 aws_time_zone = config.aws_time_zone)
 
 def page_camera():
     global config
 
     return flask.render_template("camera.html",
                                  aws_title = config.aws_location.split(",")[0],
-                                 aws_location = config.aws_location)
+                                 aws_location = config.aws_location,
+                                 aws_time_zone = config.aws_time_zone)
 
 def page_about():
     global config
