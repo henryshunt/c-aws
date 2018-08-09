@@ -24,8 +24,13 @@ function queryParam(key) {
     return match && decodeURIComponent(match[1].replace(/\+/g, " "));
 }
 
-function display_value(value, id, units) {
+function display_value(value, id, units, precision) {
     if (value != null) {
-        document.getElementById(id).innerHTML = value + units;
+        if (precision == null) {
+            document.getElementById(id).innerHTML = value + units;
+
+        } else {
+            document.getElementById(id).innerHTML = value.toFixed(precision) + units;
+        }
     } else { document.getElementById(id).innerHTML = "no data"; }
 }

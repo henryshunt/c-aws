@@ -79,23 +79,18 @@
 
                 if (data["STim"] != null) {
                     var utc = moment.utc(data["STim"], "YYYY-MM-DD HH:mm:ss");
-
                     document.getElementById("item_STim").innerHTML
                         = utc.tz("Europe/London").format("DD/MM/YYYY [at] HH:mm");
                 } else { document.getElementById("item_STim").innerHTML = "no data"; }
 
-                display_value(data["EncT"], "item_EncT", "°C");
-                display_value(data["CPUT"], "item_CPUT", "°C");
-                display_value(data["IDRS"], "item_IDRS", " gb");
+                display_value(data["EncT"], "item_EncT", "°C", 1);
+                display_value(data["CPUT"], "item_CPUT", "°C", 1);
+                display_value(data["IDRS"], "item_IDRS", " gb", 2);
 
                 if (data["CDRS"] != null) {
                     if (data["CDRS"] == false) {
                         document.getElementById("item_CDRS").innerHTML = "no drive";
-
-                    } else {
-                        document.getElementById("item_CDRS").innerHTML
-                            = data["CDRS"] + " gb";
-                    }
+                    } else { display_value(data["CDRS"], "item_CDRS", " gb", 2); }
                 } else { document.getElementById("item_CDRS").innerHTML = "no data"; }
             }
 

@@ -89,23 +89,23 @@
                         = moment(requestedTime).tz("Europe/London").format("HH:mm");
                 }
 
-                display_value(data["AirT"], "item_AirT", "°C");
-                display_value(data["ExpT"], "item_ExpT", "°C");
-                display_value(data["RelH"], "item_RelH", "%");
-                display_value(data["DewP"], "item_DewP", "°C");
-                display_value(data["WSpd"], "item_WSpd", " mph");
-                display_value(data["WDir"], "item_WDir", "°");
-                display_value(data["WGst"], "item_WGst", " mph");
-                display_value(data["SunD"], "item_SunD", " sec");
-                display_value(data["SunD_PHr"], "item_SunD_PHr", "");
-                display_value(data["Rain"], "item_Rain", " mm");
-                display_value(data["Rain_PHr"], "item_Rain_PHr", " mm");
-                display_value(data["StaP"], "item_StaP", " hPa");
-                display_value(data["MSLP"], "item_MSLP", " hPa");
-                display_value(data["StaP_PTH"], "item_StaP_PTH", " hPa");
-                display_value(data["ST10"], "item_ST10", "°C");
-                display_value(data["ST30"], "item_ST30", "°C");
-                display_value(data["ST00"], "item_ST00", "°C");
+                display_value(data["AirT"], "item_AirT", "°C", 1);
+                display_value(data["ExpT"], "item_ExpT", "°C", 1);
+                display_value(data["RelH"], "item_RelH", "%", 1);
+                display_value(data["DewP"], "item_DewP", "°C", 1);
+                display_value(data["WSpd"], "item_WSpd", " mph", 1);
+                display_value(data["WDir"], "item_WDir", "°", 0);
+                display_value(data["WGst"], "item_WGst", " mph", 1);
+                display_value(data["SunD"], "item_SunD", " sec", 0);
+                display_value(data["SunD_PHr"], "item_SunD_PHr", "", null);
+                display_value(data["Rain"], "item_Rain", " mm", 2);
+                display_value(data["Rain_PHr"], "item_Rain_PHr", " mm", 2);
+                display_value(data["StaP"], "item_StaP", " hPa", 1);
+                display_value(data["MSLP"], "item_MSLP", " hPa", 1);
+                display_value(data["StaP_PTH"], "item_StaP_PTH", " hPa", 1);
+                display_value(data["ST10"], "item_ST10", "°C", 1);
+                display_value(data["ST30"], "item_ST30", "°C", 1);
+                display_value(data["ST00"], "item_ST00", "°C", 1);
             }
         </script>
     </head>
