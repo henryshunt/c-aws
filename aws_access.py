@@ -360,14 +360,11 @@ def data_about():
     # Format software startup time
     data["STim"] = startup_time.strftime("%Y-%m-%d %H:%M:%S")
     
-    # Get remaining internal storage space
+    # Get remaining internal and camera drive storage spaces
     data["IDRS"] = helpers.remaining_space("/")
-    if data["IDRS"] != None: data["IDRS"] = round(data["IDRS"], 2)
 
-    # Get remaining camera storage space
     if config.camera_logging == True:
-        data["CDRS"] = helpers.remaining_space("/mnt/" + config.camera_drive)
-        if data["CDRS"] != None: data["CDRS"] = round(data["CDRS"], 2)
+        data["CDRS"] = helpers.remaining_space(config.camera_drive)
     else: data["CDRS"] = False
 
     data["Time"] = url_time.strftime("%Y-%m-%d %H:%M:%S")

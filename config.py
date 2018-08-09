@@ -7,6 +7,7 @@ class ConfigData():
     def __init__(self):
         self.data_directory = None
         self.database_path = None
+        self.camera_drive_label = None
         self.camera_drive = None
         self.envReport_logging = None
         self.camera_logging = None
@@ -53,8 +54,10 @@ class ConfigData():
                 "records.sq3")
             
             # Load non-required configuration options
-            self.camera_drive = parser.get("DataStores", "CameraDrive")
-            if self.camera_drive == "": self.camera_drive = None
+            self.camera_drive_label = parser.get("DataStores", "CameraDrive")
+            if self.camera_drive_label == "": self.camera_drive_label = None
+            if self.camera_drive_label != None:
+                self.camera_drive = "/mnt/" + self.camera_drive_label
 
             self.remote_sql_server = (parser.get("DataEndpoints",
                 "RemoteSQLServer"))

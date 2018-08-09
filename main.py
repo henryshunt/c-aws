@@ -74,20 +74,21 @@ if config.camera_logging == True:
     blocks = subprocess.Popen(["sudo", "blkid"], stdout = subprocess.PIPE,
         stderr = subprocess.DEVNULL); blocks.wait()
 
-    if config.camera_drive not in str(blocks.stdout.read()):
+    if config.camera_drive_label not in str(blocks.stdout.read()):
         helpers.init_exit(6, True)
     
     try:
-        if not os.path.exists("/mnt/" + config.camera_drive):
-            os.makedirs("/mnt/" + config.camera_drive)
+        if not os.path.exists(config.camera_drive):
+            os.makedirs(config.camera_drive)
 
         # Mount the specified drive via its label
-        mount = subprocess.Popen(["sudo", "mount", "-L", config.camera_drive,
-            "/mnt/" + config.camera_drive], stdout = subprocess.DEVNULL, 
-            stderr = subprocess.DEVNULL); mount.wait()
+        mount = subprocess.Popen(["sudo", "mount", "-L",
+            config.camera_drive_label, config.camera_drive],
+            stdout = subprocess.DEVNULL, stderr = subprocess.DEVNULL)
+        mount.wait()
     except: helpers.init_exit(7, True)
 
-    free_space = helpers.remaining_space("/mnt/" + config.camera_drive)
+    free_space = helpers.remaining_space(config.camera_drive)
     if free_space == None or free_space < 5: helpers.init_exit(8, True)
 
     # Check camera module is connected
