@@ -80,7 +80,7 @@ if config.camera_logging == True:
 
         # Mount the specified drive via its label
         os.popen("sudo mount -L "
-            + config.camera_drive + "/mnt/" + config.camera_drive)
+            + config.camera_drive + " /mnt/" + config.camera_drive)
     except: helpers.init_exit(7, True)
 
     free_space = helpers.remaining_space(config.camera_drive)
