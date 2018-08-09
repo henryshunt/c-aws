@@ -71,7 +71,10 @@ if not os.path.isfile(config.database_path):
 
 # -- CHECK CAMERA DRIVE --------------------------------------------------------
 if config.camera_logging == True:
-    if config.camera_drive not in os.popen("sudo blkid").read():
+    blocks = subprocess.Popen(["sudo", "blkid"], stdout = subprocess.PIPE,
+        stderr = subprocess.DEVNULL); blocks.wait()
+
+    if config.camera_drive not in blocks.stdout.read():
         helpers.init_exit(6, True)
     
     try:
@@ -79,8 +82,9 @@ if config.camera_logging == True:
             os.makedirs("/mnt/" + config.camera_drive)
 
         # Mount the specified drive via its label
-        os.popen("sudo mount -L "
-            + config.camera_drive + " /mnt/" + config.camera_drive).read()
+        mount = subprocess.Popen(["sudo", "mount", "-L", config.camera_drive,
+            "/mnt/" + config.camera_drive], stdout = subprocess.DEVNULL, 
+            stderr = subprocess.DEVNULL); mount.wait()
     except: helpers.init_exit(7, True)
 
     free_space = helpers.remaining_space(config.camera_drive)
