@@ -79,8 +79,8 @@
 
                 if (data["STim"] != null) {
                     var utc = moment.utc(data["STim"], "YYYY-MM-DD HH:mm:ss");
-                    document.getElementById("item_STim").innerHTML
-                        = utc.tz("Europe/London").format("DD/MM/YYYY [at] HH:mm");
+                    var formatted = utc.tz("Europe/London").format("DD/MM/YYYY [at] HH:mm");
+                    display_value(formatted, "item_STim", "", null);
                 } else { document.getElementById("item_STim").innerHTML = "no data"; }
 
                 display_value(data["EncT"], "item_EncT", "°C", 1);

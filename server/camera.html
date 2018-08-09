@@ -106,26 +106,25 @@
 
                 if (data["SRis"] != null) {
                     var utc = moment.utc(data["SRis"], "YYYY-MM-DD HH:mm:ss");
-                    document.getElementById("item_SRis").innerHTML
-                        = utc.tz("Europe/London").format("HH:mm");
+                    var formatted = utc.tz("Europe/London").format("HH:mm");
+                    display_value(formatted, "item_SRis", "", null);
                 } else { document.getElementById("item_SRis").innerHTML = "no data"; }
 
                 if (data["SSet"] != null) {
                     var utc = moment.utc(data["SSet"], "YYYY-MM-DD HH:mm:ss");
-                    document.getElementById("item_SSet").innerHTML
-                        = utc.tz("Europe/London").format("HH:mm");
+                    var formatted = utc.tz("Europe/London").format("HH:mm");
+                    display_value(formatted, "item_SSet", "", null);
                 } else { document.getElementById("item_SSet").innerHTML = "no data"; }
 
                 if (data["Noon"] != null) {
                     var utc = moment.utc(data["Noon"], "YYYY-MM-DD HH:mm:ss");
-                    document.getElementById("item_Noon").innerHTML
-                        = utc.tz("Europe/London").format("HH:mm");
+                    var formatted = utc.tz("Europe/London").format("HH:mm");
+                    display_value(formatted, "item_Noon", "", null);
                 } else { document.getElementById("item_Noon").innerHTML = "no data"; }
 
                 if (data["ImgP"] != null) {
                     document.getElementById("item_CImg").src = data["ImgP"];
                 } else { document.getElementById("item_CImg").src = "res/no-camera.png"; }
-
                 isLoading = false;
             }
         

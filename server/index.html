@@ -97,7 +97,12 @@
                 display_value(data["WDir"], "item_WDir", "°", 0);
                 display_value(data["WGst"], "item_WGst", " mph", 1);
                 display_value(data["SunD"], "item_SunD", " sec", 0);
-                display_value(data["SunD_PHr"], "item_SunD_PHr", "", null);
+
+                if (data["SunD_PHr"] != null) {
+                    var formatted = moment.utc(data["SunD_PHr"] * 1000).format("HH:mm:ss");
+                    display_value(formatted, "item_SunD_PHr", "", null);
+                } else { document.getElementById("item_SunD_PHr").innerHTML = "no data"; }
+
                 display_value(data["Rain"], "item_Rain", " mm", 2);
                 display_value(data["Rain_PHr"], "item_Rain_PHr", " mm", 2);
                 display_value(data["StaP"], "item_StaP", " hPa", 1);

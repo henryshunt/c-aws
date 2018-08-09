@@ -143,7 +143,12 @@
                 display_value(data["WGst_Avg"], "item_WGst_Avg", " mph", 1);
                 display_value(data["WGst_Min"], "item_WGst_Min", " mph", 1);
                 display_value(data["WGst_Max"], "item_WGst_Max", " mph", 1);
-                display_value(data["SunD_Ttl"], "item_SunD_Ttl", "", null);
+
+                if (data["SunD_Ttl"] != null) {
+                    var formatted = moment.utc(data["SunD_Ttl"] * 1000).format("HH:mm:ss");
+                    display_value(formatted, "item_SunD_Ttl", "", null);
+                } else { document.getElementById("item_SunD_Ttl").innerHTML = "no data"; }
+
                 display_value(data["Rain_Ttl"], "item_Rain_Ttl", " mm", 2);
                 display_value(data["MSLP_Avg"], "item_MSLP_Avg", " hPa", 1);
                 display_value(data["MSLP_Min"], "item_MSLP_Min", " hPa", 1);

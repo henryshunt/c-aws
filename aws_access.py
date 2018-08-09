@@ -127,14 +127,12 @@ def data_now():
     # Calculate total sunshine duration over past hour
     SunD_PHr_record = analysis.past_hour_total(config, url_time, "SunD")
     if SunD_PHr_record != False and SunD_PHr_record != None:
-        if SunD_PHr_record["SunD"] != None:
-            data["SunD_PHr"] = str(timedelta(seconds = SunD_PHr_record["SunD"]))
+        data["SunD_PHr"] = SunD_PHr_record["SunD_PHr"]
 
     # Calculate total rainfall over past hour
     Rain_PHr_record = analysis.past_hour_total(config, url_time, "Rain")
     if Rain_PHr_record != False and Rain_PHr_record != None:
-        if Rain_PHr_record["Rain"] != None:
-            data["Rain_PHr"] = round(Rain_PHr_record["Rain"], 2)
+        data["Rain_PHr"] = Rain_PHr_record["Rain_PHr"]
 
     # Calculate three hour pressure tendency
     if data["StaP"] != None:
@@ -191,9 +189,6 @@ def data_statistics():
             # Add record data to final data
             for key in dict(zip(record.keys(), record)):
                 if key in data: data[key] = record[key]
-
-    if data["SunD_Ttl"] != None:
-        data["SunD_Ttl"] = str(timedelta(seconds = data["SunD_Ttl"]))
 
     data["Time"] = url_time.strftime("%Y-%m-%d %H:%M:%S")
     return flask.jsonify(data)
