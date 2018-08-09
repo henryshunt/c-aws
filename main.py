@@ -87,7 +87,7 @@ if config.camera_logging == True:
             stderr = subprocess.DEVNULL); mount.wait()
     except: helpers.init_exit(7, True)
 
-    free_space = helpers.remaining_space(config.camera_drive)
+    free_space = helpers.remaining_space("/mnt/" + config.camera_drive)
     if free_space == None or free_space < 5: helpers.init_exit(8, True)
 
     # Check camera module is connected
