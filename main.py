@@ -71,22 +71,32 @@ if not os.path.isfile(config.database_path):
 
 # -- CHECK CAMERA DRIVE --------------------------------------------------------
 if config.camera_logging == True:
-    if not os.path.isdir(config.camera_drive): helpers.init_exit(6, True)
+    if config.camera_drive not in os.system("sudo blkid"):
+        helpers.init_exit(6, True)
+    
+    try:
+        if not os.path.exists("/mnt/" + config.camera_drive):
+            os.makedirs("/mnt/" + config.camera_drive)
+
+        # Mount the specified drive via its label
+        os.system("sudo mount -L "
+            + config.camera_drive + "/mnt/" + config.camera_drive)
+    except: helpers.init_exit(7, True)
 
     free_space = helpers.remaining_space(config.camera_drive)
-    if free_space == None or free_space < 5: helpers.init_exit(7, True)
+    if free_space == None or free_space < 5: helpers.init_exit(8, True)
 
     # Check camera module is connected
     try:
         with picamera.PiCamera() as camera: pass
-    except: helpers.init_exit(8, True)
+    except: helpers.init_exit(9, True)
 
 # -- RUN ACCESS ----------------------------------------------------------------
 if config.local_network_server == True:
     try:
         proc_access = subprocess.Popen(["sudo", "python3", "aws_access.py",
             startup_time.strftime("%Y-%m-%dT%H:%M:%S")])
-    except: helpers.init_exit(9, True)
+    except: helpers.init_exit(10, True)
 
 # -- RUN SUPPORT ---------------------------------------------------------------
 if (config.report_uploading == True or
@@ -98,7 +108,7 @@ if (config.report_uploading == True or
         proc_support = subprocess.Popen(["sudo", "python3", "aws_support.py"])
     except:
         if proc_access != None: proc_access.terminate()
-        helpers.init_exit(10, True)
+        helpers.init_exit(11, True)
 
 # -- RUN DATA ------------------------------------------------------------------
 try:
@@ -108,4 +118,4 @@ try:
 except:
     if proc_access != None: proc_access.terminate()
     if proc_support != None: proc_support.terminate()
-    helpers.init_exit(11, True)
+    helpers.init_exit(12, True)
