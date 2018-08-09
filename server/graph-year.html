@@ -90,7 +90,9 @@
                         }
                     };
 
-                    new Chartist.Line("#graph_" + graph, data, options);
+                    if (graph == "sunshine" || graph == "rainfall") {
+                        new Chartist.Bar("#graph_" + graph, data, options);
+                    } else { new Chartist.Line("#graph_" + graph, data, options); }
 
                     graphsLoaded += 1;
                     if (graphsLoaded == openGraphs.length) {
