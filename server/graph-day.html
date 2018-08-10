@@ -100,9 +100,14 @@
                         showPoint: false, lineSmooth: false, height: 300,
 
                         axisY: {
-                            offset: 30,
+                            offset: 38,
                             labelInterpolationFnc: function(value) {
-                                return (Math.round(value * 100) / 100).toString();
+                                if (graph == "direction") { return value.toFixed(0); }
+                                else if (graph == "sunshine") {
+                                    return moment.utc(value * 1000).format("HH:mm");
+                                }
+                                else if (graph == "rainfall") { return value.toFixed(2) }
+                                else { return value.toFixed(1); }
                             }
                         },
 
@@ -115,6 +120,10 @@
                             }
                         }
                     };
+
+                    if (graph == "direction") {
+                        options.axisY.low = 0; options.axisY.high = 360;
+                    }
 
                     new Chartist.Line("#graph_" + graph, data, options);
 

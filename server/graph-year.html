@@ -74,9 +74,14 @@
                         showPoint: false, lineSmooth: false, height: 300,
 
                         axisY: {
-                            offset: 30,
+                            offset: 38,
                             labelInterpolationFnc: function(value) {
-                                return (Math.round(value * 100) / 100).toString();
+                                if (graph == "direction") { return value.toFixed(0); }
+                                else if (graph == "sunshine") {
+                                    return moment.utc(value * 1000).format("HH:mm");
+                                }
+                                else if (graph == "rainfall") { return value.toFixed(2) }
+                                else { return value.toFixed(1); }
                             }
                         },
 
@@ -89,6 +94,10 @@
                             }
                         }
                     };
+
+                    if (graph == "direction") {
+                        options.axisY.low = 0; options.axisY.high = 360;
+                    }
 
                     if (graph == "sunshine" || graph == "rainfall") {
                         new Chartist.Bar("#graph_" + graph, data, options);
@@ -119,14 +128,14 @@
 
             function scroller_left() {
                 if (isLoading == false) {
-                    requestedTime.subtract(365, "days");
+                    requestedTime.subtract(30, "days");
                     scroller_change();
                 }
             }
             
             function scroller_right() {
                 if (isLoading == false) {
-                    requestedTime.add(365, "days");
+                    requestedTime.add(30, "days");
                     scroller_change();
                 }
             }
