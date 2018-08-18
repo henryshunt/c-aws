@@ -36,7 +36,7 @@
     stroke-width: 2;
 }
 .ct-label.ct-vertical.ct-start {
-    transform: translateY(10%);
+    transform: translateY(6px);
     font-size: 10px;
 }
 
