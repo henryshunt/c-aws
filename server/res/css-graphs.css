@@ -26,6 +26,14 @@
     color: gray;
 }
 
+.ct-label.ct-vertical.ct-start {
+    transform: translateY(6px);
+    font-size: 10px;
+}
+.ct-chart-bar .ct-label.ct-horizontal.ct-end {
+    justify-content: left;
+}
+
 .ct-series .ct-line {
     stroke-width: 1px;
 }
@@ -34,10 +42,6 @@
 }
 .ct-series .ct-bar {
     stroke-width: 2;
-}
-.ct-label.ct-vertical.ct-start {
-    transform: translateY(6px);
-    font-size: 10px;
 }
 
 .ct-series-a .ct-line {
