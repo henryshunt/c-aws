@@ -36,7 +36,7 @@ GENERATE_DAYSTAT = ("SELECT MIN(AirT) AS AirT_Min, MAX(AirT) AS AirT_Max, ROUND(
     + "MIN(DewP) AS DewP_Min, MAX(DewP) AS DewP_Max, ROUND(AVG(DewP), 3) AS DewP_Avg, "
     + "MIN(WSpd) AS WSpd_Min, MAX(WSpd) AS WSpd_Max, ROUND(AVG(WSpd), 3) AS WSpd_Avg, "
     + "MIN(WDir) AS WDir_Min, MAX(WDir) AS WDir_Max, ROUND(AVG(WDir), 3) AS WDir_Avg, "
-    + "MIN(WGst) AS WGst_Min, MAX(WGst) AS WGst_Max, ROUND(MAX(WGst), 3) AS WGst_Avg, "
+    + "MIN(WGst) AS WGst_Min, MAX(WGst) AS WGst_Max, ROUND(AVG(WGst), 3) AS WGst_Avg, "
     + "SUM(SunD) AS SunD_Ttl, SUM(Rain) AS Rain_Ttl, "
     + "MIN(MSLP) AS MSLP_Min, MAX(MSLP) AS MSLP_Max, ROUND(AVG(MSLP), 3) AS MSLP_Avg, "
     + "MIN(ST10) AS ST10_Min, MAX(ST10) AS ST10_Max, ROUND(AVG(ST10), 3) AS ST10_Avg, "
