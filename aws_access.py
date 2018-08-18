@@ -297,13 +297,17 @@ def data_camera():
     if not os.path.isfile(image_path):
         if not flask.request.args.get("abs") == "1":
             url_time -= timedelta(minutes = 5)
+            local_time -= timedelta(minutes = 5)
+            
             image_path = os.path.join(config.camera_drive,
                 url_time.strftime("%Y/%m/%d/%Y-%m-%dT%H-%M-%S") + ".jpg")
 
             if os.path.isfile(image_path): 
                 data["ImgP"] = ("data/camera/"
                     + url_time.strftime("%Y/%m/%d/%Y-%m-%dT%H-%M-%S") + ".jpg")
-            else: url_time += timedelta(minutes = 5)
+            else:
+                url_time += timedelta(minutes = 5)
+                local_time += timedelta(minutes = 5)
 
     else: data["ImgP"] = ("data/camera/"
         + url_time.strftime("%Y/%m/%d/%Y-%m-%dT%H-%M-%S") + ".jpg")
