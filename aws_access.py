@@ -180,7 +180,9 @@ def data_statistics():
             # Go back a minute if no record and not in absolute mode
             if not flask.request.args.get("abs") == "1":
                 url_time -= timedelta(minutes = 1)
-                record = analysis.record_for_time(config, url_time,
+                local_time -= timedelta(minutes = 1)
+
+                record = analysis.record_for_time(config, local_time,
                                                   DbTable.DAYSTATS)
                 
                 if record != False:
