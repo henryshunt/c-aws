@@ -40,6 +40,7 @@
 }
 .ct-label.ct-vertical.ct-start {
     transform: translateY(10%);
+    font-size: 10px;
 }
 
 .ct-series-a .ct-line {
