@@ -35,9 +35,6 @@
 .ct-series .ct-bar {
     stroke-width: 2;
 }
-.ct-label.ct-horizontal.ct-end {
-    transform: translateX(-12%);
-}
 .ct-label.ct-vertical.ct-start {
     transform: translateY(10%);
     font-size: 10px;
