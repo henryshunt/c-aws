@@ -93,39 +93,45 @@
                 var x_end = moment(local_time).add(1, "day").hour(0).minute(0).unix();
                 var x_start = moment(local_time).hour(0).minute(0).unix();
 
+                var options = {
+                    showPoint: false, lineSmooth: false, height: 300,
+
+                    axisY: {
+                        offset: 38,
+                        labelInterpolationFnc: function(value) {
+                            if (graph == "direction") { return value.toFixed(0); }
+                            else if (graph == "sunshine") {
+                                return moment.utc(value * 1000).format("HH:mm");
+                            }
+                            else if (graph == "rainfall") { return value.toFixed(2) }
+                            else { return value.toFixed(1); }
+                        }
+                    },
+
+                    axisX: {
+                        type: Chartist.FixedScaleAxis,
+                        low: x_start, high: x_end, divisor: 8, offset: 20,    
+                        labelInterpolationFnc: function(value) {
+                            return moment.unix(value).utc().tz(awsTimeZone).format("HH:mm");
+                        }
+                    }
+                };
+
+                if (graph == "direction") {
+                    options.axisY.low = 0; options.axisY.high = 360;
+                }
+
                 $.get(url, function(response) {
                     var data = { series: response };
+                    new Chartist.Line("#graph_" + graph, data, options);
 
-                    var options = {
-                        showPoint: false, lineSmooth: false, height: 300,
-
-                        axisY: {
-                            offset: 38,
-                            labelInterpolationFnc: function(value) {
-                                if (graph == "direction") { return value.toFixed(0); }
-                                else if (graph == "sunshine") {
-                                    return moment.utc(value * 1000).format("HH:mm");
-                                }
-                                else if (graph == "rainfall") { return value.toFixed(2) }
-                                else { return value.toFixed(1); }
-                            }
-                        },
-
-                        axisX: {
-                            type: Chartist.FixedScaleAxis,
-                            low: x_start, high: x_end, divisor: 8, offset: 20,
-        
-                            labelInterpolationFnc: function(value) {
-                                return moment.unix(value).utc().tz(awsTimeZone).format("HH:mm");
-                            }
-                        }
-                    };
-
-                    if (graph == "direction") {
-                        options.axisY.low = 0; options.axisY.high = 360;
+                    graphsLoaded += 1;
+                    if (graphsLoaded == openGraphs.length) {
+                        isLoading = false; graphsLoaded = 0;
                     }
 
-                    new Chartist.Line("#graph_" + graph, data, options);
+                }).fail(function() {
+                    new Chartist.Line("#graph_" + graph, null, options);
 
                     graphsLoaded += 1;
                     if (graphsLoaded == openGraphs.length) {
