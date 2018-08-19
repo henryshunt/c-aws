@@ -286,7 +286,6 @@ def data_camera():
     try:
         url_time = datetime.strptime(
             flask.request.args.get("time"), "%Y-%m-%dT%H-%M-%S")
-        local_time = helpers.utc_to_local(config, url_time)
     except: return flask.jsonify(data)
 
     # Get image for that time
@@ -297,22 +296,20 @@ def data_camera():
     if not os.path.isfile(image_path):
         if not flask.request.args.get("abs") == "1":
             url_time -= timedelta(minutes = 5)
-            local_time -= timedelta(minutes = 5)
-            
             image_path = os.path.join(config.camera_drive,
                 url_time.strftime("%Y/%m/%d/%Y-%m-%dT%H-%M-%S") + ".jpg")
 
             if os.path.isfile(image_path): 
                 data["ImgP"] = ("data/camera/"
                     + url_time.strftime("%Y/%m/%d/%Y-%m-%dT%H-%M-%S") + ".jpg")
-            else:
-                url_time += timedelta(minutes = 5)
-                local_time += timedelta(minutes = 5)
+            else: url_time += timedelta(minutes = 5)
 
     else: data["ImgP"] = ("data/camera/"
         + url_time.strftime("%Y/%m/%d/%Y-%m-%dT%H-%M-%S") + ".jpg")
 
     # Calculate sunrise and sunset times
+    local_time = helpers.utc_to_local(config, url_time).replace(hours = 0,
+        minutes = 0, seconds = 0)
     location = astral.Location(("", "", config.aws_latitude,
         config.aws_longitude, str(config.aws_time_zone), config.aws_elevation))
     solar = location.sun(date = local_time, local = False)
