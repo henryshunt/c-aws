@@ -308,8 +308,8 @@ def data_camera():
         + url_time.strftime("%Y/%m/%d/%Y-%m-%dT%H-%M-%S") + ".jpg")
 
     # Calculate sunrise and sunset times
-    local_time = helpers.utc_to_local(config, url_time).replace(hours = 0,
-        minutes = 0, seconds = 0)
+    local_time = helpers.utc_to_local(config, url_time).replace(hour = 0,
+        minute = 0, second = 0)
     location = astral.Location(("", "", config.aws_latitude,
         config.aws_longitude, str(config.aws_time_zone), config.aws_elevation))
     solar = location.sun(date = local_time, local = False)
