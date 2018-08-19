@@ -48,16 +48,3 @@ def day_bounds_utc(config, local, inclusive):
 
     # Convert start and end to UTC
     return local_to_utc(config, start), local_to_utc(config, end)
-
-def degrees_to_compass(degrees):
-    if degrees >= 338 or degrees < 23: return "N"
-    elif degrees >= 23 and degrees < 68: return "NE"
-    elif degrees >= 68 and degrees < 113: return "E"
-    elif degrees >= 113 and degrees < 158: return "SE"
-    elif degrees >= 158 and degrees < 203: return "S"
-    elif degrees >= 203 and degrees < 248: return "SW"
-    elif degrees >= 248 and degrees < 293: return "W"
-    elif degrees >= 293 and degrees < 338: return "NW"
-
-def none_to_null(value):
-    return "NULL" if value == None else value

@@ -96,7 +96,13 @@
                 display_value(data["RelH"], "item_RelH", "%", 1);
                 display_value(data["DewP"], "item_DewP", "°C", 1);
                 display_value(data["WSpd"], "item_WSpd", " mph", 1);
-                display_value(data["WDir"], "item_WDir", "°", 0);
+
+                if (data["WDir"] != null) {
+                    var formatted = data["WDir"]
+                        .toFixed(0) + "° (" + degreesToCompass(data["WDir"]) + ")"
+                    display_value(formatted, "item_WDir", "", null);
+                } else { document.getElementById("item_WDir").innerHTML = "no data"; }
+
                 display_value(data["WGst"], "item_WGst", " mph", 1);
                 display_value(data["SunD"], "item_SunD", " sec", 0);
 

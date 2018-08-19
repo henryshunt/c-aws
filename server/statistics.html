@@ -139,9 +139,25 @@
                 display_value(data["WSpd_Avg"], "item_WSpd_Avg", " mph", 1);
                 display_value(data["WSpd_Min"], "item_WSpd_Min", " mph", 1);
                 display_value(data["WSpd_Max"], "item_WSpd_Max", " mph", 1);
-                display_value(data["WDir_Avg"], "item_WDir_Avg", "°", 0);
-                display_value(data["WDir_Min"], "item_WDir_Min", "°", 0);
-                display_value(data["WDir_Max"], "item_WDir_Max", "°", 0);
+
+                if (data["WDir_Avg"] != null) {
+                    var formatted = data["WDir_Avg"]
+                        .toFixed(0) + "° (" + degreesToCompass(data["WDir_Avg"]) + ")"
+                    display_value(formatted, "item_WDir_Avg", "", null);
+                } else { document.getElementById("item_WDir_Avg").innerHTML = "no data"; }
+
+                if (data["WDir_Min"] != null) {
+                    var formatted = data["WDir_Min"]
+                        .toFixed(0) + "° (" + degreesToCompass(data["WDir_Min"]) + ")"
+                    display_value(formatted, "item_WDir_Min", "", null);
+                } else { document.getElementById("item_WDir_Min").innerHTML = "no data"; }
+
+                if (data["WDir_Max"] != null) {
+                    var formatted = data["WDir_Max"]
+                        .toFixed(0) + "° (" + degreesToCompass(data["WDir_Max"]) + ")"
+                    display_value(formatted, "item_WDir_Max", "", null);
+                } else { document.getElementById("item_WDir_Max").innerHTML = "no data"; }
+
                 display_value(data["WGst_Avg"], "item_WGst_Avg", " mph", 1);
                 display_value(data["WGst_Min"], "item_WGst_Min", " mph", 1);
                 display_value(data["WGst_Max"], "item_WGst_Max", " mph", 1);
