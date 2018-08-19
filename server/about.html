@@ -51,7 +51,7 @@
                 $.ajax({
                     dataType: "json",
                     url: "data/about.json?time=" + requestedTime.format(
-                        "YYYY-MM-DD[T]HH-mm-[00]"),
+                        "YYYY-MM-DD[T]HH-mm-00"),
 
                     success: function (data) { processData(data); },
                     error: function() {

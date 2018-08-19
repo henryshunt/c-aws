@@ -87,7 +87,7 @@
 
             function loadGraphData(graph, fields) {
                 var url = "/data/graph-day.json?time=" + requestedTime.format(
-                    "YYYY-MM-DD[T]HH-mm-[00]") + "&fields=" + fields;
+                    "YYYY-MM-DD[T]HH-mm-00") + "&fields=" + fields;
                 
                 var local_time = moment(requestedTime).tz(awsTimeZone);
                 var x_end = moment(local_time).add(1, "day").hour(0).minute(0).unix();

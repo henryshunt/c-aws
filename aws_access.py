@@ -103,7 +103,7 @@ def data_now():
     if flask.request.args.get("time") == None: return flask.jsonify(data)
     try:
         url_time = datetime.strptime(
-            flask.request.args.get("time"), "%Y-%m-%dT%H-%M-%S")
+            flask.request.args.get("time"), "%Y-%m-%dT%H-%M-00")
     except: return flask.jsonify(data)
 
     # Get record for that time
@@ -168,7 +168,7 @@ def data_statistics():
     if flask.request.args.get("time") == None: return flask.jsonify(data)
     try:
         url_time = datetime.strptime(
-            flask.request.args.get("time"), "%Y-%m-%dT%H-%M-%S")
+            flask.request.args.get("time"), "%Y-%m-%dT%H-%M-00")
         local_time = helpers.utc_to_local(config, url_time)
     except: return flask.jsonify(data)
 
@@ -208,7 +208,7 @@ def data_graph_day():
     if flask.request.args.get("time") == None: return flask.jsonify(data)
     try:
         url_time = datetime.strptime(
-            flask.request.args.get("time"), "%Y-%m-%dT%H-%M-%S")
+            flask.request.args.get("time"), "%Y-%m-%dT%H-%M-00")
     except: return flask.jsonify(data)
 
     bounds = helpers.day_bounds_utc(
@@ -253,7 +253,7 @@ def data_graph_year():
     if flask.request.args.get("time") == None: return flask.jsonify(data)
     try:
         url_time = datetime.strptime(
-            flask.request.args.get("time"), "%Y-%m-%dT%H-%M-%S")
+            flask.request.args.get("time"), "%Y-%m-%dT%H-%M-00")
     except: return flask.jsonify(data)
 
     # Calculate data range in local time
@@ -293,7 +293,7 @@ def data_camera():
     if flask.request.args.get("time") == None: return flask.jsonify(data)
     try:
         url_time = datetime.strptime(
-            flask.request.args.get("time"), "%Y-%m-%dT%H-%M-%S")
+            flask.request.args.get("time"), "%Y-%m-%dT%H-%M-00")
     except: return flask.jsonify(data)
 
     # Get image for that time
@@ -316,8 +316,8 @@ def data_camera():
         + url_time.strftime("%Y/%m/%d/%Y-%m-%dT%H-%M-%S") + ".jpg")
 
     # Calculate sunrise and sunset times
-    local_time = helpers.utc_to_local(config, url_time).replace(hour = 0,
-        minute = 0, second = 0)
+    local_time = helpers.utc_to_local(config, url_time).replace(
+        hour = 0, minute = 0)
     location = astral.Location(("", "", config.aws_latitude,
         config.aws_longitude, str(config.aws_time_zone), config.aws_elevation))
     solar = location.sun(date = local_time, local = False)
@@ -341,7 +341,7 @@ def data_about():
     if flask.request.args.get("time") == None: return flask.jsonify(data)
     try:
         url_time = datetime.strptime(
-            flask.request.args.get("time"), "%Y-%m-%dT%H-%M-%S")
+            flask.request.args.get("time"), "%Y-%m-%dT%H-%M-00")
     except: return flask.jsonify(data)
 
     # Get record for that time
