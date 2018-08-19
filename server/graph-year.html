@@ -33,14 +33,15 @@
                 isLoading = true;
                 if (setTime == true) {
                     requestedTime = moment().utc().millisecond(0).second(0);
+                    requestedTime.subtract(1, "days");
                 }
 
                 document.getElementById("item_data_time").innerHTML
                     = moment(requestedTime).tz(awsTimeZone).format("HH:mm");
                 document.getElementById("scroller_time").innerHTML
-                    = moment(requestedTime).subtract(1, "days")
-                    .tz(awsTimeZone).format("[Year Ending] DD/MM/YYYY");
-                
+                    = moment(requestedTime).tz(
+                    awsTimeZone).format("[Year Ending] DD/MM/YYYY");
+
                 if ($.inArray("temperature", openGraphs) != -1)
                 { loadGraphData("temperature", "AirT_Avg,AirT_Min,AirT_Max"); }
                 if ($.inArray("humidity", openGraphs) != -1)
@@ -64,8 +65,8 @@
                     "YYYY-MM-DD[T]HH-mm-[00]") + "&fields=" + fields;
                 
                 var local_time = moment(requestedTime).tz(awsTimeZone);
-                var x_end = moment(local_time).subtract(1, "days").hour(0).minute(0).unix();
-                var x_start = moment(local_time).subtract(366, "day").hour(0).minute(0).unix();
+                var x_end = moment(local_time).hour(0).minute(0).unix();
+                var x_start = moment(local_time).subtract(365, "day").hour(0).minute(0).unix();
 
                 var options = {
                     showPoint: false, lineSmooth: false, height: 300,

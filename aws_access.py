@@ -254,7 +254,7 @@ def data_graph_year():
 
     bounds = helpers.day_bounds_utc(
         config, helpers.utc_to_local(config, url_time), True)
-    range_end = bounds[0] - timedelta(minutes = 1)
+    range_end = bounds[0]
     range_start = range_end - timedelta(days = 365)
     fields = "Date," + flask.request.args.get("fields")
 
