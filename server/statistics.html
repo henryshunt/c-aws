@@ -155,7 +155,7 @@
                 if (data["WDir_Max"] != null) {
                     var formatted = data["WDir_Max"]
                         .toFixed(0) + "° (" + degreesToCompass(data["WDir_Max"]) + ")"
-                    document.getElementById("item_WDir_Avg").innerHTML = formatted;
+                    document.getElementById("item_WDir_Max").innerHTML = formatted;
                 } else { document.getElementById("item_WDir_Max").innerHTML = "no data"; }
 
                 displayValue(data["WGst_Avg"], "item_WGst_Avg", " mph", 1);
