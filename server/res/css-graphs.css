@@ -28,7 +28,7 @@
 }
 
 .ct-label.ct-vertical.ct-start {
-    transform: translateY(5px);
+    transform: translateY(6px);
     font-size: 10px;
 }
 .ct-chart-bar .ct-label.ct-horizontal.ct-end {
