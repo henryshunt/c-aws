@@ -140,14 +140,14 @@
 
             function scroller_left() {
                 if (isLoading == false) {
-                    requestedTime.subtract(30, "days");
+                    requestedTime.subtract(1, "months");
                     scroller_change();
                 }
             }
             
             function scroller_right() {
                 if (isLoading == false) {
-                    requestedTime.add(30, "days");
+                    requestedTime.add(1, "months");
                     scroller_change();
                 }
             }
