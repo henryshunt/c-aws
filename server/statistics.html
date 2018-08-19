@@ -127,59 +127,59 @@
                         = local_time.format("DD/MM/YYYY");
                 }
 
-                display_value(data["AirT_Avg"], "item_AirT_Avg", "°C", 1);
-                display_value(data["AirT_Min"], "item_AirT_Min", "°C", 1);
-                display_value(data["AirT_Max"], "item_AirT_Max", "°C", 1);
-                display_value(data["RelH_Avg"], "item_RelH_Avg", "%", 1);
-                display_value(data["RelH_Min"], "item_RelH_Min", "%", 1);
-                display_value(data["RelH_Max"], "item_RelH_Max", "%", 1);
-                display_value(data["DewP_Avg"], "item_DewP_Avg", "°C", 1);
-                display_value(data["DewP_Min"], "item_DewP_Min", "°C", 1);
-                display_value(data["DewP_Max"], "item_DewP_Max", "°C", 1);
-                display_value(data["WSpd_Avg"], "item_WSpd_Avg", " mph", 1);
-                display_value(data["WSpd_Min"], "item_WSpd_Min", " mph", 1);
-                display_value(data["WSpd_Max"], "item_WSpd_Max", " mph", 1);
+                displayValue(data["AirT_Avg"], "item_AirT_Avg", "°C", 1);
+                displayValue(data["AirT_Min"], "item_AirT_Min", "°C", 1);
+                displayValue(data["AirT_Max"], "item_AirT_Max", "°C", 1);
+                displayValue(data["RelH_Avg"], "item_RelH_Avg", "%", 1);
+                displayValue(data["RelH_Min"], "item_RelH_Min", "%", 1);
+                displayValue(data["RelH_Max"], "item_RelH_Max", "%", 1);
+                displayValue(data["DewP_Avg"], "item_DewP_Avg", "°C", 1);
+                displayValue(data["DewP_Min"], "item_DewP_Min", "°C", 1);
+                displayValue(data["DewP_Max"], "item_DewP_Max", "°C", 1);
+                displayValue(data["WSpd_Avg"], "item_WSpd_Avg", " mph", 1);
+                displayValue(data["WSpd_Min"], "item_WSpd_Min", " mph", 1);
+                displayValue(data["WSpd_Max"], "item_WSpd_Max", " mph", 1);
 
                 if (data["WDir_Avg"] != null) {
                     var formatted = data["WDir_Avg"]
                         .toFixed(0) + "° (" + degreesToCompass(data["WDir_Avg"]) + ")"
-                    display_value(formatted, "item_WDir_Avg", "", null);
+                    document.getElementById("item_WDir_Avg").innerHTML = formatted;
                 } else { document.getElementById("item_WDir_Avg").innerHTML = "no data"; }
 
                 if (data["WDir_Min"] != null) {
                     var formatted = data["WDir_Min"]
                         .toFixed(0) + "° (" + degreesToCompass(data["WDir_Min"]) + ")"
-                    display_value(formatted, "item_WDir_Min", "", null);
+                    document.getElementById("item_WDir_Min").innerHTML = formatted;
                 } else { document.getElementById("item_WDir_Min").innerHTML = "no data"; }
 
                 if (data["WDir_Max"] != null) {
                     var formatted = data["WDir_Max"]
                         .toFixed(0) + "° (" + degreesToCompass(data["WDir_Max"]) + ")"
-                    display_value(formatted, "item_WDir_Max", "", null);
+                    document.getElementById("item_WDir_Avg").innerHTML = formatted;
                 } else { document.getElementById("item_WDir_Max").innerHTML = "no data"; }
 
-                display_value(data["WGst_Avg"], "item_WGst_Avg", " mph", 1);
-                display_value(data["WGst_Min"], "item_WGst_Min", " mph", 1);
-                display_value(data["WGst_Max"], "item_WGst_Max", " mph", 1);
+                displayValue(data["WGst_Avg"], "item_WGst_Avg", " mph", 1);
+                displayValue(data["WGst_Min"], "item_WGst_Min", " mph", 1);
+                displayValue(data["WGst_Max"], "item_WGst_Max", " mph", 1);
 
                 if (data["SunD_Ttl"] != null) {
                     var formatted = moment.utc(data["SunD_Ttl"] * 1000).format("HH:mm:ss");
-                    display_value(formatted, "item_SunD_Ttl", "", null);
+                    document.getElementById("item_SunD_Ttl").innerHTML = formatted;
                 } else { document.getElementById("item_SunD_Ttl").innerHTML = "no data"; }
 
-                display_value(data["Rain_Ttl"], "item_Rain_Ttl", " mm", 2);
-                display_value(data["MSLP_Avg"], "item_MSLP_Avg", " hPa", 1);
-                display_value(data["MSLP_Min"], "item_MSLP_Min", " hPa", 1);
-                display_value(data["MSLP_Max"], "item_MSLP_Max", " hPa", 1);
-                display_value(data["ST10_Avg"], "item_ST10_Avg", "°C", 1);
-                display_value(data["ST10_Min"], "item_ST10_Min", "°C", 1);
-                display_value(data["ST10_Max"], "item_ST10_Max", "°C", 1);
-                display_value(data["ST30_Avg"], "item_ST30_Avg", "°C", 1);
-                display_value(data["ST30_Min"], "item_ST30_Min", "°C", 1);
-                display_value(data["ST30_Max"], "item_ST30_Max", "°C", 1);
-                display_value(data["ST00_Avg"], "item_ST00_Avg", "°C", 1);
-                display_value(data["ST00_Min"], "item_ST00_Min", "°C", 1);
-                display_value(data["ST00_Max"], "item_ST00_Max", "°C", 1);
+                displayValue(data["Rain_Ttl"], "item_Rain_Ttl", " mm", 2);
+                displayValue(data["MSLP_Avg"], "item_MSLP_Avg", " hPa", 1);
+                displayValue(data["MSLP_Min"], "item_MSLP_Min", " hPa", 1);
+                displayValue(data["MSLP_Max"], "item_MSLP_Max", " hPa", 1);
+                displayValue(data["ST10_Avg"], "item_ST10_Avg", "°C", 1);
+                displayValue(data["ST10_Min"], "item_ST10_Min", "°C", 1);
+                displayValue(data["ST10_Max"], "item_ST10_Max", "°C", 1);
+                displayValue(data["ST30_Avg"], "item_ST30_Avg", "°C", 1);
+                displayValue(data["ST30_Min"], "item_ST30_Min", "°C", 1);
+                displayValue(data["ST30_Max"], "item_ST30_Max", "°C", 1);
+                displayValue(data["ST00_Avg"], "item_ST00_Avg", "°C", 1);
+                displayValue(data["ST00_Min"], "item_ST00_Min", "°C", 1);
+                displayValue(data["ST00_Max"], "item_ST00_Max", "°C", 1);
                 isLoading = false;
             }
 

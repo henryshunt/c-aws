@@ -91,34 +91,34 @@
                         = moment(requestedTime).tz(awsTimeZone).format("HH:mm");
                 }
 
-                display_value(data["AirT"], "item_AirT", "°C", 1);
-                display_value(data["ExpT"], "item_ExpT", "°C", 1);
-                display_value(data["RelH"], "item_RelH", "%", 1);
-                display_value(data["DewP"], "item_DewP", "°C", 1);
-                display_value(data["WSpd"], "item_WSpd", " mph", 1);
+                displayValue(data["AirT"], "item_AirT", "°C", 1);
+                displayValue(data["ExpT"], "item_ExpT", "°C", 1);
+                displayValue(data["RelH"], "item_RelH", "%", 1);
+                displayValue(data["DewP"], "item_DewP", "°C", 1);
+                displayValue(data["WSpd"], "item_WSpd", " mph", 1);
 
                 if (data["WDir"] != null) {
                     var formatted = data["WDir"]
                         .toFixed(0) + "° (" + degreesToCompass(data["WDir"]) + ")"
-                    display_value(formatted, "item_WDir", "", null);
+                    document.getElementById("item_WDir").innerHTML = formatted;
                 } else { document.getElementById("item_WDir").innerHTML = "no data"; }
 
-                display_value(data["WGst"], "item_WGst", " mph", 1);
-                display_value(data["SunD"], "item_SunD", " sec", 0);
+                displayValue(data["WGst"], "item_WGst", " mph", 1);
+                displayValue(data["SunD"], "item_SunD", " sec", 0);
 
                 if (data["SunD_PHr"] != null) {
                     var formatted = moment.utc(data["SunD_PHr"] * 1000).format("HH:mm:ss");
-                    display_value(formatted, "item_SunD_PHr", "", null);
+                    document.getElementById("item_SunD_PHr").innerHTML = formatted;
                 } else { document.getElementById("item_SunD_PHr").innerHTML = "no data"; }
 
-                display_value(data["Rain"], "item_Rain", " mm", 2);
-                display_value(data["Rain_PHr"], "item_Rain_PHr", " mm", 2);
-                display_value(data["StaP"], "item_StaP", " hPa", 1);
-                display_value(data["MSLP"], "item_MSLP", " hPa", 1);
-                display_value(data["StaP_PTH"], "item_StaP_PTH", " hPa", 1);
-                display_value(data["ST10"], "item_ST10", "°C", 1);
-                display_value(data["ST30"], "item_ST30", "°C", 1);
-                display_value(data["ST00"], "item_ST00", "°C", 1);
+                displayValue(data["Rain"], "item_Rain", " mm", 2);
+                displayValue(data["Rain_PHr"], "item_Rain_PHr", " mm", 2);
+                displayValue(data["StaP"], "item_StaP", " hPa", 1);
+                displayValue(data["MSLP"], "item_MSLP", " hPa", 1);
+                displayValue(data["StaP_PTH"], "item_StaP_PTH", " hPa", 1);
+                displayValue(data["ST10"], "item_ST10", "°C", 1);
+                displayValue(data["ST30"], "item_ST30", "°C", 1);
+                displayValue(data["ST00"], "item_ST00", "°C", 1);
             }
         </script>
     </head>

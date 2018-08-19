@@ -24,7 +24,7 @@ function queryParam(key) {
     return match && decodeURIComponent(match[1].replace(/\+/g, " "));
 }
 
-function display_value(value, id, units, precision) {
+function displayValue(value, id, units, precision) {
     if (value != null) {
         if (precision == null) {
             document.getElementById(id).innerHTML = value + units;

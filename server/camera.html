@@ -109,19 +109,19 @@
                 if (data["SRis"] != null) {
                     var utc = moment.utc(data["SRis"], "YYYY-MM-DD HH:mm:ss");
                     var formatted = utc.tz(awsTimeZone).format("HH:mm");
-                    display_value(formatted, "item_SRis", "", null);
+                    document.getElementById("item_SRis").innerHTML = formatted;
                 } else { document.getElementById("item_SRis").innerHTML = "no data"; }
 
                 if (data["SSet"] != null) {
                     var utc = moment.utc(data["SSet"], "YYYY-MM-DD HH:mm:ss");
                     var formatted = utc.tz(awsTimeZone).format("HH:mm");
-                    display_value(formatted, "item_SSet", "", null);
+                    document.getElementById("item_SSet").innerHTML = formatted;
                 } else { document.getElementById("item_SSet").innerHTML = "no data"; }
 
                 if (data["Noon"] != null) {
                     var utc = moment.utc(data["Noon"], "YYYY-MM-DD HH:mm:ss");
                     var formatted = utc.tz(awsTimeZone).format("HH:mm");
-                    display_value(formatted, "item_Noon", "", null);
+                    document.getElementById("item_Noon").innerHTML = formatted;
                 } else { document.getElementById("item_Noon").innerHTML = "no data"; }
 
                 if (data["ImgP"] != null) {
