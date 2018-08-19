@@ -86,7 +86,7 @@
             }
 
             function loadGraphData(graph, fields) {
-                var url = "/data/graph-day.json?time=" + requestedTime.format(
+                var url = "data/graph-day.json?time=" + requestedTime.format(
                     "YYYY-MM-DD[T]HH-mm-00") + "&fields=" + fields;
                 
                 var local_time = moment(requestedTime).tz(awsTimeZone);
@@ -122,7 +122,7 @@
                     options.showPoint = true; options.showLine = false;
                 }
 
-                $.get(url, function(response) {
+                $.getJSON(url, function(response) {
                     var data = { series: response };
                     new Chartist.Line("#graph_" + graph, data, options);
 

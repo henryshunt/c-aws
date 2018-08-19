@@ -61,7 +61,7 @@
             }
 
             function loadGraphData(graph, fields) {
-                var url = "/data/graph-year.json?time=" + requestedTime.format(
+                var url = "data/graph-year.json?time=" + requestedTime.format(
                     "YYYY-MM-DD[T]HH-mm-00") + "&fields=" + fields;
                 
                 var local_time = moment(requestedTime).tz(awsTimeZone);
@@ -98,7 +98,7 @@
                     options.showPoint = true; options.showLine = false;
                 }
 
-                $.get(url, function(response) {
+                $.getJSON(url, function(response) {
                     var data = { series: response };
                     
                     if (graph == "sunshine" || graph == "rainfall") {
