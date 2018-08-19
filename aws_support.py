@@ -28,7 +28,7 @@ is_processing_camera = False
 
 # HELPERS ----------------------------------------------------------------------
 def none_to_null(value):
-    return "NULL" if value == None else value
+    return "null" if value == None else value
 
 # OPERATIONS -------------------------------------------------------------------
 def do_process_data_queue():
