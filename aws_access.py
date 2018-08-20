@@ -277,11 +277,10 @@ def data_graph_year():
     for record in records:
         if record["Date"] == current_local.strftime("%Y-%m-%d"): break
         local_time = datetime.strptime(record["Date"], "%Y-%m-%d")
-        utc = helpers.local_to_utc(config, local_time).timestamp()
 
         # Create point and add to relevant series
         for field in range(1, len(fields)):
-            point = { "x": utc, "y": record[fields[field]] }
+            point = { "x": local_time, "y": record[fields[field]] }
             data[field - 1].append(point)
     return flask.jsonify(data)
 
