@@ -203,12 +203,13 @@ def data_statistics():
 
 def data_graph_day():
     global config; data = []
-
-    # Try parsing time specified in URL
     if flask.request.args.get("time") == None: return flask.jsonify(data)
+    if flask.request.args.get("fields") == None: return flask.jsonify(data)
+
     try:
-        url_time = datetime.strptime(
-            flask.request.args.get("time"), "%Y-%m-%dT%H-%M-00")
+        # Try parsing time specified in URL
+        url_time = datetime.strptime(flask.request.args.get("time"),
+                                     "%Y-%m-%dT%H-%M-00")
     except: return flask.jsonify(data)
 
     bounds = helpers.day_bounds_utc(
@@ -248,12 +249,13 @@ def data_graph_day():
 
 def data_graph_year():
     global config; data = []
-
-    # Try parsing time specified in URL
     if flask.request.args.get("time") == None: return flask.jsonify(data)
+    if flask.request.args.get("fields") == None: return flask.jsonify(data)
+
     try:
-        url_time = datetime.strptime(
-            flask.request.args.get("time"), "%Y-%m-%dT%H-%M-00")
+        # Try parsing time specified in URL
+        url_time = datetime.strptime(flask.request.args.get("time"),
+                                     "%Y-%m-%dT%H-%M-00")
     except: return flask.jsonify(data)
 
     # Calculate data range in local time
