@@ -27,6 +27,7 @@ power_pressed = False
 
 # INTERRUPTS -------------------------------------------------------------------
 def do_shutdown(channel):
+    global power_pressed
     if power_pressed == False: power_pressed = True
     else: return
     
@@ -37,9 +38,10 @@ def do_shutdown(channel):
     os.system("sudo halt"); sys.exit(0)
 
 def do_restart(channel):
+    global power_pressed
     if power_pressed == False: power_pressed = True
     else: return
-        
+
     second = datetime.utcnow().second
     while second < 30 or second > 50:
         time.sleep(0.8); second = datetime.utcnow().second
