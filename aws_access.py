@@ -23,9 +23,13 @@ from frames import DbTable
 # GLOBAL VARIABLES -------------------------------------------------------------
 config = ConfigData()
 startup_time = None
+power_pressed = False
 
 # INTERRUPTS -------------------------------------------------------------------
 def do_shutdown(channel):
+    if power_pressed == False: power_pressed = True
+    else: return
+    
     second = datetime.utcnow().second
     while second < 30 or second > 50:
         time.sleep(0.8); second = datetime.utcnow().second
@@ -33,6 +37,9 @@ def do_shutdown(channel):
     os.system("sudo halt"); sys.exit(0)
 
 def do_restart(channel):
+    if power_pressed == False: power_pressed = True
+    else: return
+        
     second = datetime.utcnow().second
     while second < 30 or second > 50:
         time.sleep(0.8); second = datetime.utcnow().second
