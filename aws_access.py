@@ -26,12 +26,18 @@ startup_time = None
 
 # INTERRUPTS -------------------------------------------------------------------
 def do_shutdown(channel):
-    os.system("sudo halt")
-    sys.exit(0)
+    second = datetime.utcnow().second
+    while second < 30 or second > 50:
+        time.sleep(0.8); second = datetime.utcnow().second
+
+    os.system("sudo halt"); sys.exit(0)
 
 def do_restart(channel):
-    os.system("sudo reboot")
-    sys.exit(0)
+    second = datetime.utcnow().second
+    while second < 30 or second > 50:
+        time.sleep(0.8); second = datetime.utcnow().second
+
+    os.system("sudo reboot"); sys.exit(0)
 
 # PAGE SERVERS -----------------------------------------------------------------
 def page_now():
