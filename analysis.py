@@ -111,7 +111,7 @@ def past_hour_total(config, now, column):
             database.row_factory = sqlite3.Row
             cursor = database.cursor()
 
-            cursor.execute(queries.SELECT_PAST_HOUR_REPORT
+            cursor.execute(queries.SELECT_PAST_HOUR_REPORTS
                            .format(column),
                            (start.strftime("%Y-%m-%d %H:%M:%S"),
                             end.strftime("%Y-%m-%d %H:%M:%S")))
