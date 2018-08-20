@@ -40,17 +40,17 @@ def records_in_range(config, start, end, table):
 
             # Query respective database table
             if table == DbTable.REPORTS:
-                cursor.execute(queries.SELECT_RANGE_REPORT,
+                cursor.execute(queries.SELECT_RANGE_REPORTS,
                                (start.strftime("%Y-%m-%d %H:%M:%S"),
                                 end.strftime("%Y-%m-%d %H:%M:%S")))
 
             elif table == DbTable.ENVREPORTS:
-                cursor.execute(queries.SELECT_RANGE_ENVREPORT,
+                cursor.execute(queries.SELECT_RANGE_ENVREPORTS,
                                (start.strftime("%Y-%m-%d %H:%M:%S"),
                                 end.strftime("%Y-%m-%d %H:%M:%S")))
 
             elif table == DbTable.DAYSTATS:
-                cursor.execute(queries.SELECT_RANGE_DAYSTAT,
+                cursor.execute(queries.SELECT_RANGE_DAYSTATS,
                                (start.strftime("%Y-%m-%d"),
                                 end.strftime("%Y-%m-%d")))
 
@@ -68,19 +68,19 @@ def fields_in_range(config, start, end, fields, table):
 
             # Query respective database table
             if table == DbTable.REPORTS:
-                cursor.execute(queries.SELECT_FIELDS_REPORT
+                cursor.execute(queries.SELECT_FIELDS_REPORTS
                                .format(fields),
                                (start.strftime("%Y-%m-%d %H:%M:%S"),
                                 end.strftime("%Y-%m-%d %H:%M:%S")))
 
             elif table == DbTable.ENVREPORTS:
-                cursor.execute(queries.SELECT_FIELDS_ENVREPORT
+                cursor.execute(queries.SELECT_FIELDS_ENVREPORTS
                                .format(fields),
                                (start.strftime("%Y-%m-%d %H:%M:%S"),
                                 end.strftime("%Y-%m-%d %H:%M:%S")))
 
             elif table == DbTable.DAYSTATS:
-                cursor.execute(queries.SELECT_FIELDS_DAYSTAT
+                cursor.execute(queries.SELECT_FIELDS_DAYSTATS
                                .format(fields),
                                (start.strftime("%Y-%m-%d"),
                                 end.strftime("%Y-%m-%d")))
