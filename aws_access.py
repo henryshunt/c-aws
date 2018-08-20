@@ -276,7 +276,7 @@ def data_graph_year():
 
     for record in records:
         if record["Date"] == current_local.strftime("%Y-%m-%d"): break
-        local_time = datetime.strptime(record["Date"], "%Y-%m-%d")
+        local_time = datetime.strptime(record["Date"], "%Y-%m-%d").timestamp()
 
         # Create point and add to relevant series
         for field in range(1, len(fields)):
