@@ -31,22 +31,26 @@ def do_shutdown(channel):
     if power_pressed == False: power_pressed = True
     else: return
     
+    # Wait for safe time window to prevent data and upload corruption
     second = datetime.utcnow().second
     while second < 30 or second > 50:
         time.sleep(0.8); second = datetime.utcnow().second
 
-    os.system("sudo kill -9 " + os.getpid() + " & sudo halt")
+    # Need to kill this program first as it prevents shutdown
+    os.system("sudo kill -9 " + str(os.getpid()) + " & sudo halt")
 
 def do_restart(channel):
     global power_pressed
     if power_pressed == False: power_pressed = True
     else: return
 
+    # Wait for safe time window to prevent data and upload corruption
     second = datetime.utcnow().second
     while second < 30 or second > 50:
         time.sleep(0.8); second = datetime.utcnow().second
 
-    os.system("sudo kill -9 " + os.getpid() + " & sudo reboot")
+    # Need to kill this program first as it prevents restart
+    os.system("sudo kill -9 " + str(os.getpid()) + " & sudo reboot")
 
 # PAGE SERVERS -----------------------------------------------------------------
 def page_now():
