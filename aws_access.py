@@ -248,7 +248,7 @@ def data_graph_day():
     if "Rain" in fields: Rain_Ttl = 0
     if "SunD" in fields: SunD_Ttl = 0
 
-    # Generate each series from retrieved records 
+    # Generate each series from retrieved records
     for record in records:
         utc = datetime.strptime(record["Time"], "%Y-%m-%d %H:%M:%S").timestamp()
 
@@ -294,7 +294,7 @@ def data_graph_year():
     fields = fields.split(",")
     for field in range(1, len(fields)): data.append([])
 
-    # Generate each series from retrieved records 
+    # Generate each series from retrieved records
     for record in records:
         local_time = datetime.strptime(record["Date"], "%Y-%m-%d").timestamp()
 

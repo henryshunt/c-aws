@@ -115,7 +115,13 @@
                 displayValue(data["Rain_PHr"], "item_Rain_PHr", " mm", 2);
                 displayValue(data["StaP"], "item_StaP", " hPa", 1);
                 displayValue(data["MSLP"], "item_MSLP", " hPa", 1);
-                displayValue(data["StaP_PTH"], "item_StaP_PTH", " hPa", 1);
+                
+                if (data["StaP_PTH"] != null) {
+                     var formatted = data["StaP_PTH"].toFixed(1) + " hpa";
+                     if (data["StaP_PTH"] > 0) { formatted = "+" + formatted; }
+                     document.getElementById("item_StaP_PTH").innerHTML = formatted;
+                } else { document.getElementById("item_StaP_PTH").innerHTML = "no data"; }
+                
                 displayValue(data["ST10"], "item_ST10", "°C", 1);
                 displayValue(data["ST30"], "item_ST30", "°C", 1);
                 displayValue(data["ST00"], "item_ST00", "°C", 1);
