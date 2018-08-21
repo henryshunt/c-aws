@@ -35,7 +35,7 @@ def do_shutdown(channel):
     while second < 30 or second > 50:
         time.sleep(0.8); second = datetime.utcnow().second
 
-    os.system("sudo halt"); sys.exit(0)
+    os.system("sudo kill -9 " + os.getpid() + " & sudo halt")
 
 def do_restart(channel):
     global power_pressed
@@ -46,7 +46,7 @@ def do_restart(channel):
     while second < 30 or second > 50:
         time.sleep(0.8); second = datetime.utcnow().second
 
-    os.system("sudo reboot"); sys.exit(0)
+    os.system("sudo kill -9 " + os.getpid() + " & sudo reboot")
 
 # PAGE SERVERS -----------------------------------------------------------------
 def page_now():
