@@ -53,7 +53,7 @@ EncT_value = None
 CPUT_value = None
 
 # HELPERS ----------------------------------------------------------------------
-def read_temperature(address):
+def read_temperature(address, is_first_read):
     """ Reads the value of a DS18B20 temperature probe via its address, into its
         global variable
     """
@@ -66,21 +66,25 @@ def read_temperature(address):
             data = probe.readlines()
             temp = int(data[1][data[1].find("t=") + 2:]) / 1000
 
-            # Check for error value
-            if temp == -127 or temp == 85: gpio.output(24, gpio.HIGH); return
+            # Check for error values
+            if temp == -127: gpio.output(24, gpio.HIGH); return
+            if temp == 85:
+                if is_first_read == True:
+                    read_temperature(address, False); return
+                else: gpio.output(24, gpio.HIGH); return
 
             # Store value in respective global variable
-            if os.path.basename(address) == "28-04167053d6ff":
+            if address == "28-04167053d6ff":
                 global AirT_value; AirT_value = round(temp, 1)
-            elif os.path.basename(address) == "28-0416704a38ff":
+            elif address == "28-0416704a38ff":
                 global ExpT_value; ExpT_value = round(temp, 1)
-            elif os.path.basename(address) == "28-0416705d66ff":
+            elif address == "28-0416705d66ff":
                 global ST10_value; ST10_value = round(temp, 1)
-            elif os.path.basename(address) == "28-04167055d5ff":
+            elif address == "28-04167055d5ff":
                 global ST30_value; ST30_value = round(temp, 1)
-            elif os.path.basename(address) == "28-0516704dc0ff":
+            elif address == "28-0516704dc0ff":
                 global ST00_value; ST00_value = round(temp, 1)
-            elif os.path.basename(address) == "28-8000001f88fa":
+            elif address == "28-8000001f88fa":
                 global EncT_value; EncT_value = round(temp, 1)
     except: gpio.output(24, gpio.HIGH)
 
@@ -112,15 +116,15 @@ def do_log_report(utc):
     # -- TEMPERATURE -----------------------------------------------------------
     try:
         AirT_thread = Thread(target = read_temperature,
-            args = ("28-04167053d6ff",)); AirT_thread.start()
+            args = ("28-04167053d6ff", True)); AirT_thread.start()
         ExpT_thread = Thread(target = read_temperature,
-            args = ("28-0416704a38ff",)); ExpT_thread.start()
+            args = ("28-0416704a38ff", True)); ExpT_thread.start()
         ST10_thread = Thread(target = read_temperature,
-            args = ("28-0416705d66ff",)); ST10_thread.start()
+            args = ("28-0416705d66ff", True)); ST10_thread.start()
         ST30_thread = Thread(target = read_temperature,
-            args = ("28-04167055d5ff",)); ST30_thread.start()
+            args = ("28-04167055d5ff", True)); ST30_thread.start()
         ST00_thread = Thread(target = read_temperature,
-            args = ("28-0516704dc0ff",)); ST00_thread.start()
+            args = ("28-0516704dc0ff", True)); ST00_thread.start()
 
         # Read each temp sensor in separate thread to reduce wait time
         AirT_thread.join(); frame.air_temperature = AirT_value
@@ -283,7 +287,7 @@ def do_log_environment(utc):
 
     # -- ENCLOSURE TEMPERATURE -------------------------------------------------
     try:
-        read_temperature("28-8000001f88fa")
+        read_temperature("28-8000001f88fa", True)
         frame.enclosure_temperature = EncT_value
     except: gpio.output(24, gpio.HIGH)
 
