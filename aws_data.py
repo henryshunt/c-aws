@@ -463,8 +463,8 @@ def every_second():
 
             # Add to sample list with timestamp
             WDir_samples.append((datetime.utcnow(), int(round(WDir_degrees))))
-        else: gpio.output(24, gpio.HIGH)
-    except: gpio.output(24, gpio.HIGH)
+        else: pass #gpio.output(24, gpio.HIGH)
+    except: pass #gpio.output(24, gpio.HIGH)
 
     if spi != None: spi.close()
 
