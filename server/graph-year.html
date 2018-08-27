@@ -141,20 +141,15 @@
             function scroller_left() {
                 if (isLoading == false) {
                     requestedTime.subtract(1, "months");
-                    scroller_change();
+                    getAndProcessData(false);
                 }
             }
             
             function scroller_right() {
                 if (isLoading == false) {
                     requestedTime.add(1, "months");
-                    scroller_change();
+                    getAndProcessData(false);
                 }
-            }
-
-            function scroller_change(time) {
-                var utc = moment().utc().millisecond(0).second(0);
-                getAndProcessData(false);
             }
         </script>
     </head>
