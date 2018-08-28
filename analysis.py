@@ -102,6 +102,32 @@ def stats_for_date(config, bounds):
             return cursor.fetchone()
     except: return False
 
+def stats_for_year(config, year):
+    try:
+        with sqlite3.connect(config.database_path) as database:
+            database.row_factory = sqlite3.Row
+            cursor = database.cursor()
+
+            # Generate the statistics
+            cursor.execute(queries.GENERATE_YEAR_STATS,
+                           (year,))
+                            
+            return cursor.fetchone()
+    except: return False
+
+def stats_for_months(config, year):
+    try:
+        with sqlite3.connect(config.database_path) as database:
+            database.row_factory = sqlite3.Row
+            cursor = database.cursor()
+
+            # Generate the statistics
+            cursor.execute(queries.GENERATE_MONTHS_STATS,
+                           (year,))
+                            
+            return cursor.fetchall()
+    except: return False
+
 def past_hour_total(config, now, column):
     start = now.replace(second = 0, microsecond = 0) - timedelta(minutes = 59)
     end = now.replace(second = 0, microsecond = 0)

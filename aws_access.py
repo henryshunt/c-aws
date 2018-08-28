@@ -381,7 +381,16 @@ def data_climate():
     try:
         url_time = datetime.strptime(
             flask.request.args.get("time"), "%Y-%m-%dT%H-%M-00")
+        local_time = helpers.utc_to_local(config, url_time)
     except: return flask.jsonify(data)
+
+    # Get climate data for that year
+    record = analysis.stats_for_year(config, local_time.strftime("%Y"))
+
+    if record != False and record != None:
+        # Add record data to final data
+        for key in dict(zip(record.keys(), record)):
+            if key + "_Year" in data: data[key + "_Year"] = record[key]
 
 
     return flask.jsonify(data)
