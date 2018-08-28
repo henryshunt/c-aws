@@ -38,7 +38,7 @@ GENERATE_DAYSTAT = ("SELECT "
     + "ROUND(AVG(WSpd), 3) AS WSpd_Avg, MIN(WSpd) AS WSpd_Min, MAX(WSpd) AS WSpd_Max, "
     + "ROUND(AVG(WDir), 3) AS WDir_Avg, MIN(WDir) AS WDir_Min, MAX(WDir) AS WDir_Max, "
     + "ROUND(AVG(WGst), 3) AS WGst_Avg, MIN(WGst) AS WGst_Min, MAX(WGst) AS WGst_Max, "
-    + "SUM(SunD) AS SunD_Ttl, SUM(Rain) AS Rain_Ttl, "
+    + "SUM(SunD) AS SunD_Ttl, ROUND(SUM(Rain), 3) AS Rain_Ttl, "
     + "ROUND(AVG(MSLP), 3) AS MSLP_Avg, MIN(MSLP) AS MSLP_Min, MAX(MSLP) AS MSLP_Max, "
     + "ROUND(AVG(ST10), 3) AS ST10_Avg, MIN(ST10) AS ST10_Min, MAX(ST10) AS ST10_Max, "
     + "ROUND(AVG(ST30), 3) AS ST30_Avg, MIN(ST30) AS ST30_Min, MAX(ST30) AS ST30_Max, "
@@ -49,12 +49,12 @@ GENERATE_YEAR_STATS = ("SELECT "
     + "ROUND(AVG(AirT_Avg), 3) AS AirT_Avg, ROUND(MIN(AirT_Min), 3) AS AirT_Min, "
     + "ROUND(MAX(AirT_Max), 3) AS AirT_Max, ROUND(AVG(WSpd_Avg), 3) AS WSpd_Avg, "
     + "ROUND(AVG(WDir_Avg), 3) AS WDir_Avg, ROUND(SUM(SunD_Ttl) / 60 / 60, 3) AS SunD_Ttl, "
-    + "SUM(Rain_Ttl) AS Rain_Ttl FROM dayStats WHERE strftime('%Y', Date) = ?")
+    + "ROUND(SUM(Rain_Ttl), 3) AS Rain_Ttl FROM dayStats WHERE strftime('%Y', Date) = ?")
 GENERATE_MONTHS_STATS = ("SELECT MONTH(Date) AS Month, "
     + "ROUND(AVG(AirT_Avg), 3) AS AirT_Avg, ROUND(AVG(RelH_Avg), 3) AS RelH_Avg, "
     + "ROUND(AVG(WSpd_Avg), 3) AS WSpd_Avg, ROUND(AVG(WDir_Avg), 3) AS WDir_Avg, "
     + "ROUND(MAX(WGst_Max), 3) AS WGst_Max, ROUND(SUM(SunD_Ttl) / 60 / 60, 3) AS SunD_Ttl, "
-    + "SUM(Rain_Ttl) AS Rain_Ttl, ROUND(AVG(MSLP_Avg), 3) AS MSLP_Avg, "
+    + "ROUND(SUM(Rain_Ttl), 3) AS Rain_Ttl, ROUND(AVG(MSLP_Avg), 3) AS MSLP_Avg, "
     + "ROUND(AVG(ST10_Avg), 3) AS ST10_Avg, ROUND(AVG(ST30_Avg), 3) AS ST30_Avg, "
     + "ROUND(AVG(ST00_Avg), 3) AS ST00_Avg FROM dayStats WHERE YEAR(Date) = ? GROUP BY MONTH(Date)")
 
