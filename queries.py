@@ -49,7 +49,7 @@ GENERATE_YEAR_STATS = ("SELECT "
     + "ROUND(AVG(AirT_Avg), 3) AS AirT_Avg, ROUND(MIN(AirT_Min), 3) AS AirT_Min, "
     + "ROUND(MAX(AirT_Max), 3) AS AirT_Max, ROUND(AVG(WSpd_Avg), 3) AS WSpd_Avg, "
     + "ROUND(AVG(WDir_Avg), 3) AS WDir_Avg, ROUND(SUM(SunD_Ttl) / 60 / 60, 3) AS SunD_Ttl, "
-    + "SUM(Rain_Ttl) AS Rain_Ttl FROM dayStats WHERE YEAR(Date) = ?")
+    + "SUM(Rain_Ttl) AS Rain_Ttl FROM dayStats WHERE strftime('%Y', Date) = ?")
 GENERATE_MONTHS_STATS = ("SELECT MONTH(Date) AS Month, "
     + "ROUND(AVG(AirT_Avg), 3) AS AirT_Avg, ROUND(AVG(RelH_Avg), 3) AS RelH_Avg, "
     + "ROUND(AVG(WSpd_Avg), 3) AS WSpd_Avg, ROUND(AVG(WDir_Avg), 3) AS WDir_Avg, "
