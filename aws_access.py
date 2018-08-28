@@ -306,7 +306,8 @@ def data_graph_day():
 
     # Generate each series from retrieved records
     for record in records:
-        utc = datetime.strptime(record["Time"], "%Y-%m-%d %H:%M:%S").timestamp()
+        utc = int(datetime.strptime(record["Time"], "%Y-%m-%d %H:%M:%S")
+                  .timestamp())
 
         # Create point and add to relevant series
         for field in range(1, len(fields)):
@@ -352,7 +353,8 @@ def data_graph_year():
 
     # Generate each series from retrieved records
     for record in records:
-        local_time = datetime.strptime(record["Date"], "%Y-%m-%d").timestamp()
+        local_time = int(datetime.strptime(record["Date"], "%Y-%m-%d")
+                         .timestamp())
 
         # Create point and add to relevant series
         for field in range(1, len(fields)):
