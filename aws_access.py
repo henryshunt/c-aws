@@ -361,7 +361,28 @@ def data_graph_year():
     return flask.jsonify(data)
 
 def data_climate():
-    pass
+    global config
+    data = dict.fromkeys(["AirT_Avg_Year", "AirT_Min_Year", "AirT_Max_Year",
+                          "WSpd_Avg_Year", "WDir_Avg_Year", "SunD_Ttl_Year",
+                          "Rain_Ttl_Year"])
+    fill_value = dict.fromkeys(
+        ["1", "2", "3", "4", "5", "6", "7", "8", "9", "10", "11", "12"])
+    data["AirT_Avg_Month"] = fill_value; data["RelH_Avg_Month"] = fill_value
+    data["WSpd_Avg_Month"] = fill_value; data["WDir_Avg_Month"] = fill_value
+    data["WGst_Max_Month"] = fill_value; data["SunD_Ttl_Month"] = fill_value
+    data["Rain_Ttl_Month"] = fill_value; data["MSLP_Avg_Month"] = fill_value
+    data["ST10_Avg_Month"] = fill_value; data["ST30_Avg_Month"] = fill_value
+    data["ST00_Avg_Month"] = fill_value
+
+    # Try parsing time specified in URL
+    if flask.request.args.get("time") == None: return flask.jsonify(data)
+    try:
+        url_time = datetime.strptime(
+            flask.request.args.get("time"), "%Y-%m-%dT%H-%M-00")
+    except: return flask.jsonify(data)
+
+
+    return flask.jsonify(data)
 
 def data_about():
     global config, startup_time
