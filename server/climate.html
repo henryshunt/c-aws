@@ -43,13 +43,13 @@
                     success: function (data) { processData(data); },
 
                     error: function() {
-                        document.getElementById("item_AirT_Avg").innerHTML = "no data";
-                        document.getElementById("item_AirT_Min").innerHTML = "no data";
-                        document.getElementById("item_AirT_Max").innerHTML = "no data";
-                        document.getElementById("item_WSpd_Avg").innerHTML = "no data";
-                        document.getElementById("item_WDir_Avg").innerHTML = "no data";
-                        document.getElementById("item_SunD_Ttl").innerHTML = "no data";
-                        document.getElementById("item_Rain_Ttl").innerHTML = "no data";
+                        document.getElementById("item_AirT_Avg_Year").innerHTML = "no data";
+                        document.getElementById("item_AirT_Min_Year").innerHTML = "no data";
+                        document.getElementById("item_AirT_Max_Year").innerHTML = "no data";
+                        document.getElementById("item_WSpd_Avg_Year").innerHTML = "no data";
+                        document.getElementById("item_WDir_Avg_Year").innerHTML = "no data";
+                        document.getElementById("item_SunD_Ttl_Year").innerHTML = "no data";
+                        document.getElementById("item_Rain_Ttl_Year").innerHTML = "no data";
                         
                         var table = document.getElementById("climate_month");
                         for (var i = 1, row; row = table.rows[i]; i++) {
