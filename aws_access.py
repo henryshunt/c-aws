@@ -392,6 +392,15 @@ def data_climate():
         for key in dict(zip(record.keys(), record)):
             if key + "_Year" in data: data[key + "_Year"] = record[key]
 
+    # Get climate data for that year by month
+    records = analysis.stats_for_months(config, local_time.strftime("%Y"))
+
+    if records != False and len(records) >= 1:
+        # Add record data to final data
+        for _record in records:
+            for key in dict(zip(_record.keys(), _record)):
+                if key + "_Month" in data: 
+                    data[key + "_Month"][_record["Month"]] = _record[key]
 
     return flask.jsonify(data)
 
