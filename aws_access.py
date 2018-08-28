@@ -400,7 +400,8 @@ def data_climate():
         for _record in records:
             for key in dict(zip(_record.keys(), _record)):
                 if key + "_Month" in data: 
-                    data[key + "_Month"][_record["Month"]] = _record[key]
+                    data[key + "_Month"][
+                        _record["Month"].lstrip('0')] = _record[key]
 
     return flask.jsonify(data)
 
