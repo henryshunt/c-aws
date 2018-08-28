@@ -69,6 +69,14 @@ def page_statistics():
                                  aws_location = config.aws_location,
                                  aws_time_zone = config.aws_time_zone)
 
+def page_camera():
+    global config
+
+    return flask.render_template("camera.html",
+                                 aws_title = config.aws_location.split(",")[0],
+                                 aws_location = config.aws_location,
+                                 aws_time_zone = config.aws_time_zone)
+
 def page_graph_day():
     global config
 
@@ -93,10 +101,10 @@ def page_graph_year():
                                  aws_location = config.aws_location,
                                  aws_time_zone = config.aws_time_zone)
 
-def page_camera():
+def page_climate():
     global config
 
-    return flask.render_template("camera.html",
+    return flask.render_template("climate.html",
                                  aws_title = config.aws_location.split(",")[0],
                                  aws_location = config.aws_location,
                                  aws_time_zone = config.aws_time_zone)
@@ -222,6 +230,54 @@ def data_statistics():
     data["Time"] = url_time.strftime("%Y-%m-%d %H:%M:%S")
     return flask.jsonify(data)
 
+def data_camera():
+    global config
+    data = dict.fromkeys(["Time", "ImgP", "SRis", "SSet"])
+
+    # Try parsing time specified in URL
+    if flask.request.args.get("time") == None: return flask.jsonify(data)
+    try:
+        url_time = datetime.strptime(
+            flask.request.args.get("time"), "%Y-%m-%dT%H-%M-00")
+    except: return flask.jsonify(data)
+
+    # Get image for that time
+    image_path = os.path.join(config.camera_drive,
+        url_time.strftime("%Y/%m/%d/%Y-%m-%dT%H-%M-%S") + ".jpg")
+
+    # Go back five minutes if no image and not in absolute mode
+    if not os.path.isfile(image_path):
+        if not flask.request.args.get("abs") == "1":
+            url_time -= timedelta(minutes = 5)
+            image_path = os.path.join(config.camera_drive,
+                url_time.strftime("%Y/%m/%d/%Y-%m-%dT%H-%M-%S") + ".jpg")
+
+            if os.path.isfile(image_path): 
+                data["ImgP"] = ("data/camera/"
+                    + url_time.strftime("%Y/%m/%d/%Y-%m-%dT%H-%M-%S") + ".jpg")
+            else: url_time += timedelta(minutes = 5)
+
+    else: data["ImgP"] = ("data/camera/"
+        + url_time.strftime("%Y/%m/%d/%Y-%m-%dT%H-%M-%S") + ".jpg")
+
+    # Calculate sunrise and sunset times
+    local_time = helpers.utc_to_local(config, url_time).replace(
+        hour = 0, minute = 0)
+    location = astral.Location(("", "", config.aws_latitude,
+        config.aws_longitude, str(config.aws_time_zone), config.aws_elevation))
+    solar = location.sun(date = local_time, local = False)
+    
+    data["SRis"] = solar["sunrise"].strftime("%Y-%m-%d %H:%M:%S")
+    data["SSet"] = solar["sunset"].strftime("%Y-%m-%d %H:%M:%S")
+    data["Noon"] = solar["noon"].strftime("%Y-%m-%d %H:%M:%S")
+    
+    data["Time"] = url_time.strftime("%Y-%m-%d %H:%M:%S")
+    return flask.jsonify(data)
+
+def file_camera(year, month, day, file_name):
+    return flask.send_from_directory(os.path.join(config.camera_drive, year,
+        month, day), file_name)
+
 def data_graph_day():
     global config; data = []
     if flask.request.args.get("time") == None: return flask.jsonify(data)
@@ -304,53 +360,8 @@ def data_graph_year():
             data[field - 1].append(point)
     return flask.jsonify(data)
 
-def data_camera():
-    global config
-    data = dict.fromkeys(["Time", "ImgP", "SRis", "SSet"])
-
-    # Try parsing time specified in URL
-    if flask.request.args.get("time") == None: return flask.jsonify(data)
-    try:
-        url_time = datetime.strptime(
-            flask.request.args.get("time"), "%Y-%m-%dT%H-%M-00")
-    except: return flask.jsonify(data)
-
-    # Get image for that time
-    image_path = os.path.join(config.camera_drive,
-        url_time.strftime("%Y/%m/%d/%Y-%m-%dT%H-%M-%S") + ".jpg")
-
-    # Go back five minutes if no image and not in absolute mode
-    if not os.path.isfile(image_path):
-        if not flask.request.args.get("abs") == "1":
-            url_time -= timedelta(minutes = 5)
-            image_path = os.path.join(config.camera_drive,
-                url_time.strftime("%Y/%m/%d/%Y-%m-%dT%H-%M-%S") + ".jpg")
-
-            if os.path.isfile(image_path): 
-                data["ImgP"] = ("data/camera/"
-                    + url_time.strftime("%Y/%m/%d/%Y-%m-%dT%H-%M-%S") + ".jpg")
-            else: url_time += timedelta(minutes = 5)
-
-    else: data["ImgP"] = ("data/camera/"
-        + url_time.strftime("%Y/%m/%d/%Y-%m-%dT%H-%M-%S") + ".jpg")
-
-    # Calculate sunrise and sunset times
-    local_time = helpers.utc_to_local(config, url_time).replace(
-        hour = 0, minute = 0)
-    location = astral.Location(("", "", config.aws_latitude,
-        config.aws_longitude, str(config.aws_time_zone), config.aws_elevation))
-    solar = location.sun(date = local_time, local = False)
-    
-    data["SRis"] = solar["sunrise"].strftime("%Y-%m-%d %H:%M:%S")
-    data["SSet"] = solar["sunset"].strftime("%Y-%m-%d %H:%M:%S")
-    data["Noon"] = solar["noon"].strftime("%Y-%m-%d %H:%M:%S")
-    
-    data["Time"] = url_time.strftime("%Y-%m-%d %H:%M:%S")
-    return flask.jsonify(data)
-
-def file_camera(year, month, day, file_name):
-    return flask.send_from_directory(os.path.join(config.camera_drive, year,
-        month, day), file_name)
+def data_climate():
+    pass
 
 def data_about():
     global config, startup_time
@@ -432,18 +443,20 @@ def entry_point():
     server.add_url_rule("/", view_func = page_now)
     server.add_url_rule("/index.html", view_func = page_now)
     server.add_url_rule("/statistics.html", view_func = page_statistics)
+    server.add_url_rule("/camera.html", view_func = page_camera)
     server.add_url_rule("/graph-day.html", view_func = page_graph_day)
     server.add_url_rule("/graph-year.html", view_func = page_graph_year)
-    server.add_url_rule("/camera.html", view_func = page_camera)
+    server.add_url_rule("/climate.html", view_func = page_climate)
     server.add_url_rule("/about.html", view_func = page_about)
 
     server.add_url_rule("/data/now.json", view_func = data_now)
     server.add_url_rule("/data/statistics.json", view_func = data_statistics)
-    server.add_url_rule("/data/graph-day.json", view_func = data_graph_day)
-    server.add_url_rule("/data/graph-year.json", view_func = data_graph_year)
     server.add_url_rule("/data/camera.json", view_func = data_camera)
     server.add_url_rule("/data/camera/<year>/<month>/<day>/<file_name>",
         view_func = file_camera)
+    server.add_url_rule("/data/graph-day.json", view_func = data_graph_day)
+    server.add_url_rule("/data/graph-year.json", view_func = data_graph_year)
+    server.add_url_rule("/data/climate.json", view_func = data_climate)
     server.add_url_rule("/data/about.json", view_func = data_about)
     server.add_url_rule("/ctrl/command", view_func = ctrl_command)
 
