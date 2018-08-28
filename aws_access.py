@@ -10,6 +10,7 @@ import sys
 import logging
 import RPi.GPIO as gpio
 import threading
+import copy
 
 import daemon
 import flask
@@ -369,12 +370,17 @@ def data_climate():
                           "Rain_Ttl_Year"])
     fill_value = dict.fromkeys(
         ["1", "2", "3", "4", "5", "6", "7", "8", "9", "10", "11", "12"])
-    data["AirT_Avg_Month"] = fill_value; data["RelH_Avg_Month"] = fill_value
-    data["WSpd_Avg_Month"] = fill_value; data["WDir_Avg_Month"] = fill_value
-    data["WGst_Max_Month"] = fill_value; data["SunD_Ttl_Month"] = fill_value
-    data["Rain_Ttl_Month"] = fill_value; data["MSLP_Avg_Month"] = fill_value
-    data["ST10_Avg_Month"] = fill_value; data["ST30_Avg_Month"] = fill_value
-    data["ST00_Avg_Month"] = fill_value
+    data["AirT_Avg_Month"] = copy.deepcopy(fill_value)
+    data["RelH_Avg_Month"] = copy.deepcopy(fill_value)
+    data["WSpd_Avg_Month"] = copy.deepcopy(fill_value)
+    data["WDir_Avg_Month"] = copy.deepcopy(fill_value)
+    data["WGst_Max_Month"] = copy.deepcopy(fill_value)
+    data["SunD_Ttl_Month"] = copy.deepcopy(fill_value)
+    data["Rain_Ttl_Month"] = copy.deepcopy(fill_value)
+    data["MSLP_Avg_Month"] = copy.deepcopy(fill_value)
+    data["ST10_Avg_Month"] = copy.deepcopy(fill_value)
+    data["ST30_Avg_Month"] = copy.deepcopy(fill_value)
+    data["ST00_Avg_Month"] = copy.deepcopy(fill_value)
 
     # Try parsing time specified in URL
     if flask.request.args.get("time") == None: return flask.jsonify(data)
