@@ -461,13 +461,17 @@ def every_second():
         adc_value = adc.read_adc(1)
 
         # Convert ADC value to degrees
-        if adc_value > 0:
+        if adc_value >= 52 and adc_value <= 976:
             WDir_degrees = (adc_value - 52) / (976 - 52) * (360 - 0)
-            if WDir_degrees < 0 or WDir_degrees >= 359.5: WDir_degrees = 0
+
+            # Modify value to account for non-zero-degrees at north
+            WDir_degrees -= 148
+            if degrees >= 360: degrees = degrees - 360
+            elif degrees < 0: degrees = degrees + 360
 
             # Add to sample list with timestamp
+            if WDir_degrees >= 359.5: WDir_degrees = 0
             WDir_samples.append((datetime.utcnow(), int(round(WDir_degrees))))
-        else: pass #gpio.output(24, gpio.HIGH)
     except: pass #gpio.output(24, gpio.HIGH)
 
     if spi != None: spi.close()
