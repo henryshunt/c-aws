@@ -466,8 +466,8 @@ def every_second():
 
             # Modify value to account for non-zero-degrees at north
             WDir_degrees -= 148
-            if degrees >= 360: degrees = degrees - 360
-            elif degrees < 0: degrees = degrees + 360
+            if WDir_degrees >= 360: WDir_degrees -= 360
+            elif WDir_degrees < 0: WDir_degrees += 360
 
             # Add to sample list with timestamp
             if WDir_degrees >= 359.5: WDir_degrees = 0
