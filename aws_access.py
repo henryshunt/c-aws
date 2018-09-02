@@ -459,6 +459,41 @@ def data_about():
     data["Time"] = url_time.strftime("%Y-%m-%d %H:%M:%S")
     return flask.jsonify(data)
 
+def data_graph_about():
+    global config; data = []
+    if flask.request.args.get("time") == None: return flask.jsonify(data)
+    if flask.request.args.get("fields") == None: return flask.jsonify(data)
+
+    try:
+        # Try parsing time specified in URL
+        url_time = datetime.strptime(flask.request.args.get("time"),
+                                     "%Y-%m-%dT%H-%M-00")
+    except: return flask.jsonify(data)
+
+    range_start = url_time - timedelta(hours = 5)
+    range_end = url_time
+    fields = "Time," + flask.request.args.get("fields")
+
+    # Get data in range for specified parameters
+    records = analysis.fields_in_range(config, range_start, range_end, fields,
+        DbTable.ENVREPORTS)
+
+    if records == False or len(records) == 0: return flask.jsonify(data)
+    fields = fields.split(",")
+    for field in range(1, len(fields)): data.append([])
+
+    # Generate each series from retrieved records
+    for record in records:
+        utc = int(datetime.strptime(record["Time"], "%Y-%m-%d %H:%M:%S")
+                  .timestamp())
+
+        # Create point and add to relevant series
+        for field in range(1, len(fields)):
+            point = { "x": utc, "y": record[fields[field]] }
+
+            data[field - 1].append(point)
+    return flask.jsonify(data)
+
 def ctrl_command():
     if flask.request.args.get("cmd") == None: return
 
@@ -504,6 +539,7 @@ def entry_point():
         view_func = file_camera)
     server.add_url_rule("/data/graph-day.json", view_func = data_graph_day)
     server.add_url_rule("/data/graph-year.json", view_func = data_graph_year)
+    server.add_url_rule("/data/graph-about.json", view_func = data_graph_about)
     server.add_url_rule("/data/climate.json", view_func = data_climate)
     server.add_url_rule("/data/about.json", view_func = data_about)
     server.add_url_rule("/ctrl/command", view_func = ctrl_command)
