@@ -321,10 +321,10 @@ def do_log_camera(utc):
     if not utc_minute.endswith("0") and not utc_minute.endswith("5"): return
 
     # Get sunrise and sunset times for current date
-    location = astral.Location(
-        ("", "", config.aws_latitude, config.aws_longitude, "UTC",
-         config.aws_elevation))
-    solar = location.sun(date = utc, local = False)
+    local_time = helpers.utc_to_local(config, utc).replace(hour = 0, minute = 0)
+    location = astral.Location(("", "", config.aws_latitude,
+        config.aws_longitude, str(config.aws_time_zone), config.aws_elevation))
+    solar = location.sun(date = local_time, local = False)
     
     sunset_threshold = solar["sunset"] + timedelta(minutes = 60)
     sunrise_threshold = solar["sunrise"] - timedelta(minutes = 60)
