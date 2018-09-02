@@ -94,6 +94,8 @@
                 };
 
                 if (graph == "direction") {
+                    options.axisY.type = Chartist.FixedScaleAxis;
+                    options.axisY.divisor = 8;
                     options.axisY.low = 0; options.axisY.high = 360;
                     options.showPoint = true; options.showLine = false;
                 }
