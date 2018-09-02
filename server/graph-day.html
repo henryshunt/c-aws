@@ -99,12 +99,6 @@
                     }, 1000);
                 }
 
-                for (var graph in graphs) {
-                    var options = graphs[graph].options;
-                    delete options.axisX.low; delete options.axisX.high;
-                    graphs[graph].update({ series: null }, options);
-                }
-
                 getAndProcessData(restartTimers);
             }
 
@@ -197,6 +191,12 @@
             }
 
             function scroller_change(time) {
+                for (var graph in graphs) {
+                    var options = graphs[graph].options;
+                    delete options.axisX.low; delete options.axisX.high;
+                    graphs[graph].update({ series: null }, options);
+                }
+                
                 var utc = moment().utc().millisecond(0).second(0);
 
                 if (requestedTime.format("DD/MM/YYYY") == utc.format("DD/MM/YYYY")) {
