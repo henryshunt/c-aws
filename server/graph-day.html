@@ -18,10 +18,10 @@
 
             var isLoading = true;
             var requestedTime = null;
-            var graphs = { "ambient": null, "humidity": null, "wind": null,
+            var graphs = { "temperature": null, "humidity": null, "wind": null,
                 "direction": null, "sunshine": null, "rainfall": null,
                 "pressure": null, "soil": null };
-            var openGraphs = ["ambient"];
+            var openGraphs = ["temperature"];
             var graphsLoaded = 0;
             var updaterTimeout = null;
             var countTimeout = null;
@@ -32,7 +32,7 @@
                     displayLocalTime();
                 }, 250);
 
-                graphs["ambient"] = setupGraph("ambient");
+                graphs["temperature"] = setupGraph("temperature");
                 graphs["humidity"] = setupGraph("humidity");
                 graphs["wind"] = setupGraph("wind");
                 graphs["direction"] = setupGraph("direction");
@@ -113,8 +113,8 @@
                 document.getElementById("scroller_time").innerHTML
                     = local_time.format("DD/MM/YYYY");
                 
-                if ($.inArray("ambient", openGraphs) != -1)
-                { loadGraphData("ambient", "AirT,ExpT,DewP"); }
+                if ($.inArray("temperature", openGraphs) != -1)
+                { loadGraphData("temperature", "AirT,ExpT,DewP"); }
                 if ($.inArray("humidity", openGraphs) != -1)
                 { loadGraphData("humidity", "RelH"); }
                 if ($.inArray("wind", openGraphs) != -1)
@@ -190,7 +190,7 @@
                 }
             }
 
-            function scroller_change(time) {
+            function scroller_change() {
                 for (var graph in graphs) {
                     var options = graphs[graph].options;
                     delete options.axisX.low; delete options.axisX.high;
@@ -248,11 +248,11 @@
 
                     <div>
                         <span class="group_key">(<span>Air Temp</span>, <span>Exposed Temp</span>, <span>Dew Point</span>) [°C]</span>
-                        <p class="group_toggle" onclick="toggleGraph('ambient', 'AirT,ExpT,DewP', this)">-</p>
+                        <p class="group_toggle" onclick="toggleGraph('temperature', 'AirT,ExpT,DewP', this)">-</p>
                     </div>
                 </div>
 
-                <div id="graph_ambient" class="ct-chart"></div>
+                <div id="graph_temperature" class="ct-chart"></div>
             </div>
 
             <div class="group">
