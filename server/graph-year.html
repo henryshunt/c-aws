@@ -133,6 +133,10 @@
                     }
 
                 }).fail(function() {
+                    var options = graphs[graph].options;
+                    delete options.axisX.low; delete options.axisX.high;
+                    graphs[graph].update({ series: null }, options);
+                    
                     graphsLoaded += 1;
                     if (graphsLoaded == openGraphs.length) {
                         isLoading = false; graphsLoaded = 0;
