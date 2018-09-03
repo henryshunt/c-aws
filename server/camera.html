@@ -145,6 +145,9 @@
             }
 
             function scroller_change(time) {
+                document.getElementById("item_CImg").src
+                    = "data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7";
+                    
                 var utc = moment().utc().millisecond(0).second(0);
                 utcMinute = utc.get("minute").toString();
 
