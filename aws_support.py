@@ -78,7 +78,7 @@ def do_process_data_queue():
 
         # Add statistic data to data to upload
         if has_dayStat == True:
-            to_upload["Date"] = data[2]["Date"],
+            to_upload["Date"] = data[2]["Date"]
             to_upload["AirT_Min"] = none_to_null(data[2]["AirT_Min"])
             to_upload["AirT_Max"] = none_to_null(data[2]["AirT_Max"])
             to_upload["AirT_Avg"] = none_to_null(data[2]["AirT_Avg"])
@@ -113,8 +113,9 @@ def do_process_data_queue():
             to_upload["ST00_Avg"] = none_to_null(data[2]["ST00_Avg"])
 
         # Upload the data
+        print("try upload: " + to_upload["Date"] + ", " + to_upload["Time"])
+        
         try:
-            print("try upload: " + to_upload["Date"] + ", " + to_upload["Time"])
             request = requests.post(
                 config.remote_sql_server, to_upload, timeout = 8)
             if request.text != "0": data_queue.appendleft(data); break
