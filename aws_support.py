@@ -114,6 +114,7 @@ def do_process_data_queue():
 
         # Upload the data
         try:
+            print("try upload: " + to_upload["Date"] + ", " + to_upload["Time"])
             request = requests.post(
                 config.remote_sql_server, to_upload, timeout = 8)
             if request.text != "0": data_queue.appendleft(data); break
@@ -174,6 +175,7 @@ def every_minute():
     else: dayStat = None
 
     # Add data to queue and process the queue
+    print("add queue: " + dayStat["Date"] + ", " + report["Time"])
     data_queue.append((report, envReport, dayStat))
     do_process_data_queue()
 
