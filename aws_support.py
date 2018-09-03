@@ -21,8 +21,8 @@ from config import ConfigData
 # GLOBAL VARIABLES -------------------------------------------------------------
 config = ConfigData()
 
-data_queue = deque(maxlen = 7200)
-camera_queue = deque(maxlen = 1000)
+data_queue = deque(maxlen = 10080)
+camera_queue = deque(maxlen = 2016)
 is_processing_data = False
 is_processing_camera = False
 
@@ -37,7 +37,7 @@ def do_process_data_queue():
     else: is_processing_data = True
 
     # Process while there are items in the queue
-    while len(data_queue) > 0:
+    while data_queue:
         data = data_queue.popleft()
         has_report = False if data[0] == False or data[0] == None else True
         has_envReport = False if data[1] == False or data[1] == None else True
@@ -112,9 +112,7 @@ def do_process_data_queue():
             to_upload["ST00_Max"] = none_to_null(data[2]["ST00_Max"])
             to_upload["ST00_Avg"] = none_to_null(data[2]["ST00_Avg"])
 
-        # Upload the data
-        print("try upload: " + to_upload["Date"] + ", " + to_upload["Time"])
-        
+        # Upload the data        
         try:
             request = requests.post(
                 config.remote_sql_server, to_upload, timeout = 8)
@@ -129,7 +127,7 @@ def do_process_camera_queue():
     else: is_processing_camera = True
 
     # Process while there are items in the queue
-    while len(camera_queue) > 0:
+    while camera_queue:
         data = camera_queue.popleft()
         if not os.path.isfile(data): continue
 
@@ -176,10 +174,8 @@ def every_minute():
     else: dayStat = None
 
     # Add data to queue and process the queue
-    print("add queue: " + dayStat["Date"] + ", " + report["Time"])
     data_queue.append((report, envReport, dayStat))
-    do_process_data_queue()
-
+    threading.Thread(target = do_process_data_queue).start()
 
     # Add camera image to queue if config modifier is active
     if config.camera_uploading == True:
@@ -189,7 +185,7 @@ def every_minute():
             image_path = os.path.join(config.camera_drive,
                 utc.strftime("%Y/%m/%d/%Y-%m-%dT%H-%M-%S") + ".jpg")
             camera_queue.append(image_path)
-            do_process_camera_queue()
+            threading.Thread(target = do_process_camera_queue).start()
     
 
 # ENTRY POINT ==================================================================
