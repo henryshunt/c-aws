@@ -184,7 +184,7 @@ def do_log_report(utc):
                 WSpd_sample = (ticks_in_WSpd_sample * 2.5) / 3
                 WSpd_total += WSpd_sample; WSpd_count += 1
                 
-            frame.wind_gust = round(WSpd_total / WSpd_count, 1)
+            frame.wind_speed = round(WSpd_total / WSpd_count, 1)
     except: gpio.output(24, gpio.HIGH)
 
     # -- WIND DIRECTION --------------------------------------------------------
