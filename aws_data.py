@@ -364,8 +364,7 @@ def do_log_camera(utc):
             # Set image resolution, wait for auto settings, and capture
             with picamera.PiCamera() as camera:
                 camera.resolution = (1280, 960); time.sleep(2.5)
-                camera.capture(
-                    os.path.join(image_dir, image_name + ".jpg"), quality = 80)
+                camera.capture(os.path.join(image_dir, image_name + ".jpg"))
         except: gpio.output(24, gpio.HIGH)
 
 def do_generate_stats(utc):
