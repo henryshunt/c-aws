@@ -165,7 +165,26 @@ def do_log_report(utc):
 
         # Calculate wind speed only if 10 minutes of data is available
         if ten_mins_ago >= data_start:
-            frame.wind_speed = round((len(past_WSpd_ticks) * 2.5) / 600, 1)
+            # frame.wind_speed = round((len(past_WSpd_ticks) * 2.5) / 600, 1)
+
+            WSpd_total = 0
+            WSpd_count = 0
+
+            # Iterate over data in three second samples
+            for second in range(0, 598, 3):
+                WSpd_start = ten_mins_ago + timedelta(seconds = second)
+                WSpd_end = WSpd_start + timedelta(seconds = 3)
+                ticks_in_WSpd_sample = 0
+
+                # Calculate three second average wind speed and check if highest
+                for tick in past_WSpd_ticks:
+                    if tick >= WSpd_start and tick < WSpd_end:
+                        ticks_in_WSpd_sample += 1
+
+                WSpd_sample = (ticks_in_WSpd_sample * 2.5) / 3
+                WSpd_total += WSpd_sample; WSpd_count += 1
+                
+            frame.wind_gust = round(WSpd_total / WSpd_count, 1)
     except: gpio.output(24, gpio.HIGH)
 
     # -- WIND DIRECTION --------------------------------------------------------
