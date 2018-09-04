@@ -83,11 +83,10 @@
             }
 
             function getAndProcessData(setTime) {
-                isLoading = true;
                 if (setTime == true) {
                     requestedTime = moment().utc().millisecond(0).second(0);
                     requestedTime.subtract(1, "days");
-                }
+                }; graphsLoaded = 0;
 
                 document.getElementById("item_data_time").innerHTML
                     = moment(requestedTime).tz(awsTimeZone).format("HH:mm");

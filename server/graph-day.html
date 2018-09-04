@@ -105,7 +105,7 @@
             function getAndProcessData(setTime) {
                 if (setTime == true) {
                     requestedTime = moment().utc().millisecond(0).second(0);
-                }
+                }; graphsLoaded = 0;
 
                 var local_time = moment(requestedTime).tz(awsTimeZone);
                 document.getElementById("item_data_time").innerHTML
