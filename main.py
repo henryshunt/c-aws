@@ -16,14 +16,6 @@ from config import ConfigData
 import helpers
 import queries
 
-# MESSAGE ----------------------------------------------------------------------
-print("--- Custom Automatic Weather Station ---")
-print("Program: Software Entry Point")
-print("Author:  Henry Hunt")
-print("Version: 5D (August 2018)")
-print("")
-print("----------- DO NOT TERMINATE -----------")
-
 # GLOBAL VARIABLES -------------------------------------------------------------
 config = ConfigData()
 startup_time = datetime.utcnow()
