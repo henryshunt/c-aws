@@ -165,8 +165,6 @@ def do_log_report(utc):
 
         # Calculate wind speed only if 10 minutes of data is available
         if ten_mins_ago >= data_start:
-            # frame.wind_speed = round((len(past_WSpd_ticks) * 2.5) / 600, 1)
-
             WSpd_total = 0
             WSpd_count = 0
 
@@ -366,7 +364,8 @@ def do_log_camera(utc):
             # Set image resolution, wait for auto settings, and capture
             with picamera.PiCamera() as camera:
                 camera.resolution = (1280, 960); time.sleep(2.5)
-                camera.capture(os.path.join(image_dir, image_name + ".jpg"))
+                camera.capture(
+                    os.path.join(image_dir, image_name + ".jpg"), quality = 80)
         except: gpio.output(24, gpio.HIGH)
 
 def do_generate_stats(utc):
