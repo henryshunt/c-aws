@@ -124,8 +124,8 @@
                     document.getElementById("item_Noon").innerHTML = formatted;
                 } else { document.getElementById("item_Noon").innerHTML = "no data"; }
 
-                if (data["ImgP"] != null) {
-                    document.getElementById("item_CImg").src = data["ImgP"];
+                if (data["CImg"] != null) {
+                    document.getElementById("item_CImg").src = data["CImg"];
                 } else { document.getElementById("item_CImg").src = "res/no-camera.png"; }
                 isLoading = false;
             }

@@ -233,7 +233,7 @@ def data_statistics():
 
 def data_camera():
     global config
-    data = dict.fromkeys(["Time", "ImgP", "SRis", "SSet"])
+    data = dict.fromkeys(["Time", "CImg", "SRis", "SSet"])
 
     # Try parsing time specified in URL
     if flask.request.args.get("time") == None: return flask.jsonify(data)
@@ -254,11 +254,11 @@ def data_camera():
                 url_time.strftime("%Y/%m/%d/%Y-%m-%dT%H-%M-%S") + ".jpg")
 
             if os.path.isfile(image_path): 
-                data["ImgP"] = ("data/camera/"
+                data["CImg"] = ("data/camera/"
                     + url_time.strftime("%Y/%m/%d/%Y-%m-%dT%H-%M-%S") + ".jpg")
             else: url_time += timedelta(minutes = 5)
 
-    else: data["ImgP"] = ("data/camera/"
+    else: data["CImg"] = ("data/camera/"
         + url_time.strftime("%Y/%m/%d/%Y-%m-%dT%H-%M-%S") + ".jpg")
 
     # Calculate sunrise and sunset times
