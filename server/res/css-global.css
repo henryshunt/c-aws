@@ -180,6 +180,7 @@ tr {
 
 #img_container {
     position: relative;
+    z-index: -1;
 }
 #img_container img {
     width: 100%;
