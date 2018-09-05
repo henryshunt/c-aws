@@ -235,7 +235,10 @@ def do_log_report(utc):
 
     # -- RAINFALL --------------------------------------------------------------
     try:
-        frame.rainfall = new_Rain_ticks * 0.254
+        if frame.air_temperature != None and frame.exposed_temperature != None:
+            if frame.exposed_temperature >= frame.air_temperature + 0.5:
+                frame.rainfall = 0
+            else: frame.rainfall = new_Rain_ticks * 0.254
     except: gpio.output(24, gpio.HIGH)
 
     # -- DEW POINT -------------------------------------------------------------
