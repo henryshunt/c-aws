@@ -366,8 +366,7 @@ def data_graph_year():
 def data_climate():
     global config
     data = dict.fromkeys(["AirT_Avg_Year", "AirT_Min_Year", "AirT_Max_Year",
-                          "WSpd_Avg_Year", "WDir_Avg_Year", "SunD_Ttl_Year",
-                          "Rain_Ttl_Year"])
+                          "SunD_Ttl_Year", "Rain_Ttl_Year"])
     fill_value = dict.fromkeys(
         ["1", "2", "3", "4", "5", "6", "7", "8", "9", "10", "11", "12"])
     data["AirT_Avg_Months"] = copy.deepcopy(fill_value)
