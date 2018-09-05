@@ -5,21 +5,25 @@
     margin-right: 15px;
     margin-bottom: 12px;
 }
+#climate_months_a {
+    border-bottom-width: 0px;
+}
+
 .climate_table thead tr td {
-    width: 62px;
     border: 1px solid #2a2a2a;
-    border-bottom: 2px solid;
+    border-bottom-width: 2px;
     font-weight: bold;
     text-align: center;
 }
 .climate_table thead tr td:first-of-type {
-    width: 221px;
-    border-right: 2px solid;
+    border-right-width: 2px;
 }
 .climate_table thead tr td:nth-of-type(2) {
-    border-left: 0px solid;
+    border-left-width: 0px;
 }
+
 .climate_table tbody tr td {
+    width: 63px;
     border-bottom: 1px solid #2a2a2a;
     border-right: 1px solid #2a2a2a;
     font-size: 14px;
@@ -27,7 +31,7 @@
 }
 .climate_table tbody tr td:first-of-type {
     text-align: left;
-    width: 241px;
+    width: 240px;
     padding-left: 5px;
     border-left: 1px solid #2a2a2a;
     border-right: 2px solid #2a2a2a;

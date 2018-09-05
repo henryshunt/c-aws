@@ -370,9 +370,13 @@ def data_climate():
     fill_value = dict.fromkeys(
         ["1", "2", "3", "4", "5", "6", "7", "8", "9", "10", "11", "12"])
     data["AirT_Avg_Months"] = copy.deepcopy(fill_value)
+    data["AirT_Min_Months"] = copy.deepcopy(fill_value)
+    data["AirT_Max_Months"] = copy.deepcopy(fill_value)
     data["RelH_Avg_Months"] = copy.deepcopy(fill_value)
     data["WSpd_Avg_Months"] = copy.deepcopy(fill_value)
+    data["WSpd_Max_Months"] = copy.deepcopy(fill_value)
     data["WDir_Avg_Months"] = copy.deepcopy(fill_value)
+    data["WGst_Avg_Months"] = copy.deepcopy(fill_value)
     data["WGst_Max_Months"] = copy.deepcopy(fill_value)
     data["SunD_Ttl_Months"] = copy.deepcopy(fill_value)
     data["Rain_Ttl_Months"] = copy.deepcopy(fill_value)

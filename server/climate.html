@@ -49,7 +49,14 @@
                         document.getElementById("item_SunD_Ttl_Year").innerHTML = "no data";
                         document.getElementById("item_Rain_Ttl_Year").innerHTML = "no data";
                         
-                        var table = document.getElementById("climate_month");
+                        var table = document.getElementById("climate_months_a");
+                        for (var i = 1, row; row = table.rows[i]; i++) {
+                            for (var j = 1, col; col = row.cells[j]; j++) {
+                                col.innerHTML = "no data";
+                            }  
+                        }
+
+                        table = document.getElementById("climate_months_b");
                         for (var i = 1, row; row = table.rows[i]; i++) {
                             for (var j = 1, col; col = row.cells[j]; j++) {
                                 col.innerHTML = "no data";
@@ -80,9 +87,13 @@
                 displayValue(data["Rain_Ttl_Year"], "item_Rain_Ttl_Year", " mm", 0);
 
                 displayMonths(data["AirT_Avg_Months"], "item_AirT_Avg_Months", 1);
+                displayMonths(data["AirT_Min_Months"], "item_AirT_Min_Months", 1);
+                displayMonths(data["AirT_Max_Months"], "item_AirT_Max_Months", 1);
                 displayMonths(data["RelH_Avg_Months"], "item_RelH_Avg_Months", 1);
                 displayMonths(data["WSpd_Avg_Months"], "item_WSpd_Avg_Months", 1);
+                displayMonths(data["WSpd_Max_Months"], "item_WSpd_Max_Months", 1);
                 displayMonths(data["WDir_Avg_Months"], "item_WDir_Avg_Months", -1);
+                displayMonths(data["WGst_Avg_Months"], "item_WGst_Avg_Months", 1);
                 displayMonths(data["WGst_Max_Months"], "item_WGst_Max_Months", 1);
                 displayMonths(data["SunD_Ttl_Months"], "item_SunD_Ttl_Months", 1);
                 displayMonths(data["Rain_Ttl_Months"], "item_Rain_Ttl_Months", 0);
@@ -161,39 +172,10 @@
 
             <div class="group">
                 <div class="group_header">
-                    <p class="group_title">Year Statistics</p>
-                </div>
-
-                <table class="field_table">
-                    <tr>
-                        <td><p class="field_label">Air Temperature Average:</p></td>
-                        <td><p id="item_AirT_Avg_Year" class="field_value"></p></td>
-                    </tr>
-                    <tr>
-                        <td><p class="field_label">Air Temperature Minimum:</p></td>
-                        <td><p id="item_AirT_Min_Year" class="field_value"></p></td>
-                    </tr>
-                    <tr>
-                        <td><p class="field_label">Air Temperature Maximum:</p></td>
-                        <td><p id="item_AirT_Max_Year" class="field_value"></p></td>
-                    </tr>
-                    <tr>
-                        <td><p class="field_label" style="margin-top: 10px">Sunshine Duration Total:</p></td>
-                        <td><p id="item_SunD_Ttl_Year" class="field_value" style="margin-top: 10px"></p></td>
-                    </tr>
-                    <tr>
-                        <td><p class="field_label">Rainfall Total:</p></td>
-                        <td><p id="item_Rain_Ttl_Year" class="field_value"></p></td>
-                    </tr>
-                </table>
-            </div>
-
-            <div class="group">
-                <div class="group_header">
                     <p class="group_title">Monthly Statistics</p>
                 </div>
 
-                <table id="climate_month" class="climate_table">
+                <table id="climate_months_a" class="climate_table">
                     <thead>
                         <tr>
                             <td></td><td>Jan</td><td>Feb</td><td>Mar</td><td>Apr</td>
@@ -208,6 +190,21 @@
                             <td></td><td></td><td></td><td></td><td></td><td></td>
                             <td></td><td></td><td></td><td></td><td></td><td></td>
                         </tr>
+                        <tr id="item_AirT_Max_Months">
+                            <td>Air Temperature Minimum (°C)</td>
+                            <td></td><td></td><td></td><td></td><td></td><td></td>
+                            <td></td><td></td><td></td><td></td><td></td><td></td>
+                        </tr>
+                        <tr id="item_AirT_Min_Months">
+                            <td>Air Temperature Maximum (°C)</td>
+                            <td></td><td></td><td></td><td></td><td></td><td></td>
+                            <td></td><td></td><td></td><td></td><td></td><td></td>
+                        </tr>
+                    </tbody>
+                </table>
+
+                <table id="climate_months_b" class="climate_table">
+                    <tbody>
                         <tr id="item_RelH_Avg_Months">
                             <td>Relative Humidity Average (%)</td>
                             <td></td><td></td><td></td><td></td><td></td><td></td>
@@ -218,8 +215,18 @@
                             <td></td><td></td><td></td><td></td><td></td><td></td>
                             <td></td><td></td><td></td><td></td><td></td><td></td>
                         </tr>
+                        <tr id="item_WSpd_Max_Months">
+                            <td>Wind Speed Maximum (mph)</td>
+                            <td></td><td></td><td></td><td></td><td></td><td></td>
+                            <td></td><td></td><td></td><td></td><td></td><td></td>
+                        </tr>
                         <tr id="item_WDir_Avg_Months">
                             <td>Wind Direction Average (°)</td>
+                            <td></td><td></td><td></td><td></td><td></td><td></td>
+                            <td></td><td></td><td></td><td></td><td></td><td></td>
+                        </tr>
+                        <tr id="item_WGst_Avg_Months">
+                            <td>Wind Gust Average (mph)</td>
                             <td></td><td></td><td></td><td></td><td></td><td></td>
                             <td></td><td></td><td></td><td></td><td></td><td></td>
                         </tr>
@@ -244,17 +251,17 @@
                             <td></td><td></td><td></td><td></td><td></td><td></td>
                         </tr>
                         <tr id="item_ST10_Avg_Months">
-                            <td>Soil Temperature 10CM Average (°C)</td>
+                            <td>Soil Temp 10CM Average (°C)</td>
                             <td></td><td></td><td></td><td></td><td></td><td></td>
                             <td></td><td></td><td></td><td></td><td></td><td></td>
                         </tr>
                         <tr id="item_ST30_Avg_Months">
-                            <td>Soil Temperature 30CM Average (°C)</td>
+                            <td>Soil Temp 30CM Average (°C)</td>
                             <td></td><td></td><td></td><td></td><td></td><td></td>
                             <td></td><td></td><td></td><td></td><td></td><td></td>
                         </tr>
                         <tr id="item_ST00_Avg_Months">
-                            <td>Soil Temperature 1M Average (°C)</td>
+                            <td>Soil Temp 1M Average (°C)</td>
                             <td></td><td></td><td></td><td></td><td></td><td></td>
                             <td></td><td></td><td></td><td></td><td></td><td></td>
                         </tr>
