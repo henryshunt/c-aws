@@ -184,7 +184,7 @@ tr {
 }
 #img_container img {
     width: 100%;
-    position: absolute;
+    position: relative;
 }
 #img_loading {
     text-align: center;
