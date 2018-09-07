@@ -154,6 +154,7 @@ def do_log_report(utc):
         
     # -- WIND SPEED ------------------------------------------------------------
     ten_mins_ago = frame.time - timedelta(minutes = 10)
+    two_mins_ago = frame.time - timedelta(minutes = 2)
     
     try:
         # Add new minute ticks to end of past ten minute tick list
@@ -164,13 +165,13 @@ def do_log_report(utc):
             if tick < ten_mins_ago: past_WSpd_ticks.remove(tick)
 
         # Calculate wind speed only if 10 minutes of data is available
-        if ten_mins_ago >= data_start:
+        if two_mins_ago >= data_start:
             WSpd_total = 0
             WSpd_count = 0
 
             # Iterate over data in three second samples
-            for second in range(0, 598, 3):
-                WSpd_start = ten_mins_ago + timedelta(seconds = second)
+            for second in range(0, 118, 3):
+                WSpd_start = two_mins_ago + timedelta(seconds = second)
                 WSpd_end = WSpd_start + timedelta(seconds = 3)
                 ticks_in_WSpd_sample = 0
 
@@ -189,6 +190,7 @@ def do_log_report(utc):
     try:
         # Add new minute samples to end of past ten minute sample list
         past_WDir_samples.extend(new_WDir_samples)
+        count = 0
 
         # Remove samples older than 10 minutes
         for sample in list(past_WDir_samples):
@@ -199,10 +201,13 @@ def do_log_report(utc):
             and len(past_WDir_samples) > 0):
             
             WDir_total = 0
-            for sample in past_WDir_samples: WDir_total += sample[1]
+            for sample in past_WDir_samples:
+                if (sample[0] >= two_mins_ago):
+                    WDir_total += sample[1]
+                    count += 1
 
             frame.wind_direction = int(
-                round(WDir_total / len(past_WDir_samples)))
+                round(WDir_total / count))
     except: gpio.output(24, gpio.HIGH)
 
     # -- WIND GUST -------------------------------------------------------------
