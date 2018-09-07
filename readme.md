@@ -1,12 +1,16 @@
 # C-AWS
-Version 4 of the software for the Custom Automatic Weather Station (C-AWS) Project. The aim of this project is to develop, from scratch, a comprehensive Automatic Weather Station (AWS) from cheaper non- and semi-professional parts.
+The aim of this project was to develop, from scratch, an automatic weather station with a wide range of sensors and in-depth data visualisation, using cheaper non- and semi-professional sensors and data logging equipment, that was comparable to commercial systems. This repository houses the code for the weather station unit itself, and is based around Linux running on a Raspberry Pi.
 
 # Dependencies
-Lists the packages that must be installed on the target operating system (Raspbian Stretch lite). More packages may need to be installed on other systems.
+These dependencies are relative to a fresh install of Raspbian Stretch Lite.
 
-- RPi.GPIO (sudo apt-get install python3-rpi.gpio)
-- picamera (sudo apt-get install python3-picamera)
-- pytz (sudo apt-get install python3-tz)
-- apscheduler (sudo pip3 install apscheduler)
-- astral (sudo pip3 install astral)
-- gpiozero (pre-installed with Raspbian OS)
+- `RPi.GPIO` -- `sudo apt-get install python3-rpi.gpio`
+- `picamera` -- `sudo apt-get install python3-picamera`
+- `pytz` -- `sudo apt-get install python3-tz`
+- `gpiozero` -- `sudo apt-get install python3-gpiozero`
+- `apscheduler` -- `sudo apt-get install python3-apscheduler`
+- `Adafruit_GPIO` -- `sudo pip3 install Adafruit_GPIO`
+- `astral` -- `sudo pip3 install astral`
+- `flask` -- `sudo pip3 install flask`
+- `python-daemon` -- `sudo pip3 install python-daemon`
+- `spidev` -- `sudo apt-get install python-spidev`
