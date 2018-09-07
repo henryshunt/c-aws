@@ -164,10 +164,9 @@ def do_log_report(utc):
         for tick in list(past_WSpd_ticks):
             if tick < ten_mins_ago: past_WSpd_ticks.remove(tick)
 
-        # Calculate wind speed only if 10 minutes of data is available
+        # Calculate wind speed only if 2 minutes of data is available
         if two_mins_ago >= data_start:
             WSpd_total = 0
-            WSpd_count = 0
 
             # Iterate over data in three second samples
             for second in range(0, 118, 3):
@@ -181,9 +180,9 @@ def do_log_report(utc):
                         ticks_in_WSpd_sample += 1
 
                 WSpd_sample = (ticks_in_WSpd_sample * 2.5) / 3
-                WSpd_total += WSpd_sample; WSpd_count += 1
+                WSpd_total += WSpd_sample
                 
-            frame.wind_speed = round(WSpd_total / WSpd_count, 1)
+            frame.wind_speed = round(WSpd_total / 40, 1)
     except: gpio.output(24, gpio.HIGH)
 
     # -- WIND DIRECTION --------------------------------------------------------
@@ -214,7 +213,7 @@ def do_log_report(utc):
 
             # Iterate over each second in three second samples
             WGst_value = 0
-            
+
             for second in range(0, 598):
                 WGst_start = ten_mins_ago + timedelta(seconds = second)
                 WGst_end = WGst_start + timedelta(seconds = 3)
