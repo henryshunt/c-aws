@@ -188,35 +188,33 @@ def do_log_report(utc):
 
     # -- WIND DIRECTION --------------------------------------------------------
     try:
-        # Add new minute samples to end of past ten minute sample list
+        # Add new minute samples to end of past two minute sample list
         past_WDir_samples.extend(new_WDir_samples)
-        count = 0
 
-        # Remove samples older than 10 minutes
+        # Remove samples older than 2 minutes
         for sample in list(past_WDir_samples):
-            if sample[0] < ten_mins_ago: past_WDir_samples.remove(sample)
+            if sample[0] < two_mins_ago: past_WDir_samples.remove(sample)
 
         # Calculate wind direction only if there is positive wind speed
         if (frame.wind_speed != None and frame.wind_speed > 0
             and len(past_WDir_samples) > 0):
             
             WDir_total = 0
-            for sample in past_WDir_samples:
-                if (sample[0] >= two_mins_ago):
-                    WDir_total += sample[1]
-                    count += 1
+            for sample in past_WDir_samples: WDir_total += sample[1]
 
             frame.wind_direction = int(
-                round(WDir_total / count))
+                round(WDir_total / len(past_WDir_samples)))
     except: gpio.output(24, gpio.HIGH)
 
     # -- WIND GUST -------------------------------------------------------------
     try:
         # Calculate wind gust only if there is positive wind speed
-        if frame.wind_speed != None and frame.wind_speed > 0:
-            WGst_value = 0
+        if (frame.wind_speed != None and frame.wind_speed > 0
+            and ten_mins_ago >= data_start):
 
             # Iterate over each second in three second samples
+            WGst_value = 0
+            
             for second in range(0, 598):
                 WGst_start = ten_mins_ago + timedelta(seconds = second)
                 WGst_end = WGst_start + timedelta(seconds = 3)
