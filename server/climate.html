@@ -165,9 +165,19 @@
 
         <div id="main">
             <div class="group" id="scroller">
-                <p id="scroller_left" class="scroller_button" onclick="scroller_left()">◀</p>
+                <div id="scroller_left" class="scroller_button" onclick="scroller_left()">
+                    <svg width="20" height="20" viewBox="0 0 512 512">
+                        <polygon points="352,128.4 319.7,96 160,256 160,256 160,256 319.7,416 352,383.6 224.7,256"/>
+                    </svg>
+                </div>
+
                 <p id="scroller_time"></p>
-                <p id="scroller_right" class="scroller_button" onclick="scroller_right()">▶</p>
+
+                <div id="scroller_right" class="scroller_button" onclick="scroller_right()">
+                    <svg width="20" height="20" viewBox="0 0 512 512">
+                        <polygon points="160,128.4 192.3,96 352,256 352,256 352,256 192.3,416 160,383.6 287.3,256"/>
+                    </svg>
+                </div>
             </div>
 
             <div class="group">

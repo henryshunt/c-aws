@@ -129,8 +129,11 @@ tr {
     cursor: pointer;
     user-select: none;
 }
-.scroller_button:hover {
-    color: gray;
+.scroller_button svg {
+    transform: translateY(4px);
+}
+.scroller_button:hover svg {
+    fill: gray;
 }
 #scroller_time {
     display: table-cell;
@@ -173,9 +176,6 @@ tr {
     text-align: right;
     padding-right: 15px;
     font-weight: bold;
-}
-.sep {
-    margin-top: 10px;
 }
 
 #img_container {
