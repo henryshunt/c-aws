@@ -1,5 +1,5 @@
 # C-AWS
-The aim of this project was to develop, from scratch, an automatic weather station with a wide range of sensors and in-depth data visualisation, using cheaper non- and semi-professional sensors and data logging equipment, that was comparable to commercial systems. This repository houses the code for the weather station unit itself, and is based around Linux running on a Raspberry Pi.
+The aim of this project was to develop, from scratch, an automatic weather station with a wide range of sensors and in-depth data visualisation, using cheaper non- and semi-professional sensors and data logging equipment, that was comparable to existing commercial systems. This repository contains the code for the weather station unit itself, and is designed to run on Linux Stretch Lite on a Raspberry Pi.
 
 # Dependencies
 These dependencies are relative to a fresh install of Raspbian Stretch Lite.
