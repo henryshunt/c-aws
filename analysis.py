@@ -69,10 +69,19 @@ def fields_in_range(config, start, end, fields, table):
 
             # Query respective database table
             if table == DbTable.REPORTS:
-                cursor.execute(queries.SELECT_FIELDS_REPORTS
-                               .format(fields),
-                               (start.strftime("%Y-%m-%d %H:%M:%S"),
-                                end.strftime("%Y-%m-%d %H:%M:%S")))
+                if ("WSpd" in fields or "WDir" in fields or "WGst" in fields or
+                    "SunD" in fields or "Rain" in fields):
+
+                    cursor.execute(queries.SELECT_FIELDS_REPORTS
+                                .format(fields),
+                                ((start + timedelta(
+                                    minutes = 1)).strftime("%Y-%m-%d %H:%M:%S"),
+                                 end.strftime("%Y-%m-%d %H:%M:%S")))
+                else:
+                    cursor.execute(queries.SELECT_FIELDS_REPORTS
+                                .format(fields),
+                                (start.strftime("%Y-%m-%d %H:%M:%S"),
+                                 end.strftime("%Y-%m-%d %H:%M:%S")))
 
             elif table == DbTable.ENVREPORTS:
                 cursor.execute(queries.SELECT_FIELDS_ENVREPORTS
