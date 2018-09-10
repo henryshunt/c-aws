@@ -89,11 +89,10 @@ if config.camera_logging == True:
     except: helpers.init_exit(9, True)
 
 # -- RUN ACCESS ----------------------------------------------------------------
-if config.local_network_server == True:
-    try:
-        proc_access = subprocess.Popen(["sudo", "python3", "aws_access.py",
-            startup_time.strftime("%Y-%m-%dT%H:%M:%S")])
-    except: helpers.init_exit(10, True)
+try:
+    proc_access = subprocess.Popen(["sudo", "python3", "aws_access.py",
+        startup_time.strftime("%Y-%m-%dT%H:%M:%S")])
+except: helpers.init_exit(10, True)
 
 # -- RUN SUPPORT ---------------------------------------------------------------
 if (config.report_uploading == True or

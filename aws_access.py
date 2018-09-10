@@ -523,35 +523,39 @@ def entry_point():
                           bouncetime = 300)
 
     # -- CREATE SERVER ---------------------------------------------------------
-    server = flask.Flask(__name__, static_folder = "server/res",
-                         template_folder = "server")
+    if config.local_network_server == True:
+        server = flask.Flask(__name__, static_folder = "server/res",
+                            template_folder = "server")
 
-    server.add_url_rule("/", view_func = page_now)
-    server.add_url_rule("/index.html", view_func = page_now)
-    server.add_url_rule("/statistics.html", view_func = page_statistics)
-    server.add_url_rule("/camera.html", view_func = page_camera)
-    server.add_url_rule("/graph-day.html", view_func = page_graph_day)
-    server.add_url_rule("/graph-year.html", view_func = page_graph_year)
-    server.add_url_rule("/climate.html", view_func = page_climate)
-    server.add_url_rule("/about.html", view_func = page_about)
+        server.add_url_rule("/", view_func = page_now)
+        server.add_url_rule("/index.html", view_func = page_now)
+        server.add_url_rule("/statistics.html", view_func = page_statistics)
+        server.add_url_rule("/camera.html", view_func = page_camera)
+        server.add_url_rule("/graph-day.html", view_func = page_graph_day)
+        server.add_url_rule("/graph-year.html", view_func = page_graph_year)
+        server.add_url_rule("/climate.html", view_func = page_climate)
+        server.add_url_rule("/about.html", view_func = page_about)
 
-    server.add_url_rule("/data/now.json", view_func = data_now)
-    server.add_url_rule("/data/statistics.json", view_func = data_statistics)
-    server.add_url_rule("/data/camera.json", view_func = data_camera)
-    server.add_url_rule("/data/camera/<year>/<month>/<day>/<file_name>",
-        view_func = file_camera)
-    server.add_url_rule("/data/graph-day.json", view_func = data_graph_day)
-    server.add_url_rule("/data/graph-year.json", view_func = data_graph_year)
-    server.add_url_rule("/data/graph-about.json", view_func = data_graph_about)
-    server.add_url_rule("/data/climate.json", view_func = data_climate)
-    server.add_url_rule("/data/about.json", view_func = data_about)
-    server.add_url_rule("/ctrl/command", view_func = ctrl_command)
+        server.add_url_rule("/data/now.json", view_func = data_now)
+        server.add_url_rule(
+            "/data/statistics.json", view_func = data_statistics)
+        server.add_url_rule("/data/camera.json", view_func = data_camera)
+        server.add_url_rule("/data/camera/<year>/<month>/<day>/<file_name>",
+            view_func = file_camera)
+        server.add_url_rule("/data/graph-day.json", view_func = data_graph_day)
+        server.add_url_rule(
+            "/data/graph-year.json", view_func = data_graph_year)
+        server.add_url_rule(
+            "/data/graph-about.json", view_func = data_graph_about)
+        server.add_url_rule("/data/climate.json", view_func = data_climate)
+        server.add_url_rule("/data/about.json", view_func = data_about)
+        server.add_url_rule("/ctrl/command", view_func = ctrl_command)
 
-    # -- START SERVER ----------------------------------------------------------
-    server.config["SEND_FILE_MAX_AGE_DEFAULT"] = 0
-    logging.getLogger("werkzeug").setLevel(logging.CRITICAL)
-    threading.Thread(target = 
-        lambda: server.run(host = "0.0.0.0", threaded = True)).start()
+        # -- START SERVER ------------------------------------------------------
+        server.config["SEND_FILE_MAX_AGE_DEFAULT"] = 0
+        logging.getLogger("werkzeug").setLevel(logging.CRITICAL)
+        threading.Thread(target = 
+            lambda: server.run(host = "0.0.0.0", threaded = True)).start()
 
     # Prevent main thread from ending, to sustain interrupt monitoring
     while True: time.sleep(900)
