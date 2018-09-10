@@ -101,10 +101,10 @@ def stats_for_date(config, local_time):
             cursor.execute(queries.GENERATE_DAYSTAT,
                            (bounds[0].strftime("%Y-%m-%d %H:%M:%S"),
                             bounds[1].strftime("%Y-%m-%d %H:%M:%S"),
-                            bounds[0] + timedelta(
-                                minutes = 1).strftime("%Y-%m-%d %H:%M:%S"),
-                            bounds[1] + timedelta(
-                                minutes = 1).strftime("%Y-%m-%d %H:%M:%S")))
+                            (bounds[0] + timedelta(
+                                minutes = 1)).strftime("%Y-%m-%d %H:%M:%S"),
+                            (bounds[1] + timedelta(
+                                minutes = 1)).strftime("%Y-%m-%d %H:%M:%S")))
                             
             return cursor.fetchone()
     except: return False
