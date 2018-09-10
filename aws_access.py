@@ -454,9 +454,11 @@ def data_about():
     
     # Get remaining internal and camera drive storage spaces
     data["IDRS"] = helpers.remaining_space("/")
+    if data["IDRS"] != None: data["IDRS"] = round(data["IDRS"], 3)
 
     if config.camera_logging == True:
         data["CDRS"] = helpers.remaining_space(config.camera_drive)
+        if data["CDRS"] != None: data["CDRS"] = round(data["CDRS"], 3)
     else: data["CDRS"] = False
 
     data["Time"] = url_time.strftime("%Y-%m-%d %H:%M:%S")
