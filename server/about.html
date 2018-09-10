@@ -140,6 +140,10 @@
 
                 if (dialog == true) {
                     $.get("ctrl/command?cmd=" + command);
+                    
+                    if (command == "shutdown" || command == "restart") {
+                        alert("Power command will activate between the seconds :30 and :50.");
+                    }
                 }
             }
         </script>
