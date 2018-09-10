@@ -380,9 +380,7 @@ def do_generate_stats(utc):
     local_time = helpers.utc_to_local(config, utc)
 
     # -- GET NEW STATS ---------------------------------------------------------
-    bounds = helpers.day_bounds_utc(config, local_time, False)
-    new_stats = analysis.stats_for_date(config, bounds)
-    
+    new_stats = analysis.stats_for_date(config, local_time)
     if new_stats == False: gpio.output(24, gpio.HIGH); return
 
     # -- GET CURRENT STATS -----------------------------------------------------

@@ -4,6 +4,7 @@ import sqlite3
 
 from frames import DbTable
 import queries
+import helpers
 
 def record_for_time(config, time, table):
     time = time.replace(second = 0, microsecond = 0)
@@ -88,8 +89,10 @@ def fields_in_range(config, start, end, fields, table):
             return cursor.fetchall()
     except: return False
 
-def stats_for_date(config, bounds):
+def stats_for_date(config, local_time):
     try:
+        bounds = helpers.day_bounds_utc(config, local_time, False)
+        
         with sqlite3.connect(config.database_path) as database:
             database.row_factory = sqlite3.Row
             cursor = database.cursor()
@@ -97,7 +100,11 @@ def stats_for_date(config, bounds):
             # Generate the statistics
             cursor.execute(queries.GENERATE_DAYSTAT,
                            (bounds[0].strftime("%Y-%m-%d %H:%M:%S"),
-                            bounds[1].strftime("%Y-%m-%d %H:%M:%S")))
+                            bounds[1].strftime("%Y-%m-%d %H:%M:%S"),
+                            bounds[0] + timedelta(
+                                minutes = 1).strftime("%Y-%m-%d %H:%M:%S"),
+                            bounds[1] + timedelta(
+                                minutes = 1).strftime("%Y-%m-%d %H:%M:%S")))
                             
             return cursor.fetchone()
     except: return False
