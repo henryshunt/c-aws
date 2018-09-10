@@ -55,6 +55,9 @@
 
                     success: function (data) { processData(data); },
                     error: function() {
+                        document.getElementById("item_data_time").innerHTML
+                            = moment(requestedTime).tz(awsTimeZone).format("HH:mm");
+                            
                         document.getElementById("item_AirT").innerHTML = "no data";
                         document.getElementById("item_ExpT").innerHTML = "no data";
                         document.getElementById("item_RelH").innerHTML = "no data";
@@ -72,24 +75,15 @@
                         document.getElementById("item_ST10").innerHTML = "no data";
                         document.getElementById("item_ST30").innerHTML = "no data";
                         document.getElementById("item_ST00").innerHTML = "no data";
-
-                        document.getElementById("item_data_time").innerHTML
-                            = moment(requestedTime).tz(awsTimeZone).format("HH:mm");
                     }
                 });
             }
 
             function processData(data) {
-                if (data["Time"] != null) {
-                    var utc = moment.utc(data["Time"], "YYYY-MM-DD HH:mm:ss");
-                    document.getElementById("item_data_time").innerHTML
-                        = moment(utc).tz(awsTimeZone).format("HH:mm");
-                    requestedTime = moment(utc);
-
-                } else {
-                    document.getElementById("item_data_time").innerHTML
-                        = moment(requestedTime).tz(awsTimeZone).format("HH:mm");
-                }
+                var utc = moment.utc(data["Time"], "YYYY-MM-DD HH:mm:ss");
+                document.getElementById("item_data_time").innerHTML
+                    = moment(utc).tz(awsTimeZone).format("HH:mm");
+                requestedTime = moment(utc);
 
                 displayValue(data["AirT"], "item_AirT", "°C", 1);
                 displayValue(data["ExpT"], "item_ExpT", "°C", 1);

@@ -5,15 +5,18 @@
         <title>C-AWS {{ aws_title }} [Local]</title>
         <link href="{{ url_for('static', filename='css-trebuchet.ttf') }}" type="x-font-ttf">
         <link href="{{ url_for('static', filename='css-global.css') }}" rel="stylesheet" type="text/css">
+        <link href="{{ url_for('static', filename='css-flatpickr.css') }}" rel="stylesheet" type="text/css">
         <script src="{{ url_for('static', filename='js-global.js') }}" type="text/javascript"></script>
         <script src="{{ url_for('static', filename='js-jquery.js') }}" type="text/javascript"></script>
         <script src="{{ url_for('static', filename='js-moment.js') }}" type="text/javascript"></script>
         <script src="{{ url_for('static', filename='js-moment-tz.js') }}" type="text/javascript"></script>
+        <script src="{{ url_for('static', filename='js-flatpickr.js') }}" type="text/javascript"></script>
 
         <script>
             const awsTimeZone = "{{ aws_time_zone }}";
 
             var isLoading = true;
+            var datePicker = null;
             var requestedTime = null;
             var updaterTimeout = null;
             var countTimeout = null;
@@ -71,40 +74,31 @@
                     success: function (data) { processData(data); },
 
                     error: function() {
+                        var localTime = moment(requestedTime).tz(awsTimeZone);
+                        document.getElementById("item_data_time").innerHTML
+                            = localTime.format("HH:mm");
+                        document.getElementById("scroller_time").innerHTML
+                            = localTime.format("DD/MM/YYYY [at] HH:mm");
+                        
                         document.getElementById("item_SRis").innerHTML = "no data";
                         document.getElementById("item_SSet").innerHTML = "no data";
                         document.getElementById("item_Noon").innerHTML = "no data";
                         document.getElementById("item_CImg").src
                             = "data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7";
-
-                        var local_time = moment(requestedTime).tz(awsTimeZone);
-                        document.getElementById("item_data_time").innerHTML
-                            = local_time.format("HH:mm");
-                        document.getElementById("scroller_time").innerHTML
-                            = local_time.format("DD/MM/YYYY [at] HH:mm");
                         isLoading = false;
                     }
                 });
             }
 
             function processData(data) {
-                if (data["Time"] != null) {
-                    var utc = moment.utc(data["Time"], "YYYY-MM-DD HH:mm:ss");
-                    var local_time = moment(utc).tz(awsTimeZone);
+                var utc = moment.utc(data["Time"], "YYYY-MM-DD HH:mm:ss");
+                var localTime = moment(utc).tz(awsTimeZone);
 
-                    document.getElementById("item_data_time").innerHTML
-                        = local_time.format("HH:mm");
-                    document.getElementById("scroller_time").innerHTML
-                        = local_time.format("DD/MM/YYYY [at] HH:mm");
-                    requestedTime = moment(utc);
-
-                } else {
-                    var local_time = moment(requestedTime).tz(awsTimeZone);
-                    document.getElementById("item_data_time").innerHTML
-                        = local_time.format("HH:mm");
-                    document.getElementById("scroller_time").innerHTML
-                        = local_time.format("DD/MM/YYYY [at] HH:mm");
-                }
+                document.getElementById("item_data_time").innerHTML
+                    = localTime.format("HH:mm");
+                document.getElementById("scroller_time").innerHTML
+                    = localTime.format("DD/MM/YYYY [at] HH:mm");
+                requestedTime = moment(utc);
 
                 if (data["SRis"] != null) {
                     var utc = moment.utc(data["SRis"], "YYYY-MM-DD HH:mm:ss");
@@ -130,21 +124,25 @@
                 isLoading = false;
             }
         
-            function scroller_left() {
+            function scrollerLeft() {
+                if (datePicker != null) { datePicker.close(); }
+
                 if (isLoading == false) {
                     requestedTime.subtract(5, "minutes");
-                    scroller_change();
+                    scrollerChange();
                 }
             }
 
-            function scroller_right() {
+            function scrollerRight() {
+                if (datePicker != null) { datePicker.close(); }
+
                 if (isLoading == false) {
                     requestedTime.add(5, "minutes");
-                    scroller_change();
+                    scrollerChange();
                 }
             }
 
-            function scroller_change(time) {
+            function scrollerChange() {
                 document.getElementById("item_CImg").src
                     = "data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7";
                     
@@ -156,9 +154,51 @@
                     utcMinute = utc.get("minute").toString();
                 }
 
-                if (requestedTime.toString() == utc.toString()) {
+                if (utc.toString() == requestedTime.toString()) {
                     updateData(true)
                 } else { updateData(false); }
+            }
+
+            function openPicker() {
+                if (requestedTime != null && datePicker == null && isLoading == false) {
+                    var localTime = moment(requestedTime).tz(awsTimeZone);
+                    var initTime = new Date(localTime.get("year"), localTime.get("month"),
+                        localTime.get("date"), localTime.get("hour"), localTime.get("minute"), 0);
+
+                    datePicker = flatpickr("#scroller_time", {
+                        enableTime: true, time_24hr: true, defaultDate: initTime, disableMobile: true,
+                        onClose: function() { datePicker.destroy(); datePicker = null; }
+                    });
+                    
+                    datePicker.open();
+                }
+            }
+
+            function pickerSubmit() {
+                var selTime = datePicker.selectedDates[0];
+                selTime = moment.utc({
+                    year: selTime.getUTCFullYear(), month: selTime.getUTCMonth(), day: 
+                    selTime.getUTCDate(), hour: selTime.getUTCHours(), minute:
+                    selTime.getUTCMinutes(), second: 0 });
+
+                utcMinute = selTime.get("minute").toString();
+                while (!utcMinute.endsWith("0") && !utcMinute.endsWith("5")) {
+                    if (utcMinute.endsWith("3") || utcMinute.endsWith("4") ||
+                        utcMinute.endsWith("8") || utcMinute.endsWith("9")) {
+                            selTime.add(1, "minute");
+                    } else { selTime.subtract(1, "minute"); }
+                    
+                    utcMinute = selTime.get("minute").toString();
+                }
+
+                if (selTime.toString() != requestedTime.toString()) {
+                    requestedTime = moment(selTime);
+                    scrollerChange();
+                }; datePicker.close(); 
+            }
+
+            function pickerCancel() {
+                datePicker.close();
             }
         </script>
     </head>
@@ -194,15 +234,15 @@
 
         <div id="main">
             <div class="group" id="scroller">
-                <div id="scroller_left" class="scroller_button" onclick="scroller_left()">
+                <div id="scroller_left" class="scroller_button" onclick="scrollerLeft()">
                     <svg width="20" height="20" viewBox="0 0 512 512">
                         <polygon points="352,128.4 319.7,96 160,256 160,256 160,256 319.7,416 352,383.6 224.7,256"/>
                     </svg>
                 </div>
 
-                <p id="scroller_time"></p>
+                <div><p id="scroller_time" onclick="openPicker()" style="cursor: pointer; text-decoration: underline"></p></div>
 
-                <div id="scroller_right" class="scroller_button" onclick="scroller_right()">
+                <div id="scroller_right" class="scroller_button" onclick="scrollerRight()">
                     <svg width="20" height="20" viewBox="0 0 512 512">
                         <polygon points="160,128.4 192.3,96 352,256 352,256 352,256 192.3,416 160,383.6 287.3,256"/>
                     </svg>

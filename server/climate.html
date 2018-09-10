@@ -25,9 +25,9 @@
                 updateData(true);
             });
 
-            function updateData(restartTimers) {
+            function updateData(setTime) {
                 isLoading = true;
-                getAndProcessData(restartTimers);
+                getAndProcessData(setTime);
             }
 
             function getAndProcessData(setTime) {
@@ -43,6 +43,10 @@
                     success: function (data) { processData(data); },
 
                     error: function() {
+                        var localTime = moment(requestedTime).tz(awsTimeZone);
+                        document.getElementById("scroller_time").innerHTML
+                            = localTime.format("YYYY");
+
                         document.getElementById("item_AirT_Avg_Year").innerHTML = "no data";
                         document.getElementById("item_AirT_Min_Year").innerHTML = "no data";
                         document.getElementById("item_AirT_Max_Year").innerHTML = "no data";
@@ -61,24 +65,15 @@
                             for (var j = 1, col; col = row.cells[j]; j++) {
                                 col.innerHTML = "no data";
                             }  
-                        }
-
-                        var local_time = moment(requestedTime).tz(awsTimeZone);
-                        document.getElementById("item_data_time").innerHTML
-                            = local_time.format("HH:mm");
-                        document.getElementById("scroller_time").innerHTML
-                            = local_time.format("YYYY");
-                        isLoading = false;
+                        }; isLoading = false;
                     }
                 });
             }
 
             function processData(data) {
-                var local_time = moment(requestedTime).tz(awsTimeZone);
-                document.getElementById("item_data_time").innerHTML
-                    = local_time.format("HH:mm");
+                var localTime = moment(requestedTime).tz(awsTimeZone);
                 document.getElementById("scroller_time").innerHTML
-                    = local_time.format("YYYY");
+                    = localTime.format("YYYY");
 
                 displayValue(data["AirT_Avg_Year"], "item_AirT_Avg_Year", "°C", 1);
                 displayValue(data["AirT_Min_Year"], "item_AirT_Min_Year", "°C", 1);
@@ -118,14 +113,14 @@
                 }
             }
 
-            function scroller_left() {
+            function scrollerLeft() {
                 if (isLoading == false) {
                     requestedTime.subtract(1, "years");
                     updateData(false);
                 }
             }
             
-            function scroller_right() {
+            function scrollerRight() {
                 if (isLoading == false) {
                     requestedTime.add(1, "years");
                     updateData(false);
@@ -165,15 +160,15 @@
 
         <div id="main">
             <div class="group" id="scroller">
-                <div id="scroller_left" class="scroller_button" onclick="scroller_left()">
+                <div id="scroller_left" class="scroller_button" onclick="scrollerLeft()">
                     <svg width="20" height="20" viewBox="0 0 512 512">
                         <polygon points="352,128.4 319.7,96 160,256 160,256 160,256 319.7,416 352,383.6 224.7,256"/>
                     </svg>
                 </div>
 
-                <p id="scroller_time"></p>
+                <div><p id="scroller_time"></p></div>
 
-                <div id="scroller_right" class="scroller_button" onclick="scroller_right()">
+                <div id="scroller_right" class="scroller_button" onclick="scrollerRight()">
                     <svg width="20" height="20" viewBox="0 0 512 512">
                         <polygon points="160,128.4 192.3,96 352,256 352,256 352,256 192.3,416 160,383.6 287.3,256"/>
                     </svg>
@@ -313,11 +308,6 @@
             <div id="footer_items">
                 <p class="footer_label">Local Time:</p>
                 <p id="item_local_time" class="footer_value" style="width: 210px"></p>
-    
-                <div style="float: right; margin-left: 10px">
-                    <p class="footer_label">Data Time:</p>
-                    <p id="item_data_time" class="footer_value" style="width: 60px"></p>
-                </div>
             </div>
         </div>
 

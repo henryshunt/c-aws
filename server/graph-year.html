@@ -77,9 +77,9 @@
                 } else { return new Chartist.Line("#graph_" + graph, null, options); }
             }
 
-            function updateData(restartTimers) {
+            function updateData(setTime) {
                 isLoading = true;
-                getAndProcessData(restartTimers);
+                getAndProcessData(setTime);
             }
 
             function getAndProcessData(setTime) {
@@ -88,8 +88,6 @@
                     requestedTime.subtract(1, "days");
                 }; graphsLoaded = 0;
 
-                document.getElementById("item_data_time").innerHTML
-                    = moment(requestedTime).tz(awsTimeZone).format("HH:mm");
                 document.getElementById("scroller_time").innerHTML
                     = moment(requestedTime).tz(
                     awsTimeZone).format("[Year Ending] DD/MM/YYYY");
@@ -116,13 +114,13 @@
                 var url = "data/graph-year.json?time=" + requestedTime.format(
                     "YYYY-MM-DD[T]HH-mm-00") + "&fields=" + fields;
                 
-                var local_time = moment(requestedTime).tz(awsTimeZone);
-                var x_end = moment(local_time).hour(0).minute(0).unix();
-                var x_start = moment(local_time).subtract(365, "day").hour(0).minute(0).unix();
+                var localTime = moment(requestedTime).tz(awsTimeZone);
+                var xEnd = moment(localTime).hour(0).minute(0).unix();
+                var xStart = moment(localTime).subtract(365, "day").hour(0).minute(0).unix();
 
                 $.getJSON(url, function(response) {
                     var options = graphs[graph].options;
-                    options.axisX.low = x_start; options.axisX.high = x_end;
+                    options.axisX.low = xStart; options.axisX.high = xEnd;
                     document.getElementById("graph_" + graph).style.display = "block";
                     graphs[graph].update({ series: response }, options);
 
@@ -161,21 +159,21 @@
                 }
             }
 
-            function scroller_left() {
+            function scrollerLeft() {
                 if (isLoading == false) {
                     requestedTime.subtract(1, "months");
-                    scroller_change();
+                    scrollerChange();
                 }
             }
             
-            function scroller_right() {
+            function scrollerRight() {
                 if (isLoading == false) {
                     requestedTime.add(1, "months");
-                    scroller_change();
+                    scrollerChange();
                 }
             }
 
-            function scroller_change() {
+            function scrollerChange() {
                 for (var graph in graphs) {
                     var options = graphs[graph].options;
                     delete options.axisX.low; delete options.axisX.high;
@@ -183,8 +181,10 @@
                 }
 
                 var utc = moment().utc().millisecond(0).second(0);
+                var localUtc = moment(utc).tz(awsTimeZone);
+                var localReq = moment(requestedTime).tz(awsTimeZone);
 
-                if (requestedTime.format("DD/MM/YYYY") == utc.format("DD/MM/YYYY")) {
+                if (localUtc.format("DD/MM/YYYY") == localReq.format("DD/MM/YYYY")) {
                     updateData(true)
                 } else { updateData(false); }
             }
@@ -222,15 +222,15 @@
 
         <div id="main">
             <div class="group" id="scroller">
-                <div id="scroller_left" class="scroller_button" onclick="scroller_left()">
+                <div id="scroller_left" class="scroller_button" onclick="scrollerLeft()">
                     <svg width="20" height="20" viewBox="0 0 512 512">
                         <polygon points="352,128.4 319.7,96 160,256 160,256 160,256 319.7,416 352,383.6 224.7,256"/>
                     </svg>
                 </div>
 
-                <p id="scroller_time"></p>
+                <div><p id="scroller_time"></p></div>
 
-                <div id="scroller_right" class="scroller_button" onclick="scroller_right()">
+                <div id="scroller_right" class="scroller_button" onclick="scrollerRight()">
                     <svg width="20" height="20" viewBox="0 0 512 512">
                         <polygon points="160,128.4 192.3,96 352,256 352,256 352,256 192.3,416 160,383.6 287.3,256"/>
                     </svg>
@@ -268,7 +268,7 @@
                     <p class="group_title">Wind Velocity</p>
 
                     <div>
-                        <span class="group_key">(<span>Average Speed</span>, <span>Maximum Gust</span> [mph]</span>
+                        <span class="group_key">(<span>Average Speed</span>, <span>Maximum Gust</span>) [mph]</span>
                         <p class="group_toggle" onclick="toggleGraph('wind', 'WSpd_Avg,WGst_Max', this)">+</p>
                     </div>
                 </div>
@@ -346,11 +346,6 @@
             <div id="footer_items">
                 <p class="footer_label">Local Time:</p>
                 <p id="item_local_time" class="footer_value" style="width: 210px"></p>
-    
-                <div style="float: right; margin-left: 10px">
-                    <p class="footer_label">Data Time:</p>
-                    <p id="item_data_time" class="footer_value" style="width: 60px"></p>
-                </div>
             </div>
         </div>
 

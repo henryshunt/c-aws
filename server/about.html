@@ -78,14 +78,11 @@
 
                     success: function (data) { processData(data); },
                     error: function() {
-                        document.getElementById("item_STim").innerHTML = "no data";
-                        document.getElementById("item_EncT").innerHTML = "no data";
-                        document.getElementById("item_CPUT").innerHTML = "no data";
-                        document.getElementById("item_IDRS").innerHTML = "no data";
-                        document.getElementById("item_CDRS").innerHTML = "no data";
-
                         document.getElementById("item_data_time").innerHTML
                             = moment(requestedTime).tz(awsTimeZone).format("HH:mm");
+
+                        document.getElementById("item_EncT").innerHTML = "no data";
+                        document.getElementById("item_CPUT").innerHTML = "no data";
                     }
                 });
 
@@ -93,44 +90,25 @@
             }
 
             function processData(data) {
-                if (data["Time"] != null) {
-                    var utc = moment.utc(data["Time"], "YYYY-MM-DD HH:mm:ss");
-                    document.getElementById("item_data_time").innerHTML
-                        = moment(utc).tz(awsTimeZone).format("HH:mm");
-                    requestedTime = moment(utc);
-
-                } else {
-                    document.getElementById("item_data_time").innerHTML
-                        = moment(requestedTime).tz(awsTimeZone).format("HH:mm");
-                }
-
-                if (data["STim"] != null) {
-                    var utc = moment.utc(data["STim"], "YYYY-MM-DD HH:mm:ss");
-                    var formatted = utc.tz(awsTimeZone).format("DD/MM/YYYY [at] HH:mm");
-                    document.getElementById("item_STim").innerHTML = formatted;
-                } else { document.getElementById("item_STim").innerHTML = "no data"; }
+                var utc = moment.utc(data["Time"], "YYYY-MM-DD HH:mm:ss");
+                document.getElementById("item_data_time").innerHTML
+                    = moment(utc).tz(awsTimeZone).format("HH:mm");
+                requestedTime = moment(utc);
 
                 displayValue(data["EncT"], "item_EncT", "°C", 1);
                 displayValue(data["CPUT"], "item_CPUT", "°C", 1);
-                displayValue(data["IDRS"], "item_IDRS", " gb", 2);
-
-                if (data["CDRS"] != null) {
-                    if (data["CDRS"] == false) {
-                        document.getElementById("item_CDRS").innerHTML = "no drive";
-                    } else { displayValue(data["CDRS"], "item_CDRS", " gb", 2); }
-                } else { document.getElementById("item_CDRS").innerHTML = "no data"; }
             }
 
             function loadGraphData() {
                 var url = "data/graph-about.json?time=" + requestedTime.format(
                     "YYYY-MM-DD[T]HH-mm-00") + "&fields=EncT,CPUT";
                 
-                var x_end = moment(requestedTime).tz(awsTimeZone).unix();
-                var x_start = moment(requestedTime).subtract(5, "hour").tz(awsTimeZone).unix();
+                var xEnd = moment(requestedTime).tz(awsTimeZone).unix();
+                var xStart = moment(requestedTime).subtract(5, "hour").tz(awsTimeZone).unix();
 
                 $.getJSON(url, function(response) {
                     var options = graph.options;
-                    options.axisX.low = x_start; options.axisX.high = x_end;
+                    options.axisX.low = xStart; options.axisX.high = xEnd;
                     graph.update({ series: response }, options);
 
                 }).fail(function() {
@@ -138,15 +116,6 @@
                     delete options.axisX.low; delete options.axisX.high;
                     graph.update({ series: null }, options);
                 });
-            }
-
-            function send_command(command) {
-                var dialog = confirm(
-                    "Are you sure you wish to send this command?");
-
-                if (dialog == true) {
-                    $.get("ctrl/command?cmd=" + command);
-                }
             }
         </script>
     </head>
