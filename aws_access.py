@@ -291,7 +291,7 @@ def data_graph_day():
     except: return flask.jsonify(data)
 
     bounds = helpers.day_bounds_utc(
-        config, helpers.utc_to_local(config, url_time), True)
+        config, helpers.utc_to_local(config, url_time), False)
     fields = "Time," + flask.request.args.get("fields")
 
     # Get data in range for specified parameters

@@ -76,7 +76,8 @@ def fields_in_range(config, start, end, fields, table):
                                 .format(fields),
                                 ((start + timedelta(
                                     minutes = 1)).strftime("%Y-%m-%d %H:%M:%S"),
-                                 end.strftime("%Y-%m-%d %H:%M:%S")))
+                                 (end + timedelta(minutes = 1))
+                                    .strftime("%Y-%m-%d %H:%M:%S")))
                 else:
                     cursor.execute(queries.SELECT_FIELDS_REPORTS
                                 .format(fields),
