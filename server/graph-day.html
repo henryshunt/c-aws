@@ -190,6 +190,8 @@
             }
 
             function scrollerLeft() {
+                if (datePicker != null) { datePicker.close(); }
+
                 if (isLoading == false) {
                     requestedTime.subtract(1, "days");
                     scrollerChange();
@@ -197,6 +199,8 @@
             }
             
             function scrollerRight() {
+                if (datePicker != null) { datePicker.close(); }
+                
                 if (isLoading == false) {
                     requestedTime.add(1, "days");
                     scrollerChange();
