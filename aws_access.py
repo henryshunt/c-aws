@@ -11,6 +11,7 @@ import logging
 import RPi.GPIO as gpio
 import threading
 import copy
+import re
 
 import daemon
 import flask
@@ -294,6 +295,8 @@ def data_graph_day():
         config, helpers.utc_to_local(config, url_time), False)
     fields = "Time," + flask.request.args.get("fields")
 
+    if re.compile("^[a-zA-Z,_]*$").match(s) == None: return False
+
     # Get data in range for specified parameters
     records = analysis.fields_in_range(config, bounds[0], bounds[1], fields,
         DbTable.REPORTS)
@@ -343,6 +346,8 @@ def data_graph_year():
     range_end = helpers.utc_to_local(config, bounds[0])
     range_start = range_end - timedelta(days = 365)
     fields = "Date," + flask.request.args.get("fields")
+
+    if re.compile("^[a-zA-Z,_]*$").match(s) == None: return False
 
     # Get data in range for specified parameters
     records = analysis.fields_in_range(config, range_start, range_end, fields,
@@ -478,6 +483,8 @@ def data_graph_about():
     range_start = url_time - timedelta(hours = 5)
     range_end = url_time
     fields = "Time," + flask.request.args.get("fields")
+
+    if re.compile("^[a-zA-Z,_]*$").match(s) == None: return False
 
     # Get data in range for specified parameters
     records = analysis.fields_in_range(config, range_start, range_end, fields,
