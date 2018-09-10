@@ -34,7 +34,7 @@ def do_shutdown(channel):
     
     # Wait for safe time window to prevent data and upload corruption
     second = datetime.utcnow().second
-    while second < 30 or second > 50:
+    while second < 35 or second > 55:
         time.sleep(0.8); second = datetime.utcnow().second
 
     # Need to kill this program first as it prevents shutdown
@@ -47,7 +47,7 @@ def do_restart(channel):
 
     # Wait for safe time window to prevent data and upload corruption
     second = datetime.utcnow().second
-    while second < 30 or second > 50:
+    while second < 35 or second > 55:
         time.sleep(0.8); second = datetime.utcnow().second
 
     # Need to kill this program first as it prevents restart
