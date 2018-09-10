@@ -30,34 +30,6 @@ def record_for_time(config, time, table):
             return cursor.fetchone()
     except: return False
 
-def records_in_range(config, start, end, table):
-    start = start.replace(second = 0, microsecond = 0)
-    end = end.replace(second = 0, microsecond = 0)
-
-    try:
-        with sqlite3.connect(config.database_path) as database:
-            database.row_factory = sqlite3.Row
-            cursor = database.cursor()
-
-            # Query respective database table
-            if table == DbTable.REPORTS:
-                cursor.execute(queries.SELECT_RANGE_REPORTS,
-                               (start.strftime("%Y-%m-%d %H:%M:%S"),
-                                end.strftime("%Y-%m-%d %H:%M:%S")))
-
-            elif table == DbTable.ENVREPORTS:
-                cursor.execute(queries.SELECT_RANGE_ENVREPORTS,
-                               (start.strftime("%Y-%m-%d %H:%M:%S"),
-                                end.strftime("%Y-%m-%d %H:%M:%S")))
-
-            elif table == DbTable.DAYSTATS:
-                cursor.execute(queries.SELECT_RANGE_DAYSTATS,
-                               (start.strftime("%Y-%m-%d"),
-                                end.strftime("%Y-%m-%d")))
-
-            return cursor.fetchall()
-    except: return False
-
 def fields_in_range(config, start, end, fields, table):
     start = start.replace(second = 0, microsecond = 0)
     end = end.replace(second = 0, microsecond = 0)
