@@ -116,16 +116,15 @@ def do_log_report(utc):
             args = ("28-0516704dc0ff", ST00_value)); ST00_thread.start()
 
         # Read each temp sensor in separate thread to reduce wait time
-        ExpT_thread.join()
-        if len(ExpT_value) == 1: frame.exposed_temperature = ExpT_value[0]
-        ST10_thread.join()
-        if len(ST10_value) == 1: frame.soil_temperature_10 = ST10_value[0]
-        ST30_thread.join()
-        if len(ST30_value) == 1: frame.soil_temperature_30 = ST30_value[0]
+        ExpT_thread.join(); ST10_thread.join(); ST30_thread.join()
         ST00_thread.join()
+
+        if len(ExpT_value) == 1: frame.exposed_temperature = ExpT_value[0]
+        if len(ST10_value) == 1: frame.soil_temperature_10 = ST10_value[0]
+        if len(ST30_value) == 1: frame.soil_temperature_30 = ST30_value[0]
         if len(ST00_value) == 1: frame.soil_temperature_00 = ST00_value[0]
 
-        # Average air termperature samples
+        # Get average of air termperature samples
         if len(new_AirT_samples) > 0:
             frame.air_temperature = round(mean(new_AirT_samples), 1)
     except: gpio.output(24, gpio.HIGH)
@@ -137,28 +136,20 @@ def do_log_report(utc):
         if len(new_RelH_samples) > 0:
             frame.relative_humidity = round(mean(new_RelH_samples), 1)
     except: gpio.output(24, gpio.HIGH)
-
-    # -- STATION PRESSURE ------------------------------------------------------
-    try:
-        if len(new_StaP_samples) > 0:
-            frame.station_pressure = round(mean(new_StaP_samples), 1)
-    except: gpio.output(24, gpio.HIGH)
-        
+    
     # -- WIND SPEED ------------------------------------------------------------
     ten_mins_ago = frame.time - timedelta(minutes = 10)
     two_mins_ago = frame.time - timedelta(minutes = 2)
     
     try:
-        # Add new minute ticks to end of past ten minute tick list
+        # Merge new and old ticks and remove ticks older than ten minutes
         past_WSpd_ticks.extend(new_WSpd_ticks)
-
-        # Remove ticks older than 10 minutes
         for tick in list(past_WSpd_ticks):
             if tick < ten_mins_ago: past_WSpd_ticks.remove(tick)
 
         # Calculate wind speed only if 2 minutes of data is available
         if two_mins_ago >= data_start:
-            WSpd_total = 0
+            WSpd_values = []
 
             # Iterate over data in three second samples
             for second in range(0, 118, 3):
@@ -166,23 +157,19 @@ def do_log_report(utc):
                 WSpd_end = WSpd_start + timedelta(seconds = 3)
                 ticks_in_WSpd_sample = 0
 
-                # Calculate three second average wind speed and check if highest
+                # Calculate three second average wind speed
                 for tick in past_WSpd_ticks:
                     if tick >= WSpd_start and tick < WSpd_end:
                         ticks_in_WSpd_sample += 1
 
-                WSpd_sample = (ticks_in_WSpd_sample * 2.5) / 3
-                WSpd_total += WSpd_sample
-                
-            frame.wind_speed = round(WSpd_total / 40, 1)
+                WSpd_values.append((ticks_in_WSpd_sample * 2.5) / 3)
+            frame.wind_speed = round(mean(WSpd_values), 1)
     except: gpio.output(24, gpio.HIGH)
 
     # -- WIND DIRECTION --------------------------------------------------------
     try:
-        # Add new minute samples to end of past two minute sample list
+        # Merge new and old samples and remove samples older than two minutes
         past_WDir_samples.extend(new_WDir_samples)
-
-        # Remove samples older than 2 minutes
         for sample in list(past_WDir_samples):
             if sample[0] < two_mins_ago: past_WDir_samples.remove(sample)
 
@@ -229,10 +216,16 @@ def do_log_report(utc):
 
     # -- RAINFALL --------------------------------------------------------------
     try:
-        if frame.air_temperature != None and frame.exposed_temperature != None:
-            if frame.exposed_temperature >= frame.air_temperature + 0.2:
+        if (frame.air_temperature != None and frame.exposed_temperature != None
+            and frame.exposed_temperature >= frame.air_temperature + 0.2):
                 frame.rainfall = 0
-            else: frame.rainfall = new_Rain_ticks * 0.254
+        else: frame.rainfall = new_Rain_ticks * 0.254
+    except: gpio.output(24, gpio.HIGH)
+
+    # -- STATION PRESSURE ------------------------------------------------------
+    try:
+        if len(new_StaP_samples) > 0:
+            frame.station_pressure = round(mean(new_StaP_samples), 1)
     except: gpio.output(24, gpio.HIGH)
 
     # -- DEW POINT -------------------------------------------------------------
@@ -299,7 +292,7 @@ def do_log_environment(utc):
     # -- ENCLOSURE TEMPERATURE -------------------------------------------------
     try:
         read_temperature("28-8000001f88fa", EncT_value)
-        frame.enclosure_temperature = EncT_value
+        if len(EncT_value) == 1: frame.enclosure_temperature = EncT_value[0]
     except: gpio.output(24, gpio.HIGH)
 
     # -- CPU TEMPERATURE -------------------------------------------------------
@@ -307,7 +300,7 @@ def do_log_environment(utc):
         frame.cpu_temperature = CPUT_value
     except: gpio.output(24, gpio.HIGH)
 
-    EncT_value = None; CPUT_value = None
+    EncT_value = []; CPUT_value = None
 
     # -- SAVE DATA -------------------------------------------------------------
     free_space = helpers.remaining_space("/")
