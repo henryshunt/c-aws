@@ -48,11 +48,11 @@ SunD_ticks = 0
 Rain_ticks = 0
 StaP_samples = []
 
-ExpT_value = None
-ST10_value = None
-ST30_value = None
-ST00_value = None
-EncT_value = None
+ExpT_value = []
+ST10_value = []
+ST30_value = []
+ST00_value = []
+EncT_value = []
 CPUT_value = None
 
 # HELPERS ----------------------------------------------------------------------
@@ -71,9 +71,7 @@ def read_temperature(address, store):
 
             # Check for error values and store value
             if temp == -127 or temp == 85: gpio.output(24, gpio.HIGH); return
-                
-            if isinstance(store, list) == True: store.append(round(temp, 1))
-            else: store = round(temp, 1)
+            store.append(round(temp, 1))
     except: gpio.output(24, gpio.HIGH)
 
 # OPERATIONS -------------------------------------------------------------------
@@ -118,17 +116,21 @@ def do_log_report(utc):
             args = ("28-0516704dc0ff", ST00_value)); ST00_thread.start()
 
         # Read each temp sensor in separate thread to reduce wait time
-        ExpT_thread.join(); frame.exposed_temperature = ExpT_value
-        ST10_thread.join(); frame.soil_temperature_10 = ST10_value
-        ST30_thread.join(); frame.soil_temperature_30 = ST30_value
-        ST00_thread.join(); frame.soil_temperature_00 = ST00_value
+        ExpT_thread.join()
+        if len(ExpT_value) == 1: frame.exposed_temperature = ExpT_value[0]
+        ST10_thread.join()
+        if len(ST10_value) == 1: frame.soil_temperature_10 = ST10_value[0]
+        ST30_thread.join()
+        if len(ST30_value) == 1: frame.soil_temperature_30 = ST30_value[0]
+        ST00_thread.join()
+        if len(ST00_value) == 1: frame.soil_temperature_00 = ST00_value[0]
 
         # Average air termperature samples
         if len(new_AirT_samples) > 0:
             frame.air_temperature = round(mean(new_AirT_samples), 1)
     except: gpio.output(24, gpio.HIGH)
 
-    ExpT_value = None; ST10_value = None; ST30_value = None; ST00_value = None
+    ExpT_value = []; ST10_value = []; ST30_value = []; ST00_value = []
 
     # -- RELATIVE HUMIDITY -----------------------------------------------------
     try:
@@ -461,7 +463,7 @@ def every_second():
     # -- AIR TEMPERATURE -------------------------------------------------------
     try:
         AirT_thread = Thread(target = read_temperature,
-            args = ("28-04167053d6ff", AirT_samples, False)); AirT_thread.start()
+            args = ("28-04167053d6ff", AirT_samples)); AirT_thread.start()
     except: gpio.output(24, gpio.HIGH)
 
     # -- RELATIVE HUMIDITY -----------------------------------------------------
