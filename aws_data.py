@@ -12,6 +12,7 @@ from threading import Thread
 import math
 import sqlite3
 import spidev
+from statistics import mean
 
 import daemon
 import Adafruit_GPIO
@@ -37,6 +38,7 @@ config = ConfigData()
 data_start = None
 disable_sampling = True
 
+AirT_samples = []
 WSpd_ticks = []
 past_WSpd_ticks = []
 WDir_samples = []
@@ -44,7 +46,6 @@ past_WDir_samples = []
 SunD_ticks = 0
 Rain_ticks = 0
 
-AirT_value = None
 ExpT_value = None
 ST10_value = None
 ST30_value = None
@@ -75,7 +76,7 @@ def read_temperature(address, is_first_read):
 
             # Store value in respective global variable
             if address == "28-04167053d6ff":
-                global AirT_value; AirT_value = round(temp, 1)
+                global AirT_samples; AirT_samples.append(round(temp, 1))
             elif address == "28-0416704a38ff":
                 global ExpT_value; ExpT_value = round(temp, 1)
             elif address == "28-0416705d66ff":
@@ -93,9 +94,9 @@ def do_log_report(utc):
     """ Reads all sensors, calculates derived and averaged parameters, and saves
         the data to the database
     """
-    global config, disable_sampling, data_start, WSpd_ticks, past_WSpd_ticks
-    global WDir_samples, past_WDir_samples, SunD_ticks, Rain_ticks, AirT_value
-    global ExpT_value, ST10_value, ST30_value, ST00_value
+    global config, disable_sampling, data_start, AirT_samples, WSpd_ticks
+    global past_WSpd_ticks, WDir_samples, past_WDir_samples, SunD_ticks
+    global Rain_ticks, ExpT_value, ST10_value, ST30_value, ST00_value
 
     # Create a frame to store the data and set its time
     frame = frames.DataUtcReport()
@@ -103,6 +104,8 @@ def do_log_report(utc):
     
     # -- COPY GLOBALS ----------------------------------------------------------
     disable_sampling = True
+    new_AirT_samples = AirT_samples[:]
+    AirT_samples = []
     new_WSpd_ticks = WSpd_ticks[:]
     WSpd_ticks = []
     new_WDir_samples = WDir_samples[:]
@@ -115,8 +118,6 @@ def do_log_report(utc):
 
     # -- TEMPERATURE -----------------------------------------------------------
     try:
-        AirT_thread = Thread(target = read_temperature,
-            args = ("28-04167053d6ff", True)); AirT_thread.start()
         ExpT_thread = Thread(target = read_temperature,
             args = ("28-0416704a38ff", True)); ExpT_thread.start()
         ST10_thread = Thread(target = read_temperature,
@@ -127,15 +128,16 @@ def do_log_report(utc):
             args = ("28-0516704dc0ff", True)); ST00_thread.start()
 
         # Read each temp sensor in separate thread to reduce wait time
-        AirT_thread.join(); frame.air_temperature = AirT_value
         ExpT_thread.join(); frame.exposed_temperature = ExpT_value
         ST10_thread.join(); frame.soil_temperature_10 = ST10_value
         ST30_thread.join(); frame.soil_temperature_30 = ST30_value
         ST00_thread.join(); frame.soil_temperature_00 = ST00_value
     except: gpio.output(24, gpio.HIGH)
 
-    AirT_value = None; ExpT_value = None; ST10_value = None
-    ST30_value = None; ST00_value = None
+    ExpT_value = None; ST10_value = None; ST30_value = None; ST00_value = None
+
+    # Average air termperature samples
+    frame.air_temperature = round(mean(new_AirT_samples), 1)
 
     # -- RELATIVE HUMIDITY -----------------------------------------------------
     try:
@@ -468,6 +470,7 @@ def every_second():
     """ Triggered every second to read sensor values into a list for averaging
     """
     global disable_sampling, WDir_samples, SunD_ticks
+    utc = datetime.utcnow()
     if disable_sampling == True: return
 
     # -- WIND DIRECTION --------------------------------------------------------
@@ -491,7 +494,7 @@ def every_second():
 
             # Add to sample list with timestamp
             if WDir_degrees >= 359.5: WDir_degrees = 0
-            WDir_samples.append((datetime.utcnow(), int(round(WDir_degrees))))
+            WDir_samples.append((utc, int(round(WDir_degrees))))
     except: gpio.output(24, gpio.HIGH)
 
     if spi != None: spi.close()
@@ -500,6 +503,15 @@ def every_second():
     try:
         if gpio.input(25) == True: SunD_ticks += 1
     except: gpio.output(24, gpio.HIGH)
+
+    # -- AIR TEMPERATURE -------------------------------------------------------
+    utc_second = str(utc.second)
+    if ((utc_second.endswith("0") or utc_second.endswith("2") or
+        utc_second.endswith("4") or utc_second.endswith("6") or
+        utc_second.endswith("8")) and utc_second != "0"):
+        
+        Thread(target = do_process_camera_queue,
+            args = ("28-04167053d6ff", False)).start()
 
 # INTERRUPTS -------------------------------------------------------------------
 def do_trigger_wspd(channel):
