@@ -295,7 +295,8 @@ def data_graph_day():
         config, helpers.utc_to_local(config, url_time), False)
     fields = "Time," + flask.request.args.get("fields")
 
-    if re.compile("^[a-zA-Z,_]*$").match(fields) == None: return False
+    if re.compile("^[a-zA-Z0-9,_]*$").match(fields) == None:
+        return flask.jsonify(data)
 
     # Get data in range for specified parameters
     records = analysis.fields_in_range(config, bounds[0], bounds[1], fields,
@@ -347,7 +348,8 @@ def data_graph_year():
     range_start = range_end - timedelta(days = 365)
     fields = "Date," + flask.request.args.get("fields")
 
-    if re.compile("^[a-zA-Z,_]*$").match(fields) == None: return False
+    if re.compile("^[a-zA-Z0-9,_]*$").match(fields) == None:
+        return flask.jsonify(data)
 
     # Get data in range for specified parameters
     records = analysis.fields_in_range(config, range_start, range_end, fields,
@@ -484,7 +486,8 @@ def data_graph_about():
     range_end = url_time
     fields = "Time," + flask.request.args.get("fields")
 
-    if re.compile("^[a-zA-Z,_]*$").match(fields) == None: return False
+    if re.compile("^[a-zA-Z0-9,_]*$").match(fields) == None:
+        return flask.jsonify(data)
 
     # Get data in range for specified parameters
     records = analysis.fields_in_range(config, range_start, range_end, fields,
