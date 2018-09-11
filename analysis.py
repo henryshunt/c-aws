@@ -41,8 +41,10 @@ def fields_in_range(config, start, end, fields, table):
 
             # Query respective database table
             if table == DbTable.REPORTS:
-                if ("WSpd" in fields or "WDir" in fields or "WGst" in fields or
-                    "SunD" in fields or "Rain" in fields):
+                if ("AirT" in fields or "RelH" in fields or "DewP" in fields or
+                    "WSpd" in fields or "WDir" in fields or "WGst" in fields or
+                    "SunD" in fields or "Rain" in fields or "StaP" in fields or
+                    "MSLP" in fields):
 
                     cursor.execute(queries.SELECT_FIELDS_REPORTS
                                 .format(fields),
