@@ -1,8 +1,8 @@
 from enum import Enum
 
 class DataUtcReport():
-    def __init__(self):
-        self.time = None
+    def __init__(self, timestamp):
+        self.time = timestamp
         self.air_temperature = None
         self.exposed_temperature = None
         self.relative_humidity = None
@@ -19,8 +19,8 @@ class DataUtcReport():
         self.soil_temperature_00 = None
 
 class DataUtcEnviron():
-    def __init__(self):
-        self.time = None
+    def __init__(self, timestamp):
+        self.time = timestamp
         self.enclosure_temperature = None
         self.cpu_temperature = None
 

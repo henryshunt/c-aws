@@ -39,12 +39,14 @@ data_start = None
 disable_sampling = True
 
 AirT_samples = []
+RelH_samples = []
 WSpd_ticks = []
 past_WSpd_ticks = []
 WDir_samples = []
 past_WDir_samples = []
 SunD_ticks = 0
 Rain_ticks = 0
+StaP_samples = []
 
 ExpT_value = None
 ST10_value = None
@@ -54,7 +56,7 @@ EncT_value = None
 CPUT_value = None
 
 # HELPERS ----------------------------------------------------------------------
-def read_temperature(address, is_first_read):
+def read_temperature(address, store):
     """ Reads the value of a DS18B20 temperature probe via its address, into its
         global variable
     """
@@ -67,26 +69,11 @@ def read_temperature(address, is_first_read):
             data = probe.readlines()
             temp = int(data[1][data[1].find("t=") + 2:]) / 1000
 
-            # Check for error values
-            if temp == -127: gpio.output(24, gpio.HIGH); return
-            if temp == 85:
-                if is_first_read == True:
-                    read_temperature(address, False); return
-                else: gpio.output(24, gpio.HIGH); return
-
-            # Store value in respective global variable
-            if address == "28-04167053d6ff":
-                global AirT_samples; AirT_samples.append(round(temp, 1))
-            elif address == "28-0416704a38ff":
-                global ExpT_value; ExpT_value = round(temp, 1)
-            elif address == "28-0416705d66ff":
-                global ST10_value; ST10_value = round(temp, 1)
-            elif address == "28-04167055d5ff":
-                global ST30_value; ST30_value = round(temp, 1)
-            elif address == "28-0516704dc0ff":
-                global ST00_value; ST00_value = round(temp, 1)
-            elif address == "28-8000001f88fa":
-                global EncT_value; EncT_value = round(temp, 1)
+            # Check for error values and store value
+            if temp == -127 or temp == 85: gpio.output(24, gpio.HIGH); return
+                
+            if isinstance(store, list) == True: store.append(round(temp, 1))
+            else: store = round(temp, 1)
     except: gpio.output(24, gpio.HIGH)
 
 # OPERATIONS -------------------------------------------------------------------
@@ -94,18 +81,19 @@ def do_log_report(utc):
     """ Reads all sensors, calculates derived and averaged parameters, and saves
         the data to the database
     """
-    global config, disable_sampling, data_start, AirT_samples, WSpd_ticks
-    global past_WSpd_ticks, WDir_samples, past_WDir_samples, SunD_ticks
-    global Rain_ticks, ExpT_value, ST10_value, ST30_value, ST00_value
+    global config, disable_sampling, data_start, AirT_samples, RelH_samples
+    global WSpd_ticks, past_WSpd_ticks, WDir_samples, past_WDir_samples
+    global SunD_ticks, Rain_ticks, StaP_samples, ExpT_value, ST10_value
+    global ST30_value, ST00_value
 
-    # Create a frame to store the data and set its time
-    frame = frames.DataUtcReport()
-    frame.time = utc
+    frame = frames.DataUtcReport(utc)
     
     # -- COPY GLOBALS ----------------------------------------------------------
     disable_sampling = True
     new_AirT_samples = AirT_samples[:]
     AirT_samples = []
+    new_RelH_samples = RelH_samples[:]
+    RelH_samples = []
     new_WSpd_ticks = WSpd_ticks[:]
     WSpd_ticks = []
     new_WDir_samples = WDir_samples[:]
@@ -114,44 +102,44 @@ def do_log_report(utc):
     SunD_ticks = 0
     new_Rain_ticks = Rain_ticks
     Rain_ticks = 0
+    new_StaP_samples = StaP_samples[:]
+    StaP_samples = []
     disable_sampling = False
 
     # -- TEMPERATURE -----------------------------------------------------------
     try:
         ExpT_thread = Thread(target = read_temperature,
-            args = ("28-0416704a38ff", True)); ExpT_thread.start()
+            args = ("28-0416704a38ff", ExpT_value)); ExpT_thread.start()
         ST10_thread = Thread(target = read_temperature,
-            args = ("28-0416705d66ff", True)); ST10_thread.start()
+            args = ("28-0416705d66ff", ST10_value)); ST10_thread.start()
         ST30_thread = Thread(target = read_temperature,
-            args = ("28-04167055d5ff", True)); ST30_thread.start()
+            args = ("28-04167055d5ff", ST30_value)); ST30_thread.start()
         ST00_thread = Thread(target = read_temperature,
-            args = ("28-0516704dc0ff", True)); ST00_thread.start()
+            args = ("28-0516704dc0ff", ST00_value)); ST00_thread.start()
 
         # Read each temp sensor in separate thread to reduce wait time
         ExpT_thread.join(); frame.exposed_temperature = ExpT_value
         ST10_thread.join(); frame.soil_temperature_10 = ST10_value
         ST30_thread.join(); frame.soil_temperature_30 = ST30_value
         ST00_thread.join(); frame.soil_temperature_00 = ST00_value
+
+        # Average air termperature samples
+        if len(new_AirT_samples) > 0:
+            frame.air_temperature = round(mean(new_AirT_samples), 1)
     except: gpio.output(24, gpio.HIGH)
 
     ExpT_value = None; ST10_value = None; ST30_value = None; ST00_value = None
 
-    # Average air termperature samples
-    frame.air_temperature = round(mean(new_AirT_samples), 1)
-
     # -- RELATIVE HUMIDITY -----------------------------------------------------
     try:
-        frame.relative_humidity = round(
-            sht31d.SHT31(address = 0x44).read_humidity(), 1)
+        if len(new_RelH_samples) > 0:
+            frame.relative_humidity = round(mean(new_RelH_samples), 1)
     except: gpio.output(24, gpio.HIGH)
 
     # -- STATION PRESSURE ------------------------------------------------------
     try:
-        StaP_sensor = bme280.BME280(p_mode = bme280.BME280_OSAMPLE_8)
-
-        # Temperature must be read first or pressure will not return
-        discard_StaP_temp = StaP_sensor.read_temperature()
-        frame.station_pressure = round(StaP_sensor.read_pressure() / 100, 1)
+        if len(new_StaP_samples) > 0:
+            frame.station_pressure = round(mean(new_StaP_samples), 1)
     except: gpio.output(24, gpio.HIGH)
         
     # -- WIND SPEED ------------------------------------------------------------
@@ -304,14 +292,11 @@ def do_log_environment(utc):
     """ Reads computer environment sensors and saves the data to the database
     """
     global config, EncT_value, CPUT_value
-    
-    # Create a frame to store the data and set its time
-    frame = frames.DataUtcEnviron()
-    frame.time = utc
+    frame = frames.DataUtcEnviron(utc)
 
     # -- ENCLOSURE TEMPERATURE -------------------------------------------------
     try:
-        read_temperature("28-8000001f88fa", True)
+        read_temperature("28-8000001f88fa", EncT_value)
         frame.enclosure_temperature = EncT_value
     except: gpio.output(24, gpio.HIGH)
 
@@ -447,10 +432,9 @@ def every_minute():
         them to the database, activate the camera and generate statistics
     """
     global config
+    utc = datetime.utcnow().replace(second = 0, microsecond = 0)
     gpio.output(23, gpio.HIGH)
     gpio.output(24, gpio.LOW)
-    utc = datetime.utcnow().replace(second = 0, microsecond = 0)
-    time.sleep(0.15)
 
     # Read CPU temperature before anything else happens. Considered idle temp
     if config.envReport_logging == True:
@@ -469,9 +453,22 @@ def every_minute():
 def every_second():
     """ Triggered every second to read sensor values into a list for averaging
     """
-    global disable_sampling, WDir_samples, SunD_ticks
-    utc = datetime.utcnow()
-    if disable_sampling == True: return
+    global disable_sampling, AirT_samples, RelH_samples, WDir_samples
+    global SunD_ticks, StaP_samples
+    utc = datetime.utcnow().replace(microsecond = 0)
+    if disable_sampling == True or str(utc.second) == "0": return
+
+    # -- AIR TEMPERATURE -------------------------------------------------------
+    try:
+        AirT_thread = Thread(target = read_temperature,
+            args = ("28-04167053d6ff", AirT_samples, False)); AirT_thread.start()
+    except: gpio.output(24, gpio.HIGH)
+
+    # -- RELATIVE HUMIDITY -----------------------------------------------------
+    try:
+        RelH_samples.append(
+            round(sht31d.SHT31(address = 0x44).read_humidity(), 1))
+    except: gpio.output(24, gpio.HIGH)
 
     # -- WIND DIRECTION --------------------------------------------------------
     spi = None
@@ -504,14 +501,14 @@ def every_second():
         if gpio.input(25) == True: SunD_ticks += 1
     except: gpio.output(24, gpio.HIGH)
 
-    # -- AIR TEMPERATURE -------------------------------------------------------
-    utc_second = str(utc.second)
-    if ((utc_second.endswith("0") or utc_second.endswith("2") or
-        utc_second.endswith("4") or utc_second.endswith("6") or
-        utc_second.endswith("8")) and utc_second != "0"):
-        
-        Thread(target = do_process_camera_queue,
-            args = ("28-04167053d6ff", False)).start()
+    # -- STATION PRESSURE ------------------------------------------------------
+    try:
+        StaP_sensor = bme280.BME280(p_mode = bme280.BME280_OSAMPLE_8)
+
+        # Temperature must be read first or pressure will not return
+        discard_StaP_temp = StaP_sensor.read_temperature()
+        StaP_samples.append(round(StaP_sensor.read_pressure() / 100, 1))
+    except: gpio.output(24, gpio.HIGH)
 
 # INTERRUPTS -------------------------------------------------------------------
 def do_trigger_wspd(channel):
