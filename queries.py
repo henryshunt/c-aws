@@ -33,7 +33,7 @@ GENERATE_DAYSTAT = ("SELECT * FROM (SELECT "
     + "ROUND(AVG(WDir), 3) AS WDir_Avg, MIN(WDir) AS WDir_Min, MAX(WDir) AS WDir_Max, "
     + "ROUND(AVG(WGst), 3) AS WGst_Avg, MIN(WGst) AS WGst_Min, MAX(WGst) AS WGst_Max, "
     + "SUM(SunD) AS SunD_Ttl, ROUND(SUM(Rain), 3) AS Rain_Ttl, "
-    + "ROUND(AVG(MSLP), 3) AS MSLP_Avg, MIN(MSLP) AS MSLP_Min, MAX(MSLP) AS MSLP_Max, "
+    + "ROUND(AVG(MSLP), 3) AS MSLP_Avg, MIN(MSLP) AS MSLP_Min, MAX(MSLP) AS MSLP_Max "
     + "FROM reports WHERE Time BETWEEN ? AND ?) AS B")
 GENERATE_YEAR_STATS = ("SELECT "
     + "ROUND(AVG(AirT_Avg), 3) AS AirT_Avg, ROUND(MIN(AirT_Min), 3) AS AirT_Min, "
