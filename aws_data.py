@@ -217,7 +217,7 @@ def do_log_report(utc):
     # -- RAINFALL --------------------------------------------------------------
     try:
         if (frame.air_temperature != None and frame.exposed_temperature != None
-            and frame.exposed_temperature >= frame.air_temperature + 0.2):
+            and frame.exposed_temperature >= frame.air_temperature):
                 frame.rainfall = 0
         else: frame.rainfall = new_Rain_ticks * 0.254
     except: gpio.output(24, gpio.HIGH)
