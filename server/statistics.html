@@ -162,7 +162,9 @@
 
                 if (data["SunD_Ttl"] != null) {
                     var formatted = moment.utc(data["SunD_Ttl"] * 1000).format("HH:mm:ss");
-                    document.getElementById("item_SunD_Ttl").innerHTML = formatted;
+                    var formatted2 = data["SunD_Ttl"] / 60 / 60;
+                    document.getElementById("item_SunD_Ttl").innerHTML
+                        = formatted + " (" + formatted2.toFixed(1) + " hrs)";
                 } else { document.getElementById("item_SunD_Ttl").innerHTML = "no data"; }
 
                 displayValue(data["Rain_Ttl"], "item_Rain_Ttl", " mm", 2);

@@ -169,7 +169,7 @@ def data_now():
     # Calculate total rainfall over past hour
     Rain_PHr_record = analysis.past_hour_total(config, url_time, "Rain")
     if Rain_PHr_record != False and Rain_PHr_record != None:
-        data["Rain_PHr"] = Rain_PHr_record["Rain_PHr"]
+        data["Rain_PHr"] = round(Rain_PHr_record["Rain_PHr"], 3)
 
     # Calculate three hour pressure tendency
     if data["StaP"] != None:
@@ -178,7 +178,8 @@ def data_now():
     
         if StaP_PTH_record != False and StaP_PTH_record != None:
             if StaP_PTH_record["StaP"] != None:
-                data["StaP_PTH"] = data["StaP"] - StaP_PTH_record["StaP"]
+                data["StaP_PTH"] = round(
+                    data["StaP"] - StaP_PTH_record["StaP"], 1)
 
     data["Time"] = url_time.strftime("%Y-%m-%d %H:%M:%S")
     return flask.jsonify(data)
@@ -319,12 +320,12 @@ def data_graph_day():
             if fields[field] == "Rain":
                 if record[fields[field]] != None:
                     Rain_Ttl += record[fields[field]]
-                point = { "x": utc, "y": round(Rain_Ttl, 2) }
+                point = { "x": utc, "y": round(Rain_Ttl, 3) }
 
             elif fields[field] == "SunD":
                 if record[fields[field]] != None:
                     SunD_Ttl += record[fields[field]]
-                point = { "x": utc, "y": round(SunD_Ttl, 2) }
+                point = { "x": utc, "y": SunD_Ttl }
             else: point = { "x": utc, "y": record[fields[field]] }
 
             data[field - 1].append(point)

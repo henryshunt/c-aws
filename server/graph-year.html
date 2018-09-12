@@ -50,7 +50,7 @@
                         labelInterpolationFnc: function(value) {
                             if (graph == "direction") { return value.toFixed(0); }
                             else if (graph == "sunshine") {
-                                return moment.utc(value * 1000).format("HH:mm");
+                                return (value / 60 / 60).toFixed(1);
                             }
                             else if (graph == "rainfall") { return value.toFixed(2) }
                             else { return value.toFixed(1); }
@@ -294,7 +294,7 @@
                     <p class="group_title">Sunshine Duration</p>
 
                     <div>
-                        <span class="group_key">[hrs:mins]</span>
+                        <span class="group_key">[hrs]</span>
                         <p class="group_toggle" onclick="toggleGraph('sunshine', 'SunD_Ttl', this)">+</p>
                     </div>
                 </div>
