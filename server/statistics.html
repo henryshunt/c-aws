@@ -27,10 +27,10 @@
                     displayLocalTime();
                 }, 250);
 
-                updateData(true);
+                updateData(true, false);
             });
 
-            function updateData(restartTimers) {
+            function updateData(restartTimers, absolute) {
                 isLoading = true;
                 clearTimeout(updaterTimeout);
                 clearTimeout(countTimeout);
@@ -42,7 +42,7 @@
 
                 if (restartTimers == true) {
                     updaterTimeout = setInterval(function() {
-                        updateData(true);
+                        updateData(true, false);
                     }, 60000);
                         
                     countTimeout = setInterval(function() {
@@ -51,17 +51,17 @@
                     }, 1000);
                 }
 
-                getAndProcessData(restartTimers);
+                getAndProcessData(restartTimers, absolute);
             }
 
-            function getAndProcessData(setTime) {
+            function getAndProcessData(setTime, absolute) {
                 if (setTime == true) {
                     requestedTime = moment().utc().millisecond(0).second(0);
                 }
 
                 var url = "data/statistics.json?time=" + requestedTime.format(
                     "YYYY-MM-DD[T]HH-mm-00");
-                if (setTime == false) { url += "&abs=1"; }
+                if (absolute == true) { url += "&abs=1"; }
 
                 $.ajax({
                     dataType: "json", url: url,
@@ -183,7 +183,7 @@
 
             function scrollerLeft() {
                 if (datePicker != null) { datePicker.close(); }
-                
+
                 if (isLoading == false) {
                     requestedTime.subtract(1, "days");
                     scrollerChange();
@@ -192,7 +192,7 @@
             
             function scrollerRight() {
                 if (datePicker != null) { datePicker.close(); }
-
+                
                 if (isLoading == false) {
                     requestedTime.add(1, "days");
                     scrollerChange();
@@ -205,23 +205,25 @@
                 var localReq = moment(requestedTime).tz(awsTimeZone);
 
                 if (localUtc.format("DD/MM/YYYY") == localReq.format("DD/MM/YYYY")) {
-                    updateData(true)
-                } else { updateData(false); }
+                    updateData(true, true)
+                } else { updateData(false, true); }
             }
 
             function openPicker() {
-                if (requestedTime != null && datePicker == null && isLoading == false) {
-                    var localTime = moment(requestedTime).tz(awsTimeZone);
-                    var initTime = new Date(localTime.get("year"), localTime.get("month"),
-                        localTime.get("date"));
+                if (datePicker == null) {
+                    if (requestedTime != null && datePicker == null && isLoading == false) {
+                        var localTime = moment(requestedTime).tz(awsTimeZone);
+                        var initTime = new Date(localTime.get("year"), localTime.get("month"),
+                            localTime.get("date"));
 
-                    datePicker = flatpickr("#scroller_time", {
-                        defaultDate: initTime, disableMobile: true,
-                        onClose: function() { datePicker.destroy(); datePicker = null; }
-                    });
-                    
-                    datePicker.open();
-                }
+                        datePicker = flatpickr("#scroller_time", {
+                            defaultDate: initTime, disableMobile: true,
+                            onClose: function() { datePicker.destroy(); datePicker = null; }
+                        });
+                        
+                        datePicker.open();
+                    }
+                } else { datePicker.close(); }
             }
 
             function pickerSubmit() {
