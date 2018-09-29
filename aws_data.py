@@ -431,6 +431,8 @@ def every_minute():
     gpio.output(23, gpio.HIGH)
     gpio.output(24, gpio.LOW)
 
+    time.sleep(0.15)
+
     # Read CPU temperature before anything else happens. Considered idle temp
     if config.envReport_logging == True:
         try:
@@ -451,7 +453,14 @@ def every_second():
     global disable_sampling, AirT_samples, RelH_samples, WDir_samples
     global SunD_ticks, StaP_samples
     utc = datetime.utcnow().replace(microsecond = 0)
-    if disable_sampling == True or str(utc.second) == "0": return
+    if disable_sampling == True: return
+
+    # -- SUNSHINE DURATION -----------------------------------------------------
+    try:
+        if gpio.input(25) == True: SunD_ticks += 1
+    except: gpio.output(24, gpio.HIGH)
+
+    if str(utc.second) == "0": return
 
     # -- AIR TEMPERATURE -------------------------------------------------------
     try:
@@ -490,11 +499,6 @@ def every_second():
     except: gpio.output(24, gpio.HIGH)
 
     if spi != None: spi.close()
-
-    # -- SUNSHINE DURATION -----------------------------------------------------
-    try:
-        if gpio.input(25) == True: SunD_ticks += 1
-    except: gpio.output(24, gpio.HIGH)
 
     # -- STATION PRESSURE ------------------------------------------------------
     try:
