@@ -431,7 +431,7 @@ def every_minute():
     gpio.output(23, gpio.HIGH)
     gpio.output(24, gpio.LOW)
 
-    time.sleep(0.15)
+    time.sleep(0.25)
 
     # Read CPU temperature before anything else happens. Considered idle temp
     if config.envReport_logging == True:

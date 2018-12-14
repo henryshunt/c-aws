@@ -37,7 +37,7 @@
                     },
 
                     axisX: {
-                        type: Chartist.FixedScaleAxis, divisor: 5, offset: 20,    
+                        type: Chartist.FixedScaleAxis, divisor: 6, offset: 20,    
                         labelInterpolationFnc: function(value) {
                             return moment.unix(value).utc().tz(awsTimeZone).format("HH:mm");
                         }
@@ -120,7 +120,7 @@
                     "YYYY-MM-DD[T]HH-mm-00") + "&fields=EncT,CPUT";
                 
                 var xEnd = moment(requestedTime).tz(awsTimeZone).unix();
-                var xStart = moment(requestedTime).subtract(5, "hour").tz(awsTimeZone).unix();
+                var xStart = moment(requestedTime).subtract(6, "hour").tz(awsTimeZone).unix();
 
                 $.getJSON(url, function(response) {
                     var options = graph.options;
@@ -181,33 +181,33 @@
         <div id="main">
             <div class="group">
                 <div class="group_header">
-                    <p class="group_title">Basic Information</p>
+                    <p class="group_title">Station Information</p>
                 </div>
     
                 <table class="field_table">
                     <tr>
-                        <td><p class="field_label">AWS Location:</p></td>
+                        <td><p class="field_label">Location:</p></td>
                         <td><p class="field_value">{{ aws_location }}</p></td>
                     </tr>
                     <tr>
-                        <td><p class="field_label">AWS Time Zone:</p></td>
+                        <td><p class="field_label">Time Zone Name:</p></td>
                         <td><p class="field_value">{{ aws_time_zone }}</p></td>
                     </tr>
                     <tr>
-                        <td><p class="field_label">AWS Elevation:</p></td>
-                        <td><p class="field_value">{{ aws_elevation }} m asl.</p></td>
+                        <td><p class="field_label" style="margin-top: 10px">Elevation:</p></td>
+                        <td><p class="field_value" style="margin-top: 10px">{{ aws_elevation }} m</p></td>
                     </tr>
                     <tr>
-                        <td><p class="field_label">AWS Latitude:</p></td>
+                        <td><p class="field_label">Latitude:</p></td>
                         <td><p class="field_value">{{ aws_latitude }}</p></td>
                     </tr>
                     <tr>
-                        <td><p class="field_label">AWS Longitude:</p></td>
+                        <td><p class="field_label">Longitude:</p></td>
                         <td><p class="field_value">{{ aws_longitude }}</p></td>
                     </tr>
                     <tr>
                         <td><p class="field_label" style="margin-top: 10px">System Version:</p></td>
-                        <td><p class="field_value" style="margin-top: 10px">5D (September 2018)</p></td>
+                        <td><p class="field_value" style="margin-top: 10px">5D.0.2 (Dec 2018)</p></td>
                     </tr>
                 </table>
             </div>

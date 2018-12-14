@@ -37,8 +37,7 @@ GENERATE_DAYSTAT = ("SELECT * FROM (SELECT "
     + "FROM reports WHERE Time BETWEEN ? AND ?) AS B")
 GENERATE_YEAR_STATS = ("SELECT "
     + "ROUND(AVG(AirT_Avg), 3) AS AirT_Avg, ROUND(MIN(AirT_Min), 3) AS AirT_Min, "
-    + "ROUND(MAX(AirT_Max), 3) AS AirT_Max, ROUND(SUM(SunD_Ttl) / 60.0 / 60.0, 3) AS SunD_Ttl, "
-    + "ROUND(SUM(Rain_Ttl), 3) AS Rain_Ttl FROM dayStats WHERE strftime('%Y', Date) = ?")
+    + "ROUND(MAX(AirT_Max), 3) AS AirT_Max FROM dayStats WHERE strftime('%Y', Date) = ?")
 GENERATE_MONTHS_STATS = ("SELECT strftime('%m', Date) AS Month, "
     + "ROUND(AVG(AirT_Avg), 3) AS AirT_Avg, ROUND(MIN(AirT_Min), 3) AS AirT_Min, "
     + "ROUND(MAX(AirT_Max), 3) AS AirT_Max, ROUND(AVG(RelH_Avg), 3) AS RelH_Avg, "

@@ -373,8 +373,8 @@ def data_graph_year():
 
 def data_climate():
     global config
-    data = dict.fromkeys(["AirT_Avg_Year", "AirT_Min_Year", "AirT_Max_Year",
-                          "SunD_Ttl_Year", "Rain_Ttl_Year"])
+    data = dict.fromkeys(["AirT_Avg_Year", "AirT_Min_Year", "AirT_Max_Year"])
+    
     fill_value = dict.fromkeys(
         ["1", "2", "3", "4", "5", "6", "7", "8", "9", "10", "11", "12"])
     data["AirT_Avg_Months"] = copy.deepcopy(fill_value)
@@ -483,7 +483,7 @@ def data_graph_about():
                                      "%Y-%m-%dT%H-%M-00")
     except: return flask.jsonify(data)
 
-    range_start = url_time - timedelta(hours = 5)
+    range_start = url_time - timedelta(hours = 6)
     range_end = url_time
     fields = "Time," + flask.request.args.get("fields")
 
