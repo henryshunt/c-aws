@@ -13,10 +13,10 @@ import ftplib
 import daemon
 from apscheduler.schedulers.blocking import BlockingScheduler
 
-import analysis
-import helpers
-from frames import DbTable
-from config import ConfigData
+from routines.config import ConfigData
+import routines.helpers as helpers
+from routines.frames import DbTable
+import routines.analysis as analysis
 
 # GLOBAL VARIABLES -------------------------------------------------------------
 config = ConfigData()

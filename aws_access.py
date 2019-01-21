@@ -17,10 +17,10 @@ import daemon
 import flask
 import astral
 
-import analysis
-import helpers
-from config import ConfigData
-from frames import DbTable
+from routines.config import ConfigData
+import routines.helpers as helpers
+from routines.frames import DbTable
+import routines.analysis as analysis
 
 # GLOBAL VARIABLES -------------------------------------------------------------
 config = ConfigData()

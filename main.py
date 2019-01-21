@@ -12,9 +12,9 @@ import subprocess
 import RPi.GPIO as gpio
 import picamera
 
-from config import ConfigData
-import helpers
-import queries
+from routines.config import ConfigData
+import routines.helpers as helpers
+import routines.queries as queries
 
 # GLOBAL VARIABLES -------------------------------------------------------------
 config = ConfigData()

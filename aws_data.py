@@ -26,12 +26,12 @@ from gpiozero import CPUTemperature
 import pytz
 import picamera
 
-from config import ConfigData
-import helpers
-import frames
-from frames import DbTable
-import analysis
-import queries
+from routines.config import ConfigData
+import routines.helpers as helpers
+import routines.frames as frames
+from routines.frames import DbTable
+import routines.analysis as analysis
+import routines.queries as queries
 
 # GLOBAL VARIABLES -------------------------------------------------------------
 config = ConfigData()
