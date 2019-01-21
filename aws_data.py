@@ -35,6 +35,7 @@ import routines.queries as queries
 
 # GLOBAL VARIABLES -------------------------------------------------------------
 config = ConfigData()
+
 data_start = None
 disable_sampling = True
 
@@ -525,7 +526,8 @@ def do_trigger_rain(channel):
 
 # ENTRY POINT ==================================================================
 def entry_point():
-    global config, data_start, disable_sampling; config.load()
+    global config, data_start, disable_sampling
+    config.load()
 
     # -- INIT GPIO AND LEDS ----------------------------------------------------
     gpio.setwarnings(False); gpio.setmode(gpio.BCM)

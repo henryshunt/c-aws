@@ -1,14 +1,29 @@
 import os
 from configparser import ConfigParser
+from enum import Enum
 
 import pytz
 
 class ConfigData():
     def __init__(self):
+        self.__parser = ConfigParser()
+
+        self.aws_location = None
+        self.aws_time_zone = None
+        self.aws_latitude = None
+        self.aws_longitude = None
+        self.aws_elevation = None
+
         self.data_directory = None
         self.database_path = None
         self.camera_drive_label = None
         self.camera_drive = None
+
+        self.remote_sql_server = None
+        self.remote_ftp_server = None
+        self.remote_ftp_username = None
+        self.remote_ftp_password = None
+
         self.envReport_logging = None
         self.camera_logging = None
         self.dayStat_generation = None
@@ -16,90 +31,154 @@ class ConfigData():
         self.envReport_uploading = None
         self.dayStat_uploading = None
         self.camera_uploading = None
-        self.local_network_server = None
-        self.aws_location = None
-        self.aws_time_zone = None
-        self.aws_elevation = None
-        self.aws_latitude = None
-        self.aws_longitude = None
-        self.remote_sql_server = None
-        self.remote_ftp_server = None
-        self.remote_ftp_username = None
-        self.remote_ftp_password = None
+        self.local_server = None
+
+        self.log_AirT = None
+        self.AirT_address = None
+        self.log_ExpT = None
+        self.ExpT_address = None
+        self.log_RelH = None
+        self.log_DewP = None
+        self.log_WSpd = None
+        self.log_WDir = None
+        self.log_WGst = None
+        self.log_SunD = None
+        self.log_Rain = None
+        self.log_StaP = None
+        self.log_MSLP = None
+        self.log_ST10 = None
+        self.ST10_address = None
+        self.log_ST30 = None
+        self.ST30_address = None
+        self.log_ST00 = None
+        self.ST00_address = None
+        self.log_EncT = None
+        self.EncT_address = None
+        self.log_CPUT = None
 
     def load(self):
         """ Loads data from the config.ini file in the current directory
         """
-        if not os.path.isfile("config.ini"): return False
 
         try:
-            parser = ConfigParser(); parser.read("config.ini")
+            self.__parser.read("config.ini")
 
-            # Check required configuration options
-            self.data_directory = parser.get("DataStores", "DataDirectory")
-            if self.data_directory == "": return False
-            self.aws_location = parser.get("AWSInfo", "Location")
-            if self.aws_location == "": return False
+            # Load AWSInfo group values
+            self.aws_location = load_value(
+                "AWSInfo", "Location", DataType.STRING)
+            self.aws_time_zone = load_value(
+                "AWSInfo", "TimeZone", DataType.STRING)
+            self.aws_latitude = load_value(
+                "AWSInfo", "Latitude", DataType.FLOAT)
+            self.aws_longitude = load_value(
+                "AWSInfo", "Longitude", DataType.FLOAT)
+            self.aws_elevation = load_value("
+            AWSInfo", "Elevation", DataType.FLOAT)
 
-            self.aws_time_zone = parser.get("AWSInfo", "TimeZone")
-            if not self.aws_time_zone in pytz.all_timezones: return False
-            self.aws_time_zone = pytz.timezone(self.aws_time_zone)
+            # Load DataStores group values
+            self.data_directory = load_value(
+                "DataStores", "DataDirectory", DataType.STRING)
+            self.camera_drive_label = load_value(
+                "DataStores", "CameraDrive", DataType.STRING)
 
-            self.aws_elevation = parser.getfloat("AWSInfo", "Elevation")
-            self.aws_latitude = parser.getfloat("AWSInfo", "Latitude")
-            self.aws_longitude = parser.getfloat("AWSInfo", "Longitude")
+            # Load DataEndpoints group values
+            self.remote_sql_server = load_value(
+                "DataEndpoints", "RemoteSQLServer", DataType.STRING)
+            self.remote_ftp_server = load_value(
+                "DataEndpoints", "RemoteFTPServer", DataType.STRING)
+            self.remote_ftp_username = load_value(
+                "DataEndpoints", "RemoteFTPUsername", DataType.STRING)
+            self.remote_ftp_password = load_value(
+                "DataEndpoints", "RemoteFTPPassword", DataType.STRING)
 
-            # Derive directories and file paths
-            self.database_path = os.path.join(self.data_directory,
-                "records.sq3")
-            
-            # Load non-required configuration options
-            self.camera_drive_label = parser.get("DataStores", "CameraDrive")
-            if self.camera_drive_label == "": self.camera_drive_label = None
-            if self.camera_drive_label != None:
-                self.camera_drive = "/mnt/" + self.camera_drive_label
+            # Load Operations group values
+            self.envReport_logging = load_value(
+                "Operations", "EnvReportLogging", DataType.BOOLEAN)
+            self.camera_logging = load_value(
+                "Operations", "CameraLogging", DataType.BOOLEAN)
+            self.dayStat_generation = load_value(
+                "Operations", "DayStatGeneration", DataType.BOOLEAN)
+            self.report_uploading = load_value(
+                "Operations", "ReportUploading", DataType.BOOLEAN)
+            self.envReport_uploading = load_value(
+                "Operations", "EnvReportUploading", DataType.BOOLEAN)
+            self.dayStat_uploading = load_value(
+                "Operations", "DayStatUploading", DataType.BOOLEAN)
+            self.camera_uploading = load_value(
+                "Operations", "CameraUploading", DataType.BOOLEAN)
+            self.local_server = load_value(
+                "Operations", "LocalServer", DataType.BOOLEAN)
 
-            self.remote_sql_server = (parser.get("DataEndpoints",
-                "RemoteSQLServer"))
-            if self.remote_sql_server == "": self.remote_sql_server = None
-            self.remote_ftp_server = (parser.get("DataEndpoints",
-                "RemoteFTPServer"))
-            if self.remote_ftp_server == "": self.remote_ftp_server = None
-            self.remote_ftp_username = (parser.get("DataEndpoints",
-                "RemoteFTPUsername"))
-            if self.remote_ftp_username == "": self.remote_ftp_username = None
-            self.remote_ftp_password = (parser.get("DataEndpoints",
-                "RemoteFTPPassword"))
-            if self.remote_ftp_password == "": self.remote_ftp_password = None
-            
-            # Load boolean configuration modifiers
-            self.envReport_logging = (parser
-                .getboolean("ConfigModifiers", "EnvReportLogging"))
-            self.camera_logging = (parser
-                .getboolean("ConfigModifiers", "CameraLogging"))
-            self.dayStat_generation = (parser
-                .getboolean("ConfigModifiers", "DayStatGeneration"))
-            self.report_uploading = (parser
-                .getboolean("ConfigModifiers", "ReportUploading"))
-            self.envReport_uploading = (parser
-                .getboolean("ConfigModifiers", "EnvReportUploading"))
-            self.dayStat_uploading = (parser
-                .getboolean("ConfigModifiers", "DayStatUploading"))
-            self.camera_uploading = (parser
-                .getboolean("ConfigModifiers", "CameraUploading"))
-            self.local_network_server = (parser
-                .getboolean("ConfigModifiers", "LocalNetworkServer"))
+            # Load Sensors group values
+            self.log_AirT = load_value("Sensors", "LogAirT", DataType.BOOLEAN)
+            self.AirT_address = load_value(
+                "Sensors", "AirTAddress", DataType.STRING)
+            self.log_ExpT = load_value("Sensors", "LogExpT", DataType.BOOLEAN)
+            self.ExpT_address = load_value(
+                "Sensors", "EncTAddress", DataType.STRING)
+            self.log_RelH = load_value("Sensors", "LogRelH", DataType.BOOLEAN)
+            self.log_DewP = load_value("Sensors", "LogDewP", DataType.BOOLEAN)
+            self.log_WSpd = load_value("Sensors", "LogWSpd", DataType.BOOLEAN)
+            self.log_WDir = load_value("Sensors", "LogWDir", DataType.BOOLEAN)
+            self.log_WGst = load_value("Sensors", "LogWGst", DataType.BOOLEAN)
+            self.log_SunD = load_value("Sensors", "LogSunD", DataType.BOOLEAN)
+            self.log_Rain = load_value("Sensors", "LogRain", DataType.BOOLEAN)
+            self.log_StaP = load_value("Sensors", "LogStaP", DataType.BOOLEAN)
+            self.log_MSLP = load_value("Sensors", "LogMSLP", DataType.BOOLEAN)
+            self.log_ST10 = load_value("Sensors", "LogST10", DataType.BOOLEAN)
+            self.ST10_address = load_value(
+                "Sensors", "ST10Address", DataType.STRING)
+            self.log_ST30 = load_value("Sensors", "LogST30", DataType.BOOLEAN)
+            self.ST30_address = load_value(
+                "Sensors", "ST30Address", DataType.STRING)
+            self.log_ST00 = load_value("Sensors", "LogST00", DataType.BOOLEAN)
+            self.ST00_address = load_value(
+                "Sensors", "ST00Address", DataType.STRING)
+            self.log_EncT = load_value("Sensors", "LogEncT", DataType.BOOLEAN)
+            self.EncT_address = load_value(
+                "Sensors", "EncTAddress", DataType.STRING)
+            self.log_CPUT = load_value("Sensors", "LogCPUT", DataType.BOOLEAN)
         except: return False
 
-        return True
+        return False if __validate() == False else True
 
-    def validate(self):
-        """ Checks if options needed for other options are set correctly
+    def load_value(group, key, data_type):
+        """ Returns the value of the specified key, in the specified type
         """
-        if (self.camera_logging == True and
-            self.camera_drive == None):
+        if data_type == DataType.BOOLEAN:
+            return __parser.getboolean(group, name)
+        elif data_type == DataType.FLOAT:
+            return __parser.getfloat(group, name)
+
+        elif data_type == DataType.STRING:
+            value = __parser.get(group, name)
+            return None if value == "" else value
+
+    def __validate(self):
+        """ Checks the specified values and that interacting options are set
+            correctly
+        """
+
+        # AWSInfo group
+        if (self.aws_location == None or self.aws_time_zone == None
+            or self.data_directory == None):
             return False
 
+        if self.aws_time_zone in pytz.all_timezones:
+            self.aws_time_zone = pytz.timezone(self.aws_time_zone)
+
+        if aws_latitude < -90 or aws_latitude > 90: return False
+        if aws_location < -180 or aws_latitude > 180: return False
+
+        # DataStores group
+        self.database_path = os.path.join(self.data_directory, "records.sq3")
+        if camera_drive_label != None:
+            self.camera_drive = "/mnt/" + self.camera_drive_label
+
+        else:
+            if self.camera_logging == True: return False
+
+        # Operations group
         if ((self.envReport_logging == False and
             self.envReport_uploading == True) or
             (self.camera_logging == False and
@@ -120,4 +199,18 @@ class ConfigData():
                 self.remote_ftp_password == None):
                 return False
 
+        # Sensors group
+        if ((self.log_AirT == True and self.AirT_address == None) or
+            (self.log_ExpT == True and self.ExpT_address == None) or
+            (self.log_ST10 == True and self.ST10_address == None) or
+            (self.log_ST30 == True and self.ST30_address == None) or
+            (self.log_ST00 == True and self.ST00_address == None) or
+            (self.log_EncT == True and self.EncT_address == None)):
+            return False
+
         return True
+
+class DataType(Enum):
+    BOOLEAN = 1
+    FLOAT = 2
+    STRING = 3

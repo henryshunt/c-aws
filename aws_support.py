@@ -190,7 +190,8 @@ def every_minute():
 
 # ENTRY POINT ==================================================================
 def entry_point():
-    global config; config.load()
+    global config
+    config.load()
 
     # -- START WATCHING DATA ---------------------------------------------------
     event_scheduler = BlockingScheduler()

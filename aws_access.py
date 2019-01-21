@@ -24,6 +24,7 @@ import routines.analysis as analysis
 
 # GLOBAL VARIABLES -------------------------------------------------------------
 config = ConfigData()
+
 startup_time = None
 power_pressed = False
 
@@ -520,7 +521,8 @@ def ctrl_command():
 
 # ENTRY POINT ==================================================================
 def entry_point():
-    global config, startup_time; config.load()
+    global config, startup_time
+    config.load()
 
     if len(sys.argv) == 2:
         startup_time = datetime.strptime(sys.argv[1], "%Y-%m-%dT%H:%M:%S")
@@ -536,7 +538,7 @@ def entry_point():
                           bouncetime = 300)
 
     # -- CREATE SERVER ---------------------------------------------------------
-    if config.local_network_server == True:
+    if config.local_server == True:
         server = flask.Flask(__name__, static_folder = "server/res",
                             template_folder = "server")
 
