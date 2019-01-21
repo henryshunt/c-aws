@@ -140,18 +140,18 @@ class ConfigData():
             self.log_CPUT = load_value("Sensors", "LogCPUT", DataType.BOOLEAN)
         except: return False
 
-        return False if __validate() == False else True
+        return False if self.__validate() == False else True
 
-    def load_value(group, key, data_type):
+    def load_value(self, group, key, data_type):
         """ Returns the value of the specified key, in the specified type
         """
         if data_type == DataType.BOOLEAN:
-            return __parser.getboolean(group, name)
+            return self.__parser.getboolean(group, key)
         elif data_type == DataType.FLOAT:
-            return __parser.getfloat(group, name)
+            return self.__parser.getfloat(group, key)
 
         elif data_type == DataType.STRING:
-            value = __parser.get(group, name)
+            value = self.__parser.get(group, key)
             return None if value == "" else value
 
     def __validate(self):
@@ -167,12 +167,12 @@ class ConfigData():
         if self.aws_time_zone in pytz.all_timezones:
             self.aws_time_zone = pytz.timezone(self.aws_time_zone)
 
-        if aws_latitude < -90 or aws_latitude > 90: return False
-        if aws_location < -180 or aws_latitude > 180: return False
+        if self.aws_latitude < -90 or self.aws_latitude > 90: return False
+        if self.aws_location < -180 or self.aws_latitude > 180: return False
 
         # DataStores group
         self.database_path = os.path.join(self.data_directory, "records.sq3")
-        if camera_drive_label != None:
+        if self.camera_drive_label != None:
             self.camera_drive = "/mnt/" + self.camera_drive_label
 
         else:
