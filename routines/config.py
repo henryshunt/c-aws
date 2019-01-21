@@ -72,8 +72,8 @@ class ConfigData():
                 "AWSInfo", "Latitude", DataType.FLOAT)
             self.aws_longitude = load_value(
                 "AWSInfo", "Longitude", DataType.FLOAT)
-            self.aws_elevation = load_value("
-            AWSInfo", "Elevation", DataType.FLOAT)
+            self.aws_elevation = load_value(
+                "AWSInfo", "Elevation", DataType.FLOAT)
 
             # Load DataStores group values
             self.data_directory = load_value(
