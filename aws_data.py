@@ -107,17 +107,23 @@ def do_log_report(utc):
 
     # -- TEMPERATURE -----------------------------------------------------------
     try:
-        ExpT_thread = Thread(target = read_temperature,
-            args = ("28-0416704a38ff", ExpT_value)); ExpT_thread.start()
-        ST10_thread = Thread(target = read_temperature,
-            args = ("28-0416705d66ff", ST10_value)); ST10_thread.start()
-        ST30_thread = Thread(target = read_temperature,
-            args = ("28-04167055d5ff", ST30_value)); ST30_thread.start()
-        ST00_thread = Thread(target = read_temperature,
-            args = ("28-0516704dc0ff", ST00_value)); ST00_thread.start()
+        ExpT_thread = Thread(target = read_temperature, args = (
+            config.ExpT_address, ExpT_value))
+        ExpT_thread.start()
+        ST10_thread = Thread(target = read_temperature, args = (
+            config.ST10_address, ST10_value))
+        ST10_thread.start()
+        ST30_thread = Thread(target = read_temperature, args = (
+            config.ST30_address, ST30_value))
+        ST30_thread.start()
+        ST00_thread = Thread(target = read_temperature, args = (
+            config.ST00_address, ST00_value))
+        ST00_thread.start()
 
         # Read each temp sensor in separate thread to reduce wait time
-        ExpT_thread.join(); ST10_thread.join(); ST30_thread.join()
+        ExpT_thread.join()
+        ST10_thread.join()
+        ST30_thread.join()
         ST00_thread.join()
 
         if len(ExpT_value) == 1: frame.exposed_temperature = ExpT_value[0]
@@ -217,9 +223,6 @@ def do_log_report(utc):
 
     # -- RAINFALL --------------------------------------------------------------
     try:
-        #if (frame.air_temperature != None and frame.exposed_temperature != None
-        #    and frame.exposed_temperature >= frame.air_temperature):
-        #        frame.rainfall = 0
         frame.rainfall = new_Rain_ticks * 0.254
     except: gpio.output(24, gpio.HIGH)
 
@@ -292,7 +295,7 @@ def do_log_environment(utc):
 
     # -- ENCLOSURE TEMPERATURE -------------------------------------------------
     try:
-        read_temperature("28-8000001f88fa", EncT_value)
+        read_temperature(config.EncT_address, EncT_value)
         if len(EncT_value) == 1: frame.enclosure_temperature = EncT_value[0]
     except: gpio.output(24, gpio.HIGH)
 
@@ -465,8 +468,9 @@ def every_second():
 
     # -- AIR TEMPERATURE -------------------------------------------------------
     try:
-        AirT_thread = Thread(target = read_temperature,
-            args = ("28-04167053d6ff", AirT_samples)); AirT_thread.start()
+        AirT_thread = Thread(target = read_temperature, args = (
+            config.AirT_address, AirT_samples))
+        AirT_thread.start()
     except: gpio.output(24, gpio.HIGH)
 
     # -- RELATIVE HUMIDITY -----------------------------------------------------
