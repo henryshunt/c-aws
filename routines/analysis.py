@@ -2,9 +2,9 @@ from datetime import timedelta
 
 import sqlite3
 
-from frames import DbTable
-import queries
-import helpers
+from routines.frames import DbTable
+import routines.queries as queries
+import routines.helpers as helpers
 
 def record_for_time(config, time, table):
     time = time.replace(second = 0, microsecond = 0)
