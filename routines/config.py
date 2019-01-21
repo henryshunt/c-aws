@@ -184,7 +184,7 @@ class ConfigData():
             self.aws_time_zone = pytz.timezone(self.aws_time_zone)
 
         if self.aws_latitude < -90 or self.aws_latitude > 90: return False
-        if self.aws_location < -180 or self.aws_latitude > 180: return False
+        if self.aws_longitude < -180 or self.aws_longitude > 180: return False
 
         # DataStores group
         self.database_path = os.path.join(self.data_directory, "records.sq3")
