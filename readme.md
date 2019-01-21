@@ -1,16 +1,7 @@
-# C-AWS
-The aim of this project was to develop, from scratch, an automatic weather station with a wide range of sensors and in-depth data visualisation, using cheaper non- and semi-professional sensors and data logging equipment, that was comparable to existing commercial systems. This repository contains the code for the weather station unit itself, and is designed to run on Linux Stretch Lite on a Raspberry Pi.
+The aim of the C-AWS project was to develop, from scratch, an automatic weather station (AWS) system with a range of sensors as well as data visualisation, using cheaper non- and semi-professional sensors and data logging equipment, that was comparable to existing commercial AWS systems. This repository contains the code for the weather station unit itself, a Raspberry Pi running Linux Stretch Lite.
 
-# Dependencies
-These dependencies are relative to a fresh install of Raspbian Stretch Lite.
-
-- `RPi.GPIO` -- `sudo apt-get install python3-rpi.gpio`
-- `picamera` -- `sudo apt-get install python3-picamera`
-- `pytz` -- `sudo apt-get install python3-tz`
-- `gpiozero` -- `sudo apt-get install python3-gpiozero`
-- `apscheduler` -- `sudo apt-get install python3-apscheduler`
-- `Adafruit_GPIO` -- `sudo pip3 install Adafruit_GPIO`
-- `astral` -- `sudo pip3 install astral`
-- `flask` -- `sudo pip3 install flask`
-- `python-daemon` -- `sudo pip3 install python-daemon`
-- `spidev` -- `sudo apt-get install python-spidev`
+# Usage
+- Run `setup.sh` with sudo privileges to download and install all required dependencies.
+- Open the file `/etc/rc.local` and add two new lines before the `exit 0` line. These automatically start the software when the system boots:
+    - `cd <path to c-aws directory>`
+    - `sudo python3 main.py`
