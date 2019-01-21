@@ -5,3 +5,4 @@ The aim of the C-AWS project was to develop, from scratch, an automatic weather 
 - Open the file `/etc/rc.local` and add two new lines before the `exit 0` line. These automatically start the software when the system boots:
     - `cd <path to c-aws directory>`
     - `sudo python3 main.py`
+- Modify `config.ini` to configure the operation of the weather station
