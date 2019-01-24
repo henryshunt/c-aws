@@ -6,15 +6,21 @@ import time
 import RPi.GPIO as gpio
 import pytz
 
-def init_exit(code, visual):
-    if visual == True:
-        while True:
-            for i in range(code):
-                gpio.output(24, gpio.HIGH); time.sleep(0.15)
-                gpio.output(24, gpio.LOW); time.sleep(0.15)
+# Constants indicating pin numbers of the data and error LEDs
+DATALEDPIN = 23
+ERRORLEDPIN = 24
 
-            time.sleep(1)
-    else: sys.exit(1)
+def init_exit(code):
+    """ Remains in a loop, flashing the error LED to indicate an error code
+    """
+    while True:
+        for i in range(code):
+            gpio.output(ERRORLEDPIN, gpio.HIGH)
+            time.sleep(0.15)
+            gpio.output(ERRORLEDPIN, gpio.LOW)
+            time.sleep(0.15)
+
+        time.sleep(1)
 
 def remaining_space(directory):
     """ Returns the amount of remaining space in gigabytes, for non-root users,
@@ -24,24 +30,32 @@ def remaining_space(directory):
 
     try:
         disk = os.statvfs(directory)
+
+        # Number of blocks * block size, then convert to GB
         non_root_space = float(disk.f_bsize * disk.f_bavail)
         return non_root_space / 1024 / 1024 / 1024
     except: return None
 
 def utc_to_local(config, utc):
+    """ Localises a UTC time to the time zone specified in the configuration
+    """
     localised = pytz.utc.localize(utc.replace(tzinfo = None))
     return localised.astimezone(config.aws_time_zone).replace(tzinfo = None)
 
 def local_to_utc(config, local):
+    """ Converts a localised time to UTC, based on the time zone in the config
+    """
     localised = config.aws_time_zone.localize(local.replace(tzinfo = None))
     return localised.astimezone(pytz.utc).replace(tzinfo = None)
 
 def day_bounds_utc(config, local, inclusive):
+    """ Calculates the start and end times of the specified local date, in UTC
+    """
     # Get start and end of local day
-    start = local.replace(hour = 0, minute = 0, second = 0, microsecond = 0,
-                          tzinfo = None)
-    end = local.replace(hour = 23, minute = 59, second = 0, microsecond = 0,
-                        tzinfo = None)
+    start = local.replace(
+        hour = 0, minute = 0, second = 0, microsecond = 0, tzinfo = None)
+    end = local.replace(
+        hour = 23, minute = 59, second = 0, microsecond = 0, tzinfo = None)
 
     # Use start of next day as end if inclusive
     if inclusive == True: end += timedelta(minutes = 1)

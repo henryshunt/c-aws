@@ -1,5 +1,5 @@
 """ C-AWS Main Entry Point
-      Performs the initial environment checks and starts the sub-systems
+      Performs initialisation, system checks, and starts the sub-systems
 """
 
 # DEPENDENCIES -----------------------------------------------------------------
@@ -10,7 +10,6 @@ import sqlite3
 import subprocess
 
 import RPi.GPIO as gpio
-import picamera
 
 from routines.config import ConfigData
 import routines.helpers as helpers
@@ -25,28 +24,34 @@ proc_support = None
 proc_access = None
 
 # -- INIT GPIO AND LEDS --------------------------------------------------------
-try:
-    gpio.setwarnings(False); gpio.setmode(gpio.BCM)
-    gpio.setup(23, gpio.OUT); gpio.output(23, gpio.LOW)
-    gpio.setup(24, gpio.OUT); gpio.output(24, gpio.LOW)
-except: helpers.init_exit(0, False)
+gpio.setwarnings(False)
+gpio.setmode(gpio.BCM)
 
-gpio.output(23, gpio.HIGH); gpio.output(24, gpio.HIGH)
+# Setup and reset the data and error LEDs
+gpio.setup(helpers.DATALEDPIN, gpio.OUT)
+gpio.output(helpers.DATALEDPIN, gpio.LOW)
+gpio.setup(helpers.ERRORLEDPIN, gpio.OUT)
+gpio.output(helpers.ERRORLEDPIN, gpio.LOW)
+
+# Illuminate both LEDs for 2.5 seconds to indicate startup
+gpio.output(helpers.DATALEDPIN, gpio.HIGH)
+gpio.output(helpers.ERRORLEDPIN, gpio.HIGH)
 time.sleep(2.5)
-gpio.output(23, gpio.LOW); gpio.output(24, gpio.LOW)
+gpio.output(helpers.DATALEDPIN, gpio.LOW)
+gpio.output(helpers.ERRORLEDPIN, gpio.LOW)
 
 # -- CHECK CONFIG --------------------------------------------------------------
-if config.load() == False: helpers.init_exit(1, True)
+if config.load() == False: helpers.init_exit(0)
 
 # -- CHECK INTERNAL DRIVE ------------------------------------------------------
 free_space = helpers.remaining_space("/")
-if free_space == None or free_space < 1: helpers.init_exit(2, True)
+if free_space == None or free_space < 1: helpers.init_exit(1)
 
 # -- CHECK DATA DIRECTORY ------------------------------------------------------
 if not os.path.isdir(config.data_directory):
     try:
         os.makedirs(config.data_directory)
-    except: helpers.init_exit(3, True)
+    except: helpers.init_exit(2)
 
 # -- MAKE DATABASE -------------------------------------------------------------
 if not os.path.isfile(config.database_path):
@@ -58,17 +63,19 @@ if not os.path.isfile(config.database_path):
             cursor.execute(queries.CREATE_DAYSTATS_TABLE)
 
             database.commit()
-    except: helpers.init_exit(4, True)
+    except: helpers.init_exit(3)
 
 # -- CHECK CAMERA DRIVE --------------------------------------------------------
 if config.camera_logging == True:
-    blocks = subprocess.Popen(["sudo", "blkid"], stdout = subprocess.PIPE,
-        stderr = subprocess.DEVNULL); blocks.wait()
-
-    if config.camera_drive_label not in str(blocks.stdout.read()):
-        helpers.init_exit(5, True)
-    
     try:
+        blocks = subprocess.Popen(["sudo", "blkid"],
+            stdout = subprocess.PIPE, stderr = subprocess.DEVNULL)
+        blocks.wait()
+
+        # Check if specified camera drive is not connected
+        if config.camera_drive_label not in str(blocks.stdout.read()):
+            helpers.init_exit(4)
+    
         if not os.path.exists(config.camera_drive):
             os.makedirs(config.camera_drive)
 
@@ -77,23 +84,25 @@ if config.camera_logging == True:
             config.camera_drive_label, config.camera_drive],
             stdout = subprocess.DEVNULL, stderr = subprocess.DEVNULL)
         mount.wait()
-    except: helpers.init_exit(6, True)
+    except: helpers.init_exit(5)
 
     free_space = helpers.remaining_space(config.camera_drive)
-    if free_space == None or free_space < 5: helpers.init_exit(7, True)
+    if free_space == None or free_space < 5: helpers.init_exit(6)
 
     # Check camera module is connected
     try:
+        import picamera
         with picamera.PiCamera() as camera: pass
-    except: helpers.init_exit(8, True)
+    except: helpers.init_exit(7)
 
-# -- RUN ACCESS ----------------------------------------------------------------
+
+# -- RUN ACCESS SUBSYSTEM -----------------------------------------------------
 try:
     proc_access = subprocess.Popen(["sudo", "python3", "aws_access.py",
         startup_time.strftime("%Y-%m-%dT%H:%M:%S")])
-except: helpers.init_exit(9, True)
+except: helpers.init_exit(8)
 
-# -- RUN SUPPORT ---------------------------------------------------------------
+# -- RUN SUPPORT SUBSYSTEM ----------------------------------------------------
 if (config.report_uploading == True or
     config.envReport_uploading == True or
     config.dayStat_uploading == True or
@@ -101,16 +110,18 @@ if (config.report_uploading == True or
 
     try:
         proc_support = subprocess.Popen(["sudo", "python3", "aws_support.py"])
+
     except:
         if proc_access != None: proc_access.terminate()
-        helpers.init_exit(10, True)
+        helpers.init_exit(9)
 
-# -- RUN DATA ------------------------------------------------------------------
+# -- RUN DATA SUBSYSTEM -------------------------------------------------------
 try:
     proc_data = subprocess.Popen(["sudo", "python3", "aws_data.py"])
-    gpio.output(23, gpio.HIGH); gpio.output(24, gpio.HIGH)
+    gpio.output(helpers.DATALEDPIN, gpio.HIGH)
+    gpio.output(helpers.ERRORLEDPIN, gpio.HIGH)
     
 except:
     if proc_access != None: proc_access.terminate()
     if proc_support != None: proc_support.terminate()
-    helpers.init_exit(11, True)
+    helpers.init_exit(10)
