@@ -11,7 +11,7 @@ import pytz
 DATALEDPIN = 23
 ERRORLEDPIN = 24
 
-def init_exit(code):
+def init_error(code):
     """ Remains in a loop, flashing the error LED to indicate an error code
     """
     while True:
@@ -22,6 +22,10 @@ def init_exit(code):
             time.sleep(0.15)
 
         time.sleep(1)
+
+
+def data_error():
+    gpio.output(ERRORLEDPIN, gpio.HIGH)
 
 def remaining_space(directory):
     """ Returns the amount of remaining space in gigabytes, for non-root users,
