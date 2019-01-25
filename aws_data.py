@@ -2,7 +2,7 @@
       Responsible for logging data parameters and generating statistics
 """
 
-# DEPENDENCIES ----------------------------------------------------------------
+# DEPENDENCIES -----------------------------------------------------------------
 import sys
 import subprocess
 import os
@@ -11,7 +11,6 @@ import time
 from threading import Thread
 import math
 import sqlite3
-import spidev
 from statistics import mean
 
 import daemon
@@ -25,17 +24,17 @@ import sensors.mcp3008 as mcp3008
 from gpiozero import CPUTemperature
 import pytz
 import picamera
+import spidev
 
-from routines.config import ConfigData
+import routines.config as config
 import routines.helpers as helpers
 import routines.frames as frames
 from routines.frames import DbTable
 import routines.analysis as analysis
 import routines.queries as queries
+import sensors.ds18b20 as ds18b20
 
 # GLOBAL VARIABLES -------------------------------------------------------------
-config = ConfigData()
-
 data_start = None
 disable_sampling = True
 
@@ -51,20 +50,20 @@ StaP_samples = []
 
 CPUT_value = None
 
-# OPERATIONS ------------------------------------------------------------------
+# OPERATIONS -------------------------------------------------------------------
 def do_log_report(utc):
     """ Reads all sensors, calculates derived and averaged parameters, and
         saves the data to the database
     """
-    global config, disable_sampling, data_start, AirT_samples, RelH_samples
-    global WSpd_ticks, past_WSpd_ticks, WDir_samples, past_WDir_samples
-    global SunD_ticks, Rain_ticks, StaP_samples
+    global disable_sampling, data_start, AirT_samples, RelH_samples, WSpd_ticks
+    global past_WSpd_ticks, WDir_samples, past_WDir_samples, SunD_ticks
+    global Rain_ticks, StaP_samples
 
     frame = frames.DataUtcReport(utc)
     ten_mins_ago = frame.time - timedelta(minutes = 10)
     two_mins_ago = frame.time - timedelta(minutes = 2)
     
-    # -- COPY GLOBALS ---------------------------------------------------------
+    # -- COPY GLOBALS ----------------------------------------------------------
     disable_sampling = True
     new_AirT_samples = AirT_samples[:]
     AirT_samples = []
@@ -82,10 +81,8 @@ def do_log_report(utc):
     StaP_samples = []
     disable_sampling = False
 
-    # -- TEMPERATURE ----------------------------------------------------------
+    # -- TEMPERATURE -----------------------------------------------------------
     try:
-        import sensors.ds18b20 as ds18b20
-
         # Read each sensor in separate thread to reduce wait
         ExpT_value = None
         ExpT_thread = Thread(target = ds18b20.read_temperature, args = (
@@ -139,13 +136,13 @@ def do_log_report(utc):
             frame.air_temperature = round(mean(new_AirT_samples), 1)
     except: helpers.data_error()
 
-    # -- RELATIVE HUMIDITY ----------------------------------------------------
+    # -- RELATIVE HUMIDITY -----------------------------------------------------
     try:
         if len(new_RelH_samples) > 0:
             frame.relative_humidity = round(mean(new_RelH_samples), 1)
     except: helpers.data_error()
     
-    # -- WIND SPEED -----------------------------------------------------------
+    # -- WIND SPEED ------------------------------------------------------------
     try:
         # Merge new and old ticks and remove ticks older than ten minutes
         past_WSpd_ticks.extend(new_WSpd_ticks)
@@ -172,7 +169,7 @@ def do_log_report(utc):
             frame.wind_speed = round(mean(WSpd_values), 1)
     except: helpers.data_error()
 
-    # -- WIND DIRECTION -------------------------------------------------------
+    # -- WIND DIRECTION --------------------------------------------------------
     try:
         # Merge new and old samples and remove samples older than two minutes
         past_WDir_samples.extend(new_WDir_samples)
@@ -191,7 +188,7 @@ def do_log_report(utc):
                 round(WDir_total / len(past_WDir_samples)))
     except: helpers.data_error()
 
-    # -- WIND GUST ------------------------------------------------------------
+    # -- WIND GUST -------------------------------------------------------------
     try:
         # Calculate wind gust only if there is positive wind speed
         if (frame.wind_speed != None and frame.wind_speed > 0
@@ -216,42 +213,41 @@ def do_log_report(utc):
             frame.wind_gust = round(WGst_value, 1)
     except: helpers.data_error()
 
-    # -- SUNSHINE DURATION ----------------------------------------------------
+    # -- SUNSHINE DURATION -----------------------------------------------------
     try:
         frame.sunshine_duration = new_SunD_ticks
     except: helpers.data_error()
 
-    # -- RAINFALL -------------------------------------------------------------
+    # -- RAINFALL --------------------------------------------------------------
     try:
         frame.rainfall = new_Rain_ticks * 0.254
     except: helpers.data_error()
 
-    # -- STATION PRESSURE -----------------------------------------------------
+    # -- STATION PRESSURE ------------------------------------------------------
     try:
         if len(new_StaP_samples) > 0:
             frame.station_pressure = round(mean(new_StaP_samples), 1)
     except: helpers.data_error()
 
-    # -- DEW POINT ------------------------------------------------------------
+    # -- DEW POINT -------------------------------------------------------------
     try:
         if frame.air_temperature != None and frame.relative_humidity != None:
             frame.dew_point = round(helpers.calculate_dew_point(
                 frame.air_temperature, frame.relative_humidity), 1)
     except: helpers.data_error()
 
-    # -- MEAN SEA LEVEL PRESSURE ----------------------------------------------
+    # -- MEAN SEA LEVEL PRESSURE -----------------------------------------------
     try:
         if (frame.station_pressure != None and frame.air_temperature != None
             and frame.dew_point != None):
 
             MSLP_value = helpers.calculate_mean_sea_level_pressure(
-                config, frame.station_pressure, frame.air_temperature,
-                frame.dew_point)
+                frame.station_pressure, frame.air_temperature, frame.dew_point)
 
             frame.mean_sea_level_pressure = round(MSLP_value, 1)
     except: helpers.data_error()
 
-    # ADD TO DATABASE ---------------------------------------------------------
+    # ADD TO DATABASE ----------------------------------------------------------
     free_space = helpers.remaining_space("/")
 
     if free_space == None or free_space < 0.1:
@@ -284,12 +280,10 @@ def do_log_report(utc):
 def do_log_environment(utc):
     """ Reads computer environment sensors and saves the data to the database
     """
-    global config, CPUT_value
     frame = frames.DataUtcEnviron(utc)
 
-    # -- ENCLOSURE TEMPERATURE ------------------------------------------------
+    # -- ENCLOSURE TEMPERATURE -------------------------------------------------
     try:
-        import sensors.ds18b20 as ds18b20
         EncT_value = ds18b20.read_temperature(config.EncT_address, None)
 
         if EncT_value == None: helpers.data_error()
@@ -297,13 +291,14 @@ def do_log_environment(utc):
             frame.enclosure_temperature = round(EncT_value, 1)
     except: helpers.data_error()
 
-    # -- CPU TEMPERATURE ------------------------------------------------------
+    # -- CPU TEMPERATURE -------------------------------------------------------
     try:
-        frame.cpu_temperature = CPUT_value
+        global CPUT_value
+        frame.cpu_temperature = round(CPUT_value, 1)
         CPUT_value = None
     except: helpers.data_error()
 
-    # -- ADD TO DATABASE ------------------------------------------------------
+    # -- ADD TO DATABASE -------------------------------------------------------
     free_space = helpers.remaining_space("/")
 
     if free_space == None or free_space < 0.1:
@@ -324,16 +319,13 @@ def do_log_environment(utc):
 def do_log_camera(utc):
     """ Takes an image on the camera if it is currently a five minute interval
         of the hour, and saves it to the camera drive
-    """
-    global config
-    
+    """    
     utc_minute = str(utc.minute)
     if not utc_minute.endswith("0") and not utc_minute.endswith("5"):
         return
 
     # Get sunrise and sunset times for current date
-    local_time = helpers.utc_to_local(config, utc).replace(hour = 0, 
-        minute = 0)
+    local_time = helpers.utc_to_local(utc).replace(hour = 0, minute = 0)
     location = astral.Location(("", "", config.aws_latitude,
         config.aws_longitude, str(config.aws_time_zone), config.aws_elevation))
     solar = location.sun(date = local_time, local = False)
@@ -352,6 +344,7 @@ def do_log_camera(utc):
             helpers.data_error()
             return
 
+        # -- CAMERA -----------------------------------------------------------
         try:
             image_dir = os.path.join(config.camera_drive,
                                      utc.strftime("%Y/%m/%d"))
@@ -360,7 +353,8 @@ def do_log_camera(utc):
         
             # Set image resolution, wait for auto settings, and capture
             with picamera.PiCamera() as camera:
-                camera.resolution = (1280, 960); time.sleep(2.5)
+                camera.resolution = (1280, 960)
+                time.sleep(2.5)
                 camera.capture(os.path.join(image_dir, image_name + ".jpg"))
         except: helpers.data_error()
 
@@ -368,24 +362,23 @@ def do_generate_stats(utc):
     """ Generates statistics for the local current day from logged records and
         saves them to the database
     """
-    global config
-    local_time = helpers.utc_to_local(config, utc)
+    local_time = helpers.utc_to_local(utc)
 
     # -- GET NEW STATS ---------------------------------------------------------
-    new_stats = analysis.stats_for_date(config, local_time)
+    new_stats = analysis.stats_for_date(local_time)
 
     if new_stats == False:
         helpers.data_error()
         return
 
     # -- GET CURRENT STATS -----------------------------------------------------
-    cur_stats = analysis.record_for_time(config, local_time, DbTable.DAYSTATS)
+    cur_stats = analysis.record_for_time(local_time, DbTable.DAYSTATS)
 
     if cur_stats == False:
         helpers.data_error()
         return
 
-    # -- ADD TO DATABASE ------------------------------------------------------
+    # -- ADD TO DATABASE -------------------------------------------------------
     free_space = helpers.remaining_space("/")
 
     if free_space == None or free_space < 0.1:
@@ -440,25 +433,24 @@ def do_generate_stats(utc):
             database.commit()
     except: helpers.data_error()
 
-# SCHEDULERS ------------------------------------------------------------------
+# SCHEDULERS -------------------------------------------------------------------
 def every_minute():
     """ Triggered every minute to generate a report and environment report, add
         them to the database, activate the camera and generate statistics
     """
-    global config
     utc = datetime.utcnow().replace(second = 0, microsecond = 0)
-    gpio.output(23, gpio.HIGH)
-    gpio.output(24, gpio.LOW)
 
+    # Reset LEDS and wait to allow every_second() to finish
+    gpio.output(helpers.DATALEDPIN, gpio.HIGH)
+    gpio.output(helpers.ERRORLEDPIN, gpio.LOW)
     time.sleep(0.25)
 
     # Read CPU temperature before anything else happens. Considered idle temp
-    if config.envReport_logging == True:
-
-        # -- CPU TEMPERATURE --------------------------------------------------
+    # -- CPU TEMPERATURE -------------------------------------------------------
+    if config.envReport_logging == True and config.log_CPUT == True:
         try:
             global CPUT_value
-            CPUT_value = round(CPUTemperature().temperature, 1)
+            CPUT_value = CPUTemperature().temperature
         except: helpers.data_error()
 
     # Run actions if relevant configuration modifiers are active
@@ -471,37 +463,39 @@ def every_minute():
 def every_second():
     """ Triggered every second to read sensor values into a list for averaging
     """
-    global disable_sampling, AirT_samples, RelH_samples, WDir_samples
-    global SunD_ticks, StaP_samples
-
     utc = datetime.utcnow().replace(microsecond = 0)
+
+    global disable_sampling
     if disable_sampling == True: return
 
-    # -- SUNSHINE DURATION ----------------------------------------------------
+    # -- SUNSHINE DURATION -----------------------------------------------------
     try:
+        global SunD_ticks
         if gpio.input(25) == True: SunD_ticks += 1
     except: helpers.data_error()
 
     if str(utc.second) == "0": return
 
-    # -- AIR TEMPERATURE ------------------------------------------------------
+    # -- AIR TEMPERATURE -------------------------------------------------------
     AirT_value = None
     
     try:
-        import sensors.ds18b20 as ds18b20
         AirT_thread = Thread(target = ds18b20.read_temperature, args = (
             config.AirT_address, AirT_value))
 
         AirT_thread.start()
     except: helpers.data_error()
 
-    # -- RELATIVE HUMIDITY ----------------------------------------------------
+    # -- RELATIVE HUMIDITY -----------------------------------------------------
     try:
+        global RelH_samples
+
         RelH_samples.append(
             round(sht31d.SHT31(address = 0x44).read_humidity(), 1))
     except: helpers.data_error()
 
-    # -- WIND DIRECTION -------------------------------------------------------
+    # -- WIND DIRECTION --------------------------------------------------------
+    global WDir_samples
     spi = None
 
     try:
@@ -527,8 +521,9 @@ def every_second():
 
     if spi != None: spi.close()
 
-    # -- STATION PRESSURE -----------------------------------------------------
+    # -- STATION PRESSURE ------------------------------------------------------
     try:
+        global StaP_samples
         StaP_sensor = bme280.BME280(p_mode = bme280.BME280_OSAMPLE_8)
 
         # Temperature must be read first or pressure will not return
@@ -536,14 +531,16 @@ def every_second():
         StaP_samples.append(round(StaP_sensor.read_pressure() / 100, 1))
     except: helpers.data_error()
 
-    # -- AIR TEMPERATURE ------------------------------------------------------
+    # -- AIR TEMPERATURE -------------------------------------------------------
     try:
+        global AirT_samples
+
         if AirT_value == None: helpers.data_error()
         else:
             AirT_samples.append(round(AirT_value, 1))
     except: helpers.data_error()
 
-# INTERRUPTS ------------------------------------------------------------------
+# INTERRUPTS -------------------------------------------------------------------
 def do_trigger_wspd(channel):
     global disable_sampling, WSpd_ticks
     if disable_sampling == True: return
@@ -557,12 +554,12 @@ def do_trigger_rain(channel):
     Rain_ticks += 1
 
 
-# ENTRY POINT =================================================================
+# ENTRY POINT ==================================================================
 def entry_point():
-    global config, data_start, disable_sampling
+    global data_start, disable_sampling
     config.load()
 
-    # -- INIT GPIO AND LEDS ---------------------------------------------------
+    # -- INIT GPIO AND LEDS ----------------------------------------------------
     gpio.setwarnings(False)
     gpio.setmode(gpio.BCM)
 
@@ -572,7 +569,7 @@ def entry_point():
     gpio.setup(helpers.ERRORLEDPIN, gpio.OUT)
     gpio.output(helpers.ERRORLEDPIN, gpio.LOW)
 
-    # -- SET UP SENSORS -------------------------------------------------------
+    # -- SET UP SENSORS --------------------------------------------------------
     gpio.setup(27, gpio.IN, pull_up_down = gpio.PUD_DOWN)
     gpio.add_event_detect(27, gpio.FALLING, callback = do_trigger_wspd,
                         bouncetime = 1)
@@ -581,14 +578,14 @@ def entry_point():
                         bouncetime = 150)
     gpio.setup(25, gpio.IN, pull_up_down = gpio.PUD_DOWN)
 
-    # -- WAIT FOR MINUTE ------------------------------------------------------
+    # -- WAIT FOR MINUTE -------------------------------------------------------
     while datetime.utcnow().second != 0:
         gpio.output(helpers.DATALEDPIN, gpio.HIGH)
         time.sleep(0.1)
         gpio.output(helpers.DATALEDPIN, gpio.LOW)
         time.sleep(0.1)
 
-    # -- START DATA LOGGING ---------------------------------------------------
+    # -- START DATA LOGGING ----------------------------------------------------
     data_start = datetime.utcnow().replace(second = 0, microsecond = 0)
     disable_sampling = False
 
@@ -599,6 +596,6 @@ def entry_point():
 
 if __name__ == "__main__":
     current_dir = os.path.dirname(os.path.realpath(__file__))
-    
+
     with daemon.DaemonContext(working_directory = current_dir):
         entry_point()

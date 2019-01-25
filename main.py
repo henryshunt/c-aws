@@ -10,6 +10,7 @@ import sqlite3
 import subprocess
 
 import RPi.GPIO as gpio
+import picamera
 
 import routines.config as config
 import routines.helpers as helpers
@@ -90,7 +91,6 @@ if config.camera_logging == True:
 
     # Check camera module is connected
     try:
-        import picamera
         with picamera.PiCamera() as camera: pass
     except: helpers.init_error(8)
 

@@ -8,113 +8,103 @@ from datetime import datetime, timedelta
 import os
 import sys
 import logging
-import RPi.GPIO as gpio
 import threading
 import copy
 import re
 
 import daemon
+import RPi.GPIO as gpio
 import flask
 import astral
 
-from routines.config import ConfigData
+import routines.config as config
 import routines.helpers as helpers
 from routines.frames import DbTable
 import routines.analysis as analysis
 
 # GLOBAL VARIABLES -------------------------------------------------------------
-config = ConfigData()
-
 startup_time = None
 power_pressed = False
 
 # INTERRUPTS -------------------------------------------------------------------
 def do_shutdown(channel):
+    """ Performs a system shutdown on press of the shutdown push button
+    """
     global power_pressed
-    if power_pressed == False: power_pressed = True
+    if power_pressed == False:power_pressed = True
     else: return
     
     # Wait for safe time window to prevent data and upload corruption
     second = datetime.utcnow().second
+
     while second < 35 or second > 55:
-        time.sleep(0.8); second = datetime.utcnow().second
+        time.sleep(0.8)
+        second = datetime.utcnow().second
 
     # Need to kill this program first as it prevents shutdown
     os.system("sudo kill -9 " + str(os.getpid()) + " & sudo halt")
 
 def do_restart(channel):
+    """ Performs a system restart on press of the restart push button
+    """
     global power_pressed
     if power_pressed == False: power_pressed = True
     else: return
 
     # Wait for safe time window to prevent data and upload corruption
     second = datetime.utcnow().second
+
     while second < 35 or second > 55:
-        time.sleep(0.8); second = datetime.utcnow().second
+        time.sleep(0.8)
+        second = datetime.utcnow().second
 
     # Need to kill this program first as it prevents restart
     os.system("sudo kill -9 " + str(os.getpid()) + " & sudo reboot")
 
 # PAGE SERVERS -----------------------------------------------------------------
 def page_now():
-    global config
-
     return flask.render_template("index.html",
                                  aws_title = config.aws_location,
                                  aws_location = config.aws_location,
                                  aws_time_zone = config.aws_time_zone)
 
 def page_statistics():
-    global config
-
     return flask.render_template("statistics.html",
                                  aws_title = config.aws_location,
                                  aws_location = config.aws_location,
                                  aws_time_zone = config.aws_time_zone)
 
 def page_camera():
-    global config
-
     return flask.render_template("camera.html",
                                  aws_title = config.aws_location,
                                  aws_location = config.aws_location,
                                  aws_time_zone = config.aws_time_zone)
 
 def page_graph_day():
-    global config
-
     return flask.render_template("graph-day.html",
                                  aws_title = config.aws_location,
                                  aws_location = config.aws_location,
                                  aws_time_zone = config.aws_time_zone)
 
 def page_graph_month():
-    global config
-
     return flask.render_template("graph-month.html",
                                  aws_title = config.aws_location,
                                  aws_location = config.aws_location,
                                  aws_time_zone = config.aws_time_zone)
 
 def page_graph_year():
-    global config
-
     return flask.render_template("graph-year.html",
                                  aws_title = config.aws_location,
                                  aws_location = config.aws_location,
                                  aws_time_zone = config.aws_time_zone)
 
 def page_climate():
-    global config
-
     return flask.render_template("climate.html",
                                  aws_title = config.aws_location,
                                  aws_location = config.aws_location,
                                  aws_time_zone = config.aws_time_zone)
 
 def page_about():
-    global config
-
     return flask.render_template("about.html",
                                  aws_title = config.aws_location,
                                  aws_location = config.aws_location,
@@ -125,7 +115,6 @@ def page_about():
 
 # DATA PAGE SERVERS ------------------------------------------------------------
 def data_now():
-    global config
     data = dict.fromkeys(["Time", "AirT", "ExpT", "RelH", "DewP", "WSpd",
                           "WDir", "WGst", "SunD", "SunD_PHr", "Rain",
                           "Rain_PHr", "StaP", "MSLP", "StaP_PTH", "ST10",
@@ -139,15 +128,14 @@ def data_now():
     except: return flask.jsonify(data)
 
     # Get record for that time
-    record = analysis.record_for_time(config, url_time, DbTable.REPORTS)
+    record = analysis.record_for_time(url_time, DbTable.REPORTS)
 
     if record != False:
         if record == None:
             # Go back a minute if no record and not in absolute mode
             if not flask.request.args.get("abs") == "1":
                 url_time -= timedelta(minutes = 1)
-                record = analysis.record_for_time(config, url_time,
-                                                  DbTable.REPORTS)
+                record = analysis.record_for_time(url_time, DbTable.REPORTS)
                 
                 if record != False:
                     if record != None:
@@ -163,18 +151,18 @@ def data_now():
                 if key in data: data[key] = record[key]
 
     # Calculate total sunshine duration over past hour
-    SunD_PHr_record = analysis.past_hour_total(config, url_time, "SunD")
+    SunD_PHr_record = analysis.past_hour_total(url_time, "SunD")
     if SunD_PHr_record != False and SunD_PHr_record != None:
         data["SunD_PHr"] = SunD_PHr_record["SunD_PHr"]
 
     # Calculate total rainfall over past hour
-    Rain_PHr_record = analysis.past_hour_total(config, url_time, "Rain")
+    Rain_PHr_record = analysis.past_hour_total(url_time, "Rain")
     if Rain_PHr_record != False and Rain_PHr_record != None:
         data["Rain_PHr"] = round(Rain_PHr_record["Rain_PHr"], 3)
 
     # Calculate three hour pressure tendency
     if data["StaP"] != None:
-        StaP_PTH_record = analysis.record_for_time(config,
+        StaP_PTH_record = analysis.record_for_time(
             url_time - timedelta(hours = 3), DbTable.REPORTS)
     
         if StaP_PTH_record != False and StaP_PTH_record != None:
@@ -186,7 +174,6 @@ def data_now():
     return flask.jsonify(data)
 
 def data_statistics():
-    global config
     data = dict.fromkeys(["Time", "AirT_Avg", "AirT_Min", "AirT_Max",
                           "RelH_Avg", "RelH_Min", "RelH_Max", "DewP_Avg",
                           "DewP_Min", "DewP_Max", "WSpd_Avg", "WSpd_Min",
@@ -202,11 +189,11 @@ def data_statistics():
     try:
         url_time = datetime.strptime(
             flask.request.args.get("time"), "%Y-%m-%dT%H-%M-00")
-        local_time = helpers.utc_to_local(config, url_time)
+        local_time = helpers.utc_to_local(url_time)
     except: return flask.jsonify(data)
 
     # Get record for that time
-    record = analysis.record_for_time(config, local_time, DbTable.DAYSTATS)
+    record = analysis.record_for_time(local_time, DbTable.DAYSTATS)
 
     if record != False:
         if record == None:
@@ -215,8 +202,7 @@ def data_statistics():
                 url_time -= timedelta(minutes = 1)
                 local_time -= timedelta(minutes = 1)
 
-                record = analysis.record_for_time(config, local_time,
-                                                  DbTable.DAYSTATS)
+                record = analysis.record_for_time(local_time, DbTable.DAYSTATS)
                 
                 if record != False:
                     if record != None:
@@ -235,7 +221,6 @@ def data_statistics():
     return flask.jsonify(data)
 
 def data_camera():
-    global config
     data = dict.fromkeys(["Time", "CImg", "SRis", "SSet"])
 
     # Try parsing time specified in URL
@@ -265,8 +250,7 @@ def data_camera():
         + url_time.strftime("%Y/%m/%d/%Y-%m-%dT%H-%M-%S") + ".jpg")
 
     # Calculate sunrise and sunset times
-    local_time = helpers.utc_to_local(config, url_time).replace(
-        hour = 0, minute = 0)
+    local_time = helpers.utc_to_local(url_time).replace(hour = 0, minute = 0)
     location = astral.Location(("", "", config.aws_latitude,
         config.aws_longitude, str(config.aws_time_zone), config.aws_elevation))
     solar = location.sun(date = local_time, local = False)
@@ -283,7 +267,7 @@ def file_camera(year, month, day, file_name):
         month, day), file_name)
 
 def data_graph_day():
-    global config; data = []
+    data = []
     if flask.request.args.get("time") == None: return flask.jsonify(data)
     if flask.request.args.get("fields") == None: return flask.jsonify(data)
 
@@ -293,15 +277,14 @@ def data_graph_day():
                                      "%Y-%m-%dT%H-%M-00")
     except: return flask.jsonify(data)
 
-    bounds = helpers.day_bounds_utc(
-        config, helpers.utc_to_local(config, url_time), False)
+    bounds = helpers.day_bounds_utc(helpers.utc_to_local(url_time), False)
     fields = "Time," + flask.request.args.get("fields")
 
     if re.compile("^[a-zA-Z0-9,_]*$").match(fields) == None:
         return flask.jsonify(data)
 
     # Get data in range for specified parameters
-    records = analysis.fields_in_range(config, bounds[0], bounds[1], fields,
+    records = analysis.fields_in_range(bounds[0], bounds[1], fields,
         DbTable.REPORTS)
 
     if records == False or len(records) == 0: return flask.jsonify(data)
@@ -333,7 +316,7 @@ def data_graph_day():
     return flask.jsonify(data)
 
 def data_graph_year():
-    global config; data = []
+    data = []
     if flask.request.args.get("time") == None: return flask.jsonify(data)
     if flask.request.args.get("fields") == None: return flask.jsonify(data)
 
@@ -344,9 +327,8 @@ def data_graph_year():
     except: return flask.jsonify(data)
 
     # Calculate data range in local time
-    bounds = helpers.day_bounds_utc(
-        config, helpers.utc_to_local(config, url_time), True)
-    range_end = helpers.utc_to_local(config, bounds[0])
+    bounds = helpers.day_bounds_utc(helpers.utc_to_local(url_time), True)
+    range_end = helpers.utc_to_local(bounds[0])
     range_start = range_end - timedelta(days = 365)
     fields = "Date," + flask.request.args.get("fields")
 
@@ -354,7 +336,7 @@ def data_graph_year():
         return flask.jsonify(data)
 
     # Get data in range for specified parameters
-    records = analysis.fields_in_range(config, range_start, range_end, fields,
+    records = analysis.fields_in_range(range_start, range_end, fields,
         DbTable.DAYSTATS)
 
     if records == False or len(records) == 0: return flask.jsonify(data)
@@ -373,7 +355,6 @@ def data_graph_year():
     return flask.jsonify(data)
 
 def data_climate():
-    global config
     data = dict.fromkeys(["AirT_Avg_Year", "AirT_Min_Year", "AirT_Max_Year"])
     
     fill_value = dict.fromkeys(
@@ -399,11 +380,11 @@ def data_climate():
     try:
         url_time = datetime.strptime(
             flask.request.args.get("time"), "%Y-%m-%dT%H-%M-00")
-        local_time = helpers.utc_to_local(config, url_time)
+        local_time = helpers.utc_to_local(url_time)
     except: return flask.jsonify(data)
 
     # Get climate data for that year
-    record = analysis.stats_for_year(config, local_time.strftime("%Y"))
+    record = analysis.stats_for_year(local_time.strftime("%Y"))
 
     if record != False and record != None:
         # Add record data to final data
@@ -411,7 +392,7 @@ def data_climate():
             if key + "_Year" in data: data[key + "_Year"] = record[key]
 
     # Get climate data for that year by month
-    records = analysis.stats_for_months(config, local_time.strftime("%Y"))
+    records = analysis.stats_for_months(local_time.strftime("%Y"))
 
     if records != False and len(records) >= 1:
         # Add record data to final data
@@ -424,7 +405,7 @@ def data_climate():
     return flask.jsonify(data)
 
 def data_about():
-    global config, startup_time
+    global startup_time
     data = dict.fromkeys(["Time", "STim", "EncT", "CPUT", "IDRS", "CDRS"])
 
     # Try parsing time specified in URL
@@ -435,15 +416,14 @@ def data_about():
     except: return flask.jsonify(data)
 
     # Get record for that time
-    record = analysis.record_for_time(config, url_time, DbTable.ENVREPORTS)
+    record = analysis.record_for_time(url_time, DbTable.ENVREPORTS)
 
     if record != False:
         if record == None:
             # Go back a minute if no record and not in absolute mode
             if not flask.request.args.get("abs") == "1":
                 url_time -= timedelta(minutes = 1)
-                record = analysis.record_for_time(config, url_time,
-                                                  DbTable.ENVREPORTS)
+                record = analysis.record_for_time(url_time, DbTable.ENVREPORTS)
                 
                 if record != False:
                     if record != None:
@@ -474,7 +454,7 @@ def data_about():
     return flask.jsonify(data)
 
 def data_graph_about():
-    global config; data = []
+    data = []
     if flask.request.args.get("time") == None: return flask.jsonify(data)
     if flask.request.args.get("fields") == None: return flask.jsonify(data)
 
@@ -492,7 +472,7 @@ def data_graph_about():
         return flask.jsonify(data)
 
     # Get data in range for specified parameters
-    records = analysis.fields_in_range(config, range_start, range_end, fields,
+    records = analysis.fields_in_range(range_start, range_end, fields,
         DbTable.ENVREPORTS)
 
     if records == False or len(records) == 0: return flask.jsonify(data)
@@ -521,7 +501,7 @@ def ctrl_command():
 
 # ENTRY POINT ==================================================================
 def entry_point():
-    global config, startup_time
+    global startup_time
     config.load()
 
     if len(sys.argv) == 2:
@@ -529,7 +509,9 @@ def entry_point():
     else: startup_time = datetime.utcnow()
 
     # SETUP POWER BUTTONS ------------------------------------------------------
-    gpio.setwarnings(False); gpio.setmode(gpio.BCM)
+    gpio.setwarnings(False)
+    gpio.setmode(gpio.BCM)
+
     gpio.setup(17, gpio.IN, gpio.PUD_UP)
     gpio.add_event_detect(17, gpio.FALLING, callback = do_shutdown,
                           bouncetime = 300)
@@ -577,5 +559,6 @@ def entry_point():
 
 if __name__ == "__main__":
     current_dir = os.path.dirname(os.path.realpath(__file__))
+    
     with daemon.DaemonContext(working_directory = current_dir):
         entry_point()

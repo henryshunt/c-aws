@@ -13,16 +13,15 @@ import ftplib
 import daemon
 from apscheduler.schedulers.blocking import BlockingScheduler
 
-from routines.config import ConfigData
+import routines.config as config
 import routines.helpers as helpers
 from routines.frames import DbTable
 import routines.analysis as analysis
 
 # GLOBAL VARIABLES -------------------------------------------------------------
-config = ConfigData()
-
 data_queue = deque(maxlen = 10080)
 camera_queue = deque(maxlen = 2016)
+
 is_processing_data = False
 is_processing_camera = False
 
@@ -156,21 +155,21 @@ def do_process_camera_queue():
 # SCHEDULERS -------------------------------------------------------------------
 def every_minute():
     utc = datetime.utcnow().replace(second = 0, microsecond = 0)
-    local_time = helpers.utc_to_local(config, utc)
+    local_time = helpers.utc_to_local(utc)
 
     # Get report data if config modifier is active
     if config.report_uploading == True:
-        report = analysis.record_for_time(config, utc, DbTable.REPORTS)
+        report = analysis.record_for_time(utc, DbTable.REPORTS)
     else: report == None
 
     # Get envReport data if config modifier is active
     if config.envReport_uploading == True:
-        envReport = analysis.record_for_time(config, utc, DbTable.ENVREPORTS)
+        envReport = analysis.record_for_time(utc, DbTable.ENVREPORTS)
     else: envReport = None
 
     # Get dayStat data is config modifier is active
     if config.dayStat_uploading == True:
-        dayStat = analysis.record_for_time(config, local_time, DbTable.DAYSTATS)
+        dayStat = analysis.record_for_time(local_time, DbTable.DAYSTATS)
     else: dayStat = None
 
     # Add data to queue and process the queue
@@ -190,7 +189,6 @@ def every_minute():
 
 # ENTRY POINT ==================================================================
 def entry_point():
-    global config
     config.load()
 
     # -- START WATCHING DATA ---------------------------------------------------
@@ -200,5 +198,6 @@ def entry_point():
 
 if __name__ == "__main__":
     current_dir = os.path.dirname(os.path.realpath(__file__))
+    
     with daemon.DaemonContext(working_directory = current_dir):
         entry_point()
