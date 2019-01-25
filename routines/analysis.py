@@ -6,7 +6,7 @@ from routines.frames import DbTable
 import routines.queries as queries
 import routines.helpers as helpers
 
-def record_for_time(config, time, table):
+def record_for_time(time, table):
     time = time.replace(second = 0, microsecond = 0)
         
     try:
@@ -30,7 +30,7 @@ def record_for_time(config, time, table):
             return cursor.fetchone()
     except: return False
 
-def fields_in_range(config, start, end, fields, table):
+def fields_in_range(start, end, fields, table):
     start = start.replace(second = 0, microsecond = 0)
     end = end.replace(second = 0, microsecond = 0)
 
@@ -73,9 +73,9 @@ def fields_in_range(config, start, end, fields, table):
             return cursor.fetchall()
     except: return False
 
-def stats_for_date(config, local_time):
+def stats_for_date(local_time):
     try:
-        bounds = helpers.day_bounds_utc(config, local_time, False)
+        bounds = helpers.day_bounds_utc(local_time, False)
         
         with sqlite3.connect(config.database_path) as database:
             database.row_factory = sqlite3.Row
@@ -93,7 +93,7 @@ def stats_for_date(config, local_time):
             return cursor.fetchone()
     except: return False
 
-def stats_for_year(config, year):
+def stats_for_year(year):
     try:
         with sqlite3.connect(config.database_path) as database:
             database.row_factory = sqlite3.Row
@@ -106,7 +106,7 @@ def stats_for_year(config, year):
             return cursor.fetchone()
     except: return False
 
-def stats_for_months(config, year):
+def stats_for_months(year):
     try:
         with sqlite3.connect(config.database_path) as database:
             database.row_factory = sqlite3.Row
@@ -119,7 +119,7 @@ def stats_for_months(config, year):
             return cursor.fetchall()
     except: return False
 
-def past_hour_total(config, now, column):
+def past_hour_total(now, column):
     start = now.replace(second = 0, microsecond = 0) - timedelta(minutes = 59)
     end = now.replace(second = 0, microsecond = 0)
 

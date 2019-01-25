@@ -7,6 +7,8 @@ import math
 import RPi.GPIO as gpio
 import pytz
 
+import routines.config as config
+
 # Constants indicating pin numbers of the data and error LEDs
 DATALEDPIN = 23
 ERRORLEDPIN = 24
@@ -22,7 +24,6 @@ def init_error(code):
             time.sleep(0.15)
 
         time.sleep(1)
-
 
 def data_error():
     gpio.output(ERRORLEDPIN, gpio.HIGH)
@@ -41,19 +42,19 @@ def remaining_space(directory):
         return non_root_space / 1024 / 1024 / 1024
     except: return None
 
-def utc_to_local(config, utc):
+def utc_to_local(utc):
     """ Localises a UTC time to the time zone specified in the configuration
     """
     localised = pytz.utc.localize(utc.replace(tzinfo = None))
     return localised.astimezone(config.aws_time_zone).replace(tzinfo = None)
 
-def local_to_utc(config, local):
+def local_to_utc(local):
     """ Converts a localised time to UTC, based on the time zone in the config
     """
     localised = config.aws_time_zone.localize(local.replace(tzinfo = None))
     return localised.astimezone(pytz.utc).replace(tzinfo = None)
 
-def day_bounds_utc(config, local, inclusive):
+def day_bounds_utc(local, inclusive):
     """ Calculates the start and end times of the specified local date, in UTC
     """
     # Get start and end of local day
@@ -66,7 +67,7 @@ def day_bounds_utc(config, local, inclusive):
     if inclusive == True: end += timedelta(minutes = 1)
 
     # Convert start and end to UTC
-    return local_to_utc(config, start), local_to_utc(config, end)
+    return local_to_utc(start), local_to_utc(end)
 
 def calculate_dew_point(AirT, RelH):
     DewP_a = 0.4343 * math.log(RelH / 100)
@@ -76,7 +77,7 @@ def calculate_dew_point(AirT, RelH):
 
     return 278.04 * ((8.0813 - DewP_c) - DewP_d)
 
-def calculate_mean_sea_level_pressure(config, StaP, AirT, DewP):
+def calculate_mean_sea_level_pressure(StaP, AirT, DewP):
     MSLP_a = 6.11 * 10 ** ((7.5 * DewP) / (237.3 + DewP))
     MSLP_b = (9.80665 / 287.3) * config.aws_elevation
     MSLP_c = ((0.0065 * config.aws_elevation) / 2) 
