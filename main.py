@@ -41,17 +41,17 @@ gpio.output(helpers.DATALEDPIN, gpio.LOW)
 gpio.output(helpers.ERRORLEDPIN, gpio.LOW)
 
 # -- CHECK CONFIG --------------------------------------------------------------
-if config.load() == False: helpers.init_exit(0)
+if config.load() == False: helpers.init_exit(1)
 
 # -- CHECK INTERNAL DRIVE ------------------------------------------------------
 free_space = helpers.remaining_space("/")
-if free_space == None or free_space < 1: helpers.init_exit(1)
+if free_space == None or free_space < 1: helpers.init_exit(2)
 
 # -- CHECK DATA DIRECTORY ------------------------------------------------------
 if not os.path.isdir(config.data_directory):
     try:
         os.makedirs(config.data_directory)
-    except: helpers.init_exit(2)
+    except: helpers.init_exit(3)
 
 # -- MAKE DATABASE -------------------------------------------------------------
 if not os.path.isfile(config.database_path):
@@ -63,7 +63,7 @@ if not os.path.isfile(config.database_path):
             cursor.execute(queries.CREATE_DAYSTATS_TABLE)
 
             database.commit()
-    except: helpers.init_exit(3)
+    except: helpers.init_exit(4)
 
 # -- CHECK CAMERA DRIVE --------------------------------------------------------
 if config.camera_logging == True:
@@ -74,7 +74,7 @@ if config.camera_logging == True:
 
         # Check if specified camera drive is not connected
         if config.camera_drive_label not in str(blocks.stdout.read()):
-            helpers.init_exit(4)
+            helpers.init_exit(5)
     
         if not os.path.exists(config.camera_drive):
             os.makedirs(config.camera_drive)
@@ -84,23 +84,23 @@ if config.camera_logging == True:
             config.camera_drive_label, config.camera_drive],
             stdout = subprocess.DEVNULL, stderr = subprocess.DEVNULL)
         mount.wait()
-    except: helpers.init_exit(5)
+    except: helpers.init_exit(6)
 
     free_space = helpers.remaining_space(config.camera_drive)
-    if free_space == None or free_space < 5: helpers.init_exit(6)
+    if free_space == None or free_space < 5: helpers.init_exit(7)
 
     # Check camera module is connected
     try:
         import picamera
         with picamera.PiCamera() as camera: pass
-    except: helpers.init_exit(7)
+    except: helpers.init_exit(8)
 
 
 # -- RUN ACCESS SUBSYSTEM -----------------------------------------------------
 try:
     proc_access = subprocess.Popen(["sudo", "python3", "aws_access.py",
         startup_time.strftime("%Y-%m-%dT%H:%M:%S")])
-except: helpers.init_exit(8)
+except: helpers.init_exit(9)
 
 # -- RUN SUPPORT SUBSYSTEM ----------------------------------------------------
 if (config.report_uploading == True or
@@ -113,7 +113,7 @@ if (config.report_uploading == True or
 
     except:
         if proc_access != None: proc_access.terminate()
-        helpers.init_exit(9)
+        helpers.init_exit(10)
 
 # -- RUN DATA SUBSYSTEM -------------------------------------------------------
 try:
@@ -124,4 +124,4 @@ try:
 except:
     if proc_access != None: proc_access.terminate()
     if proc_support != None: proc_support.terminate()
-    helpers.init_exit(10)
+    helpers.init_exit(11)
