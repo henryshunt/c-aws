@@ -11,12 +11,11 @@ import subprocess
 
 import RPi.GPIO as gpio
 
-from routines.config import ConfigData
+import routines.config as config
 import routines.helpers as helpers
 import routines.queries as queries
 
 # GLOBAL VARIABLES -------------------------------------------------------------
-config = ConfigData()
 startup_time = datetime.utcnow()
 
 proc_data = None
