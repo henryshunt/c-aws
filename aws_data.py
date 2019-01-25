@@ -235,13 +235,8 @@ def do_log_report(utc):
     # -- DEW POINT -------------------------------------------------------------
     try:
         if frame.air_temperature != None and frame.relative_humidity != None:
-            DewP_a = 0.4343 * math.log(frame.relative_humidity / 100)
-            DewP_b = ((8.082 - frame.air_temperature / 556.0)
-                      * frame.air_temperature)
-            DewP_c = DewP_a + (DewP_b) / (256.1 + frame.air_temperature)
-            DewP_d = math.sqrt((8.0813 - DewP_c) ** 2 - (1.842 * DewP_c))
-
-            frame.dew_point = round(278.04 * ((8.0813 - DewP_c) - DewP_d), 1)
+            frame.dew_point = round(helpers.calculate_dew_point(
+                frame.air_temperature, frame.relative_humidity), 1)
     except: gpio.output(24, gpio.HIGH)
 
     # -- MEAN SEA LEVEL PRESSURE -----------------------------------------------
@@ -249,14 +244,10 @@ def do_log_report(utc):
         if (frame.station_pressure != None and frame.air_temperature != None and
             frame.dew_point != None):
 
-            MSLP_a = 6.11 * 10 ** ((7.5 * frame.dew_point) / (237.3 +
-                                                             frame.dew_point))
-            MSLP_b = (9.80665 / 287.3) * config.aws_elevation
-            MSLP_c = ((0.0065 * config.aws_elevation) / 2) 
-            MSLP_d = frame.air_temperature + 273.15 + MSLP_c + MSLP_a * 0.12
-            
             frame.mean_sea_level_pressure = round(
-                frame.station_pressure * math.exp(MSLP_b / MSLP_d), 1)
+                helpers.calculate_mean_sea_level_pressure(
+                    config, frame.station_pressure, frame.air_temperature,
+                    frame.dew_point), 1)
     except: gpio.output(24, gpio.HIGH)
 
     # ADD TO DATABASE ----------------------------------------------------------
