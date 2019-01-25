@@ -3,8 +3,8 @@ The aim of the C-AWS project was to develop, from scratch, an automatic weather 
 # Breakdown
 The C-AWS software is split into three subsystems: `data`, `support`, and `access`. Each one manages its own distinct subset of operations:
 - `data` is responsible for logging sensor data and generating statistics. All database writes happens here
-- `support` is responsible for providing supporting functionality (such as uploading data to a remote server, and providing hardware power controls)
-- `access` is responsible for sustaining a web server on the local network, that allows the data to be viewed
+- `support` is responsible for providing extra supporting functionality (such as uploading data to a remote server)
+- `access` is responsible for managing interaction with the hardware (power controls, etc.), and for sustaining a web server on the local network that allows the data to be viewed
 
 The entry point for the software is `main.py`. It performs initialisation and system checks before starting the subsystems.
 
