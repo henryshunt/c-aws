@@ -85,167 +85,196 @@ def do_log_report(utc):
     try:
         # Read each sensor in separate thread to reduce wait
         ExpT_value = None
-        ExpT_thread = Thread(target = ds18b20.read_temperature, args = (
-            config.ExpT_address, ExpT_value))
-        ExpT_thread.start()
+        ExpT_thread = None
+
+        if config.log_ExpT == True:
+            ExpT_thread = Thread(target = ds18b20.read_temperature, args = (
+                config.ExpT_address, ExpT_value))
+            ExpT_thread.start()
 
         ST10_value = None
-        ST10_thread = Thread(target = ds18b20.read_temperature, args = (
-            config.ST10_address, ST10_value))
-        ST10_thread.start()
+        ST10_thread = None
+
+        if config.log_ST10 == True:
+            ST10_thread = Thread(target = ds18b20.read_temperature, args = (
+                config.ST10_address, ST10_value))
+            ST10_thread.start()
 
         ST30_value = None
-        ST30_thread = Thread(target = ds18b20.read_temperature, args = (
-            config.ST30_address, ST30_value))
-        ST30_thread.start()
+        ST30_thread = None
+        
+        if config.log_ST30 == True:
+            ST30_thread = Thread(target = ds18b20.read_temperature, args = (
+                config.ST30_address, ST30_value))
+            ST30_thread.start()
 
         ST00_value = None
-        ST00_thread = Thread(target = ds18b20.read_temperature, args = (
-            config.ST00_address, ST00_value))
-        ST00_thread.start()
+        ST00_thread = None
+        
+        if config.log_ST00 == True:
+            ST00_thread = Thread(target = ds18b20.read_temperature, args = (
+                config.ST00_address, ST00_value))
+            ST00_thread.start()
 
         # Wait for all sensors to finish reading
-        ExpT_thread.join()
-        ST10_thread.join()
-        ST30_thread.join()
-        ST00_thread.join()
+        if config.log_ExpT == True: ExpT_thread.join()
+        if config.log_ST10 == True: ST10_thread.join()
+        if config.log_ST30 == True: ST30_thread.join()
+        if config.log_ST00 == True: ST00_thread.join()
 
         # Get and check read values from each temperature sensor
-        if ExpT_value == None: helpers.data_error()
-        else:
-            frame.exposed_temperature = round(ExpT_value, 1)
-            ExpT_value = None
+        if config.log_ExpT == True:
+            if ExpT_value == None: helpers.data_error()
+            else:
+                frame.exposed_temperature = round(ExpT_value, 1)
+                ExpT_value = None
 
-        if ST10_value == None: helpers.data_error()
-        else:
-            frame.soil_temperature_10 = round(ST10_value, 1)
-            ST10_value = None
+        if config.log_ST10 == True:
+            if ST10_value == None: helpers.data_error()
+            else:
+                frame.soil_temperature_10 = round(ST10_value, 1)
+                ST10_value = None
 
-        if ST30_value == None: helpers.data_error()
-        else:
-            frame.soil_temperature_30 = round(ST30_value, 1)
-            ST30_value = None
+        if config.log_ST30 == True:
+            if ST30_value == None: helpers.data_error()
+            else:
+                frame.soil_temperature_30 = round(ST30_value, 1)
+                ST30_value = None
 
-        if ST00_value == None: helpers.data_error()
-        else:
-            frame.soil_temperature_00 = round(ST00_value, 1)
-            ST00_value = None
+        if config.log_ST00 == True:
+            if ST00_value == None: helpers.data_error()
+            else:
+                frame.soil_temperature_00 = round(ST00_value, 1)
+                ST00_value = None
 
         # Get average of air termperature samples
-        if len(new_AirT_samples) > 0:
-            frame.air_temperature = round(mean(new_AirT_samples), 1)
+        if config.log_AirT == True:
+            if len(new_AirT_samples) > 0:
+                frame.air_temperature = round(mean(new_AirT_samples), 1)
     except: helpers.data_error()
 
     # -- RELATIVE HUMIDITY -----------------------------------------------------
-    try:
-        if len(new_RelH_samples) > 0:
-            frame.relative_humidity = round(mean(new_RelH_samples), 1)
-    except: helpers.data_error()
+    if config.log_RelH == True:
+        try:
+            if len(new_RelH_samples) > 0:
+                frame.relative_humidity = round(mean(new_RelH_samples), 1)
+        except: helpers.data_error()
     
     # -- WIND SPEED ------------------------------------------------------------
-    try:
-        # Merge new and old ticks and remove ticks older than ten minutes
-        past_WSpd_ticks.extend(new_WSpd_ticks)
+    # Merge new and old ticks and remove ticks older than ten minutes
+    past_WSpd_ticks.extend(new_WSpd_ticks)
 
-        for tick in list(past_WSpd_ticks):
-            if tick < ten_mins_ago: past_WSpd_ticks.remove(tick)
+    for tick in list(past_WSpd_ticks):
+        if tick < ten_mins_ago: past_WSpd_ticks.remove(tick)
 
-        # Calculate wind speed only if 2 minutes of data is available
-        if two_mins_ago >= data_start:
-            WSpd_values = []
+    if config.log_WSpd == True:
+        try:
+            # Calculate wind speed only if 2 minutes of data is available
+            if two_mins_ago >= data_start:
+                WSpd_values = []
 
-            # Iterate over data in three second samples
-            for second in range(0, 118, 3):
-                WSpd_start = two_mins_ago + timedelta(seconds = second)
-                WSpd_end = WSpd_start + timedelta(seconds = 3)
-                ticks_in_WSpd_sample = 0
+                # Iterate over data in three second samples
+                for second in range(0, 118, 3):
+                    WSpd_start = two_mins_ago + timedelta(seconds = second)
+                    WSpd_end = WSpd_start + timedelta(seconds = 3)
+                    ticks_in_WSpd_sample = 0
 
-                # Calculate three second average wind speed
-                for tick in past_WSpd_ticks:
-                    if tick >= WSpd_start and tick < WSpd_end:
-                        ticks_in_WSpd_sample += 1
+                    # Calculate three second average wind speed
+                    for tick in past_WSpd_ticks:
+                        if tick >= WSpd_start and tick < WSpd_end:
+                            ticks_in_WSpd_sample += 1
 
-                WSpd_values.append((ticks_in_WSpd_sample * 2.5) / 3)
-            frame.wind_speed = round(mean(WSpd_values), 1)
-    except: helpers.data_error()
+                    WSpd_values.append((ticks_in_WSpd_sample * 2.5) / 3)
+                frame.wind_speed = round(mean(WSpd_values), 1)
+        except: helpers.data_error()
 
     # -- WIND DIRECTION --------------------------------------------------------
-    try:
-        # Merge new and old samples and remove samples older than two minutes
-        past_WDir_samples.extend(new_WDir_samples)
+    if config.log_WDir == True:
+        try:
+            # Merge new and old samples and remove samples older than two mins
+            past_WDir_samples.extend(new_WDir_samples)
 
-        for sample in list(past_WDir_samples):
-            if sample[0] < two_mins_ago: past_WDir_samples.remove(sample)
+            for sample in list(past_WDir_samples):
+                if sample[0] < two_mins_ago: past_WDir_samples.remove(sample)
 
-        # Calculate wind direction only if there is positive wind speed
-        if (frame.wind_speed != None and frame.wind_speed > 0
-            and len(past_WDir_samples) > 0):
-            
-            WDir_total = 0
-            for sample in past_WDir_samples: WDir_total += sample[1]
+            # Calculate wind direction only if there is positive wind speed
+            if (frame.wind_speed != None and frame.wind_speed > 0
+                and len(past_WDir_samples) > 0):
+                
+                WDir_total = 0
+                for sample in past_WDir_samples: WDir_total += sample[1]
 
-            frame.wind_direction = int(
-                round(WDir_total / len(past_WDir_samples)))
-    except: helpers.data_error()
+                frame.wind_direction = int(
+                    round(WDir_total / len(past_WDir_samples)))
+        except: helpers.data_error()
 
     # -- WIND GUST -------------------------------------------------------------
-    try:
-        # Calculate wind gust only if there is positive wind speed
-        if (frame.wind_speed != None and frame.wind_speed > 0
-            and ten_mins_ago >= data_start):
+    if config.log_WGst == True:
+        try:
+            # Calculate wind gust only if there is positive wind speed
+            if (frame.wind_speed != None and frame.wind_speed > 0
+                and ten_mins_ago >= data_start):
 
-            # Iterate over each second in three second samples
-            WGst_value = 0
+                # Iterate over each second in three second samples
+                WGst_value = 0
 
-            for second in range(0, 598):
-                WGst_start = ten_mins_ago + timedelta(seconds = second)
-                WGst_end = WGst_start + timedelta(seconds = 3)
-                ticks_in_WGst_sample = 0
+                for second in range(0, 598):
+                    WGst_start = ten_mins_ago + timedelta(seconds = second)
+                    WGst_end = WGst_start + timedelta(seconds = 3)
+                    ticks_in_WGst_sample = 0
 
-                # Calculate three second average wind speed, check if highest
-                for tick in past_WSpd_ticks:
-                    if tick >= WGst_start and tick < WGst_end:
-                        ticks_in_WGst_sample += 1
+                    # Calculate 3 second average wind speed, check if highest
+                    for tick in past_WSpd_ticks:
+                        if tick >= WGst_start and tick < WGst_end:
+                            ticks_in_WGst_sample += 1
 
-                WGst_sample = (ticks_in_WGst_sample * 2.5) / 3
-                if WGst_sample > WGst_value: WGst_value = WGst_sample
-                
-            frame.wind_gust = round(WGst_value, 1)
-    except: helpers.data_error()
+                    WGst_sample = (ticks_in_WGst_sample * 2.5) / 3
+                    if WGst_sample > WGst_value: WGst_value = WGst_sample
+                    
+                frame.wind_gust = round(WGst_value, 1)
+        except: helpers.data_error()
 
     # -- SUNSHINE DURATION -----------------------------------------------------
-    try:
-        frame.sunshine_duration = new_SunD_ticks
-    except: helpers.data_error()
+    if config.log_SunD == True:
+        try:
+            frame.sunshine_duration = new_SunD_ticks
+        except: helpers.data_error()
 
     # -- RAINFALL --------------------------------------------------------------
-    try:
-        frame.rainfall = new_Rain_ticks * 0.254
-    except: helpers.data_error()
+    if config.log_Rain == True:
+        try:
+            frame.rainfall = new_Rain_ticks * 0.254
+        except: helpers.data_error()
 
     # -- STATION PRESSURE ------------------------------------------------------
-    try:
-        if len(new_StaP_samples) > 0:
-            frame.station_pressure = round(mean(new_StaP_samples), 1)
-    except: helpers.data_error()
+    if config.log_StaP == True:
+        try:
+            if len(new_StaP_samples) > 0:
+                frame.station_pressure = round(mean(new_StaP_samples), 1)
+        except: helpers.data_error()
 
     # -- DEW POINT -------------------------------------------------------------
-    try:
-        if frame.air_temperature != None and frame.relative_humidity != None:
-            frame.dew_point = round(helpers.calculate_dew_point(
-                frame.air_temperature, frame.relative_humidity), 1)
-    except: helpers.data_error()
+    if config.log_DewP == True:
+        try:
+            if (frame.air_temperature != None and 
+                rame.relative_humidity != None):
+
+                frame.dew_point = round(helpers.calculate_dew_point(
+                    frame.air_temperature, frame.relative_humidity), 1)
+        except: helpers.data_error()
 
     # -- MEAN SEA LEVEL PRESSURE -----------------------------------------------
-    try:
-        if (frame.station_pressure != None and frame.air_temperature != None
-            and frame.dew_point != None):
+    if config.log_MSLP == True:
+        try:
+            if (frame.station_pressure != None and
+                frame.air_temperature != None and frame.dew_point != None):
 
-            MSLP_value = helpers.calculate_mean_sea_level_pressure(
-                frame.station_pressure, frame.air_temperature, frame.dew_point)
+                MSLP_value = helpers.calculate_mean_sea_level_pressure(
+                    frame.station_pressure, frame.air_temperature,
+                    frame.dew_point)
 
-            frame.mean_sea_level_pressure = round(MSLP_value, 1)
-    except: helpers.data_error()
+                frame.mean_sea_level_pressure = round(MSLP_value, 1)
+        except: helpers.data_error()
 
     # ADD TO DATABASE ----------------------------------------------------------
     free_space = helpers.remaining_space("/")
@@ -283,20 +312,23 @@ def do_log_environment(utc):
     frame = frames.DataUtcEnviron(utc)
 
     # -- ENCLOSURE TEMPERATURE -------------------------------------------------
-    try:
-        EncT_value = ds18b20.read_temperature(config.EncT_address, None)
+    if config.log_EncT == True:
+        try:
+            EncT_value = ds18b20.read_temperature(config.EncT_address, None)
 
-        if EncT_value == None: helpers.data_error()
-        else:
-            frame.enclosure_temperature = round(EncT_value, 1)
-    except: helpers.data_error()
+            if EncT_value == None: helpers.data_error()
+            else:
+                frame.enclosure_temperature = round(EncT_value, 1)
+        except: helpers.data_error()
 
     # -- CPU TEMPERATURE -------------------------------------------------------
-    try:
-        global CPUT_value
-        frame.cpu_temperature = round(CPUT_value, 1)
-        CPUT_value = None
-    except: helpers.data_error()
+    if config.log_CPUT == True:
+        try:
+            global CPUT_value
+            frame.cpu_temperature = round(CPUT_value, 1)
+
+            CPUT_value = None
+        except: helpers.data_error()
 
     # -- ADD TO DATABASE -------------------------------------------------------
     free_space = helpers.remaining_space("/")
@@ -469,76 +501,82 @@ def every_second():
     if disable_sampling == True: return
 
     # -- SUNSHINE DURATION -----------------------------------------------------
-    try:
-        global SunD_ticks
-        if gpio.input(25) == True: SunD_ticks += 1
-    except: helpers.data_error()
+    if config.log_SunD == True:
+        try:
+            global SunD_ticks
+            if gpio.input(25) == True: SunD_ticks += 1
+        except: helpers.data_error()
 
     if str(utc.second) == "0": return
 
     # -- AIR TEMPERATURE -------------------------------------------------------
-    AirT_value = None
-    
-    try:
-        AirT_thread = Thread(target = ds18b20.read_temperature, args = (
-            config.AirT_address, AirT_value))
+    if config.log_AirT == True:
+        AirT_value = None
+        
+        try:
+            AirT_thread = Thread(target = ds18b20.read_temperature, args = (
+                config.AirT_address, AirT_value))
 
-        AirT_thread.start()
-    except: helpers.data_error()
+            AirT_thread.start()
+        except: helpers.data_error()
 
     # -- RELATIVE HUMIDITY -----------------------------------------------------
-    try:
-        global RelH_samples
+    if config.log_RelH == True:
+        try:
+            global RelH_samples
 
-        RelH_samples.append(
-            round(sht31d.SHT31(address = 0x44).read_humidity(), 1))
-    except: helpers.data_error()
+            RelH_samples.append(
+                round(sht31d.SHT31(address = 0x44).read_humidity(), 1))
+        except: helpers.data_error()
 
     # -- WIND DIRECTION --------------------------------------------------------
-    global WDir_samples
-    spi = None
+    if config.log_WDir == True:
+        global WDir_samples
+        spi = None
 
-    try:
-        spi = Adafruit_GPIO.SPI.SpiDev(0, 0)
-        adc = mcp3008.MCP3008(spi = spi)
+        try:
+            spi = Adafruit_GPIO.SPI.SpiDev(0, 0)
+            adc = mcp3008.MCP3008(spi = spi)
 
-        # Read sensor value from analog to digital converter
-        adc_value = adc.read_adc(1)
+            # Read sensor value from analog to digital converter
+            adc_value = adc.read_adc(1)
 
-        # Convert ADC value to degrees
-        if adc_value >= 52 and adc_value <= 976:
-            WDir_degrees = (adc_value - 52) / (976 - 52) * (360 - 0)
+            # Convert ADC value to degrees
+            if adc_value >= 52 and adc_value <= 976:
+                WDir_degrees = (adc_value - 52) / (976 - 52) * (360 - 0)
 
-            # Modify value to account for non-zero-degrees at north
-            WDir_degrees -= 148
-            if WDir_degrees >= 360: WDir_degrees -= 360
-            elif WDir_degrees < 0: WDir_degrees += 360
+                # Modify value to account for non-zero-degrees at north
+                WDir_degrees -= 148
+                if WDir_degrees >= 360: WDir_degrees -= 360
+                elif WDir_degrees < 0: WDir_degrees += 360
 
-            # Add to sample list with timestamp
-            if WDir_degrees >= 359.5: WDir_degrees = 0
-            WDir_samples.append((utc, int(round(WDir_degrees))))
-    except: helpers.data_error()
+                # Add to sample list with timestamp
+                if WDir_degrees >= 359.5: WDir_degrees = 0
+                WDir_samples.append((utc, int(round(WDir_degrees))))
+        except: helpers.data_error()
 
-    if spi != None: spi.close()
+        if spi != None: spi.close()
 
     # -- STATION PRESSURE ------------------------------------------------------
-    try:
-        global StaP_samples
-        StaP_sensor = bme280.BME280(p_mode = bme280.BME280_OSAMPLE_8)
+    if config.log_StaP == True:
+        try:
+            global StaP_samples
+            StaP_sensor = bme280.BME280(p_mode = bme280.BME280_OSAMPLE_8)
 
-        # Temperature must be read first or pressure will not return
-        discard_StaP_temp = StaP_sensor.read_temperature()
-        StaP_samples.append(round(StaP_sensor.read_pressure() / 100, 1))
-    except: helpers.data_error()
+            # Temperature must be read first or pressure will not return
+            discard_StaP_temp = StaP_sensor.read_temperature()
+            StaP_samples.append(round(StaP_sensor.read_pressure() / 100, 1))
+        except: helpers.data_error()
 
     # -- AIR TEMPERATURE -------------------------------------------------------
-    try:
-        global AirT_samples
+    if config.log_AirT == True:
+        try:
+            global AirT_samples
 
-        if AirT_value == None: helpers.data_error()
-        else:
-            AirT_samples.append(round(AirT_value, 1))
-    except: helpers.data_error()
+            if AirT_value == None: helpers.data_error()
+            else:
+                AirT_samples.append(round(AirT_value, 1))
+        except: helpers.data_error()
 
 # INTERRUPTS -------------------------------------------------------------------
 def do_trigger_wspd(channel):
@@ -570,13 +608,18 @@ def entry_point():
     gpio.output(helpers.ERRORLEDPIN, gpio.LOW)
 
     # -- SET UP SENSORS --------------------------------------------------------
-    gpio.setup(27, gpio.IN, pull_up_down = gpio.PUD_DOWN)
-    gpio.add_event_detect(27, gpio.FALLING, callback = do_trigger_wspd,
-                        bouncetime = 1)
-    gpio.setup(22, gpio.IN, pull_up_down = gpio.PUD_DOWN)
-    gpio.add_event_detect(22, gpio.FALLING, callback = do_trigger_rain,
-                        bouncetime = 150)
-    gpio.setup(25, gpio.IN, pull_up_down = gpio.PUD_DOWN)
+    if config.log_WSpd == True:
+        gpio.setup(27, gpio.IN, pull_up_down = gpio.PUD_DOWN)
+        gpio.add_event_detect(27, gpio.FALLING, callback = do_trigger_wspd,
+            bouncetime = 1)
+
+    if config.log_Rain == True:
+        gpio.setup(22, gpio.IN, pull_up_down = gpio.PUD_DOWN)
+        gpio.add_event_detect(22, gpio.FALLING, callback = do_trigger_rain,
+                            bouncetime = 150)
+
+    if config.log_SunD == True:
+        gpio.setup(25, gpio.IN, pull_up_down = gpio.PUD_DOWN)
 
     # -- WAIT FOR MINUTE -------------------------------------------------------
     while datetime.utcnow().second != 0:
