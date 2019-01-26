@@ -120,6 +120,9 @@ def __validate():
         log_DewP == False)):
         return False
 
+    if (envReport_logging == False and (log_EncT == True or log_CPUT == True)):
+        return False
+
     return True
 
 def __load_value(group, key, data_type):

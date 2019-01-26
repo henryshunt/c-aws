@@ -2,7 +2,6 @@
       Responsible for logging data parameters and generating statistics
 """
 
-# DEPENDENCIES -----------------------------------------------------------------
 import sys
 import subprocess
 import os
@@ -33,8 +32,8 @@ from routines.frames import DbTable
 import routines.analysis as analysis
 import routines.queries as queries
 import sensors.ds18b20 as ds18b20
+import routines.data as data
 
-# GLOBAL VARIABLES -------------------------------------------------------------
 data_start = None
 disable_sampling = True
 
@@ -48,9 +47,7 @@ SunD_ticks = 0
 Rain_ticks = 0
 StaP_samples = []
 
-CPUT_value = None
 
-# OPERATIONS -------------------------------------------------------------------
 def do_log_report(utc):
     """ Reads all sensors, calculates derived and averaged parameters, and
         saves the data to the database
@@ -81,7 +78,7 @@ def do_log_report(utc):
     StaP_samples = []
     disable_sampling = False
 
-    # -- TEMPERATURE -----------------------------------------------------------
+    # -- INSTANTANEOUS TEMPERATURES --------------------------------------------
     try:
         # Read each sensor in separate thread to reduce wait
         ExpT_value = None
@@ -125,33 +122,27 @@ def do_log_report(utc):
         # Get and check read values from each temperature sensor
         if config.log_ExpT == True:
             if ExpT_value == None: helpers.data_error()
-            else:
-                frame.exposed_temperature = round(ExpT_value, 1)
-                ExpT_value = None
+            else: frame.exposed_temperature = round(ExpT_value, 1)
 
         if config.log_ST10 == True:
             if ST10_value == None: helpers.data_error()
-            else:
-                frame.soil_temperature_10 = round(ST10_value, 1)
-                ST10_value = None
+            else: frame.soil_temperature_10 = round(ST10_value, 1)
 
         if config.log_ST30 == True:
             if ST30_value == None: helpers.data_error()
-            else:
-                frame.soil_temperature_30 = round(ST30_value, 1)
-                ST30_value = None
+            else: frame.soil_temperature_30 = round(ST30_value, 1)
 
         if config.log_ST00 == True:
             if ST00_value == None: helpers.data_error()
-            else:
-                frame.soil_temperature_00 = round(ST00_value, 1)
-                ST00_value = None
+            else: frame.soil_temperature_00 = round(ST00_value, 1)
+    except: helpers.data_error()
 
-        # Get average of air termperature samples
-        if config.log_AirT == True:
+    # -- AIR TEMPERATURE -------------------------------------------------------
+    if config.log_AirT == True:
+        try:
             if len(new_AirT_samples) > 0:
                 frame.air_temperature = round(mean(new_AirT_samples), 1)
-    except: helpers.data_error()
+        except: helpers.data_error()
 
     # -- RELATIVE HUMIDITY -----------------------------------------------------
     if config.log_RelH == True:
@@ -160,78 +151,39 @@ def do_log_report(utc):
                 frame.relative_humidity = round(mean(new_RelH_samples), 1)
         except: helpers.data_error()
     
+    # -- WIND SPEED AND WIND GUST ----------------------------------------------
+    if config.log_WSpd == True or config.log_WGst == True:
+        data.prepare_wind_ticks(past_WSpd_ticks, new_WSpd_ticks, ten_mins_ago)
+
     # -- WIND SPEED ------------------------------------------------------------
-    # Merge new and old ticks and remove ticks older than ten minutes
-    past_WSpd_ticks.extend(new_WSpd_ticks)
-
-    for tick in list(past_WSpd_ticks):
-        if tick < ten_mins_ago: past_WSpd_ticks.remove(tick)
-
     if config.log_WSpd == True:
         try:
-            # Calculate wind speed only if 2 minutes of data is available
             if two_mins_ago >= data_start:
-                WSpd_values = []
-
-                # Iterate over data in three second samples
-                for second in range(0, 118, 3):
-                    WSpd_start = two_mins_ago + timedelta(seconds = second)
-                    WSpd_end = WSpd_start + timedelta(seconds = 3)
-                    ticks_in_WSpd_sample = 0
-
-                    # Calculate three second average wind speed
-                    for tick in past_WSpd_ticks:
-                        if tick >= WSpd_start and tick < WSpd_end:
-                            ticks_in_WSpd_sample += 1
-
-                    WSpd_values.append((ticks_in_WSpd_sample * 2.5) / 3)
-                frame.wind_speed = round(mean(WSpd_values), 1)
+                WSpd_value = data.calculate_wind_speed(past_WSpd_ticks,
+                    two_mins_ago)
+                
+                if WSpd_value != None: frame.wind_speed = round(WSpd_value, 1)
         except: helpers.data_error()
 
     # -- WIND DIRECTION --------------------------------------------------------
     if config.log_WDir == True:
         try:
-            # Merge new and old samples and remove samples older than two mins
-            past_WDir_samples.extend(new_WDir_samples)
+            if two_mins_ago >= data_start:
+                WDir_value = data.calculate_wind_direction(past_WDir_samples,
+                    new_WDir_samples, two_mins_ago)
 
-            for sample in list(past_WDir_samples):
-                if sample[0] < two_mins_ago: past_WDir_samples.remove(sample)
-
-            # Calculate wind direction only if there is positive wind speed
-            if (frame.wind_speed != None and frame.wind_speed > 0
-                and len(past_WDir_samples) > 0):
-                
-                WDir_total = 0
-                for sample in past_WDir_samples: WDir_total += sample[1]
-
-                frame.wind_direction = int(
-                    round(WDir_total / len(past_WDir_samples)))
+                if WDir_value != None:
+                    frame.wind_direction = int(round(WDir_value))
         except: helpers.data_error()
 
     # -- WIND GUST -------------------------------------------------------------
     if config.log_WGst == True:
         try:
-            # Calculate wind gust only if there is positive wind speed
-            if (frame.wind_speed != None and frame.wind_speed > 0
-                and ten_mins_ago >= data_start):
+            if ten_mins_ago >= data_start:
+                WGst_value = data.calculate_wind_gust(past_WSpd_ticks,
+                    ten_mins_ago)
 
-                # Iterate over each second in three second samples
-                WGst_value = 0
-
-                for second in range(0, 598):
-                    WGst_start = ten_mins_ago + timedelta(seconds = second)
-                    WGst_end = WGst_start + timedelta(seconds = 3)
-                    ticks_in_WGst_sample = 0
-
-                    # Calculate 3 second average wind speed, check if highest
-                    for tick in past_WSpd_ticks:
-                        if tick >= WGst_start and tick < WGst_end:
-                            ticks_in_WGst_sample += 1
-
-                    WGst_sample = (ticks_in_WGst_sample * 2.5) / 3
-                    if WGst_sample > WGst_value: WGst_value = WGst_sample
-                    
-                frame.wind_gust = round(WGst_value, 1)
+                if WGst_value != None: frame.wind_gust = round(WGst_value, 1)
         except: helpers.data_error()
 
     # -- SUNSHINE DURATION -----------------------------------------------------
@@ -256,23 +208,20 @@ def do_log_report(utc):
     # -- DEW POINT -------------------------------------------------------------
     if config.log_DewP == True:
         try:
-            if (frame.air_temperature != None and 
-                rame.relative_humidity != None):
+            DewP_value = data.calculate_dew_point(frame.air_temperature,
+                frame.relative_humidity)
 
-                frame.dew_point = round(helpers.calculate_dew_point(
-                    frame.air_temperature, frame.relative_humidity), 1)
+            if DewP_value != None: frame.dew_point = round(DewP_value, 1)
         except: helpers.data_error()
 
     # -- MEAN SEA LEVEL PRESSURE -----------------------------------------------
     if config.log_MSLP == True:
         try:
-            if (frame.station_pressure != None and
-                frame.air_temperature != None and frame.dew_point != None):
+            MSLP_value = data.calculate_mean_sea_level_pressure(
+                frame.station_pressure, frame.air_temperature,
+                frame.dew_point)
 
-                MSLP_value = helpers.calculate_mean_sea_level_pressure(
-                    frame.station_pressure, frame.air_temperature,
-                    frame.dew_point)
-
+            if MSLP_value != None:
                 frame.mean_sea_level_pressure = round(MSLP_value, 1)
         except: helpers.data_error()
 
@@ -306,7 +255,7 @@ def do_log_report(utc):
             database.commit()
     except: helpers.data_error()
 
-def do_log_environment(utc):
+def do_log_environment(utc, CPUT_value):
     """ Reads computer environment sensors and saves the data to the database
     """
     frame = frames.DataUtcEnviron(utc)
@@ -317,17 +266,14 @@ def do_log_environment(utc):
             EncT_value = ds18b20.read_temperature(config.EncT_address, None)
 
             if EncT_value == None: helpers.data_error()
-            else:
-                frame.enclosure_temperature = round(EncT_value, 1)
+            else: frame.enclosure_temperature = round(EncT_value, 1)
         except: helpers.data_error()
 
     # -- CPU TEMPERATURE -------------------------------------------------------
     if config.log_CPUT == True:
         try:
-            global CPUT_value
-            frame.cpu_temperature = round(CPUT_value, 1)
-
-            CPUT_value = None
+            if CPUT_value == None: helpers.data_error()
+            else: frame.cpu_temperature = round(CPUT_value, 1)
         except: helpers.data_error()
 
     # -- ADD TO DATABASE -------------------------------------------------------
@@ -465,7 +411,7 @@ def do_generate_stats(utc):
             database.commit()
     except: helpers.data_error()
 
-# SCHEDULERS -------------------------------------------------------------------
+
 def every_minute():
     """ Triggered every minute to generate a report and environment report, add
         them to the database, activate the camera and generate statistics
@@ -477,17 +423,18 @@ def every_minute():
     gpio.output(helpers.ERRORLEDPIN, gpio.LOW)
     time.sleep(0.25)
 
-    # Read CPU temperature before anything else happens. Considered idle temp
     # -- CPU TEMPERATURE -------------------------------------------------------
-    if config.envReport_logging == True and config.log_CPUT == True:
+    CPUT_value = None
+
+    # Read CPU temperature before anything else happens. Considered idle temp
+    if config.log_CPUT == True:
         try:
-            global CPUT_value
             CPUT_value = CPUTemperature().temperature
         except: helpers.data_error()
 
-    # Run actions if relevant configuration modifiers are active
+    # -- RUN OPERATIONS --------------------------------------------------------
     do_log_report(utc)
-    if config.envReport_logging == True: do_log_environment(utc)
+    if config.envReport_logging == True: do_log_environment(utc, CPUT_value)
     if config.camera_logging == True: do_log_camera(utc)
     if config.dayStat_generation == True: do_generate_stats(utc)
     gpio.output(23, gpio.LOW)
@@ -578,7 +525,7 @@ def every_second():
                 AirT_samples.append(round(AirT_value, 1))
         except: helpers.data_error()
 
-# INTERRUPTS -------------------------------------------------------------------
+
 def do_trigger_wspd(channel):
     global disable_sampling, WSpd_ticks
     if disable_sampling == True: return
