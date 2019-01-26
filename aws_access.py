@@ -158,7 +158,8 @@ def data_now():
     # Calculate total rainfall over past hour
     Rain_PHr_record = analysis.past_hour_total(url_time, "Rain")
     if Rain_PHr_record != False and Rain_PHr_record != None:
-        data["Rain_PHr"] = round(Rain_PHr_record["Rain_PHr"], 3)
+        if Rain_PHr_record["Rain_PHr"] != None:
+            data["Rain_PHr"] = round(Rain_PHr_record["Rain_PHr"], 3)
 
     # Calculate three hour pressure tendency
     if data["StaP"] != None:
