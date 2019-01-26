@@ -82,7 +82,7 @@ def do_log_report(utc):
     # -- INSTANTANEOUS TEMPERATURES --------------------------------------------
     try:
         # Read each sensor in separate thread to reduce wait
-        ExpT_value = None
+        ExpT_value = MutableValue()
         ExpT_thread = None
 
         if config.log_ExpT == True:
@@ -90,7 +90,7 @@ def do_log_report(utc):
                 config.ExpT_address, ExpT_value))
             ExpT_thread.start()
 
-        ST10_value = None
+        ST10_value = MutableValue()
         ST10_thread = None
 
         if config.log_ST10 == True:
@@ -98,7 +98,7 @@ def do_log_report(utc):
                 config.ST10_address, ST10_value))
             ST10_thread.start()
 
-        ST30_value = None
+        ST30_value = MutableValue()
         ST30_thread = None
         
         if config.log_ST30 == True:
@@ -106,7 +106,7 @@ def do_log_report(utc):
                 config.ST30_address, ST30_value))
             ST30_thread.start()
 
-        ST00_value = None
+        ST00_value = MutableValue()
         ST00_thread = None
         
         if config.log_ST00 == True:
@@ -122,20 +122,20 @@ def do_log_report(utc):
 
         # Get and check read values from each temperature sensor
         if config.log_ExpT == True:
-            if ExpT_value == None: helpers.data_error()
-            else: frame.exposed_temperature = round(ExpT_value, 1)
+            if ExpT_value.getValue() == None: helpers.data_error()
+            else: frame.exposed_temperature = round(ExpT_value.getValue(), 1)
 
         if config.log_ST10 == True:
-            if ST10_value == None: helpers.data_error()
-            else: frame.soil_temperature_10 = round(ST10_value, 1)
+            if ST10_value.getValue() == None: helpers.data_error()
+            else: frame.soil_temperature_10 = round(ST10_value.getValue(), 1)
 
         if config.log_ST30 == True:
-            if ST30_value == None: helpers.data_error()
-            else: frame.soil_temperature_30 = round(ST30_value, 1)
+            if ST30_value.getValue() == None: helpers.data_error()
+            else: frame.soil_temperature_30 = round(ST30_value.getValue(), 1)
 
         if config.log_ST00 == True:
-            if ST00_value == None: helpers.data_error()
-            else: frame.soil_temperature_00 = round(ST00_value, 1)
+            if ST00_value.getValue() == None: helpers.data_error()
+            else: frame.soil_temperature_00 = round(ST00_value.getValue(), 1)
     except: helpers.data_error()
 
     # -- AIR TEMPERATURE -------------------------------------------------------
@@ -520,10 +520,10 @@ def every_second():
     if config.log_AirT == True:
         try:
             global AirT_samples
+            AirT_thread.join()
 
             if AirT_value.getValue() == None: helpers.data_error()
-            else:
-                AirT_samples.append(round(AirT_value.getValue(), 1))
+            else: AirT_samples.append(round(AirT_value.getValue(), 1))
         except: helpers.data_error()
 
 
