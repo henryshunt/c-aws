@@ -33,6 +33,7 @@ import routines.analysis as analysis
 import routines.queries as queries
 import sensors.ds18b20 as ds18b20
 import routines.data as data
+from routines.mutable import MutableValue
 
 data_start = None
 disable_sampling = True
@@ -458,7 +459,7 @@ def every_second():
 
     # -- AIR TEMPERATURE -------------------------------------------------------
     if config.log_AirT == True:
-        AirT_value = None
+        AirT_value = MutableValue()
         
         try:
             AirT_thread = Thread(target = ds18b20.read_temperature, args = (
@@ -520,9 +521,9 @@ def every_second():
         try:
             global AirT_samples
 
-            if AirT_value == None: helpers.data_error()
+            if AirT_value.getValue() == None: helpers.data_error()
             else:
-                AirT_samples.append(round(AirT_value, 1))
+                AirT_samples.append(round(AirT_value.getValue(), 1))
         except: helpers.data_error()
 
 

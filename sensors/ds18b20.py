@@ -5,7 +5,7 @@ def read_temperature(address, store):
         the specified variable
     """
     if not os.path.isdir("/sys/bus/w1/devices/" + address):
-        if store != None: store = None
+        if store != None: store.setValue(None)
         return None
 
     try:
@@ -17,12 +17,12 @@ def read_temperature(address, store):
 
             # Check for error values
             if temp == -127 or temp == 85:
-                if store != None: store = None
+                if store != None: store.setValue(None)
                 return None
 
-            if store != None: store = temp
+            if store != None: store.setValue(temp)
             return temp
 
     except:
-        if store != None: store = None
+        if store != None: store.setValue(None)
         return None
