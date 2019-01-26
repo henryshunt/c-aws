@@ -28,12 +28,12 @@ import spidev
 import routines.config as config
 import routines.helpers as helpers
 from sensors.temperature import Temperature
-from sensors.humidity import Humidity
-from sensors.wind import Wind
-from sensors.direction import Direction
+# from sensors.humidity import Humidity
+# from sensors.wind import Wind
+# from sensors.direction import Direction
 from sensors.sunshine import Sunshine
 from sensors.rainfall import Rainfall
-from sensors.pressure import Pressure
+# from sensors.pressure import Pressure
 import routines.frames as frames
 from routines.frames import DbTable
 from routines.mutable import MutableValue
@@ -47,16 +47,16 @@ disable_sampling = True
 
 sensor_AirT = Temperature()
 sensor_ExpT = Temperature()
-sensor_RelH = Humidity()
-sensor_WSpd = Wind()
-sensor_WDir = Direction()
+# sensor_RelH = Humidity()
+# sensor_WSpd = Wind()
+# sensor_WDir = Direction()
 sensor_SunD = Sunshine()
 sensor_Rain = Rainfall()
-sensor_StaP = Pressure()
+# sensor_StaP = Pressure()
 sensor_ST10 = Temperature()
 sensor_ST30 = Temperature()
 sensor_ST00 = Temperature()
-sensor_CPUT = CPUTemperature()
+# sensor_CPUT = CPUTemperature()
 sensor_EncT = Temperature()
 
 RelH_samples = []
@@ -83,6 +83,8 @@ def do_log_report(utc):
     
     # -- COPY GLOBALS ----------------------------------------------------------
     disable_sampling = True
+    sensor_Rain.set_pause(True)
+
     sensor_AirT.shift_store()
     sensor_AirT.reset_store()
     new_RelH_samples = RelH_samples[:]
@@ -91,13 +93,15 @@ def do_log_report(utc):
     WSpd_ticks = []
     new_WDir_samples = WDir_samples[:]
     WDir_samples = []
-    new_SunD_ticks = SunD_ticks
-    SunD_ticks = 0
-    new_Rain_ticks = Rain_ticks
-    Rain_ticks = 0
+    sensor_SunD.shift_store()
+    sensor_SunD.reset_store()
+    sensor_Rain.shift_store()
+    sensor_Rain.reset_store()
     new_StaP_samples = StaP_samples[:]
     StaP_samples = []
+
     disable_sampling = False
+    sensor_Rain.set_pause(False)
 
     # -- INSTANTANEOUS TEMPERATURES --------------------------------------------
     try:
@@ -213,7 +217,11 @@ def do_log_report(utc):
     # -- SUNSHINE DURATION -----------------------------------------------------
     if config.log_SunD == True:
         try:
-            frame.sunshine_duration = new_SunD_ticks
+            SunD_value = sensor_SunD.get_shifted()
+            sensor_SunD.reset_shift()
+
+            if SunD_value != None:
+                frame.sunshine_duration = SunD_value
         except: helpers.data_error()
 
     # -- RAINFALL --------------------------------------------------------------
@@ -474,8 +482,7 @@ def every_second():
     # -- SUNSHINE DURATION -----------------------------------------------------
     if config.log_SunD == True:
         try:
-            global SunD_ticks
-            if gpio.input(25) == True: SunD_ticks += 1
+            sensor_SunD.sample()
         except: helpers.data_error()
 
     if str(utc.second) == "0": return
@@ -551,12 +558,6 @@ def do_trigger_wspd(channel):
     
     WSpd_ticks.append(datetime.utcnow())
 
-def do_trigger_rain(channel):
-    global disable_sampling, Rain_ticks
-    if disable_sampling == True: return
-        
-    Rain_ticks += 1
-
 
 # ENTRY POINT ==================================================================
 def entry_point():
@@ -584,13 +585,8 @@ def entry_point():
         gpio.add_event_detect(27, gpio.FALLING, callback = do_trigger_wspd,
             bouncetime = 1)
 
-    if config.log_Rain == True:
-        gpio.setup(22, gpio.IN, pull_up_down = gpio.PUD_DOWN)
-        gpio.add_event_detect(22, gpio.FALLING, callback = do_trigger_rain,
-                            bouncetime = 150)
-
-    if config.log_SunD == True:
-        gpio.setup(25, gpio.IN, pull_up_down = gpio.PUD_DOWN)
+    if config.log_SunD == True: sensor_SunD.setup(25)
+    if config.log_Rain == True: sensor_Rain.setup(22)
 
     if config.log_ST10 == True:
         sensor_ST10.setup(LogType.ARRAY, config.ST10_address)
@@ -612,6 +608,7 @@ def entry_point():
     # -- START DATA LOGGING ----------------------------------------------------
     data_start = datetime.utcnow().replace(second = 0, microsecond = 0)
     disable_sampling = False
+    sensor_Rain.set_pause(False)
 
     event_scheduler = BlockingScheduler()
     event_scheduler.add_job(every_minute, "cron", minute = "0-59")
