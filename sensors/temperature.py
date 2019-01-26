@@ -10,6 +10,7 @@ class Temperature():
         self.__log_type = None
         self.__address = None
         self.__store = None
+        self.__shift = None
     
     def setup(self, log_type, address):
         self.__error = False
@@ -47,6 +48,7 @@ class Temperature():
         elif self.__log_type == LogType.ARRAY:
             if len(self.__store) > 0:
                 return statistics.mean(self.__store)
+            else: return None
 
     def reset_store(self):
         self.__error = False
@@ -56,6 +58,35 @@ class Temperature():
 
         elif self.__log_type == LogType.ARRAY:
             self.__store = []
+
+    def get_shifted(self):
+        self.__error = False
+
+        if self.__log_type == LogType.VALUE:
+            return self.__shift
+
+        elif self.__log_type == LogType.ARRAY:
+            if len(self.__shift) > 0:
+                return statistics.mean(self.__shift)
+            else: return None
+
+    def reset_shift(self):
+        self.__error = False
+        
+        if self.__log_type == LogType.VALUE:
+            self.__shift = None
+
+        elif self.__log_type == LogType.ARRAY:
+            self.__shift = []
+
+    def shift_store(self):
+        self.__error = False
+
+        if self.__log_type == LogType.VALUE:
+            self.__shift = self.__store
+
+        elif self.__log_type == LogType.ARRAY:
+            self.__shift = self.__store[:]
 
     def __read_value(self):
         try:

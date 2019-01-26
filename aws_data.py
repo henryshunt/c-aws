@@ -27,18 +27,38 @@ import spidev
 
 import routines.config as config
 import routines.helpers as helpers
+from sensors.temperature import Temperature
+from sensors.humidity import Humidity
+from sensors.wind import Wind
+from sensors.direction import Direction
+from sensors.sunshine import Sunshine
+from sensors.rainfall import Rainfall
+from sensors.pressure import Pressure
 import routines.frames as frames
 from routines.frames import DbTable
+from routines.mutable import MutableValue
+from sensors.logtype import LogType
+import routines.data as data
 import routines.analysis as analysis
 import routines.queries as queries
-import sensors.ds18b20 as ds18b20
-import routines.data as data
-from routines.mutable import MutableValue
 
 data_start = None
 disable_sampling = True
 
-AirT_samples = []
+sensor_AirT = Temperature()
+sensor_ExpT = Temperature()
+sensor_RelH = Humidity()
+sensor_WSpd = Wind()
+sensor_WDir = Direction()
+sensor_SunD = Sunshine()
+sensor_Rain = Rainfall()
+sensor_StaP = Pressure()
+sensor_ST10 = Temperature()
+sensor_ST30 = Temperature()
+sensor_ST00 = Temperature()
+sensor_CPUT = CPUTemperature()
+sensor_EncT = Temperature()
+
 RelH_samples = []
 WSpd_ticks = []
 past_WSpd_ticks = []
@@ -63,8 +83,8 @@ def do_log_report(utc):
     
     # -- COPY GLOBALS ----------------------------------------------------------
     disable_sampling = True
-    new_AirT_samples = AirT_samples[:]
-    AirT_samples = []
+    sensor_AirT.shift_store()
+    sensor_AirT.reset_store()
     new_RelH_samples = RelH_samples[:]
     RelH_samples = []
     new_WSpd_ticks = WSpd_ticks[:]
@@ -141,8 +161,11 @@ def do_log_report(utc):
     # -- AIR TEMPERATURE -------------------------------------------------------
     if config.log_AirT == True:
         try:
-            if len(new_AirT_samples) > 0:
-                frame.air_temperature = round(mean(new_AirT_samples), 1)
+            AirT_value = sensor_AirT.get_shifted()
+            sensor_AirT.reset_shift()
+
+            if AirT_value != None:
+                frame.air_temperature = round(AirT_value, 1)
         except: helpers.data_error()
 
     # -- RELATIVE HUMIDITY -----------------------------------------------------
@@ -458,13 +481,11 @@ def every_second():
     if str(utc.second) == "0": return
 
     # -- AIR TEMPERATURE -------------------------------------------------------
-    if config.log_AirT == True:
-        AirT_value = MutableValue()
-        
-        try:
-            AirT_thread = Thread(target = ds18b20.read_temperature, args = (
-                config.AirT_address, AirT_value))
+    AirT_thread = None
 
+    if config.log_AirT == True:
+        try:
+            AirT_thread = Thread(target = sensor_AirT.sample, args = ())
             AirT_thread.start()
         except: helpers.data_error()
 
@@ -519,11 +540,8 @@ def every_second():
     # -- AIR TEMPERATURE -------------------------------------------------------
     if config.log_AirT == True:
         try:
-            global AirT_samples
             AirT_thread.join()
-
-            if AirT_value.getValue() == None: helpers.data_error()
-            else: AirT_samples.append(round(AirT_value.getValue(), 1))
+            if sensor_AirT.get_error() == True: helpers.data_error()
         except: helpers.data_error()
 
 
@@ -556,6 +574,11 @@ def entry_point():
     gpio.output(helpers.ERRORLEDPIN, gpio.LOW)
 
     # -- SET UP SENSORS --------------------------------------------------------
+    if config.log_AirT == True:
+        sensor_AirT.setup(LogType.ARRAY, config.AirT_address)
+    if config.log_ExpT == True:
+        sensor_ExpT.setup(LogType.ARRAY, config.ExpT_address)
+
     if config.log_WSpd == True:
         gpio.setup(27, gpio.IN, pull_up_down = gpio.PUD_DOWN)
         gpio.add_event_detect(27, gpio.FALLING, callback = do_trigger_wspd,
@@ -568,6 +591,16 @@ def entry_point():
 
     if config.log_SunD == True:
         gpio.setup(25, gpio.IN, pull_up_down = gpio.PUD_DOWN)
+
+    if config.log_ST10 == True:
+        sensor_ST10.setup(LogType.ARRAY, config.ST10_address)
+    if config.log_ST30 == True:
+        sensor_ST30.setup(LogType.ARRAY, config.ST30_address)
+    if config.log_ST00 == True:
+        sensor_ST00.setup(LogType.ARRAY, config.ST00_address)
+
+    if config.log_EncT == True:
+        sensor_EncT.setup(LogType.ARRAY, config.EncT_address)
 
     # -- WAIT FOR MINUTE -------------------------------------------------------
     while datetime.utcnow().second != 0:
