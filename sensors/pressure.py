@@ -33,7 +33,6 @@ class Pressure():
             elif self.__log_type == LogType.ARRAY:
                 if self.__store == None: self.__store = []
                 self.__store.append(value)
-                
         except: self.__error = True
 
     def get_stored(self):
