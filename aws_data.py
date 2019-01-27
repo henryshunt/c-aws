@@ -59,37 +59,42 @@ def operation_log_report(utc):
     """ Reads all sensors, calculates derived and averaged parameters, and
         saves the data to the database
     """
-    global disable_sampling, data_start, RelH_samples, WSpd_ticks
-    global past_WSpd_ticks, WDir_samples, past_WDir_samples, StaP_samples
-
+    global disable_sampling, data_start
     frame = frames.DataUtcReport(utc)
     ten_mins_ago = frame.time - timedelta(minutes = 10)
     two_mins_ago = frame.time - timedelta(minutes = 2)
     
     # -- COPY GLOBALS ----------------------------------------------------------
     disable_sampling = True
-    WSpd_sensor.set_pause(True)
-    Rain_sensor.set_pause(True)
+    if config.WSpd == True: WSpd_sensor.set_pause(True)
+    if config.Rain == True: Rain_sensor.set_pause(True)
 
     # Shift and reset sensor stores to allow data collection to continue
-    AirT_sensor.shift_store()
-    AirT_sensor.reset_store()
-    RelH_sensor.shift_store()
-    RelH_sensor.reset_store()
-    WSpd_sensor.shift_store()
-    WSpd_sensor.reset_store()
-    WDir_sensor.shift_store()
-    WDir_sensor.reset_store()
-    SunD_sensor.shift_store()
-    SunD_sensor.reset_store()
-    Rain_sensor.shift_store()
-    Rain_sensor.reset_store()
-    StaP_sensor.shift_store()
-    StaP_sensor.reset_store()
+    if config.AirT == True:
+        AirT_sensor.shift_store()
+        AirT_sensor.reset_store()
+    if config.RelH == True:
+        RelH_sensor.shift_store()
+        RelH_sensor.reset_store()
+    if config.WSpd == True:
+        WSpd_sensor.shift_store()
+        WSpd_sensor.reset_store()
+    if config.WDir == True:
+        WDir_sensor.shift_store()
+        WDir_sensor.reset_store()
+    if config.SunD == True:
+        SunD_sensor.shift_store()
+        SunD_sensor.reset_store()
+    if config.Rain == True:
+        Rain_sensor.shift_store()
+        Rain_sensor.reset_store()
+    if config.StaP == True:
+        StaP_sensor.shift_store()
+        StaP_sensor.reset_store()
 
     disable_sampling = False
-    WSpd_sensor.set_pause(False)
-    Rain_sensor.set_pause(False)
+    if config.WSpd == True: WSpd_sensor.set_pause(False)
+    if config.Rain == True: Rain_sensor.set_pause(False)
 
     # -- TEMPERATURES ----------------------------------------------------------
     try:
@@ -257,15 +262,15 @@ def operation_log_report(utc):
         except: helpers.data_error()
 
     # -- ADD TO DATABASE -------------------------------------------------------
-    AirT_sensor.reset_shift()
-    ExpT_sensor.reset_store()
-    RelH_sensor.reset_shift()
-    SunD_sensor.reset_shift()
-    Rain_sensor.reset_shift()
-    StaP_sensor.reset_shift()
-    ST10_sensor.reset_store()
-    ST30_sensor.reset_store()
-    ST00_sensor.reset_store()
+    if config.AirT == True: AirT_sensor.reset_shift()
+    if config.ExpT == True: ExpT_sensor.reset_store()
+    if config.RelH == True: RelH_sensor.reset_shift()
+    if config.SunD == True: SunD_sensor.reset_shift()
+    if config.Rain == True: Rain_sensor.reset_shift()
+    if config.StaP == True: StaP_sensor.reset_shift()
+    if config.ST10 == True: ST10_sensor.reset_store()
+    if config.ST30 == True: ST30_sensor.reset_store()
+    if config.ST00 == True: ST00_sensor.reset_store()
 
     free_space = helpers.remaining_space("/")
     if free_space == None or free_space < 0.1:
