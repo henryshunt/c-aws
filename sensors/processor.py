@@ -17,6 +17,10 @@ class Processor():
         self.__error = False
         return self.__store
 
+    def reset_store(self):
+        self.__error = False
+        self.__store = None
+
     def __read_value(self):
         try:
             return CPUTemperature().temperature
