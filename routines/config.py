@@ -36,28 +36,29 @@ camera_uploading = None
 local_server = None
 
 # Sensors group
-log_AirT = None
+AirT = None
 AirT_address = None
-log_ExpT = None
+ExpT = None
 ExpT_address = None
-log_RelH = None
-log_DewP = None
-log_WSpd = None
-log_WDir = None
-log_WGst = None
-log_SunD = None
-log_Rain = None
-log_StaP = None
-log_MSLP = None
-log_ST10 = None
+RelH = None
+WSpd = None
+WDir = None
+SunD = None
+Rain = None
+StaP = None
+ST10 = None
 ST10_address = None
-log_ST30 = None
+ST30 = None
 ST30_address = None
-log_ST00 = None
+ST00 = None
 ST00_address = None
-log_EncT = None
+EncT = None
 EncT_address = None
-log_CPUT = None
+
+# Derived group
+log_DewP = None
+log_WGst = None
+log_MSLP = None
 
 def __validate():
     """ Checks the specified values and that interacting options are set
@@ -68,9 +69,10 @@ def __validate():
     global camera_logging, envReport_logging, envReport_uploading
     global camera_uploading, dayStat_generation, dayStat_uploading
     global report_uploading, remote_sql_server, remote_ftp_server
-    global remote_ftp_username, remote_ftp_password, log_AirT, AirT_address
-    global log_ExpT, ExpT_address, log_ST10, ST10_address, log_ST30
-    global ST30_address, log_ST00, ST00_address, log_EncT, EncT_address
+    global remote_ftp_username, remote_ftp_password, AirT, AirT_address
+    global ExpT, ExpT_address, ST10, ST10_address, ST30, ST30_address, ST00
+    global ST00_address, EncT, EncT_address, log_DewP, RelH, log_WGst, WSpd
+    global log_MSLP, StaP
 
     # AWSInfo group
     if aws_location == None or aws_time_zone == None or data_directory == None:
@@ -107,14 +109,17 @@ def __validate():
             return False
 
     # Sensors group
-    if ((log_AirT == True and AirT_address == None) or (log_ExpT == True and
-        ExpT_address == None) or (log_ST10 == True and ST10_address == None) or
-        (log_ST30 == True and ST30_address == None) or (log_ST00 == True and
-        ST00_address == None) or (log_EncT == True and EncT_address == None)):
+    if ((AirT == True and AirT_address == None) or (ExpT == True and
+        ExpT_address == None) or (ST10 == True and ST10_address == None) or
+        (ST30 == True and ST30_address == None) or (ST00 == True and
+        ST00_address == None) or (EncT == True and EncT_address == None)):
         return False
 
-    if (envReport_logging == False and (log_EncT == True or log_CPUT == True)):
-        return False
+    # Derived group
+    if log_DewP == True and (AirT == False or RelH == False): return False
+    if log_WGst == True and WSpd == False: return False
+    if log_MSLP == True and (StaP == False or AirT == False or
+        log_DewP == False): return False
 
     return True
 
@@ -141,10 +146,9 @@ def load():
     global remote_ftp_username, remote_ftp_password, envReport_logging
     global camera_logging, dayStat_generation, report_uploading
     global envReport_uploading, dayStat_uploading, camera_uploading
-    global local_server, log_AirT, AirT_address, log_ExpT, ExpT_address
-    global log_RelH, log_DewP, log_WSpd, log_WDir, log_WGst, log_SunD, log_Rain
-    global log_StaP, log_MSLP, log_ST10, ST10_address, log_ST30, ST30_address
-    global log_ST00, ST00_address, log_EncT, EncT_address, log_CPUT
+    global local_server, AirT, AirT_address, ExpT, ExpT_address, RelH, WSpd
+    global WDir, SunD, Rain, StaP, ST10, ST10_address, ST30, ST30_address, ST00
+    global ST00_address, EncT, EncT_address, log_DewP, log_WGst, log_MSLP
 
     try:
         __parser.read("config.ini")
@@ -191,34 +195,35 @@ def load():
             "Operations", "LocalServer", __DataType.BOOLEAN)
 
         # Load Sensors group values
-        log_AirT = (__load_value("Sensors", "LogAirT", __DataType.BOOLEAN))
+        AirT = (__load_value("Sensors", "AirT", __DataType.BOOLEAN))
         AirT_address = (
             __load_value("Sensors", "AirTAddress", __DataType.STRING))
-        log_ExpT = (__load_value("Sensors", "LogExpT", __DataType.BOOLEAN))
+        ExpT = (__load_value("Sensors", "ExpT", __DataType.BOOLEAN))
         ExpT_address = (
             __load_value("Sensors", "EncTAddress", __DataType.STRING))
-        log_RelH = (__load_value("Sensors", "LogRelH", __DataType.BOOLEAN))
-        log_DewP = (__load_value("Sensors", "LogDewP", __DataType.BOOLEAN))
-        log_WSpd = (__load_value("Sensors", "LogWSpd", __DataType.BOOLEAN))
-        log_WDir = (__load_value("Sensors", "LogWDir", __DataType.BOOLEAN))
-        log_WGst = (__load_value("Sensors", "LogWGst", __DataType.BOOLEAN))
-        log_SunD = (__load_value("Sensors", "LogSunD", __DataType.BOOLEAN))
-        log_Rain = (__load_value("Sensors", "LogRain", __DataType.BOOLEAN))
-        log_StaP = (__load_value("Sensors", "LogStaP", __DataType.BOOLEAN))
-        log_MSLP = (__load_value("Sensors", "LogMSLP", __DataType.BOOLEAN))
-        log_ST10 = (__load_value("Sensors", "LogST10", __DataType.BOOLEAN))
+        RelH = (__load_value("Sensors", "RelH", __DataType.BOOLEAN))
+        WSpd = (__load_value("Sensors", "WSpd", __DataType.BOOLEAN))
+        WDir = (__load_value("Sensors", "WDir", __DataType.BOOLEAN))
+        SunD = (__load_value("Sensors", "SunD", __DataType.BOOLEAN))
+        Rain = (__load_value("Sensors", "Rain", __DataType.BOOLEAN))
+        StaP = (__load_value("Sensors", "StaP", __DataType.BOOLEAN))
+        ST10 = (__load_value("Sensors", "ST10", __DataType.BOOLEAN))
         ST10_address = (
             __load_value("Sensors", "ST10Address", __DataType.STRING))
-        log_ST30 = (__load_value("Sensors", "LogST30", __DataType.BOOLEAN))
+        ST30 = (__load_value("Sensors", "ST30", __DataType.BOOLEAN))
         ST30_address = (
             __load_value("Sensors", "ST30Address", __DataType.STRING))
-        log_ST00 = (__load_value("Sensors", "LogST00", __DataType.BOOLEAN))
+        ST00 = (__load_value("Sensors", "ST00", __DataType.BOOLEAN))
         ST00_address = (
             __load_value("Sensors", "ST00Address", __DataType.STRING))
-        log_EncT = (__load_value("Sensors", "LogEncT", __DataType.BOOLEAN))
+        EncT = (__load_value("Sensors", "EncT", __DataType.BOOLEAN))
         EncT_address = (
             __load_value("Sensors", "EncTAddress", __DataType.STRING))
-        log_CPUT = (__load_value("Sensors", "LogCPUT", __DataType.BOOLEAN))
+
+        # Load Derived group values
+        log_DewP = (__load_value("Derived", "LogDewP", __DataType.BOOLEAN))
+        log_WGst = (__load_value("Derived", "LogWGst", __DataType.BOOLEAN))
+        log_MSLP = (__load_value("Derived", "LogMSLP", __DataType.BOOLEAN))
     except: return False
 
     return False if __validate() == False else True
