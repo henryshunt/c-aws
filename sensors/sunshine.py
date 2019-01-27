@@ -1,24 +1,17 @@
 import RPi.GPIO as gpio
 
-from sensors.logtype import LogType
-
 class Sunshine():
     def __init__(self):
         self.__error = False
-
         self.__pin = None
         self.__store = None
         self.__shift = None
     
     def setup(self, pin):
-        self.__error = False
         self.__pin = pin
-
-        self.reset_store()
-        self.reset_shift()
         
         try:
-            gpio.setup(25, gpio.IN, pull_up_down = gpio.PUD_DOWN)
+            gpio.setup(pin, gpio.IN, pull_up_down = gpio.PUD_DOWN)
         except: self.__error = True
 
     def get_error(self):

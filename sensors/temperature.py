@@ -6,22 +6,18 @@ from sensors.logtype import LogType
 class Temperature():
     def __init__(self):
         self.__error = False
-
         self.__log_type = None
         self.__address = None
         self.__store = None
         self.__shift = None
     
     def setup(self, log_type, address):
-        self.__error = False
         self.__log_type = log_type
         self.__address = address
-        self.reset_store()
         
         # Check a probe with that address exists
         if not os.path.isdir("/sys/bus/w1/devices/" + address):
             self.__error = True
-            return
     
     def get_error(self):
         return self.__error
@@ -29,15 +25,17 @@ class Temperature():
     def sample(self):
         self.__error = False
 
-        if self.__log_type == LogType.VALUE:
-            try:
-                self.__store = self.__read_value()
-            except: self.__error = True
+        try:
+            value = self.__read_value()
 
-        elif self.__log_type == LogType.ARRAY:
-            try:
-                self.__store.append(self.__read_value())
-            except: self.__error = True
+            if self.__log_type == LogType.VALUE:
+                self.__store = value
+
+            elif self.__log_type == LogType.ARRAY:
+                if self.__store == None: self.__store = []
+                self.__store.append(value)
+                
+        except: self.__error = True
 
     def get_stored(self):
         self.__error = False
@@ -46,18 +44,13 @@ class Temperature():
             return self.__store
 
         elif self.__log_type == LogType.ARRAY:
-            if len(self.__store) > 0:
+            if self.__store != None:
                 return statistics.mean(self.__store)
             else: return None
 
     def reset_store(self):
         self.__error = False
-        
-        if self.__log_type == LogType.VALUE:
-            self.__store = None
-
-        elif self.__log_type == LogType.ARRAY:
-            self.__store = []
+        self.__store = None
 
     def get_shifted(self):
         self.__error = False
@@ -66,18 +59,13 @@ class Temperature():
             return self.__shift
 
         elif self.__log_type == LogType.ARRAY:
-            if len(self.__shift) > 0:
+            if self.__shift != None:
                 return statistics.mean(self.__shift)
             else: return None
 
     def reset_shift(self):
         self.__error = False
-        
-        if self.__log_type == LogType.VALUE:
-            self.__shift = None
-
-        elif self.__log_type == LogType.ARRAY:
-            self.__shift = []
+        self.__shift = None
 
     def shift_store(self):
         self.__error = False
