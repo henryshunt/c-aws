@@ -113,13 +113,6 @@ def __validate():
         ST00_address == None) or (log_EncT == True and EncT_address == None)):
         return False
 
-    if (log_DewP == True and (log_AirT == False or log_RelH == False)):
-        return False
-
-    if (log_MSLP == True and (log_StaP == False or log_AirT == False or
-        log_DewP == False)):
-        return False
-
     if (envReport_logging == False and (log_EncT == True or log_CPUT == True)):
         return False
 
