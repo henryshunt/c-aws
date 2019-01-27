@@ -76,7 +76,6 @@ class Wind():
 
     def shift_store(self):
         self.__error = False
-        if self.__store != None and self.__shift == None: self.__shift = []
         self.__shift.extend(self.__store)
 
     def __interrupt(self, channel):
