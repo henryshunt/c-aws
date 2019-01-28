@@ -320,7 +320,7 @@ def operation_log_environment(utc):
 
     # -- CPU TEMPERATURE -------------------------------------------------------
     try:
-        if sensor_CPUT.get_error() == False:
+        if CPUT_sensor.get_error() == False:
             CPUT_value = CPUT_sensor.get_stored()
             if CPUT_value != None:
                 frame.cpu_temperature = round(CPUT_value, 1)
