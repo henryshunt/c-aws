@@ -1,5 +1,5 @@
 #!/bin/bash
-echo "Installing dependencies for C-AWS software..."
+echo "Installing dependencies for C-AWS..."
 
 apt-get update
 apt-get upgrade
@@ -17,3 +17,5 @@ pip3 install Adafruit_GPIO
 pip3 install astral
 pip3 install flask
 pip3 install python-daemon
+
+echo "DONE installing dependencies for C-AWS"

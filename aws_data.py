@@ -2,15 +2,11 @@
       Responsible for logging data parameters and generating statistics
 """
 
-import sys
-import subprocess
 import os
 from datetime import datetime, timedelta
 import time
 from threading import Thread
-import math
 import sqlite3
-from statistics import mean
 
 import daemon
 import RPi.GPIO as gpio
@@ -471,7 +467,7 @@ def schedule_minute():
     global CPUT_sensor
     utc = datetime.utcnow().replace(second = 0, microsecond = 0)
 
-    # Reset LEDS and wait to allow every_second() to finish
+    # Reset LEDS and wait to allow schedule_second() to finish
     gpio.output(helpers.DATALEDPIN, gpio.HIGH)
     gpio.output(helpers.ERRORLEDPIN, gpio.LOW)
     time.sleep(0.25)
@@ -602,5 +598,6 @@ def entry_point():
 
 if __name__ == "__main__":
     current_dir = os.path.dirname(os.path.realpath(__file__))
+
     with daemon.DaemonContext(working_directory = current_dir):
         entry_point()
