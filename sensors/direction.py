@@ -27,6 +27,8 @@ class Direction():
 
         try:
             value = self.__read_value()
+            if value == None: return
+                
             if self.__store == None: self.__store = []
             self.__store.append((utc, value))
         except: self.__error = True
@@ -74,4 +76,6 @@ class Direction():
 
                 if degrees >= 359.5: degrees = 0
                 return degrees
+
+            else: return None
         except: raise Exception("Error while reading sensor value")
