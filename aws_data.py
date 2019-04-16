@@ -100,28 +100,28 @@ def operation_log_report(utc):
             try:
                 ExpT_thread = Thread(target = ExpT_sensor.sample, args = ())
                 ExpT_thread.start()
-            except: helpers.data_error()
+            except: helpers.data_error(0)
 
         ST10_thread = None
         if config.ST10 == True:
             try:
                 ST10_thread = Thread(target = ST10_sensor.sample, args = ())
                 ST10_thread.start()
-            except: helpers.data_error()
+            except: helpers.data_error(1)
 
         ST30_thread = None
         if config.ST30 == True:
             try:
                 ST30_thread = Thread(target = ST30_sensor.sample, args = ())
                 ST30_thread.start()
-            except: helpers.data_error()
+            except: helpers.data_error(2)
 
         ST00_thread = None
         if config.ST00 == True:
             try:
                 ST00_thread = Thread(target = ST00_sensor.sample, args = ())
                 ST00_thread.start()
-            except: helpers.data_error()
+            except: helpers.data_error(3)
 
         # Wait for all sensors to finish reading
         if config.ExpT == True: ExpT_thread.join()
@@ -132,40 +132,40 @@ def operation_log_report(utc):
         # Get read values and check for read errors, for each sensor
         if config.ExpT == True:
             try:
-                if ExpT_sensor.get_error() == True: helpers.data_error()
+                if ExpT_sensor.get_error() == True: helpers.data_error(4)
                 else:
                     ExpT_value = ExpT_sensor.get_stored()
                     if ExpT_value != None:
                         frame.exposed_temperature = round(ExpT_value, 1)
-            except: helpers.data_error()
+            except: helpers.data_error(5)
 
         if config.ST10 == True:
             try:
-                if ST10_sensor.get_error() == True: helpers.data_error()
+                if ST10_sensor.get_error() == True: helpers.data_error(6)
                 else:
                     ST10_value = ST10_sensor.get_stored()
                     if ST10_value != None:
                         frame.soil_temperature_10 = round(ST10_value, 1)
-            except: helpers.data_error()
+            except: helpers.data_error(7)
 
         if config.ST30 == True:
             try:
-                if ST30_sensor.get_error() == True: helpers.data_error()
+                if ST30_sensor.get_error() == True: helpers.data_error(8)
                 else:
                     ST30_value = ST30_sensor.get_stored()
                     if ST30_value != None:
                         frame.soil_temperature_30 = round(ST30_value, 1)
-            except: helpers.data_error()
+            except: helpers.data_error(9)
 
         if config.ST00 == True:
             try:
-                if ST00_sensor.get_error() == True: helpers.data_error()
+                if ST00_sensor.get_error() == True: helpers.data_error(10)
                 else:
                     ST00_value = ST00_sensor.get_stored()
                     if ST00_value != None:
                         frame.soil_temperature_00 = round(ST00_value, 1)
-            except: helpers.data_error()
-    except: helpers.data_error()
+            except: helpers.data_error(11)
+    except: helpers.data_error(12)
 
     # -- AIR TEMPERATURE -------------------------------------------------------
     if config.AirT == True:
@@ -173,7 +173,7 @@ def operation_log_report(utc):
             AirT_value = AirT_sensor.get_shifted()
             if AirT_value != None:
                 frame.air_temperature = round(AirT_value, 1)
-        except: helpers.data_error()
+        except: helpers.data_error(13)
 
     # -- RELATIVE HUMIDITY -----------------------------------------------------
     if config.RelH == True:
@@ -181,7 +181,7 @@ def operation_log_report(utc):
             RelH_value = RelH_sensor.get_shifted()
             if RelH_value != None:
                 frame.relative_humidity = round(RelH_value, 1)
-        except: helpers.data_error()
+        except: helpers.data_error(14)
     
     # -- WIND SPEED ------------------------------------------------------------
     if config.WSpd == True:
@@ -192,7 +192,7 @@ def operation_log_report(utc):
                 
                 if WSpd_value != None:
                     frame.wind_speed = round(WSpd_value, 1)
-        except: helpers.data_error()
+        except: helpers.data_error(15)
 
     # -- WIND DIRECTION --------------------------------------------------------
     if config.WDir == True:
@@ -204,7 +204,7 @@ def operation_log_report(utc):
                 if WDir_value != None:
                     if frame.wind_speed != None and frame.wind_speed > 0:
                         frame.wind_direction = WDir_value
-        except: helpers.data_error()
+        except: helpers.data_error(16)
 
     # -- SUNSHINE DURATION -----------------------------------------------------
     if config.SunD == True:
@@ -212,7 +212,7 @@ def operation_log_report(utc):
             SunD_value = SunD_sensor.get_shifted()
             if SunD_value != None:
                 frame.sunshine_duration = SunD_value
-        except: helpers.data_error()
+        except: helpers.data_error(17)
 
     # -- RAINFALL --------------------------------------------------------------
     if config.Rain == True:
@@ -220,7 +220,7 @@ def operation_log_report(utc):
             Rain_value = Rain_sensor.get_shifted()
             if Rain_value != None:
                 frame.rainfall = round(Rain_value, 3)
-        except: helpers.data_error()
+        except: helpers.data_error(18)
 
     # -- STATION PRESSURE ------------------------------------------------------
     if config.StaP == True:
@@ -228,7 +228,7 @@ def operation_log_report(utc):
             StaP_value = StaP_sensor.get_shifted()
             if StaP_value != None:
                 frame.station_pressure = round(StaP_value, 1)
-        except: helpers.data_error()
+        except: helpers.data_error(19)
 
     # -- DEW POINT -------------------------------------------------------------
     if config.log_DewP == True:
@@ -236,7 +236,7 @@ def operation_log_report(utc):
             DewP_value = data.calculate_dew_point(frame.air_temperature,
                 frame.relative_humidity)
             if DewP_value != None: frame.dew_point = round(DewP_value, 1)
-        except: helpers.data_error()
+        except: helpers.data_error(20)
 
     # -- WIND GUST -------------------------------------------------------------
     if config.log_WGst == True:
@@ -247,7 +247,7 @@ def operation_log_report(utc):
                 if WGst_value != None:
                     if frame.wind_speed != None and frame.wind_speed > 0:
                         frame.wind_gust = round(WGst_value, 1)
-        except: helpers.data_error()
+        except: helpers.data_error(21)
 
     # -- MEAN SEA LEVEL PRESSURE -----------------------------------------------
     if config.log_MSLP == True:
@@ -258,7 +258,7 @@ def operation_log_report(utc):
 
             if MSLP_value != None:
                 frame.mean_sea_level_pressure = round(MSLP_value, 1)
-        except: helpers.data_error()
+        except: helpers.data_error(22)
     
     if config.AirT == True: AirT_sensor.reset_shift()
     if config.ExpT == True: ExpT_sensor.reset_store()
@@ -273,7 +273,7 @@ def operation_log_report(utc):
     # -- ADD TO DATABASE -------------------------------------------------------
     free_space = helpers.remaining_space("/")
     if free_space == None or free_space < 0.1:
-        helpers.data_error()
+        helpers.data_error(23)
         return
         
     try:
@@ -297,7 +297,7 @@ def operation_log_report(utc):
                                 frame.soil_temperature_00))
             
             database.commit()
-    except: helpers.data_error()
+    except: helpers.data_error(24)
 
 def operation_log_environment(utc):
     """ Reads computer environment sensors and saves the data to the database
@@ -309,13 +309,13 @@ def operation_log_environment(utc):
     if config.EncT == True:
         try:
             EncT_sensor.sample()
-            if EncT_sensor.get_error() == True: helpers.data_error()
+            if EncT_sensor.get_error() == True: helpers.data_error(25)
 
             else:
                 EncT_value = EncT_sensor.get_stored()
                 if EncT_value != None:
                     frame.enclosure_temperature = round(EncT_value, 1)
-        except: helpers.data_error()
+        except: helpers.data_error(26)
 
     # -- CPU TEMPERATURE -------------------------------------------------------
     try:
@@ -323,7 +323,7 @@ def operation_log_environment(utc):
             CPUT_value = CPUT_sensor.get_stored()
             if CPUT_value != None:
                 frame.cpu_temperature = round(CPUT_value, 1)
-    except: helpers.data_error()
+    except: helpers.data_error(27)
 
     EncT_sensor.reset_store()
     CPUT_sensor.reset_store()
@@ -331,7 +331,7 @@ def operation_log_environment(utc):
     # -- ADD TO DATABASE -------------------------------------------------------
     free_space = helpers.remaining_space("/")
     if free_space == None or free_space < 0.1:
-        helpers.data_error()
+        helpers.data_error(28)
         return
 
     try:
@@ -343,7 +343,7 @@ def operation_log_environment(utc):
                                 frame.cpu_temperature))
             
             database.commit()
-    except: helpers.data_error()
+    except: helpers.data_error(29)
 
 def operation_log_camera(utc):
     """ Takes an image on the camera if it is currently a five minute interval
@@ -370,7 +370,7 @@ def operation_log_camera(utc):
         free_space = helpers.remaining_space(config.camera_drive)
 
         if free_space == None or free_space < 0.1:
-            helpers.data_error()
+            helpers.data_error(30)
             return
 
         # -- CAMERA -----------------------------------------------------------
@@ -385,7 +385,7 @@ def operation_log_camera(utc):
                 camera.resolution = (1280, 960)
                 time.sleep(2.5)
                 camera.capture(os.path.join(image_dir, image_name + ".jpg"))
-        except: helpers.data_error()
+        except: helpers.data_error(31)
 
 def operation_generate_stats(utc):
     """ Generates statistics for the local current day from logged records and
@@ -397,21 +397,21 @@ def operation_generate_stats(utc):
     new_stats = analysis.stats_for_date(local_time)
 
     if new_stats == False:
-        helpers.data_error()
+        helpers.data_error(32)
         return
 
     # -- GET CURRENT STATS -----------------------------------------------------
     cur_stats = analysis.record_for_time(local_time, DbTable.DAYSTATS)
 
     if cur_stats == False:
-        helpers.data_error()
+        helpers.data_error(33)
         return
 
     # -- ADD TO DATABASE -------------------------------------------------------
     free_space = helpers.remaining_space("/")
 
     if free_space == None or free_space < 0.1:
-        helpers.data_error()
+        helpers.data_error(34)
         return
 
     try:
@@ -460,7 +460,7 @@ def operation_generate_stats(utc):
                      local_time.strftime("%Y-%m-%d")))
             
             database.commit()
-    except: helpers.data_error()
+    except: helpers.data_error(35)
 
 
 def schedule_minute():
@@ -479,8 +479,8 @@ def schedule_minute():
     # Read CPU temperature before anything else happens. Considered idle temp
     try:
         CPUT_sensor.sample()
-        if CPUT_sensor.get_error() == True: helpers.data_error()
-    except: helpers.data_error()
+        if CPUT_sensor.get_error() == True: helpers.data_error(36)
+    except: helpers.data_error(37)
 
     # -- RUN OPERATIONS --------------------------------------------------------
     operation_log_report(utc)
@@ -503,8 +503,8 @@ def schedule_second():
     if config.SunD == True:
         try:
             SunD_sensor.sample()
-            if SunD_sensor.get_error() == True: helpers.data_error()
-        except: helpers.data_error()
+            if SunD_sensor.get_error() == True: helpers.data_error(38)
+        except: helpers.data_error(39)
 
     # Prevent reading on 0 second. Previous sensors are totalled, so require the
     # 0 second for the final value. Following sensors are averaged, so the 0 
@@ -518,35 +518,35 @@ def schedule_second():
         try:
             AirT_thread = Thread(target = AirT_sensor.sample, args = ())
             AirT_thread.start()
-        except: helpers.data_error()
+        except: helpers.data_error(40)
 
     # -- RELATIVE HUMIDITY -----------------------------------------------------
     if config.RelH == True:
         try:
             RelH_sensor.sample()
-            if RelH_sensor.get_error() == True: helpers.data_error()
-        except: helpers.data_error()
+            if RelH_sensor.get_error() == True: helpers.data_error(41)
+        except: helpers.data_error(42)
 
     # -- WIND DIRECTION --------------------------------------------------------
     if config.WDir == True:
         try:
             WDir_sensor.sample(utc)
-            if WDir_sensor.get_error() == True: helpers.data_error()
-        except: helpers.data_error()
+            if WDir_sensor.get_error() == True: helpers.data_error(43)
+        except: helpers.data_error(44)
 
     # -- STATION PRESSURE ------------------------------------------------------
     if config.StaP == True:
         try:
             StaP_sensor.sample()
-            if StaP_sensor.get_error() == True: helpers.data_error()
-        except: helpers.data_error()
+            if StaP_sensor.get_error() == True: helpers.data_error(45)
+        except: helpers.data_error(46)
 
     # -- AIR TEMPERATURE -------------------------------------------------------
     if config.AirT == True:
         try:
             AirT_thread.join()
-            if AirT_sensor.get_error() == True: helpers.data_error()
-        except: helpers.data_error()
+            if AirT_sensor.get_error() == True: helpers.data_error(47)
+        except: helpers.data_error(48)
 
 
 def entry_point():

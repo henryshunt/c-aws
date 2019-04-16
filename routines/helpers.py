@@ -24,7 +24,7 @@ def init_error(code):
 
         time.sleep(1)
 
-def data_error():
+def data_error(code):
     gpio.output(ERRORLEDPIN, gpio.HIGH)
 
 def remaining_space(directory):
