@@ -1,7 +1,7 @@
 import statistics
 
 from sensors.logtype import LogType
-import sensors.bme280
+import sensors.bme280 as bme280
 
 class Pressure():
     def __init__(self):
@@ -79,6 +79,6 @@ class Pressure():
     def __read_value(self):
         try:
             # Temperature must be read first or pressure will not return
-            discard_temperature = StaP_sensor.read_temperature()
+            discard_temperature = self.__bridge.read_temperature()
             return self.__bridge.read_pressure() / 100
         except: raise Exception("Error while reading sensor value")

@@ -1,6 +1,6 @@
 import Adafruit_GPIO
 
-import sensors.mcp3008
+import sensors.mcp3008 as mcp3008
 import spidev
 
 class Direction():
@@ -18,6 +18,9 @@ class Direction():
             self.__bridge = mcp3008.MCP3008(
                 spi = Adafruit_GPIO.SPI.SpiDev(0, 0))
         except: self.__error = True
+
+    def get_error(self):
+        return self.__error
 
     def sample(self, utc):
         self.__error = False
@@ -69,6 +72,6 @@ class Direction():
                 if degrees >= 360: degrees -= 360
                 elif degrees < 0: degrees += 360
 
-                if WDir_degrees >= 359.5: WDir_degrees = 0
+                if degrees >= 359.5: degrees = 0
                 return degrees
         except: raise Exception("Error while reading sensor value")

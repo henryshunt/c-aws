@@ -152,7 +152,7 @@ def operation_log_report(utc):
             try:
                 if ST30_sensor.get_error() == True: helpers.data_error()
                 else:
-                    ST10_value = ST30_sensor.get_stored()
+                    ST30_value = ST30_sensor.get_stored()
                     if ST30_value != None:
                         frame.soil_temperature_30 = round(ST30_value, 1)
             except: helpers.data_error()
@@ -226,7 +226,7 @@ def operation_log_report(utc):
         try:
             StaP_value = StaP_sensor.get_shifted()
             if StaP_value != None:
-                frame.relative_humidity = round(StaP_value, 1)
+                frame.station_pressure = round(StaP_value, 1)
         except: helpers.data_error()
 
     # -- DEW POINT -------------------------------------------------------------

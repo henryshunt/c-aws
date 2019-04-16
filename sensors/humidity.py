@@ -1,7 +1,7 @@
 import statistics
 
 from sensors.logtype import LogType
-import sensors.sht31d
+import sensors.sht31d as sht31d
 
 class Humidity():
     def __init__(self):
