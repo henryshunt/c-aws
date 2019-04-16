@@ -60,7 +60,7 @@ def operation_log_report(utc):
     ten_mins_ago = frame.time - timedelta(minutes = 10)
     two_mins_ago = frame.time - timedelta(minutes = 2)
     
-    # -- COPY GLOBALS ----------------------------------------------------------
+    # -- SHIFT PRIMARY DATA ----------------------------------------------------
     disable_sampling = True
     if config.WSpd == True: WSpd_sensor.set_pause(True)
     if config.Rain == True: Rain_sensor.set_pause(True)
@@ -202,7 +202,8 @@ def operation_log_report(utc):
                 WDir_value = WDir_sensor.get_shifted()
 
                 if WDir_value != None:
-                    frame.wind_direction = WDir_value
+                    if frame.wind_speed != None and frame.wind_speed > 0:
+                        frame.wind_direction = WDir_value
         except: helpers.data_error()
 
     # -- SUNSHINE DURATION -----------------------------------------------------
@@ -242,8 +243,10 @@ def operation_log_report(utc):
         try:
             if ten_mins_ago >= data_start:
                 WGst_value = WSpd_sensor.get_shifted(ten_mins_ago, True)
+
                 if WGst_value != None:
-                    frame.wind_gust = round(WGst_value, 1)
+                    if frame.wind_speed != None and frame.wind_speed > 0:
+                        frame.wind_gust = round(WGst_value, 1)
         except: helpers.data_error()
 
     # -- MEAN SEA LEVEL PRESSURE -----------------------------------------------
@@ -256,8 +259,7 @@ def operation_log_report(utc):
             if MSLP_value != None:
                 frame.mean_sea_level_pressure = round(MSLP_value, 1)
         except: helpers.data_error()
-
-    # -- ADD TO DATABASE -------------------------------------------------------
+    
     if config.AirT == True: AirT_sensor.reset_shift()
     if config.ExpT == True: ExpT_sensor.reset_store()
     if config.RelH == True: RelH_sensor.reset_shift()
@@ -268,6 +270,7 @@ def operation_log_report(utc):
     if config.ST30 == True: ST30_sensor.reset_store()
     if config.ST00 == True: ST00_sensor.reset_store()
 
+    # -- ADD TO DATABASE -------------------------------------------------------
     free_space = helpers.remaining_space("/")
     if free_space == None or free_space < 0.1:
         helpers.data_error()
@@ -322,10 +325,10 @@ def operation_log_environment(utc):
                 frame.cpu_temperature = round(CPUT_value, 1)
     except: helpers.data_error()
 
-    # -- ADD TO DATABASE -------------------------------------------------------
     EncT_sensor.reset_store()
     CPUT_sensor.reset_store()
 
+    # -- ADD TO DATABASE -------------------------------------------------------
     free_space = helpers.remaining_space("/")
     if free_space == None or free_space < 0.1:
         helpers.data_error()
@@ -503,7 +506,10 @@ def schedule_second():
             if SunD_sensor.get_error() == True: helpers.data_error()
         except: helpers.data_error()
 
-    # No more sensor reads on 0 second since that is part of the next minute
+    # Prevent reading on 0 second. Previous sensors are totalled, so require the
+    # 0 second for the final value. Following sensors are averaged, so the 0 
+    # second is part of the next minute and must be not be read since the
+    # logging routine runs after the 0 second has passed.
     if str(utc.second) == "0": return
 
     # -- AIR TEMPERATURE -------------------------------------------------------
