@@ -1,6 +1,22 @@
 import math
 
+import sqlite
+
 import routines.config as config
+import routines.helpers as helpers
+
+def write_record(query, parameters):
+    try:
+        free_space = helpers.remaining_space(config.data_directory)
+        if free_space == None or free_space < 0.1: return False
+        
+        with sqlite3.connect(config.database_path) as database:
+            cursor = database.cursor()
+            cursor.execute(query, parameters)
+            database.commit()
+
+    except: return False
+    return True
 
 def calculate_dew_point(AirT, RelH):
     if AirT == None or RelH == None: return None

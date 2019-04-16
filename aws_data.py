@@ -260,6 +260,7 @@ def operation_log_report(utc):
                 frame.mean_sea_level_pressure = round(MSLP_value, 1)
         except: helpers.data_error(22)
     
+
     if config.AirT == True: AirT_sensor.reset_shift()
     if config.ExpT == True: ExpT_sensor.reset_store()
     if config.RelH == True: RelH_sensor.reset_shift()
@@ -271,33 +272,14 @@ def operation_log_report(utc):
     if config.ST00 == True: ST00_sensor.reset_store()
 
     # -- ADD TO DATABASE -------------------------------------------------------
-    free_space = helpers.remaining_space("/")
-    if free_space == None or free_space < 0.1:
-        helpers.data_error(23)
-        return
-        
-    try:
-        with sqlite3.connect(config.database_path) as database:
-            cursor = database.cursor()
-            cursor.execute(queries.INSERT_REPORT,
-                               (frame.time.strftime("%Y-%m-%d %H:%M:%S"),
-                                frame.air_temperature,
-                                frame.exposed_temperature,
-                                frame.relative_humidity,
-                                frame.dew_point,
-                                frame.wind_speed,
-                                frame.wind_direction,
-                                frame.wind_gust,
-                                frame.sunshine_duration,
-                                frame.rainfall,
-                                frame.station_pressure,
-                                frame.mean_sea_level_pressure,
-                                frame.soil_temperature_10,
-                                frame.soil_temperature_30,
-                                frame.soil_temperature_00))
-            
-            database.commit()
-    except: helpers.data_error(24)
+    write = data.write_record(queries.INSERT_REPORT,
+        (frame.time.strftime("%Y-%m-%d %H:%M:%S"), frame.air_temperature,
+         frame.exposed_temperature, frame.relative_humidity, frame.dew_point,
+         frame.wind_speed, frame.wind_direction, frame.wind_gust, 
+         frame.sunshine_duration, frame.rainfall, frame.station_pressure,
+         frame.mean_sea_level_pressure, frame.soil_temperature_10,
+         frame.soil_temperature_30, frame.soil_temperature_00))
+    if write == False: helpers.data_error(23)
 
 def operation_log_environment(utc):
     """ Reads computer environment sensors and saves the data to the database
@@ -325,25 +307,15 @@ def operation_log_environment(utc):
                 frame.cpu_temperature = round(CPUT_value, 1)
     except: helpers.data_error(27)
 
+
     EncT_sensor.reset_store()
     CPUT_sensor.reset_store()
 
     # -- ADD TO DATABASE -------------------------------------------------------
-    free_space = helpers.remaining_space("/")
-    if free_space == None or free_space < 0.1:
-        helpers.data_error(28)
-        return
-
-    try:
-        with sqlite3.connect(config.database_path) as database:
-            cursor = database.cursor()
-            cursor.execute(queries.INSERT_ENVREPORT,
-                               (frame.time.strftime("%Y-%m-%d %H:%M:%S"),
-                                frame.enclosure_temperature,
-                                frame.cpu_temperature))
-            
-            database.commit()
-    except: helpers.data_error(29)
+    write = data.write_record(queries.INSERT_ENVREPORT,
+        (frame.time.strftime("%Y-%m-%d %H:%M:%S"), frame.enclosure_temperature,
+         frame.cpu_temperature))
+    if write == False: helpers.data_error(28)
 
 def operation_log_camera(utc):
     """ Takes an image on the camera if it is currently a five minute interval
@@ -395,72 +367,58 @@ def operation_generate_stats(utc):
 
     # -- GET NEW STATS ---------------------------------------------------------
     new_stats = analysis.stats_for_date(local_time)
-
     if new_stats == False:
         helpers.data_error(32)
         return
 
     # -- GET CURRENT STATS -----------------------------------------------------
     cur_stats = analysis.record_for_time(local_time, DbTable.DAYSTATS)
-
     if cur_stats == False:
         helpers.data_error(33)
         return
 
     # -- ADD TO DATABASE -------------------------------------------------------
-    free_space = helpers.remaining_space("/")
+    if cur_stats == None:
+        write = data.write_record(queries.INSERT_DAYSTAT,
+            (local_time.strftime("%Y-%m-%d"),
+             new_stats["AirT_Avg"], new_stats["AirT_Min"],
+             new_stats["AirT_Max"], new_stats["RelH_Avg"],
+             new_stats["RelH_Min"], new_stats["RelH_Max"],
+             new_stats["DewP_Avg"], new_stats["DewP_Min"],
+             new_stats["DewP_Max"], new_stats["WSpd_Avg"],
+             new_stats["WSpd_Min"], new_stats["WSpd_Max"],
+             new_stats["WDir_Avg"], new_stats["WDir_Min"],
+             new_stats["WDir_Max"], new_stats["WGst_Avg"],
+             new_stats["WGst_Min"], new_stats["WGst_Max"],
+             new_stats["SunD_Ttl"], new_stats["Rain_Ttl"],
+             new_stats["MSLP_Avg"], new_stats["MSLP_Min"],
+             new_stats["MSLP_Max"], new_stats["ST10_Avg"],
+             new_stats["ST10_Min"], new_stats["ST10_Max"],
+             new_stats["ST30_Avg"], new_stats["ST30_Min"],
+             new_stats["ST30_Max"], new_stats["ST00_Avg"],
+             new_stats["ST00_Min"], new_stats["ST00_Max"]))
+        if write == False: helpers.data_error(34)
 
-    if free_space == None or free_space < 0.1:
-        helpers.data_error(34)
-        return
-
-    try:
-        with sqlite3.connect(config.database_path) as database:
-            cursor = database.cursor()
-
-            # Insert or update depending on status of current statistic
-            if cur_stats == None:
-                cursor.execute(queries.INSERT_DAYSTAT,
-                    (local_time.strftime("%Y-%m-%d"),
-                     new_stats["AirT_Avg"], new_stats["AirT_Min"],
-                     new_stats["AirT_Max"], new_stats["RelH_Avg"],
-                     new_stats["RelH_Min"], new_stats["RelH_Max"],
-                     new_stats["DewP_Avg"], new_stats["DewP_Min"],
-                     new_stats["DewP_Max"], new_stats["WSpd_Avg"],
-                     new_stats["WSpd_Min"], new_stats["WSpd_Max"],
-                     new_stats["WDir_Avg"], new_stats["WDir_Min"],
-                     new_stats["WDir_Max"], new_stats["WGst_Avg"],
-                     new_stats["WGst_Min"], new_stats["WGst_Max"],
-                     new_stats["SunD_Ttl"], new_stats["Rain_Ttl"],
-                     new_stats["MSLP_Avg"], new_stats["MSLP_Min"],
-                     new_stats["MSLP_Max"], new_stats["ST10_Avg"],
-                     new_stats["ST10_Min"], new_stats["ST10_Max"],
-                     new_stats["ST30_Avg"], new_stats["ST30_Min"],
-                     new_stats["ST30_Max"], new_stats["ST00_Avg"],
-                     new_stats["ST00_Min"], new_stats["ST00_Max"]))
-                
-            else:
-                cursor.execute(queries.UPDATE_DAYSTAT,
-                    (new_stats["AirT_Avg"], new_stats["AirT_Min"],
-                     new_stats["AirT_Max"], new_stats["RelH_Avg"],
-                     new_stats["RelH_Min"], new_stats["RelH_Max"],
-                     new_stats["DewP_Avg"], new_stats["DewP_Min"],
-                     new_stats["DewP_Max"], new_stats["WSpd_Avg"],
-                     new_stats["WSpd_Min"], new_stats["WSpd_Max"],
-                     new_stats["WDir_Avg"], new_stats["WDir_Min"],
-                     new_stats["WDir_Max"], new_stats["WGst_Avg"],
-                     new_stats["WGst_Min"], new_stats["WGst_Max"],
-                     new_stats["SunD_Ttl"], new_stats["Rain_Ttl"],
-                     new_stats["MSLP_Avg"], new_stats["MSLP_Min"],
-                     new_stats["MSLP_Max"], new_stats["ST10_Avg"],
-                     new_stats["ST10_Min"], new_stats["ST10_Max"],
-                     new_stats["ST30_Avg"], new_stats["ST30_Min"],
-                     new_stats["ST30_Max"], new_stats["ST00_Avg"],
-                     new_stats["ST00_Min"], new_stats["ST00_Max"],
-                     local_time.strftime("%Y-%m-%d")))
-            
-            database.commit()
-    except: helpers.data_error(35)
+    else:
+        write = data.write_record(queries.UPDATE_DAYSTAT,
+            (new_stats["AirT_Avg"], new_stats["AirT_Min"],
+             new_stats["AirT_Max"], new_stats["RelH_Avg"],
+             new_stats["RelH_Min"], new_stats["RelH_Max"],
+             new_stats["DewP_Avg"], new_stats["DewP_Min"],
+             new_stats["DewP_Max"], new_stats["WSpd_Avg"],
+             new_stats["WSpd_Min"], new_stats["WSpd_Max"],
+             new_stats["WDir_Avg"], new_stats["WDir_Min"],
+             new_stats["WDir_Max"], new_stats["WGst_Avg"],
+             new_stats["WGst_Min"], new_stats["WGst_Max"],
+             new_stats["SunD_Ttl"], new_stats["Rain_Ttl"],
+             new_stats["MSLP_Avg"], new_stats["MSLP_Min"],
+             new_stats["MSLP_Max"], new_stats["ST10_Avg"],
+             new_stats["ST10_Min"], new_stats["ST10_Max"],
+             new_stats["ST30_Avg"], new_stats["ST30_Min"],
+             new_stats["ST30_Max"], new_stats["ST00_Avg"],
+             new_stats["ST00_Min"], new_stats["ST00_Max"],
+             local_time.strftime("%Y-%m-%d"))
+        if write == False: helpers.data_error(35)
 
 
 def schedule_minute():
