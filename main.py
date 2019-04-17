@@ -89,17 +89,12 @@ if config.camera_logging == True:
     free_space = helpers.remaining_space(config.camera_drive)
     if free_space == None or free_space < 5: helpers.init_error(7)
 
-    # Check camera module is connected
-    try:
-        with picamera.PiCamera() as camera: pass
-    except: helpers.init_error(8)
-
 
 # -- RUN ACCESS SUBSYSTEM -----------------------------------------------------
 try:
     proc_access = subprocess.Popen(["sudo", "python3", "aws_access.py",
         startup_time.strftime("%Y-%m-%dT%H:%M:%S")])
-except: helpers.init_error(9)
+except: helpers.init_error(8)
 
 # -- RUN SUPPORT SUBSYSTEM ----------------------------------------------------
 if (config.report_uploading == True or
@@ -112,7 +107,7 @@ if (config.report_uploading == True or
 
     except:
         if proc_access != None: proc_access.terminate()
-        helpers.init_error(10)
+        helpers.init_error(9)
 
 # -- RUN DATA SUBSYSTEM -------------------------------------------------------
 try:
@@ -123,4 +118,4 @@ try:
 except:
     if proc_access != None: proc_access.terminate()
     if proc_support != None: proc_support.terminate()
-    helpers.init_error(11)
+    helpers.init_error(10)

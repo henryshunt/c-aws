@@ -536,22 +536,56 @@ if __name__ == "__main__":
         # -- SET UP SENSORS ----------------------------------------------------
         if config.AirT == True:
             AirT_sensor.setup(LogType.ARRAY, config.AirT_address)
+            if AirT_sensor.get_error() == True: helpers.init_error(11)
+
         if config.ExpT == True:
             ExpT_sensor.setup(LogType.VALUE, config.ExpT_address)
-        if config.RelH == True: RelH_sensor.setup(LogType.ARRAY)
-        if config.WSpd == True: WSpd_sensor.setup(27)
-        if config.WDir == True: WDir_sensor.setup(1)
-        if config.SunD == True: SunD_sensor.setup(25)
-        if config.Rain == True: Rain_sensor.setup(22)
-        if config.StaP == True: StaP_sensor.setup(LogType.ARRAY)
+            if ExpT_sensor.get_error() == True: helpers.init_error(11)
+
+        if config.RelH == True:
+            RelH_sensor.setup(LogType.ARRAY)
+            if RelH_sensor.get_error() == True: helpers.init_error(11)
+
+        if config.WSpd == True:
+            WSpd_sensor.setup(27)
+            if WSpd_sensor.get_error() == True: helpers.init_error(11)
+
+        if config.WDir == True:
+            WDir_sensor.setup(1)
+            if WDir_sensor.get_error() == True: helpers.init_error(11)
+
+        if config.SunD == True:
+            SunD_sensor.setup(25)
+            if SunD_sensor.get_error() == True: helpers.init_error(11)
+
+        if config.Rain == True:
+            Rain_sensor.setup(22)
+            if Rain_sensor.get_error() == True: helpers.init_error(11)
+
+        if config.StaP == True:
+            StaP_sensor.setup(LogType.ARRAY)
+            if StaP_sensor.get_error() == True: helpers.init_error(11)
+
         if config.ST10 == True:
             ST10_sensor.setup(LogType.VALUE, config.ST10_address)
+            if ST10_sensor.get_error() == True: helpers.init_error(11)
+
         if config.ST30 == True:
             ST30_sensor.setup(LogType.VALUE, config.ST30_address)
+            if ST30_sensor.get_error() == True: helpers.init_error(11)
+
         if config.ST00 == True:
             ST00_sensor.setup(LogType.VALUE, config.ST00_address)
+            if ST00_sensor.get_error() == True: helpers.init_error(11)
+
         if config.EncT == True:
             EncT_sensor.setup(LogType.VALUE, config.EncT_address)
+            if EncT_sensor.get_error() == True: helpers.init_error(11)
+
+        if config.camera_logging == True:
+            try:
+                with picamera.PiCamera() as camera: pass
+            except: helpers.init_error(11)
 
         # -- WAIT FOR MINUTE ---------------------------------------------------
         while datetime.utcnow().second != 0:
