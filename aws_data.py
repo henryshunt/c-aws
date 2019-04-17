@@ -365,6 +365,16 @@ def operation_generate_stats(utc):
     """
     local_time = helpers.utc_to_local(utc)
 
+    # Need to recalculate previous day stats once more as averaged and totalled
+    # sensors include the first minute of the next day
+    if local_time.hour == 0 and local_time.minute == 0:
+        generate_stats(utc - timedelta(minutes = 1))
+        
+    generate_stats(utc)
+
+def generate_stats(utc):
+    local_time = helpers.utc_to_local(utc)
+
     # -- GET NEW STATS ---------------------------------------------------------
     new_stats = analysis.stats_for_date(local_time)
     if new_stats == False:
@@ -417,7 +427,7 @@ def operation_generate_stats(utc):
              new_stats["ST30_Avg"], new_stats["ST30_Min"],
              new_stats["ST30_Max"], new_stats["ST00_Avg"],
              new_stats["ST00_Min"], new_stats["ST00_Max"],
-             local_time.strftime("%Y-%m-%d"))
+             local_time.strftime("%Y-%m-%d")))
         if write == False: helpers.data_error(35)
 
 
