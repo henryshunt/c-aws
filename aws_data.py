@@ -517,61 +517,58 @@ def schedule_second():
         except: helpers.data_error(48)
 
 
-def entry_point():
-    global data_start, disable_sampling
-    config.load()
-
-    # -- INIT GPIO AND LEDS ----------------------------------------------------
-    gpio.setwarnings(False)
-    gpio.setmode(gpio.BCM)
-
-    # Setup and reset the data and error LEDs
-    gpio.setup(helpers.DATALEDPIN, gpio.OUT)
-    gpio.output(helpers.DATALEDPIN, gpio.LOW)
-    gpio.setup(helpers.ERRORLEDPIN, gpio.OUT)
-    gpio.output(helpers.ERRORLEDPIN, gpio.LOW)
-
-    # -- SET UP SENSORS --------------------------------------------------------
-    if config.AirT == True:
-        AirT_sensor.setup(LogType.ARRAY, config.AirT_address)
-    if config.ExpT == True:
-        ExpT_sensor.setup(LogType.VALUE, config.ExpT_address)
-    if config.RelH == True: RelH_sensor.setup(LogType.ARRAY)
-    if config.WSpd == True: WSpd_sensor.setup(27)
-    if config.WDir == True: WDir_sensor.setup(1)
-    if config.SunD == True: SunD_sensor.setup(25)
-    if config.Rain == True: Rain_sensor.setup(22)
-    if config.StaP == True: StaP_sensor.setup(LogType.ARRAY)
-    if config.ST10 == True:
-        ST10_sensor.setup(LogType.VALUE, config.ST10_address)
-    if config.ST30 == True:
-        ST30_sensor.setup(LogType.VALUE, config.ST30_address)
-    if config.ST00 == True:
-        ST00_sensor.setup(LogType.VALUE, config.ST00_address)
-    if config.EncT == True:
-        EncT_sensor.setup(LogType.VALUE, config.EncT_address)
-
-    # -- WAIT FOR MINUTE -------------------------------------------------------
-    event_scheduler = BlockingScheduler()
-    event_scheduler.add_job(schedule_minute, "cron", minute = "0-59")
-    event_scheduler.add_job(schedule_second, "cron", second = "0-59")
-
-    while datetime.utcnow().second != 0:
-        gpio.output(helpers.DATALEDPIN, gpio.HIGH)
-        time.sleep(0.1)
-        gpio.output(helpers.DATALEDPIN, gpio.LOW)
-        time.sleep(0.1)
-
-    # -- START DATA LOGGING ----------------------------------------------------
-    data_start = datetime.utcnow().replace(second = 0, microsecond = 0)
-
-    disable_sampling = False
-    WSpd_sensor.set_pause(False)
-    Rain_sensor.set_pause(False)
-    event_scheduler.start()
-
 if __name__ == "__main__":
     current_dir = os.path.dirname(os.path.realpath(__file__))
 
     with daemon.DaemonContext(working_directory = current_dir):
-        entry_point()
+        global data_start, disable_sampling
+        config.load()
+
+        # -- INIT GPIO AND LEDS ------------------------------------------------
+        gpio.setwarnings(False)
+        gpio.setmode(gpio.BCM)
+
+        # Setup and reset the data and error LEDs
+        gpio.setup(helpers.DATALEDPIN, gpio.OUT)
+        gpio.output(helpers.DATALEDPIN, gpio.LOW)
+        gpio.setup(helpers.ERRORLEDPIN, gpio.OUT)
+        gpio.output(helpers.ERRORLEDPIN, gpio.LOW)
+
+        # -- SET UP SENSORS ----------------------------------------------------
+        if config.AirT == True:
+            AirT_sensor.setup(LogType.ARRAY, config.AirT_address)
+        if config.ExpT == True:
+            ExpT_sensor.setup(LogType.VALUE, config.ExpT_address)
+        if config.RelH == True: RelH_sensor.setup(LogType.ARRAY)
+        if config.WSpd == True: WSpd_sensor.setup(27)
+        if config.WDir == True: WDir_sensor.setup(1)
+        if config.SunD == True: SunD_sensor.setup(25)
+        if config.Rain == True: Rain_sensor.setup(22)
+        if config.StaP == True: StaP_sensor.setup(LogType.ARRAY)
+        if config.ST10 == True:
+            ST10_sensor.setup(LogType.VALUE, config.ST10_address)
+        if config.ST30 == True:
+            ST30_sensor.setup(LogType.VALUE, config.ST30_address)
+        if config.ST00 == True:
+            ST00_sensor.setup(LogType.VALUE, config.ST00_address)
+        if config.EncT == True:
+            EncT_sensor.setup(LogType.VALUE, config.EncT_address)
+
+        # -- WAIT FOR MINUTE ---------------------------------------------------
+        while datetime.utcnow().second != 0:
+            gpio.output(helpers.DATALEDPIN, gpio.HIGH)
+            time.sleep(0.1)
+            gpio.output(helpers.DATALEDPIN, gpio.LOW)
+            time.sleep(0.1)
+
+        # -- START DATA LOGGING ------------------------------------------------
+        data_start = datetime.utcnow().replace(second = 0, microsecond = 0)
+
+        disable_sampling = False
+        WSpd_sensor.set_pause(False)
+        Rain_sensor.set_pause(False)
+
+        event_scheduler = BlockingScheduler()
+        event_scheduler.add_job(schedule_minute, "cron", minute = "0-59")
+        event_scheduler.add_job(schedule_second, "cron", second = "0-59")
+        event_scheduler.start()

@@ -187,17 +187,14 @@ def every_minute():
             threading.Thread(target = do_process_camera_queue).start()
     
 
-# ENTRY POINT ==================================================================
-def entry_point():
-    config.load()
-
-    # -- START WATCHING DATA ---------------------------------------------------
-    event_scheduler = BlockingScheduler()
-    event_scheduler.add_job(every_minute, "cron", minute = "0-59", second = 8)
-    event_scheduler.start()
-
 if __name__ == "__main__":
     current_dir = os.path.dirname(os.path.realpath(__file__))
     
     with daemon.DaemonContext(working_directory = current_dir):
-        entry_point()
+        config.load()
+
+        # -- START WATCHING DATA -----------------------------------------------
+        event_scheduler = BlockingScheduler()
+        event_scheduler.add_job(every_minute, "cron", minute = "0-59",
+            second = 8)
+        event_scheduler.start()
