@@ -503,7 +503,6 @@ if __name__ == "__main__":
     current_dir = os.path.dirname(os.path.realpath(__file__))
     
     with daemon.DaemonContext(working_directory = current_dir):
-        global startup_time
         config.load()
 
         if len(sys.argv) == 2:
