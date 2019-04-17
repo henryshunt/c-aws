@@ -6,7 +6,6 @@ import os
 from datetime import datetime, timedelta
 import time
 from threading import Thread
-import sqlite3
 
 import daemon
 import RPi.GPIO as gpio

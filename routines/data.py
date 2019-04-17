@@ -1,6 +1,6 @@
 import math
 
-import sqlite
+import sqlite3
 
 import routines.config as config
 import routines.helpers as helpers
