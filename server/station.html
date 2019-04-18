@@ -73,7 +73,7 @@
 
                 $.ajax({
                     dataType: "json",
-                    url: "data/about.json?time=" + requestedTime.format(
+                    url: "data/station.json?time=" + requestedTime.format(
                         "YYYY-MM-DD[T]HH-mm-00"),
 
                     success: function (data) { processData(data); },
@@ -116,7 +116,7 @@
             }
 
             function loadGraphData() {
-                var url = "data/graph-about.json?time=" + requestedTime.format(
+                var url = "data/graph-station.json?time=" + requestedTime.format(
                     "YYYY-MM-DD[T]HH-mm-00") + "&fields=EncT,CPUT";
                 
                 var xEnd = moment(requestedTime).tz(awsTimeZone).unix();
@@ -170,7 +170,7 @@
     
                         <span>|</span>
                         <a class="menu_item" href="climate.html">Climate</a>
-                        <a class="menu_item" id="ami" href="about.html">About</a>
+                        <a class="menu_item" id="ami" href="station.html">Station</a>
                     </div>
 
                     <span>Accessing <b>LOCAL</b> Data Stores</span>
@@ -207,7 +207,7 @@
                     </tr>
                     <tr>
                         <td><p class="field_label" style="margin-top: 10px">System Version:</p></td>
-                        <td><p class="field_value" style="margin-top: 10px">5D.0.2 (Dec 2018)</p></td>
+                        <td><p class="field_value" style="margin-top: 10px">5.1.0 (Apr 2019)</p></td>
                     </tr>
                 </table>
             </div>

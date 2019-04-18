@@ -104,8 +104,8 @@ def page_climate():
                                  aws_location = config.aws_location,
                                  aws_time_zone = config.aws_time_zone)
 
-def page_about():
-    return flask.render_template("about.html",
+def page_station():
+    return flask.render_template("station.html",
                                  aws_title = config.aws_location,
                                  aws_location = config.aws_location,
                                  aws_time_zone = config.aws_time_zone,
@@ -404,7 +404,7 @@ def data_climate():
 
     return flask.jsonify(data)
 
-def data_about():
+def data_station():
     global startup_time
     data = dict.fromkeys(["Time", "STim", "EncT", "CPUT", "IDRS", "CDRS"])
 
@@ -453,7 +453,7 @@ def data_about():
     data["Time"] = url_time.strftime("%Y-%m-%d %H:%M:%S")
     return flask.jsonify(data)
 
-def data_graph_about():
+def data_graph_station():
     data = []
     if flask.request.args.get("time") == None: return flask.jsonify(data)
     if flask.request.args.get("fields") == None: return flask.jsonify(data)
@@ -532,7 +532,7 @@ if __name__ == "__main__":
             server.add_url_rule("/graph-day.html", view_func = page_graph_day)
             server.add_url_rule("/graph-year.html", view_func = page_graph_year)
             server.add_url_rule("/climate.html", view_func = page_climate)
-            server.add_url_rule("/about.html", view_func = page_about)
+            server.add_url_rule("/station.html", view_func = page_station)
 
             server.add_url_rule("/data/now.json", view_func = data_now)
             server.add_url_rule(
@@ -545,9 +545,9 @@ if __name__ == "__main__":
             server.add_url_rule(
                 "/data/graph-year.json", view_func = data_graph_year)
             server.add_url_rule(
-                "/data/graph-about.json", view_func = data_graph_about)
+                "/data/graph-station.json", view_func = data_graph_station)
             server.add_url_rule("/data/climate.json", view_func = data_climate)
-            server.add_url_rule("/data/about.json", view_func = data_about)
+            server.add_url_rule("/data/station.json", view_func = data_station)
             server.add_url_rule("/ctrl/command", view_func = ctrl_command)
 
             # -- START SERVER --------------------------------------------------
