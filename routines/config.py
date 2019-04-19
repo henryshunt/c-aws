@@ -200,7 +200,7 @@ def load():
             __load_value("Sensors", "AirTAddress", __DataType.STRING))
         ExpT = (__load_value("Sensors", "ExpT", __DataType.BOOLEAN))
         ExpT_address = (
-            __load_value("Sensors", "EncTAddress", __DataType.STRING))
+            __load_value("Sensors", "ExpTAddress", __DataType.STRING))
         RelH = (__load_value("Sensors", "RelH", __DataType.BOOLEAN))
         WSpd = (__load_value("Sensors", "WSpd", __DataType.BOOLEAN))
         WDir = (__load_value("Sensors", "WDir", __DataType.BOOLEAN))
