@@ -44,4 +44,4 @@ class Rainfall():
         self.__shift = self.__store
 
     def __interrupt(self, channel):
-        if self.__pause == False: self.__store + 1
+        if self.__pause == False: self.__store += 1

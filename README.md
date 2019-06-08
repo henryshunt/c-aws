@@ -85,3 +85,5 @@ A situation where both the data and error LEDs illuminate for 2.5 seconds, go of
 - 5.0.1 (Sep 2018): Fixed a bug that prevented sunshine data from being read during the last second of the minute.
 - 5.0.2 (Dec 2018): Various minor tweaks to text on the data viewing pages. Removed yearly total rainfall and sunshine from climate page.
 - 5.1.0 (Apr 2019): Rewritten data sub-system and various tweaks. Configuration now allows specification of which parameters to log. Fixed a bug that meant the first minute of the next day was not included in the previous day's averaged and totalled statistics. Removed monthly average wind gust from climate page. About page renamed to 'station'. Year graphs now end at the current day instead of yesterday.
+- 5.1.1 (Apr 2019) Fixed a bug where the ExpT and EncT sensor addresses were the same.
+- 5.1.2 (Apr 2019) Fixed a bug preventing rainfall from being counted.
