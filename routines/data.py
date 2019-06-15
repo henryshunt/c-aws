@@ -8,9 +8,9 @@ import routines.helpers as helpers
 
 def write_record(query, parameters):
     try:
-        if not os.path.isfile("/"): return False
+        if not os.path.isfile(config.database_path): return False
             
-        free_space = helpers.remaining_space(config.data_directory)
+        free_space = helpers.remaining_space("/")
         if free_space == None or free_space < 0.1: return False
         
         with sqlite3.connect(config.database_path) as database:
