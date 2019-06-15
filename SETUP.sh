@@ -15,7 +15,6 @@ apt-get install python3-pip
 
 pip3 install Adafruit_GPIO
 pip3 install astral
-pip3 install flask
 pip3 install python-daemon
 
 echo "DONE installing dependencies for C-AWS"

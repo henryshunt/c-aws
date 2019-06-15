@@ -1,5 +1,5 @@
-""" CAWS Data Acquisition Program
-      Responsible for logging data parameters and generating statistics
+""" C-AWS Data Subsystem
+    Responsible for logging data parameters and generating statistics
 """
 
 import os
@@ -54,7 +54,10 @@ def operation_log_report(utc):
     """ Reads all sensors, calculates derived and averaged parameters, and
         saves the data to the database
     """
-    global disable_sampling, data_start
+    global disable_sampling, data_start, WSpd_sensor, Rain_sensor, AirT_sensor
+    global RelH_sensor, WDir_sensor, SunD_sensor, StaP_sensor, ExpT_sensor
+    global ST10_sensor, ST30_sensor, ST00_sensor
+    
     frame = frames.DataUtcReport(utc)
     ten_mins_ago = frame.time - timedelta(minutes = 10)
     two_mins_ago = frame.time - timedelta(minutes = 2)
@@ -201,7 +204,9 @@ def operation_log_report(utc):
                 WDir_value = WDir_sensor.get_shifted()
 
                 if WDir_value != None:
-                    if frame.wind_speed != None and frame.wind_speed > 0:
+                    if (config.WSpd == False or
+                        (frame.wind_speed != None and frame.wind_speed > 0)):
+
                         frame.wind_direction = WDir_value
         except: helpers.data_error(16)
 
@@ -337,16 +342,22 @@ def operation_log_camera(utc):
     if (utc >= sunrise_threshold.replace(tzinfo = None) and
         utc <= sunset_threshold.replace(tzinfo = None)):
 
-        # Check free space on camera drive
-        free_space = helpers.remaining_space(config.camera_drive)
+        if not os.path.exists(config.camera_directory):
+            helpers.data_error(49)
+            return
 
+        if not os.path.ismount(config.camera_directory):
+            helpers.data_error(50)
+            return
+
+        free_space = helpers.remaining_space(config.camera_directory)
         if free_space == None or free_space < 0.1:
             helpers.data_error(30)
             return
 
         # -- CAMERA -----------------------------------------------------------
         try:
-            image_dir = os.path.join(config.camera_drive,
+            image_dir = os.path.join(config.camera_directory,
                                      utc.strftime("%Y/%m/%d"))
             if not os.path.exists(image_dir): os.makedirs(image_dir)
             image_name = utc.strftime("%Y-%m-%dT%H-%M-%S")
@@ -372,6 +383,9 @@ def operation_generate_stats(utc):
     generate_stats(utc)
 
 def generate_stats(utc):
+    """ Calculates and writes/updates statistics for the specified local day to
+        the database
+    """
     local_time = helpers.utc_to_local(utc)
 
     # -- GET NEW STATS ---------------------------------------------------------
@@ -535,56 +549,56 @@ if __name__ == "__main__":
         # -- SET UP SENSORS ----------------------------------------------------
         if config.AirT == True:
             AirT_sensor.setup(LogType.ARRAY, config.AirT_address)
-            if AirT_sensor.get_error() == True: helpers.init_error(11)
+            if AirT_sensor.get_error() == True: helpers.init_error(10)
 
         if config.ExpT == True:
             ExpT_sensor.setup(LogType.VALUE, config.ExpT_address)
-            if ExpT_sensor.get_error() == True: helpers.init_error(11)
+            if ExpT_sensor.get_error() == True: helpers.init_error(10)
 
         if config.RelH == True:
             RelH_sensor.setup(LogType.ARRAY)
-            if RelH_sensor.get_error() == True: helpers.init_error(11)
+            if RelH_sensor.get_error() == True: helpers.init_error(10)
 
         if config.WSpd == True:
-            WSpd_sensor.setup(27)
-            if WSpd_sensor.get_error() == True: helpers.init_error(11)
+            WSpd_sensor.setup(config.WSpd_pin)
+            if WSpd_sensor.get_error() == True: helpers.init_error(10)
 
         if config.WDir == True:
-            WDir_sensor.setup(1)
-            if WDir_sensor.get_error() == True: helpers.init_error(11)
+            WDir_sensor.setup(config.WDir_channel)
+            if WDir_sensor.get_error() == True: helpers.init_error(10)
 
         if config.SunD == True:
-            SunD_sensor.setup(25)
-            if SunD_sensor.get_error() == True: helpers.init_error(11)
+            SunD_sensor.setup(config.SunD_pin)
+            if SunD_sensor.get_error() == True: helpers.init_error(10)
 
         if config.Rain == True:
-            Rain_sensor.setup(22)
-            if Rain_sensor.get_error() == True: helpers.init_error(11)
+            Rain_sensor.setup(config.Rain_pin)
+            if Rain_sensor.get_error() == True: helpers.init_error(10)
 
         if config.StaP == True:
             StaP_sensor.setup(LogType.ARRAY)
-            if StaP_sensor.get_error() == True: helpers.init_error(11)
+            if StaP_sensor.get_error() == True: helpers.init_error(10)
 
         if config.ST10 == True:
             ST10_sensor.setup(LogType.VALUE, config.ST10_address)
-            if ST10_sensor.get_error() == True: helpers.init_error(11)
+            if ST10_sensor.get_error() == True: helpers.init_error(10)
 
         if config.ST30 == True:
             ST30_sensor.setup(LogType.VALUE, config.ST30_address)
-            if ST30_sensor.get_error() == True: helpers.init_error(11)
+            if ST30_sensor.get_error() == True: helpers.init_error(10)
 
         if config.ST00 == True:
             ST00_sensor.setup(LogType.VALUE, config.ST00_address)
-            if ST00_sensor.get_error() == True: helpers.init_error(11)
+            if ST00_sensor.get_error() == True: helpers.init_error(10)
 
         if config.EncT == True:
             EncT_sensor.setup(LogType.VALUE, config.EncT_address)
-            if EncT_sensor.get_error() == True: helpers.init_error(11)
+            if EncT_sensor.get_error() == True: helpers.init_error(10)
 
         if config.camera_logging == True:
             try:
                 with picamera.PiCamera() as camera: pass
-            except: helpers.init_error(11)
+            except: helpers.init_error(10)
 
         # -- WAIT FOR MINUTE ---------------------------------------------------
         while datetime.utcnow().second != 0:

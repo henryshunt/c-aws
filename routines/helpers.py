@@ -15,6 +15,13 @@ ERRORLEDPIN = 24
 def init_error(code):
     """ Remains in a loop, flashing the error LED to indicate an error code
     """
+    try:
+        with open(os.path.join(
+            config.data_directory, "error_log.txt"), 'a') as log:
+            
+            log.write("Initialisation error code " + str(code) + " triggered\n")
+    except: pass
+        
     while True:
         for i in range(code):
             gpio.output(ERRORLEDPIN, gpio.HIGH)
@@ -25,6 +32,13 @@ def init_error(code):
         time.sleep(1)
 
 def data_error(code):
+    try:
+        with open(os.path.join(
+            config.data_directory, "error_log.txt"), 'a') as log:
+            
+            log.write("Error code " + str(code) + " triggered\n")
+    except: pass
+        
     gpio.output(ERRORLEDPIN, gpio.HIGH)
 
 def remaining_space(directory):
@@ -67,3 +81,6 @@ def day_bounds_utc(local, inclusive):
 
     # Convert start and end to UTC
     return local_to_utc(start), local_to_utc(end)
+
+def none_to_null(value):
+    return "null" if value == None else value
