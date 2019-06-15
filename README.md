@@ -3,7 +3,7 @@ The aim of C-AWS was to develop from scratch a capable automatic weather station
 # Breakdown
 The C-AWS software is split into a `data` subsystem, which logs sensor data and generates statistics, and a `support` subsystem, which provides all other supporting functionality (such as data uploading and power controls). There was previously also an `access` subsystem which provided access to the data via a web server, but this was split out into the C-AWS Server repository.
 
-Data is saved to an SQLite3 database, and if camera logging is enabled then the images are saved to a USB drive.
+Data is saved to an SQLite3 database, and if camera logging is enabled then the images are saved to a USB drive. Any errors that occur during initialisation or while the `data` subsystem is running will be written to an `error_log.txt` file in the specified `DataDirectory`.
 
 `main.py` is the entry point for the software system. It performs initialisation and system checks before starting the subsystems as background processes. The rest of the code comprises a set of routines to support the codebase, as well as a set of classes that abstract each sensor behind a common interface.
 
