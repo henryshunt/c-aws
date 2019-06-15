@@ -160,7 +160,7 @@ def operation_process_camera():
     # Process while there are items in the queue
     while camera_queue:
         data = camera_queue.popleft()
-        if not os.path.exists(config.camera_directory): continue
+        if not os.path.isdir(config.camera_directory): continue
         if not os.path.ismount(config.camera_directory): continue
         if not os.path.isfile(data): continue
 
@@ -256,7 +256,7 @@ def schedule_minute():
             image_path = os.path.join(config.camera_directory,
                 utc.strftime("%Y/%m/%d/%Y-%m-%dT%H-%M-%S") + ".jpg")
 
-            if (os.path.exists(config.camera_directory) and
+            if (os.path.isdir(config.camera_directory) and
                 os.path.ismount(config.camera_directory) and
                 os.path.isfile(image_path)):
 

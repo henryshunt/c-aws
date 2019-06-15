@@ -19,7 +19,7 @@ def get_camera_drive_space():
     if config.load() == False: return "NULL"
 
     if (config.camera_logging == True and
-        os.path.exists(config.camera_directory) and
+        os.path.isdir(config.camera_directory) and
         os.path.ismount(config.camera_directory)):
 
         space = helpers.remaining_space(config.camera_directory)

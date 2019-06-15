@@ -57,7 +57,7 @@ def operation_log_report(utc):
     global disable_sampling, data_start, WSpd_sensor, Rain_sensor, AirT_sensor
     global RelH_sensor, WDir_sensor, SunD_sensor, StaP_sensor, ExpT_sensor
     global ST10_sensor, ST30_sensor, ST00_sensor
-    
+
     frame = frames.DataUtcReport(utc)
     ten_mins_ago = frame.time - timedelta(minutes = 10)
     two_mins_ago = frame.time - timedelta(minutes = 2)
@@ -342,7 +342,7 @@ def operation_log_camera(utc):
     if (utc >= sunrise_threshold.replace(tzinfo = None) and
         utc <= sunset_threshold.replace(tzinfo = None)):
 
-        if not os.path.exists(config.camera_directory):
+        if not os.path.isdir(config.camera_directory):
             helpers.data_error(49)
             return
 
@@ -359,7 +359,7 @@ def operation_log_camera(utc):
         try:
             image_dir = os.path.join(config.camera_directory,
                                      utc.strftime("%Y/%m/%d"))
-            if not os.path.exists(image_dir): os.makedirs(image_dir)
+            if not os.path.isdir(image_dir): os.makedirs(image_dir)
             image_name = utc.strftime("%Y-%m-%dT%H-%M-%S")
         
             # Set image resolution, wait for auto settings, and capture

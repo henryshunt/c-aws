@@ -62,7 +62,7 @@ if not os.path.isfile(config.database_path):
 
 # -- CHECK CAMERA DRIVE --------------------------------------------------------
 if config.camera_logging == True:
-    if not os.path.exists(config.camera_directory): helpers.init_error(5)
+    if not os.path.isdir(config.camera_directory): helpers.init_error(5)
     if not os.path.ismount(config.camera_directory): helpers.init_error(6)
 
     free_space = helpers.remaining_space(config.camera_directory)
