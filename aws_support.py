@@ -204,7 +204,7 @@ def operation_shutdown(channel):
         time.sleep(0.8)
         second = datetime.utcnow().second
 
-    os.system("halt")
+    os.system("shutdown -h now")
 
 def operation_restart(channel):
     """ Performs a system restart on press of the restart push button
@@ -220,7 +220,7 @@ def operation_restart(channel):
         time.sleep(0.8)
         second = datetime.utcnow().second
 
-    os.system("reboot")
+    os.system("shutdown -r now")
 
 
 def schedule_minute():
@@ -271,11 +271,11 @@ def schedule_second():
     try:
         if os.path.isfile(os.path.join(config.data_directory, "shutdown.cmd")):
             os.remove(os.path.join(config.data_directory, "shutdown.cmd"))
-            os.system("sudo halt")
+            os.system("shutdown -h now")
 
         elif os.path.isfile(os.path.join(config.data_directory, "restart.cmd")):
             os.remove(os.path.join(config.data_directory, "restart.cmd"))
-            os.system("sudo reboot")
+            os.system("shutdown -r now")
     except: pass
 
 
