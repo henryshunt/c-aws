@@ -9,6 +9,7 @@ import requests
 from collections import deque
 import ftplib
 import time
+import sys
 
 import daemon
 from apscheduler.schedulers.blocking import BlockingScheduler
@@ -203,7 +204,7 @@ def operation_shutdown(channel):
         time.sleep(0.8)
         second = datetime.utcnow().second
 
-    os.system("sudo halt")
+    os.system("halt")
 
 def operation_restart(channel):
     """ Performs a system restart on press of the restart push button
@@ -219,7 +220,7 @@ def operation_restart(channel):
         time.sleep(0.8)
         second = datetime.utcnow().second
 
-    os.system("sudo reboot")
+    os.system("reboot")
 
 
 def schedule_minute():
@@ -263,12 +264,35 @@ def schedule_minute():
                 camera_queue.append(image_path)        
         threading.Thread(target = operation_process_camera).start()
 
+def schedule_second():
+    """ Triggered during a certain part of each minute to check for shutdown
+        and restart commands
+    """
+    try:
+        if os.path.isfile(os.path.join(config.data_directory, "shutdown.cmd")):
+            os.remove(os.path.join(config.data_directory, "shutdown.cmd"))
+            os.system("sudo halt")
+
+        elif os.path.isfile(os.path.join(config.data_directory, "restart.cmd")):
+            os.remove(os.path.join(config.data_directory, "restart.cmd"))
+            os.system("sudo reboot")
+    except: pass
+
 
 if __name__ == "__main__":
     current_dir = os.path.dirname(os.path.realpath(__file__))
     
     with daemon.DaemonContext(working_directory = current_dir):
-        config.load()
+        if config.load() == False: sys.exit()
+
+        # REMOVE TEMP FILES ----------------------------------------------------
+        try:
+            path = os.path.join(config.data_directory, "shutdown.cmd")
+            if os.path.isfile(path): os.remove(path)
+            
+            path = os.path.join(config.data_directory, "restart.cmd")
+            if os.path.isfile(path): os.remove(path)
+        except: sys.exit()
 
         # SETUP POWER BUTTONS --------------------------------------------------
         gpio.setwarnings(False)
@@ -285,4 +309,5 @@ if __name__ == "__main__":
         event_scheduler = BlockingScheduler()
         event_scheduler.add_job(schedule_minute, "cron", minute = "0-59",
             second = 8)
+        event_scheduler.add_job(schedule_second, "cron", second = "35-55")
         event_scheduler.start()

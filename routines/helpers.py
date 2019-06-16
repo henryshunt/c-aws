@@ -18,7 +18,7 @@ def init_error(code):
     if config.data_directory != None and os.path.isdir(config.data_directory):
         try:
             with open(os.path.join(
-                config.data_directory, "error_log.txt"), 'a') as log:
+                config.data_directory, "error_log.txt"), "a") as log:
                 
                 log.write("Initialisation error code "
                     + str(code) + " triggered\n")
@@ -37,7 +37,7 @@ def data_error(code):
     if config.data_directory != None and os.path.isdir(config.data_directory):
         try:
             with open(os.path.join(
-                config.data_directory, "error_log.txt"), 'a') as log:
+                config.data_directory, "error_log.txt"), "a") as log:
                 
                 log.write("Error code " + str(code) + " triggered\n")
         except: pass

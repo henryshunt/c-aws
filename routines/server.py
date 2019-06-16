@@ -34,21 +34,3 @@ def get_static_info():
 
     print(str(startup_time) + str(internal_drive_space) + "\n"
         + str(camera_drive_space))
-
-def operation_shutdown():
-    second = datetime.utcnow().second
-
-    while second < 35 or second > 55:
-        time.sleep(0.8)
-        second = datetime.utcnow().second
-
-    os.system("halt")
-
-def operation_restart():
-    second = datetime.utcnow().second
-
-    while second < 35 or second > 55:
-        time.sleep(0.8)
-        second = datetime.utcnow().second
-
-    os.system("reboot")

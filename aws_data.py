@@ -6,6 +6,7 @@ import os
 from datetime import datetime, timedelta
 import time
 from threading import Thread
+import sys
 
 import daemon
 import RPi.GPIO as gpio
@@ -534,7 +535,7 @@ if __name__ == "__main__":
     current_dir = os.path.dirname(os.path.realpath(__file__))
 
     with daemon.DaemonContext(working_directory = current_dir):
-        config.load()
+        if config.load() == False: sys.exit()
 
         # -- INIT GPIO AND LEDS ------------------------------------------------
         gpio.setwarnings(False)
