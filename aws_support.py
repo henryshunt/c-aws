@@ -5,7 +5,7 @@
 from datetime import datetime
 import os
 import threading
-import requests
+import urllib.request
 from collections import deque
 import ftplib
 import time
@@ -138,13 +138,14 @@ def operation_process_data():
 
         # Upload the data        
         try:
-            request = requests.post(
-                config.remote_sql_server, to_upload, timeout = 10)
-            if request.text != "0": raise Exception()
+            request = urllib.request.Request(config.remote_sql_server,
+                urllib.parse.urlencode(to_upload).encode("utf-8"))
+            response = urllib.request.urlopen(request, timeout = 10)
+            if response.read().decode() != "0": raise Exception()
 
         except:
             data_queue.appendleft(data)
-            helpers.data_error(52)
+            helpers.data_error_blind(52)
             break
 
     is_processing_data = False
@@ -185,11 +186,11 @@ def operation_process_camera():
 
             except:
                 camera_queue.appendleft(data)
-                helpers.data_error(56)
+                helpers.data_error_blind(56)
                 break
 
         else:
-            helpers.data_error(55)
+            helpers.data_error_blind(55)
             return
 
     is_processing_camera = False
@@ -210,7 +211,7 @@ def operation_shutdown(channel):
 
     try:
         os.system("shutdown -h now")
-    except: helpers.data_error(57)
+    except: helpers.data_error_blind(57)
 
 def operation_restart(channel):
     """ Performs a system restart on press of the restart push button
@@ -228,7 +229,7 @@ def operation_restart(channel):
 
     try:
         os.system("shutdown -r now")
-    except: helpers.data_error(58)
+    except: helpers.data_error_blind(58)
 
 
 def schedule_minute():
@@ -256,7 +257,7 @@ def schedule_minute():
         else: dayStat = None
 
         if report == False or envReport == False or dayStat == False:
-            helpers.data_error(59)
+            helpers.data_error_blind(59)
 
         # Add data to queue and process the queue
         if ((report != False and report != None) or (envReport != False and
@@ -292,7 +293,7 @@ def schedule_second():
         elif os.path.isfile(os.path.join(config.data_directory, "restart.cmd")):
             os.remove(os.path.join(config.data_directory, "restart.cmd"))
             os.system("shutdown -r now")
-    except: helpers.data_error(51)
+    except: helpers.data_error_blind(51)
 
 
 if __name__ == "__main__":

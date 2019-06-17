@@ -35,6 +35,10 @@ def init_error(code):
         time.sleep(1)
 
 def data_error(code):
+    data_error_blind(code)
+    gpio.output(ERRORLEDPIN, gpio.HIGH)
+
+def data_error_blind(code):
     if os.path.isdir(config.data_directory):
         try:
             with open(os.path.join(
@@ -43,8 +47,6 @@ def data_error(code):
                 time = datetime.utcnow().strftime("%d/%m/%Y %H:%M:%S")
                 log.write("[" + time + "] Error code " + str(code) + "\n")
         except: pass
-        
-    gpio.output(ERRORLEDPIN, gpio.HIGH)
 
 def remaining_space(directory):
     """ Returns the amount of remaining space in gigabytes, for non-root users,
