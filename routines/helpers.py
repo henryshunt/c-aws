@@ -20,8 +20,9 @@ def init_error(code):
             with open(os.path.join(
                 config.data_directory, "error_log.txt"), "a") as log:
                 
-                time = datetime.utcnow().strftime("Y-%m-%d %H-%M-%S")
-                log.write("[" + time + "] Initialisation code " + str(code))
+                time = datetime.utcnow().strftime("%d/%m/%Y %H:%M:%S")
+                log.write(
+                    "[" + time + "] Initialisation code " + str(code) + "\n")
         except: pass
         
     while True:
@@ -39,8 +40,8 @@ def data_error(code):
             with open(os.path.join(
                 config.data_directory, "error_log.txt"), "a") as log:
                 
-                time = datetime.utcnow().strftime("Y-%m-%d %H-%M-%S")
-                log.write("[" + time + "] Error code " + str(code))
+                time = datetime.utcnow().strftime("%d/%m/%Y %H:%M:%S")
+                log.write("[" + time + "] Error code " + str(code) + "\n")
         except: pass
         
     gpio.output(ERRORLEDPIN, gpio.HIGH)
