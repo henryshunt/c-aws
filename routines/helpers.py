@@ -15,14 +15,14 @@ ERRORLEDPIN = 24
 def init_error(code):
     """ Remains in a loop, flashing the error LED to indicate an error code
     """
-    if os.path.isdir(config.data_directory):
+    if config.data_directory != None and os.path.isdir(config.data_directory):
         try:
             with open(os.path.join(
                 config.data_directory, "error_log.txt"), "a") as log:
                 
-                time = datetime.utcnow().strftime("%d/%m/%Y %H:%M:%S")
-                log.write(
-                    "[" + time + "] Initialisation code " + str(code) + "\n")
+                log_time = datetime.utcnow().strftime("%d/%m/%Y %H:%M:%S")
+                log.write("["
+                    + log_time + "] Initialisation code " + str(code) + "\n")
         except: pass
         
     while True:
@@ -39,13 +39,13 @@ def data_error(code):
     gpio.output(ERRORLEDPIN, gpio.HIGH)
 
 def data_error_blind(code):
-    if os.path.isdir(config.data_directory):
+    if config.data_directory != None and os.path.isdir(config.data_directory):
         try:
             with open(os.path.join(
                 config.data_directory, "error_log.txt"), "a") as log:
                 
-                time = datetime.utcnow().strftime("%d/%m/%Y %H:%M:%S")
-                log.write("[" + time + "] Error code " + str(code) + "\n")
+                log_time = datetime.utcnow().strftime("%d/%m/%Y %H:%M:%S")
+                log.write("[" + log_time + "] Error code " + str(code) + "\n")
         except: pass
 
 def remaining_space(directory):

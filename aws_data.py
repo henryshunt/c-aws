@@ -343,11 +343,8 @@ def operation_log_camera(utc):
     if (utc >= sunrise_threshold.replace(tzinfo = None) and
         utc <= sunset_threshold.replace(tzinfo = None)):
 
-        if not os.path.isdir(config.camera_directory):
-            helpers.data_error(49)
-            return
-
-        if not os.path.ismount(config.camera_directory):
+        if (not os.path.isdir(config.camera_directory) or 
+            not os.path.ismount(config.camera_directory)):
             helpers.data_error(50)
             return
 
