@@ -15,13 +15,13 @@ ERRORLEDPIN = 24
 def init_error(code):
     """ Remains in a loop, flashing the error LED to indicate an error code
     """
-    if config.data_directory != None and os.path.isdir(config.data_directory):
+    if os.path.isdir(config.data_directory):
         try:
             with open(os.path.join(
                 config.data_directory, "error_log.txt"), "a") as log:
                 
-                log.write("Initialisation error code "
-                    + str(code) + " triggered\n")
+                time = datetime.utcnow().strftime("Y-%m-%d %H-%M-%S")
+                log.write("[" + time + "] Initialisation code " + str(code))
         except: pass
         
     while True:
@@ -34,12 +34,13 @@ def init_error(code):
         time.sleep(1)
 
 def data_error(code):
-    if config.data_directory != None and os.path.isdir(config.data_directory):
+    if os.path.isdir(config.data_directory):
         try:
             with open(os.path.join(
                 config.data_directory, "error_log.txt"), "a") as log:
                 
-                log.write("Error code " + str(code) + " triggered\n")
+                time = datetime.utcnow().strftime("Y-%m-%d %H-%M-%S")
+                log.write("[" + time + "] Error code " + str(code))
         except: pass
         
     gpio.output(ERRORLEDPIN, gpio.HIGH)

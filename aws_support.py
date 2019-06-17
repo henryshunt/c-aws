@@ -44,9 +44,6 @@ def operation_process_data():
             "has_dayStat": 0 if data[2] == False or data[2] == None else 1
         }
 
-        if (to_upload["has_report"] == False and to_upload["has_envReport"]
-            == False and to_upload["has_dayStat"] == False): continue
-
         # Add report data to data to upload
         if to_upload["has_report"] == 1:
             to_upload["report_Time"] = data[0]["Time"]
@@ -147,6 +144,7 @@ def operation_process_data():
 
         except:
             data_queue.appendleft(data)
+            helpers.data_error(52)
             break
 
     is_processing_data = False
@@ -161,32 +159,38 @@ def operation_process_camera():
     # Process while there are items in the queue
     while camera_queue:
         data = camera_queue.popleft()
-        if not os.path.isdir(config.camera_directory): continue
-        if not os.path.ismount(config.camera_directory): continue
-        if not os.path.isfile(data): continue
 
-        try:
-            ftp = ftplib.FTP(config.remote_ftp_server,
-                config.remote_ftp_username, config.remote_ftp_password,
-                timeout = 45)
-            ftp.set_pasv(False)
+        if (os.path.isdir(config.camera_directory) and
+            os.path.ismount(config.camera_directory) and
+            os.path.isfile(data)):
 
-            # Create y/m/d directory if doesn't exist already
-            image_date = os.path.basename(data).split("T")[0].split("-")
-            if image_date[0] not in ftp.nlst(): ftp.mkd(image_date[0])
-            ftp.cwd(image_date[0])
-            if image_date[1] not in ftp.nlst(): ftp.mkd(image_date[1])
-            ftp.cwd(image_date[1])
-            if image_date[2] not in ftp.nlst(): ftp.mkd(image_date[2])
-            ftp.cwd(image_date[2])
+            try:
+                ftp = ftplib.FTP(config.remote_ftp_server,
+                    config.remote_ftp_username, config.remote_ftp_password,
+                    timeout = 45)
+                ftp.set_pasv(False)
 
-            # Upload the image
-            with open(data, "rb") as file:
-                ftp.storbinary("STOR " + os.path.basename(data), file)
+                # Create y/m/d directory if doesn't exist already
+                image_date = os.path.basename(data).split("T")[0].split("-")
+                if image_date[0] not in ftp.nlst(): ftp.mkd(image_date[0])
+                ftp.cwd(image_date[0])
+                if image_date[1] not in ftp.nlst(): ftp.mkd(image_date[1])
+                ftp.cwd(image_date[1])
+                if image_date[2] not in ftp.nlst(): ftp.mkd(image_date[2])
+                ftp.cwd(image_date[2])
 
-        except:
-            camera_queue.appendleft(data)
-            break
+                # Upload the image
+                with open(data, "rb") as file:
+                    ftp.storbinary("STOR " + os.path.basename(data), file)
+
+            except:
+                camera_queue.appendleft(data)
+                helpers.data_error(56)
+                break
+
+        else:
+            helpers.data_error(55)
+            return
 
     is_processing_camera = False
 
@@ -204,7 +208,9 @@ def operation_shutdown(channel):
         time.sleep(0.8)
         second = datetime.utcnow().second
 
-    os.system("shutdown -h now")
+    try:
+        os.system("shutdown -h now")
+    except: helpers.data_error(57)
 
 def operation_restart(channel):
     """ Performs a system restart on press of the restart push button
@@ -220,7 +226,9 @@ def operation_restart(channel):
         time.sleep(0.8)
         second = datetime.utcnow().second
 
-    os.system("shutdown -r now")
+    try:
+        os.system("shutdown -r now")
+    except: helpers.data_error(58)
 
 
 def schedule_minute():
@@ -232,22 +240,30 @@ def schedule_minute():
     local_time = helpers.utc_to_local(utc)
 
     # Get database records depending on if uploading them is active
-    if config.report_uploading == True:
-        report = analysis.record_for_time(utc, DbTable.REPORTS)
-    else: report == None
+    if (config.report_uploading == True or config.envReport_uploading == True
+        or config.dayStat_uploading == True):
 
-    if config.envReport_uploading == True:
-        envReport = analysis.record_for_time(utc, DbTable.ENVREPORTS)
-    else: envReport = None
+        if config.report_uploading == True:
+            report = analysis.record_for_time(utc, DbTable.REPORTS)
+        else: report == None
 
-    if config.dayStat_uploading == True:
-        dayStat = analysis.record_for_time(local_time, DbTable.DAYSTATS)
-    else: dayStat = None
+        if config.envReport_uploading == True:
+            envReport = analysis.record_for_time(utc, DbTable.ENVREPORTS)
+        else: envReport = None
 
-    # Add data to queue and process the queue
-    if report != None or envReport != None or dayStat != None:
-        data_queue.append((report, envReport, dayStat))
-    threading.Thread(target = operation_process_data).start()
+        if config.dayStat_uploading == True:
+            dayStat = analysis.record_for_time(local_time, DbTable.DAYSTATS)
+        else: dayStat = None
+
+        if report == False or envReport == False or dayStat == False:
+            helpers.data_error(59)
+
+        # Add data to queue and process the queue
+        if ((report != False and report != None) or (envReport != False and
+            envReport != None) or (dayStat != False and dayStat != None)):
+
+            data_queue.append((report, envReport, dayStat))
+        threading.Thread(target = operation_process_data).start()
 
     # Add camera image to queue if camera uploading is active
     if config.camera_uploading == True:
@@ -276,7 +292,7 @@ def schedule_second():
         elif os.path.isfile(os.path.join(config.data_directory, "restart.cmd")):
             os.remove(os.path.join(config.data_directory, "restart.cmd"))
             os.system("shutdown -r now")
-    except: pass
+    except: helpers.data_error(51)
 
 
 if __name__ == "__main__":
@@ -307,7 +323,14 @@ if __name__ == "__main__":
 
         # -- START WATCHING DATA -----------------------------------------------
         event_scheduler = BlockingScheduler()
-        event_scheduler.add_job(schedule_minute, "cron", minute = "0-59",
-            second = 8)
+        
+        if (config.report_uploading == True or
+            config.envReport_uploading == True or
+            config.dayStat_uploading == True or
+            config.camera_uploading == True):
+
+            event_scheduler.add_job(schedule_minute, "cron", minute = "0-59",
+                second = 8)
+
         event_scheduler.add_job(schedule_second, "cron", second = "35-55")
         event_scheduler.start()

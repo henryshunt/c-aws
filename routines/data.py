@@ -7,9 +7,9 @@ import routines.config as config
 import routines.helpers as helpers
 
 def write_record(query, parameters):
+    if not os.path.isfile(config.database_path): return False
+        
     try:
-        if not os.path.isfile(config.database_path): return False
-            
         free_space = helpers.remaining_space("/")
         if free_space == None or free_space < 0.1: return False
         
