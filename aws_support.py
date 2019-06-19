@@ -1,7 +1,3 @@
-""" C-AWS Support Subsystem
-    Responsible for providing supporting functionality for the station
-"""
-
 from datetime import datetime
 import os
 import threading

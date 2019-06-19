@@ -16,11 +16,6 @@ SELECT_SINGLE_REPORT = "SELECT * FROM reports WHERE Time = ?"
 SELECT_SINGLE_ENVREPORT = "SELECT * FROM envReports WHERE Time = ?"
 SELECT_SINGLE_DAYSTAT = "SELECT * FROM dayStats WHERE Date = ?"
 
-SELECT_FIELDS_REPORTS = "SELECT {} FROM reports WHERE Time BETWEEN ? AND ?"
-SELECT_PAST_HOUR_REPORTS = "SELECT SUM({0}) AS {0}_PHr FROM reports WHERE Time BETWEEN ? AND ?"
-SELECT_FIELDS_ENVREPORTS = "SELECT {} FROM envReports WHERE Time BETWEEN ? AND ?"
-SELECT_FIELDS_DAYSTATS = "SELECT {} FROM dayStats WHERE Date BETWEEN ? AND ?"
-
 GENERATE_DAYSTAT = ("SELECT * FROM (SELECT "
     + "ROUND(AVG(ST10), 3) AS ST10_Avg, MIN(ST10) AS ST10_Min, MAX(ST10) AS ST10_Max, "
     + "ROUND(AVG(ST30), 3) AS ST30_Avg, MIN(ST30) AS ST30_Min, MAX(ST30) AS ST30_Max, "
@@ -35,19 +30,6 @@ GENERATE_DAYSTAT = ("SELECT * FROM (SELECT "
     + "SUM(SunD) AS SunD_Ttl, ROUND(SUM(Rain), 3) AS Rain_Ttl, "
     + "ROUND(AVG(MSLP), 3) AS MSLP_Avg, MIN(MSLP) AS MSLP_Min, MAX(MSLP) AS MSLP_Max "
     + "FROM reports WHERE Time BETWEEN ? AND ?) AS B")
-GENERATE_YEAR_STATS = ("SELECT "
-    + "ROUND(AVG(AirT_Avg), 3) AS AirT_Avg, ROUND(MIN(AirT_Min), 3) AS AirT_Min, "
-    + "ROUND(MAX(AirT_Max), 3) AS AirT_Max FROM dayStats WHERE strftime('%Y', Date) = ?")
-GENERATE_MONTHS_STATS = ("SELECT strftime('%m', Date) AS Month, "
-    + "ROUND(AVG(AirT_Avg), 3) AS AirT_Avg, ROUND(MIN(AirT_Min), 3) AS AirT_Min, "
-    + "ROUND(MAX(AirT_Max), 3) AS AirT_Max, ROUND(AVG(RelH_Avg), 3) AS RelH_Avg, "
-    + "ROUND(AVG(WSpd_Avg), 3) AS WSpd_Avg, ROUND(MAX(WSpd_Max), 3) AS WSpd_Max, "
-    + "ROUND(AVG(WDir_Avg), 3) AS WDir_Avg, ROUND(MAX(WGst_Max), 3) AS WGst_Max, "
-    + "ROUND(SUM(SunD_Ttl) / 60.0 / 60.0, 3) AS SunD_Ttl, "
-    + "ROUND(SUM(Rain_Ttl), 3) AS Rain_Ttl, ROUND(AVG(MSLP_Avg), 3) AS MSLP_Avg, "
-    + "ROUND(AVG(ST10_Avg), 3) AS ST10_Avg, ROUND(AVG(ST30_Avg), 3) AS ST30_Avg, "
-    + "ROUND(AVG(ST00_Avg), 3) AS ST00_Avg FROM dayStats WHERE strftime('%Y', Date) "
-    + "= ? GROUP BY strftime('%m', Date)")
 
 INSERT_REPORT = "INSERT INTO reports VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)"
 INSERT_ENVREPORT = "INSERT INTO envReports VALUES (?, ?, ?)"

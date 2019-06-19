@@ -1,8 +1,3 @@
-""" C-AWS Main Entry Point
-      Performs initialisation, system checks, and starts the sub-systems
-"""
-
-# DEPENDENCIES -----------------------------------------------------------------
 import os
 import time
 import sqlite3
@@ -14,7 +9,6 @@ import routines.config as config
 import routines.helpers as helpers
 import routines.queries as queries
 
-# GLOBAL VARIABLES -------------------------------------------------------------
 proc_support = None
 proc_data = None
 

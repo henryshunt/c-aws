@@ -1,7 +1,3 @@
-""" C-AWS Data Subsystem
-    Responsible for logging data parameters and generating statistics
-"""
-
 import os
 from datetime import datetime, timedelta
 import time
