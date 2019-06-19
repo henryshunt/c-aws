@@ -62,8 +62,7 @@ log_WGst = None
 log_MSLP = None
 
 def __validate():
-    """ Checks the specified values and that interacting options are set
-        correctly
+    """ Checks and verifies the loaded configuration values
     """
     global aws_time_zone, aws_latitude, aws_longitude, aws_elevation
     global data_directory, database_path, camera_directory, remote_sql_server
@@ -145,7 +144,7 @@ def __load_value(group, key, data_type):
         return __parser.getint(group, key)
 
 def load():
-    """ Loads data from the config.ini file in the current directory
+    """ Loads data from the config.ini file in the project root directory
     """
     global __parser, aws_time_zone, aws_latitude, aws_longitude, aws_elevation
     global data_directory, camera_directory, remote_sql_server

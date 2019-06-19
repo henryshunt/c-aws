@@ -13,7 +13,8 @@ DATALEDPIN = 23
 ERRORLEDPIN = 24
 
 def init_error(code):
-    """ Remains in a loop, flashing the error LED to indicate an error code
+    """ Logs the initialisation error code, then remains in a loop flashing the
+        error LED to indicate the error code
     """
     if config.data_directory != None and os.path.isdir(config.data_directory):
         try:
@@ -35,10 +36,14 @@ def init_error(code):
         time.sleep(1)
 
 def data_error(code):
+    """ Logs the data error code and turns on the error LED
+    """
     data_error_blind(code)
     gpio.output(ERRORLEDPIN, gpio.HIGH)
 
 def data_error_blind(code):
+    """ Logs the data error code
+    """
     if config.data_directory != None and os.path.isdir(config.data_directory):
         try:
             with open(os.path.join(
@@ -90,4 +95,6 @@ def day_bounds_utc(local, inclusive):
     return local_to_utc(start), local_to_utc(end)
 
 def none_to_null(value):
+    """ Returns None if the specified value is null, else returns the value
+    """
     return "null" if value == None else value

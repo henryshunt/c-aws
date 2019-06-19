@@ -70,6 +70,8 @@ class Wind():
             return value
 
     def prepare_shift(self, ten_mins_ago):
+        """ Prepares the logged data by removing old samples
+        """
         if self.__shift != None:
             for tick in list(self.__shift):
                 if tick < ten_mins_ago: self.__shift.remove(tick)

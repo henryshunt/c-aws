@@ -8,6 +8,9 @@ import routines.queries as queries
 import routines.helpers as helpers
 
 def record_for_time(time, table):
+    """ Query the database for a record in the specified table matching the
+        specified time
+    """
     time = time.replace(second = 0, microsecond = 0)
         
     try:
@@ -32,6 +35,9 @@ def record_for_time(time, table):
     except: return False
 
 def stats_for_date(local_time):
+    """ Calculate statistics using the reports table, for the date corresponding
+        to the specified local time
+    """
     try:
         bounds = helpers.day_bounds_utc(local_time, False)
         

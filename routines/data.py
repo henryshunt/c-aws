@@ -7,6 +7,8 @@ import routines.config as config
 import routines.helpers as helpers
 
 def write_record(query, parameters):
+    """ Performs the specified write query using the specified values
+    """
     if not os.path.isfile(config.database_path): return False
         
     try:
@@ -22,6 +24,8 @@ def write_record(query, parameters):
     return True
 
 def calculate_dew_point(AirT, RelH):
+    """ Calculates dew point using the same formula the Met Office uses
+    """
     if AirT == None or RelH == None: return None
 
     DewP_a = 0.4343 * math.log(RelH / 100)
@@ -32,6 +36,8 @@ def calculate_dew_point(AirT, RelH):
     return 278.04 * ((8.0813 - DewP_c) - DewP_d)
 
 def calculate_mean_sea_level_pressure(StaP, AirT, DewP):
+    """ Reduces station pressure to mean sea level using the WMO formula
+    """
     if StaP == None or AirT == None or DewP == None: return None
 
     MSLP_a = 6.11 * 10 ** ((7.5 * DewP) / (237.3 + DewP))

@@ -1,9 +1,6 @@
 #!/bin/bash
 echo "Installing dependencies for C-AWS..."
 
-apt-get update
-apt-get upgrade
-
 apt-get install python3-rpi.gpio
 apt-get install python3-picamera
 apt-get install python3-tz

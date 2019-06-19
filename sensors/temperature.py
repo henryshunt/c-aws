@@ -23,6 +23,8 @@ class Temperature():
         return self.__error
 
     def sample(self):
+        """ Samples the temperature sensor and stores the value in the store
+        """
         self.__error = False
 
         try:
@@ -37,6 +39,8 @@ class Temperature():
         except: self.__error = True
 
     def get_stored(self):
+        """ Returns the value stored in the store
+        """
         self.__error = False
 
         if self.__log_type == LogType.VALUE:
@@ -52,6 +56,8 @@ class Temperature():
         self.__store = None
 
     def get_shifted(self):
+        """ Returns the value stored in the shifted store
+        """
         self.__error = False
 
         if self.__log_type == LogType.VALUE:
@@ -67,6 +73,8 @@ class Temperature():
         self.__shift = None
 
     def shift_store(self):
+        """ Shifts the value of the store over to the shift store
+        """
         self.__error = False
 
         if self.__store != None:

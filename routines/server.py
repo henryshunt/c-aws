@@ -8,6 +8,9 @@ import routines.config as config
 import routines.helpers as helpers
 
 def get_static_info():
+    """ Outputs system startup time, and internal and camera drive remaining
+        space values
+    """
     startup_time = None
     internal_drive_space = None
     camera_drive_space = None
