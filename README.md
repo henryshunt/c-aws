@@ -111,3 +111,4 @@ The software is currently in its fifth major version, with the repository going 
 - 5.1.1 (Apr 2019): fixed a bug where the ExpT and EncT sensor addresses were the same.
 - 5.1.2 (Apr 2019): fixed a bug preventing rainfall from being counted.
 - 5.2.0 (Jun 2019): removed the access subsystem (replaced with separate codebade) and associated routines. Various small changes and fault tolerance improvements. Removed code to mount the camera drive.
+- 5.0.1 (Jun 2019): server interface now returns remaining camera drive space even if not logging from a camera

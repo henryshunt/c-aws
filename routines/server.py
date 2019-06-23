@@ -27,7 +27,7 @@ def get_static_info():
 
     # Get camera drive space
     if config.load() != False:
-        if (config.camera_logging == True and
+        if (config.camera_directory != None and
             os.path.isdir(config.camera_directory) and
             os.path.ismount(config.camera_directory)):
 
