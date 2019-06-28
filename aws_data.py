@@ -46,6 +46,12 @@ ST00_sensor = Temperature()
 EncT_sensor = Temperature()
 CPUT_sensor = Processor()
 
+# DS18B20 sensors take 0.75 seconds to read. When the CPU-heavy on-the-minute
+# job runs, on-the-second jobs can overrun and subsequently the next second run
+# gets cancelled. This variable disables DS18B20 logging in the on-the-second
+# jobs while the on-the-minute job is running, to prevent overrun
+isRunningLogRoutine = False
+
 
 def operation_log_report(utc):
     """ Reads all sensors, calculates derived and averaged parameters, and
@@ -442,8 +448,9 @@ def schedule_minute():
     """ Triggered every minute to generate a report and environment report, add
         them to the database, activate the camera and generate statistics
     """
-    global CPUT_sensor
+    global CPUT_sensor, isRunningLogRoutine
     utc = datetime.utcnow().replace(second = 0, microsecond = 0)
+    isRunningLogRoutine = True
 
     # Reset LEDS and wait to allow schedule_second() to finish
     gpio.output(helpers.DATALEDPIN, gpio.HIGH)
@@ -462,13 +469,15 @@ def schedule_minute():
     if config.envReport_logging == True: operation_log_environment(utc)
     if config.camera_logging == True: operation_log_camera(utc)
     if config.dayStat_generation == True: operation_generate_stats(utc)
+
     gpio.output(23, gpio.LOW)
+    isRunningLogRoutine = False
 
 def schedule_second():
     """ Triggered every second to read sensor values into a list for averaging
     """
     global disable_sampling, SunD_sensor, AirT_sensor, RelH_sensor, WDir_sensor
-    global StaP_sensor
+    global StaP_sensor, isRunningLogRoutine
     utc = datetime.utcnow().replace(microsecond = 0)
 
     # No sensor reads if sampling is disabled
@@ -489,7 +498,7 @@ def schedule_second():
 
     # -- AIR TEMPERATURE -------------------------------------------------------
     AirT_thread = None
-    if config.AirT == True:
+    if config.AirT == True and isRunningLogRoutine == False:
         try:
             AirT_thread = Thread(target = AirT_sensor.sample, args = ())
             AirT_thread.start()
@@ -517,7 +526,7 @@ def schedule_second():
         except: helpers.data_error(46)
 
     # -- AIR TEMPERATURE -------------------------------------------------------
-    if config.AirT == True:
+    if config.AirT == True and AirT_thread != None:
         try:
             AirT_thread.join()
             if AirT_sensor.get_error() == True: helpers.data_error(47)
