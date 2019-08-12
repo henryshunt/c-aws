@@ -2,20 +2,20 @@ import statistics
 
 import board
 import busio
-import adafruit_bme280
+import adafruit_htu21d
 
 from sensors.sensor import Sensor
 
-class BME280(Sensor):
+class HTU21D(Sensor):
 
     def setup(self, log_type):
         super().setup(log_type)
 
         i2c = busio.I2C(board.SCL, board.SDA)
-        self.bridge = adafruit_bme280.Adafruit_BME280_I2C(i2c)
+        self.bridge = adafruit_htu21d.HTU21D(i2c)
 
     def read_value(self):
-        return self.bridge.pressure
+        return self.bridge.relative_humidity
 
     def array_format(self, array):
         if array != None:

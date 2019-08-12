@@ -89,26 +89,29 @@ A situation where both the data and error LEDs illuminate for 2.5 seconds, go of
 
 # Dependencies
 - RPi.GPIO
+- Adafruit Blinka
 - picamera
 - Python TZ
-- gpiozero
+- GPIO Zero
 - Advanced Python Scheduler
 - spidev
 - Adafruit GPIO
 - astral
-- python-daemon
-- [Adafruit Python SHT31](https://github.com/ralf1070/Adafruit_Python_SHT31)
-- [Adafruit Python MCP3008](https://github.com/adafruit/Adafruit_Python_MCP3008/)
-- [Adafruit Python BME280](https://github.com/adafruit/Adafruit_Python_BME280)
+- Python Daemon
+- Adafruit CircuitPython MCP9808
+- Adafruit CircuitPython HTU21D
+- Adafruit CircuitPython BME280
+- Adafruit CircuitPython MCP3XXX
 
 # Version History
 The software is currently in its fifth major version, with the repository going back to version four.
 
-- 5.0.0 (Sep 2018): version five, the final major software re-write for the project.
-- 5.0.1 (Sep 2018): fixed a bug that prevented sunshine data from being read during the last second of the minute.
+- 5.0.0 (Sep 2018): version five, the final major software re-write for the project
+- 5.0.1 (Sep 2018): fixed a bug that prevented sunshine data from being read during the last second of the minute
 - 5.0.2 (Dec 2018): various minor tweaks to text on the data viewing pages. Removed yearly total rainfall and sunshine from climate page.
 - 5.1.0 (Apr 2019): rewritten data sub-system and various tweaks. Configuration now allows specification of which parameters to log. Fixed a bug that meant the first minute of the next day was not included in the previous day's averaged and totalled statistics. Removed monthly average wind gust from climate page. About page renamed to 'station'. Year graphs now end at the current day instead of yesterday.
-- 5.1.1 (Apr 2019): fixed a bug where the ExpT and EncT sensor addresses were the same.
-- 5.1.2 (Apr 2019): fixed a bug preventing rainfall from being counted.
+- 5.1.1 (Apr 2019): fixed a bug where the ExpT and EncT sensor addresses were the same
+- 5.1.2 (Apr 2019): fixed a bug preventing rainfall from being counted
 - 5.2.0 (Jun 2019): removed the access subsystem (replaced with separate codebade) and associated routines. Various small changes and fault tolerance improvements. Removed code to mount the camera drive.
-- 5.0.1 (Jun 2019): server interface now returns remaining camera drive space even if not logging from a camera
+- 5.2.1 (Jun 2019): server interface now returns remaining camera drive space even if not logging from a camera
+- 5.3.0 (Aug 2019): sensor upgrades + support subsystem rewrite

@@ -1,8 +1,5 @@
 import os
-from datetime import datetime
-import time
 import subprocess
-import sys
 
 import routines.config as config
 import routines.helpers as helpers
@@ -23,17 +20,17 @@ def get_static_info():
     # Get internal drive space
     free_space = helpers.remaining_space("/")
     if free_space != None:
-        internal_drive_space = round(free_space, 3)
+        internal_drive_space = round(free_space, 2)
 
     # Get camera drive space
-    if config.load() != False:
-        if (config.camera_directory != None and
-            os.path.isdir(config.camera_directory) and
-            os.path.ismount(config.camera_directory)):
+    if (config.load() == True and config.camera_directory != None and
+        os.path.isdir(config.camera_directory) and os.path.ismount(
+        config.camera_directory)):
 
-            free_space = helpers.remaining_space(config.camera_directory)
-            if free_space != None:
-                camera_drive_space = round(free_space, 3)
+        free_space = helpers.remaining_space(config.camera_directory)
+        if free_space != None:
+            camera_drive_space = round(free_space, 2)
 
+    # New line needed as startup_time already ends with one
     print(str(startup_time) + str(internal_drive_space) + "\n"
         + str(camera_drive_space))

@@ -34,7 +34,6 @@ camera_uploading = None
 
 # Sensors group
 AirT = None
-AirT_address = None
 ExpT = None
 ExpT_address = None
 RelH = None
@@ -69,9 +68,9 @@ def __validate():
     global remote_ftp_server, remote_ftp_username, remote_ftp_password
     global envReport_logging, camera_logging, dayStat_generation
     global report_uploading, envReport_uploading, dayStat_uploading
-    global camera_uploading, AirT, AirT_address, ExpT, ExpT_address, RelH, WSpd
-    global WSpd_pin, WDir, WDir_channel, SunD, SunD_pin, Rain, Rain_pin, StaP
-    global ST10, ST10_address, ST30, ST30_address, ST00, ST00_address, EncT
+    global camera_uploading, AirT, ExpT, ExpT_address, RelH, WSpd, WSpd_pin
+    global WDir, WDir_channel, SunD, SunD_pin, Rain, Rain_pin, StaP, ST10
+    global ST10_address, ST30, ST30_address, ST00, ST00_address, EncT
     global EncT_address, log_DewP, log_WGst, log_MSLP
 
     # AWSInfo group
@@ -109,13 +108,12 @@ def __validate():
             return False
 
     # Sensors group
-    if ((AirT == True and AirT_address == None) or (ExpT == True and
-        ExpT_address == None) or (ST10 == True and ST10_address == None) or
-        (ST30 == True and ST30_address == None) or (ST00 == True and
-        ST00_address == None) or (EncT == True and EncT_address == None) or
-        (WSpd == True and WSpd_pin == None) or (WDir == True and
-        WDir_channel == None) or (SunD == True and SunD_pin == None) or
-        (Rain == True and Rain_pin == None)):
+    if ((ExpT == True and ExpT_address == None) or (ST10 == True and
+        ST10_address == None) or (ST30 == True and ST30_address == None) or
+        (ST00 == True and ST00_address == None) or (EncT == True and
+        EncT_address == None) or (WSpd == True and WSpd_pin == None) or
+        (WDir == True and WDir_channel == None) or (SunD == True and
+        SunD_pin == None) or (Rain == True and Rain_pin == None)):
         return False
 
     # Derived group
@@ -151,9 +149,9 @@ def load():
     global remote_ftp_server, remote_ftp_username, remote_ftp_password
     global envReport_logging, camera_logging, dayStat_generation
     global report_uploading, envReport_uploading, dayStat_uploading
-    global camera_uploading, AirT, AirT_address, ExpT, ExpT_address, RelH, WSpd
-    global WSpd_pin, WDir, WDir_channel, SunD, SunD_pin, Rain, Rain_pin, StaP
-    global ST10, ST10_address, ST30, ST30_address, ST00, ST00_address, EncT
+    global camera_uploading, AirT, ExpT, ExpT_address, RelH, WSpd, WSpd_pin
+    global WDir, WDir_channel, SunD, SunD_pin, Rain, Rain_pin, StaP, ST10
+    global ST10_address, ST30, ST30_address, ST00, ST00_address, EncT
     global EncT_address, log_DewP, log_WGst, log_MSLP
 
     try:
@@ -199,8 +197,6 @@ def load():
 
         # Load Sensors group values
         AirT = __load_value("Sensors", "AirT", __DataType.BOOLEAN)
-        AirT_address = (
-            __load_value("Sensors", "AirTAddress", __DataType.STRING))
         ExpT = __load_value("Sensors", "ExpT", __DataType.BOOLEAN)
         ExpT_address = (
             __load_value("Sensors", "ExpTAddress", __DataType.STRING))

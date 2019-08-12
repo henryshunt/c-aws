@@ -8,23 +8,28 @@ import pytz
 
 import routines.config as config
 
+
 # Constants indicating pin numbers of the data and error LEDs
 DATALEDPIN = 23
 ERRORLEDPIN = 24
 
-def init_error(code):
-    """ Logs the initialisation error code, then remains in a loop flashing the
-        error LED to indicate the error code
-    """
+
+def write_error(source, code):
     if config.data_directory != None and os.path.isdir(config.data_directory):
         try:
             with open(os.path.join(
                 config.data_directory, "error_log.txt"), "a") as log:
                 
                 log_time = datetime.utcnow().strftime("%d/%m/%Y %H:%M:%S")
-                log.write("["
-                    + log_time + "] Initialisation code " + str(code) + "\n")
+                log.write("[" + log_time + "] -> " + source + " :: code " + 
+                    str(code) + "\n")
         except: pass
+
+def init_error(code):
+    """ Logs the initialisation error code, then remains in a loop flashing the
+        error LED to indicate the error code
+    """
+    write_error("init", code)
         
     while True:
         for i in range(code):
@@ -32,26 +37,19 @@ def init_error(code):
             time.sleep(0.15)
             gpio.output(ERRORLEDPIN, gpio.LOW)
             time.sleep(0.15)
-
         time.sleep(1)
 
 def data_error(code):
-    """ Logs the data error code and turns on the error LED
+    """ Logs the data subsystem error code and turns on the error LED
     """
-    data_error_blind(code)
+    write_error("data", code)
     gpio.output(ERRORLEDPIN, gpio.HIGH)
 
-def data_error_blind(code):
-    """ Logs the data error code
+def support_error(code):
+    """ Logs the support subsystem error code
     """
-    if config.data_directory != None and os.path.isdir(config.data_directory):
-        try:
-            with open(os.path.join(
-                config.data_directory, "error_log.txt"), "a") as log:
-                
-                log_time = datetime.utcnow().strftime("%d/%m/%Y %H:%M:%S")
-                log.write("[" + log_time + "] Error code " + str(code) + "\n")
-        except: pass
+    write_error("supp", code)
+
 
 def remaining_space(directory):
     """ Returns the amount of remaining space in gigabytes, for non-root users,
@@ -66,6 +64,7 @@ def remaining_space(directory):
         non_root_space = float(disk.f_bsize * disk.f_bavail)
         return non_root_space / 1024 / 1024 / 1024
     except: return None
+
 
 def utc_to_local(utc):
     """ Localises a UTC time to the time zone specified in the configuration
@@ -83,17 +82,16 @@ def day_bounds_utc(local, inclusive):
     """ Calculates the start and end times of the specified local date, in UTC
     """
     # Get start and end of local day
-    start = local.replace(
-        hour = 0, minute = 0, second = 0, microsecond = 0, tzinfo = None)
-    end = local.replace(
-        hour = 23, minute = 59, second = 0, microsecond = 0, tzinfo = None)
+    start = local.replace(hour=0, minute=0, second=0, microsecond=0,
+        tzinfo=None)
+    end = local.replace(hour=23, minute=59, second=0, microsecond=0,
+        tzinfo=None)
 
     # Use start of next day as end if inclusive
     if inclusive == True: end += timedelta(minutes = 1)
-
-    # Convert start and end to UTC
     return local_to_utc(start), local_to_utc(end)
 
+    
 def none_to_null(value):
     """ Returns None if the specified value is null, else returns the value
     """

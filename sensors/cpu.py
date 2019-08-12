@@ -1,21 +1,17 @@
 import statistics
 
-import board
-import busio
-import adafruit_bme280
+from gpiozero import CPUTemperature
 
 from sensors.sensor import Sensor
 
-class BME280(Sensor):
+# CPU temperature sensor
+class CPU(Sensor):
 
     def setup(self, log_type):
         super().setup(log_type)
 
-        i2c = busio.I2C(board.SCL, board.SDA)
-        self.bridge = adafruit_bme280.Adafruit_BME280_I2C(i2c)
-
     def read_value(self):
-        return self.bridge.pressure
+        return CPUTemperature().temperature
 
     def array_format(self, array):
         if array != None:
