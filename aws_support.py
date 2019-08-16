@@ -1,8 +1,7 @@
 from datetime import datetime
 import os
-import threading
 import urllib.request
-from collections import deque
+from urllib.request import Request
 import ftplib
 import time
 import sys
@@ -13,321 +12,323 @@ import RPi.GPIO as gpio
 
 import routines.config as config
 import routines.helpers as helpers
-from routines.frames import DbTable
-import routines.analysis as analysis
+import routines.data as data
+
 
 power_pressed = False
+is_processing = False
 
-data_queue = deque(maxlen = 10080)
-is_processing_data = False
-camera_queue = deque(maxlen = 2016)
-is_processing_camera = False
-
-def operation_process_data():
-    """ Attempts to upload all elements in the data queue, aborting on failure
-    """
-    global is_processing_data, data_queue
-    if is_processing_data == True: return
-    else: is_processing_data = True
-
-    # Process while there are items in the queue
-    while data_queue:
-        data = data_queue.popleft()
-
-        to_upload = {
-            "has_report": 0 if data[0] == False or data[0] == None else 1,
-            "has_envReport": 0 if data[1] == False or data[1] == None else 1,
-            "has_dayStat": 0 if data[2] == False or data[2] == None else 1
-        }
-
-        # Add report data to data to upload
-        if to_upload["has_report"] == 1:
-            to_upload["report_Time"] = data[0]["Time"]
-            to_upload["report_AirT"] = helpers.none_to_null(data[0]["AirT"])
-            to_upload["report_ExpT"] = helpers.none_to_null(data[0]["ExpT"])
-            to_upload["report_RelH"] = helpers.none_to_null(data[0]["RelH"])
-            to_upload["report_DewP"] = helpers.none_to_null(data[0]["DewP"])
-            to_upload["report_WSpd"] = helpers.none_to_null(data[0]["WSpd"])
-            to_upload["report_WDir"] = helpers.none_to_null(data[0]["WDir"])
-            to_upload["report_WGst"] = helpers.none_to_null(data[0]["WGst"])
-            to_upload["report_SunD"] = helpers.none_to_null(data[0]["SunD"])
-            to_upload["report_Rain"] = helpers.none_to_null(data[0]["Rain"])
-            to_upload["report_StaP"] = helpers.none_to_null(data[0]["StaP"])
-            to_upload["report_MSLP"] = helpers.none_to_null(data[0]["MSLP"])
-            to_upload["report_ST10"] = helpers.none_to_null(data[0]["ST10"])
-            to_upload["report_ST30"] = helpers.none_to_null(data[0]["ST30"])
-            to_upload["report_ST00"] = helpers.none_to_null(data[0]["ST00"])
-
-        # Add envReport data to data to upload
-        if to_upload["has_envReport"] == 1:
-            to_upload["envReport_Time"] = data[1]["Time"]
-            to_upload["envReport_EncT"] = helpers.none_to_null(data[1]["EncT"])
-            to_upload["envReport_CPUT"] = helpers.none_to_null(data[1]["CPUT"])
-
-        # Add dayStat data to data to upload
-        if to_upload["has_dayStat"] == 1:
-            to_upload["dayStat_Date"] = data[2]["Date"]
-            to_upload["dayStat_AirT_Min"] = helpers.none_to_null(data[2][
-                "AirT_Min"])
-            to_upload["dayStat_AirT_Max"] = helpers.none_to_null(data[2][
-                "AirT_Max"])
-            to_upload["dayStat_AirT_Avg"] = helpers.none_to_null(data[2][
-                "AirT_Avg"])
-            to_upload["dayStat_RelH_Min"] = helpers.none_to_null(data[2][
-                "RelH_Min"])
-            to_upload["dayStat_RelH_Max"] = helpers.none_to_null(data[2][
-                "RelH_Max"])
-            to_upload["dayStat_RelH_Avg"] = helpers.none_to_null(data[2][
-                "RelH_Avg"])
-            to_upload["dayStat_DewP_Min"] = helpers.none_to_null(data[2][
-                "DewP_Min"])
-            to_upload["dayStat_DewP_Max"] = helpers.none_to_null(data[2][
-                "DewP_Max"])
-            to_upload["dayStat_DewP_Avg"] = helpers.none_to_null(data[2][
-                "DewP_Avg"])
-            to_upload["dayStat_WSpd_Min"] = helpers.none_to_null(data[2][
-                "WSpd_Min"])
-            to_upload["dayStat_WSpd_Max"] = helpers.none_to_null(data[2][
-                "WSpd_Max"])
-            to_upload["dayStat_WSpd_Avg"] = helpers.none_to_null(data[2][
-                "WSpd_Avg"])
-            to_upload["dayStat_WDir_Min"] = helpers.none_to_null(data[2][
-                "WDir_Min"])
-            to_upload["dayStat_WDir_Max"] = helpers.none_to_null(data[2][
-                "WDir_Max"])
-            to_upload["dayStat_WDir_Avg"] = helpers.none_to_null(data[2][
-                "WDir_Avg"])
-            to_upload["dayStat_WGst_Min"] = helpers.none_to_null(data[2][
-                "WGst_Min"])
-            to_upload["dayStat_WGst_Max"] = helpers.none_to_null(data[2][
-                "WGst_Max"])
-            to_upload["dayStat_WGst_Avg"] = helpers.none_to_null(data[2][
-                "WGst_Avg"])
-            to_upload["dayStat_SunD_Ttl"] = helpers.none_to_null(data[2][
-                "SunD_Ttl"])
-            to_upload["dayStat_Rain_Ttl"] = helpers.none_to_null(data[2][
-                "Rain_Ttl"])
-            to_upload["dayStat_MSLP_Min"] = helpers.none_to_null(data[2][
-                "MSLP_Min"])
-            to_upload["dayStat_MSLP_Max"] = helpers.none_to_null(data[2][
-                "MSLP_Max"])
-            to_upload["dayStat_MSLP_Avg"] = helpers.none_to_null(data[2][
-                "MSLP_Avg"])
-            to_upload["dayStat_ST10_Min"] = helpers.none_to_null(data[2][
-                "ST10_Min"])
-            to_upload["dayStat_ST10_Max"] = helpers.none_to_null(data[2][
-                "ST10_Max"])
-            to_upload["dayStat_ST10_Avg"] = helpers.none_to_null(data[2][
-                "ST10_Avg"])
-            to_upload["dayStat_ST30_Min"] = helpers.none_to_null(data[2][
-                "ST30_Min"])
-            to_upload["dayStat_ST30_Max"] = helpers.none_to_null(data[2][
-                "ST30_Max"])
-            to_upload["dayStat_ST30_Avg"] = helpers.none_to_null(data[2][
-                "ST30_Avg"])
-            to_upload["dayStat_ST00_Min"] = helpers.none_to_null(data[2][
-                "ST00_Min"])
-            to_upload["dayStat_ST00_Max"] = helpers.none_to_null(data[2][
-                "ST00_Max"])
-            to_upload["dayStat_ST00_Avg"] = helpers.none_to_null(data[2][
-                "ST00_Avg"])
-
-        # Upload the data        
-        try:
-            request = urllib.request.Request(config.remote_sql_server,
-                urllib.parse.urlencode(to_upload).encode("utf-8"))
-            response = urllib.request.urlopen(request, timeout = 10)
-            if response.read().decode() != "0": raise Exception()
-
-        except:
-            data_queue.appendleft(data)
-            helpers.data_error_blind(52)
-            break
-
-    is_processing_data = False
-
-def operation_process_camera():
-    """ Attempts to upload all elements in the camera queue, aborting on failure
-    """
-    global is_processing_camera, camera_queue
-    if is_processing_camera == True: return
-    else: is_processing_camera = True
-
-    # Process while there are items in the queue
-    while camera_queue:
-        data = camera_queue.popleft()
-
-        if (os.path.isdir(config.camera_directory) and
-            os.path.ismount(config.camera_directory) and
-            os.path.isfile(data)):
-
-            try:
-                ftp = ftplib.FTP(config.remote_ftp_server,
-                    config.remote_ftp_username, config.remote_ftp_password,
-                    timeout = 45)
-                ftp.set_pasv(False)
-
-                # Create y/m/d directory if doesn't exist already
-                image_date = os.path.basename(data).split("T")[0].split("-")
-                if image_date[0] not in ftp.nlst(): ftp.mkd(image_date[0])
-                ftp.cwd(image_date[0])
-                if image_date[1] not in ftp.nlst(): ftp.mkd(image_date[1])
-                ftp.cwd(image_date[1])
-                if image_date[2] not in ftp.nlst(): ftp.mkd(image_date[2])
-                ftp.cwd(image_date[2])
-
-                # Upload the image
-                with open(data, "rb") as file:
-                    ftp.storbinary("STOR " + os.path.basename(data), file)
-
-            except:
-                camera_queue.appendleft(data)
-                helpers.data_error_blind(56)
-                break
-
-        else:
-            helpers.data_error_blind(55)
-            return
-
-    is_processing_camera = False
 
 def operation_shutdown(channel):
     """ Performs a system shutdown on press of the shutdown push button
     """
     global power_pressed
-    if power_pressed == False: power_pressed = True
+    if power_pressed == False:
+        power_pressed = True
     else: return
     
     # Wait for safe time window to prevent data and upload corruption
     second = datetime.utcnow().second
 
-    while second < 35 or second > 55:
-        time.sleep(0.8)
+    while second < 40 or second > 55:
+        time.sleep(1)
         second = datetime.utcnow().second
 
     try:
         os.system("shutdown -h now")
-    except: helpers.data_error_blind(57)
+    except: helpers.support_error("operation_shutdown() 0")
 
 def operation_restart(channel):
     """ Performs a system restart on press of the restart push button
     """
     global power_pressed
-    if power_pressed == False: power_pressed = True
+    if power_pressed == False:
+        power_pressed = True
     else: return
 
     # Wait for safe time window to prevent data and upload corruption
     second = datetime.utcnow().second
 
-    while second < 35 or second > 55:
-        time.sleep(0.8)
+    while second < 40 or second > 55:
+        time.sleep(1)
         second = datetime.utcnow().second
 
     try:
         os.system("shutdown -r now")
-    except: helpers.data_error_blind(58)
+    except: helpers.support_error("operation_restart() 0")
+
+
+def post_request(data):
+    try:
+        request = Request(config.remote_sql_server,
+            urllib.parse.urlencode(data).encode("utf-8"))
+        response = urllib.request.urlopen(request, timeout=10)
+        if response.read().decode() != "0": raise Exception()
+    except: return False
+
+    return True
+
+def upload_report(report):
+    post_data = {
+        "has_report": 1, "has_envReport": 0, "has_dayStat": 0
+    }
+
+    post_data["report_Time"] = report["Time"]
+    post_data["report_AirT"] = helpers.none_to_null(report["AirT"])
+    post_data["report_ExpT"] = helpers.none_to_null(report["ExpT"])
+    post_data["report_RelH"] = helpers.none_to_null(report["RelH"])
+    post_data["report_DewP"] = helpers.none_to_null(report["DewP"])
+    post_data["report_WSpd"] = helpers.none_to_null(report["WSpd"])
+    post_data["report_WDir"] = helpers.none_to_null(report["WDir"])
+    post_data["report_WGst"] = helpers.none_to_null(report["WGst"])
+    post_data["report_SunD"] = helpers.none_to_null(report["SunD"])
+    post_data["report_Rain"] = helpers.none_to_null(report["Rain"])
+    post_data["report_StaP"] = helpers.none_to_null(report["StaP"])
+    post_data["report_MSLP"] = helpers.none_to_null(report["MSLP"])
+    post_data["report_ST10"] = helpers.none_to_null(report["ST10"])
+    post_data["report_ST30"] = helpers.none_to_null(report["ST30"])
+    post_data["report_ST00"] = helpers.none_to_null(report["ST00"])
+
+    return True if post_request(post_data) == True else False
+
+def upload_envReport(envReport):
+    post_data = {
+        "has_report": 0, "has_envReport": 1, "has_dayStat": 0
+    }
+
+    post_data["envReport_Time"] = envReport["Time"]
+    post_data["envReport_EncT"] = helpers.none_to_null(envReport["EncT"])
+    post_data["envReport_CPUT"] = helpers.none_to_null(envReport["CPUT"])
+
+    return True if post_request(post_data) == True else False
+
+def upload_dayStat(dayStat):
+    post_data = {
+        "has_report": 0, "has_envReport": 0, "has_dayStat": 1
+    }
+
+    post_data["dayStat_Date"] = dayStat["Date"]
+    post_data["dayStat_AirT_Min"] = helpers.none_to_null(dayStat["AirT_Min"])
+    post_data["dayStat_AirT_Max"] = helpers.none_to_null(dayStat["AirT_Max"])
+    post_data["dayStat_AirT_Avg"] = helpers.none_to_null(dayStat["AirT_Avg"])
+    post_data["dayStat_RelH_Min"] = helpers.none_to_null(dayStat["RelH_Min"])
+    post_data["dayStat_RelH_Max"] = helpers.none_to_null(dayStat["RelH_Max"])
+    post_data["dayStat_RelH_Avg"] = helpers.none_to_null(dayStat["RelH_Avg"])
+    post_data["dayStat_DewP_Min"] = helpers.none_to_null(dayStat["DewP_Min"])
+    post_data["dayStat_DewP_Max"] = helpers.none_to_null(dayStat["DewP_Max"])
+    post_data["dayStat_DewP_Avg"] = helpers.none_to_null(dayStat["DewP_Avg"])
+    post_data["dayStat_WSpd_Min"] = helpers.none_to_null(dayStat["WSpd_Min"])
+    post_data["dayStat_WSpd_Max"] = helpers.none_to_null(dayStat["WSpd_Max"])
+    post_data["dayStat_WSpd_Avg"] = helpers.none_to_null(dayStat["WSpd_Avg"])
+    post_data["dayStat_WDir_Min"] = helpers.none_to_null(dayStat["WDir_Min"])
+    post_data["dayStat_WDir_Max"] = helpers.none_to_null(dayStat["WDir_Max"])
+    post_data["dayStat_WDir_Avg"] = helpers.none_to_null(dayStat["WDir_Avg"])
+    post_data["dayStat_WGst_Min"] = helpers.none_to_null(dayStat["WGst_Min"])
+    post_data["dayStat_WGst_Max"] = helpers.none_to_null(dayStat["WGst_Max"])
+    post_data["dayStat_WGst_Avg"] = helpers.none_to_null(dayStat["WGst_Avg"])
+    post_data["dayStat_SunD_Ttl"] = helpers.none_to_null(dayStat["SunD_Ttl"])
+    post_data["dayStat_Rain_Ttl"] = helpers.none_to_null(dayStat["Rain_Ttl"])
+    post_data["dayStat_MSLP_Min"] = helpers.none_to_null(dayStat["MSLP_Min"])
+    post_data["dayStat_MSLP_Max"] = helpers.none_to_null(dayStat["MSLP_Max"])
+    post_data["dayStat_MSLP_Avg"] = helpers.none_to_null(dayStat["MSLP_Avg"])
+    post_data["dayStat_ST10_Min"] = helpers.none_to_null(dayStat["ST10_Min"])
+    post_data["dayStat_ST10_Max"] = helpers.none_to_null(dayStat["ST10_Max"])
+    post_data["dayStat_ST10_Avg"] = helpers.none_to_null(dayStat["ST10_Avg"])
+    post_data["dayStat_ST30_Min"] = helpers.none_to_null(dayStat["ST30_Min"])
+    post_data["dayStat_ST30_Max"] = helpers.none_to_null(dayStat["ST30_Max"])
+    post_data["dayStat_ST30_Avg"] = helpers.none_to_null(dayStat["ST30_Avg"])
+    post_data["dayStat_ST00_Min"] = helpers.none_to_null(dayStat["ST00_Min"])
+    post_data["dayStat_ST00_Max"] = helpers.none_to_null(dayStat["ST00_Max"])
+    post_data["dayStat_ST00_Avg"] = helpers.none_to_null(dayStat["ST00_Avg"])
+
+    return True if post_request(post_data) == True else False
+
+def upload_camReport(camReport):
+    image_path = os.path.join(config.camera_directory,
+        camReport["Time"].strftime("%Y/%m/%d/%Y-%m-%dT%H-%M-%S") + ".jpg")
+
+    if (os.path.isdir(config.camera_directory) and
+        os.path.ismount(config.camera_directory) and
+        os.path.isfile(image_path)):
+
+        try:
+            ftp = ftplib.FTP(config.remote_ftp_server,
+                config.remote_ftp_username, config.remote_ftp_password,
+                timeout=45)
+            ftp.set_pasv(False)
+
+            # Create y/m/d directory if doesn't exist already
+            image_date = os.path.basename(image_path).split("T")[0].split("-")
+            if image_date[0] not in ftp.nlst(): ftp.mkd(image_date[0])
+            ftp.cwd(image_date[0])
+            if image_date[1] not in ftp.nlst(): ftp.mkd(image_date[1])
+            ftp.cwd(image_date[1])
+            if image_date[2] not in ftp.nlst(): ftp.mkd(image_date[2])
+            ftp.cwd(image_date[2])
+
+            # Upload the image
+            with open(image_path, "rb") as file:
+                ftp.storbinary("STOR " + os.path.basename(image_path), file)
+            return True
+
+        except: return False
+    else: return False
 
 
 def schedule_minute():
-    """ Triggered every minute to add new data to the upload queues and to try
-        and process the queues
+    """ Triggered every minute to begin uploading of any non-uploaded data
     """
-    global data_queue, camera_queue
-    utc = datetime.utcnow().replace(second = 0, microsecond = 0)
-    local_time = helpers.utc_to_local(utc)
+    global is_processing
+    if is_processing: return
+    is_processing = True
 
-    # Get database records depending on if uploading them is active
-    if (config.report_uploading == True or config.envReport_uploading == True
-        or config.dayStat_uploading == True):
+    # Retrieve each set of records from upload database
+    reports = []
+    if config.report_uploading == True:
+        reportsQuery = data.query_database(
+            config.upload_db_path, "SELECT * FROM reports LIMIT 60", None)
 
-        if config.report_uploading == True:
-            report = analysis.record_for_time(utc, DbTable.REPORTS)
-        else: report == None
+        if reportsQuery == False:
+            helpers.support_error("schedule_minute() 0")
+        elif reportsQuery != None: reports = reportsQuery
 
-        if config.envReport_uploading == True:
-            envReport = analysis.record_for_time(utc, DbTable.ENVREPORTS)
-        else: envReport = None
+    envReports = []
+    if config.envReport_uploading == True:
+        envReportsQuery = data.query_database(
+            config.upload_db_path, "SELECT * FROM envReports LIMIT 60", None)
 
-        if config.dayStat_uploading == True:
-            dayStat = analysis.record_for_time(local_time, DbTable.DAYSTATS)
-        else: dayStat = None
+        if envReportsQuery == False:
+            helpers.support_error("schedule_minute() 1")
+        elif envReportsQuery != None: envReports = envReportsQuery
 
-        if report == False or envReport == False or dayStat == False:
-            helpers.data_error_blind(59)
+    dayStats = []
+    if config.dayStat_uploading == True:
+        dayStatsQuery = data.query_database(
+            config.upload_db_path, "SELECT * FROM dayStats LIMIT 20", None)
 
-        # Add data to queue and process the queue
-        if ((report != False and report != None) or (envReport != False and
-            envReport != None) or (dayStat != False and dayStat != None)):
+        if dayStatsQuery == False:
+            helpers.support_error("schedule_minute() 2")
+        elif dayStats != None: dayStats = dayStatsQuery
 
-            data_queue.append((report, envReport, dayStat))
-        threading.Thread(target = operation_process_data).start()
-
-    # Add camera image to queue if camera uploading is active
+    camReports = []
     if config.camera_uploading == True:
-        utc_minute = str(utc.minute)
+        camReportsQuery = data.query_database(
+            config.upload_db_path, "SELECT * FROM camReports LIMIT 10", None)
 
-        if utc_minute.endswith("0") or utc_minute.endswith("5"):
-            image_path = os.path.join(config.camera_directory,
-                utc.strftime("%Y/%m/%d/%Y-%m-%dT%H-%M-%S") + ".jpg")
+        if camReportsQuery == False: 
+            helpers.support_error("schedule_minute() 3")
+        elif camReports != None: camReports = camReportsQuery
 
-            if (os.path.isdir(config.camera_directory) and
-                os.path.ismount(config.camera_directory) and
-                os.path.isfile(image_path)):
+    
+    # Upload anything that was retrieved from the database
+    while (len(reports) > 0 or len(envReports) > 0 or len(dayStats) > 0
+        or len(camReports) > 0):
 
-                camera_queue.append(image_path)        
-        threading.Thread(target = operation_process_camera).start()
+        if len(reports) > 0:
+            if upload_report(reports[0]) == False:
+                helpers.support_error("schedule_minute() 4")
+                break
+            
+            else:
+                query = data.query_database(config.upload_db_path,
+                    "DELETE FROM reports WHERE Time = ?", (reports[0]["Time"],))
+                if query == False: helpers.support_error("schedule_minute() 5")
+                reports.pop(0)
+
+        if len(envReports) > 0:
+            if upload_envReport(envReports[0]) == False:
+                helpers.support_error("schedule_minute() 6")
+                break
+            
+            else:
+                query = data.query_database(config.upload_db_path,
+                    "DELETE FROM envReports WHERE Time = ?",
+                    (envReports[0]["Time"],))
+                if query == False: helpers.support_error("schedule_minute() 7")
+                envReports.pop(0)
+
+        if len(dayStats) > 0:
+            if upload_dayStat(dayStats[0]) == False:
+                helpers.support_error("schedule_minute() 8")
+                break
+            
+            else:
+                query = data.query_database(config.upload_db_path,
+                    "DELETE FROM dayStats WHERE Date = ? AND Signature = ?",
+                    (dayStats[0]["Date"], dayStats[0]["Signature"]))
+                if query == False: helpers.support_error("schedule_minute() 9")
+                dayStats.pop(0)
+
+        if len(camReports) > 0:
+            if upload_camReport(camReports[0]) == False:
+                helpers.support_error("schedule_minute() 10")
+                break
+            
+            else:
+                query = data.query_database(config.upload_db_path,
+                    "DELETE FROM camReports WHERE Time = ?",
+                    (camReports[0]["Time"],))
+                if query == False: helpers.support_error("schedule_minute() 11")
+                camReports.pop(0)
+
+    is_processing = False
 
 def schedule_second():
     """ Triggered during a certain part of each minute to check for shutdown
         and restart commands
     """
-    try:
-        if os.path.isfile(os.path.join(config.data_directory, "shutdown.cmd")):
-            os.remove(os.path.join(config.data_directory, "shutdown.cmd"))
-            os.system("shutdown -h now")
+    shutdown_cmd = os.path.join(config.data_directory, "shutdown.cmd")
+    restart_cmd = os.path.join(config.data_directory, "restart.cmd")
 
-        elif os.path.isfile(os.path.join(config.data_directory, "restart.cmd")):
-            os.remove(os.path.join(config.data_directory, "restart.cmd"))
+    try:
+        if os.path.isfile(shutdown_cmd):
+            os.remove(shutdown_cmd)
+            os.system("shutdown -h now")
+        elif os.path.isfile(restart_cmd):
+            os.remove(restart_cmd)
             os.system("shutdown -r now")
-    except: helpers.data_error_blind(51)
+    except: helpers.support_error("schedule_second() 0")
 
 
 if __name__ == "__main__":
     current_dir = os.path.dirname(os.path.realpath(__file__))
     
-    with daemon.DaemonContext(working_directory = current_dir):
-        if config.load() == False: sys.exit()
+    with daemon.DaemonContext(working_directory=current_dir):
+        helpers.write_log("supp", "Support subsystem daemon started")
+        config.load()
 
-        # REMOVE TEMP FILES ----------------------------------------------------
+        # Remove any temporary power command trigger files
         try:
-            path = os.path.join(config.data_directory, "shutdown.cmd")
-            if os.path.isfile(path): os.remove(path)
+            shutdown_cmd = os.path.join(config.data_directory, "shutdown.cmd")
+            if os.path.isfile(shutdown_cmd): os.remove(shutdown_cmd)
             
-            path = os.path.join(config.data_directory, "restart.cmd")
-            if os.path.isfile(path): os.remove(path)
-        except: sys.exit()
+            restart_cmd = os.path.join(config.data_directory, "restart.cmd")
+            if os.path.isfile(restart_cmd): os.remove(restart_cmd)
+        except: helpers.support_error("__main__() 0")
 
-        # SETUP POWER BUTTONS --------------------------------------------------
-        gpio.setwarnings(False)
+        # Set up power buttons
         gpio.setmode(gpio.BCM)
 
-        gpio.setup(17, gpio.IN, gpio.PUD_UP)
-        gpio.add_event_detect(17, gpio.FALLING, callback = operation_shutdown,
-                            bouncetime = 300)
-        gpio.setup(18, gpio.IN, gpio.PUD_UP)
-        gpio.add_event_detect(18, gpio.FALLING, callback = operation_restart,
-                            bouncetime = 300)
+        if config.shutdown_pin != None:
+            gpio.setup(config.shutdown_pin, gpio.IN, gpio.PUD_UP)
+            gpio.add_event_detect(config.shutdown_pin, gpio.FALLING,
+                callback=operation_shutdown, bouncetime=300)
 
-        # -- START WATCHING DATA -----------------------------------------------
+        if config.restart_pin != None:
+            gpio.setup(config.restart_pin, gpio.IN, gpio.PUD_UP)
+            gpio.add_event_detect(config.restart_pin, gpio.FALLING,
+                callback=operation_restart, bouncetime=300)
+
+        # Start scheduler
         event_scheduler = BlockingScheduler()
         
         if (config.report_uploading == True or
             config.envReport_uploading == True or
-            config.dayStat_uploading == True or
-            config.camera_uploading == True):
+            config.camera_uploading == True or
+            config.dayStat_uploading == True):
 
-            event_scheduler.add_job(schedule_minute, "cron", minute = "0-59",
-                second = 8)
+            event_scheduler.add_job(schedule_minute, "cron", minute="0-59",
+                second=6)
 
-        event_scheduler.add_job(schedule_second, "cron", second = "35-55")
+        event_scheduler.add_job(schedule_second, "cron", second="40-55")
         event_scheduler.start()

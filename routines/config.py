@@ -14,8 +14,9 @@ aws_elevation = None
 
 # DataStores group
 data_directory = None
-database_path = None
 camera_directory = None
+main_db_path = None
+upload_db_path = None
 
 # DataEndpoints group
 remote_sql_server = None
@@ -26,13 +27,15 @@ remote_ftp_password = None
 # Operations group
 envReport_logging = None
 camera_logging = None
-dayStat_generation = None
+dayStat_logging = None
 report_uploading = None
 envReport_uploading = None
-dayStat_uploading = None
 camera_uploading = None
+dayStat_uploading = None
 
 # Sensors group
+shutdown_pin = None
+restart_pin = None
 AirT = None
 ExpT = None
 ExpT_address = None
@@ -64,14 +67,15 @@ def __validate():
     """ Checks and verifies the loaded configuration values
     """
     global aws_time_zone, aws_latitude, aws_longitude, aws_elevation
-    global data_directory, database_path, camera_directory, remote_sql_server
-    global remote_ftp_server, remote_ftp_username, remote_ftp_password
-    global envReport_logging, camera_logging, dayStat_generation
-    global report_uploading, envReport_uploading, dayStat_uploading
-    global camera_uploading, AirT, ExpT, ExpT_address, RelH, WSpd, WSpd_pin
-    global WDir, WDir_channel, SunD, SunD_pin, Rain, Rain_pin, StaP, ST10
-    global ST10_address, ST30, ST30_address, ST00, ST00_address, EncT
-    global EncT_address, log_DewP, log_WGst, log_MSLP
+    global data_directory, camera_directory, main_db_path, upload_db_path
+    global remote_sql_server, remote_ftp_server, remote_ftp_username
+    global remote_ftp_password, envReport_logging, camera_logging
+    global dayStat_logging, report_uploading, envReport_uploading
+    global camera_uploading, dayStat_uploading, shutdown_pin, restart_pin
+    global AirT, ExpT, ExpT_address, RelH, WSpd, WSpd_pin, WDir, WDir_channel
+    global SunD, SunD_pin, Rain, Rain_pin, StaP, ST10, ST10_address, ST30
+    global ST30_address, ST00, ST00_address, EncT, EncT_address, log_DewP
+    global log_WGst, log_MSLP
 
     # AWSInfo group
     if (aws_time_zone == None or aws_latitude == None or
@@ -87,14 +91,15 @@ def __validate():
 
     # DataStores group
     if data_directory == None: return False
-    database_path = os.path.join(data_directory, "records.sq3")
+    main_db_path = os.path.join(data_directory, "records.sq3")
+    upload_db_path = os.path.join(data_directory, "upload.sq3")
 
     if camera_logging == True and camera_directory == None: return False
 
     # Operations group
     if ((envReport_logging == False and envReport_uploading == True) or
         (camera_logging == False and camera_uploading == True) or
-        (dayStat_generation == False and dayStat_uploading == True)):
+        (dayStat_logging == False and dayStat_uploading == True)):
         return False
 
     if (report_uploading == True or envReport_uploading == True or
@@ -107,7 +112,7 @@ def __validate():
             remote_ftp_password == None):
             return False
 
-    # Sensors group
+    # Sensors group        
     if ((ExpT == True and ExpT_address == None) or (ST10 == True and
         ST10_address == None) or (ST30 == True and ST30_address == None) or
         (ST00 == True and ST00_address == None) or (EncT == True and
@@ -147,29 +152,29 @@ def load():
     global __parser, aws_time_zone, aws_latitude, aws_longitude, aws_elevation
     global data_directory, camera_directory, remote_sql_server
     global remote_ftp_server, remote_ftp_username, remote_ftp_password
-    global envReport_logging, camera_logging, dayStat_generation
-    global report_uploading, envReport_uploading, dayStat_uploading
-    global camera_uploading, AirT, ExpT, ExpT_address, RelH, WSpd, WSpd_pin
-    global WDir, WDir_channel, SunD, SunD_pin, Rain, Rain_pin, StaP, ST10
-    global ST10_address, ST30, ST30_address, ST00, ST00_address, EncT
+    global envReport_logging, camera_logging, dayStat_logging, report_uploading
+    global envReport_uploading, camera_uploading, dayStat_uploading
+    global shutdown_pin, restart_pin, AirT, ExpT, ExpT_address, RelH, WSpd
+    global WSpd_pin, WDir, WDir_channel, SunD, SunD_pin, Rain, Rain_pin, StaP
+    global ST10, ST10_address, ST30, ST30_address, ST00, ST00_address, EncT
     global EncT_address, log_DewP, log_WGst, log_MSLP
 
     try:
         __parser.read("config.ini")
 
-        # Load AWSInfo group values
+        # AWSInfo group
         aws_time_zone = __load_value("AWSInfo", "TimeZone", __DataType.STRING)
         aws_latitude = __load_value("AWSInfo", "Latitude", __DataType.FLOAT)
         aws_longitude = __load_value("AWSInfo", "Longitude", __DataType.FLOAT)
         aws_elevation = __load_value("AWSInfo", "Elevation", __DataType.FLOAT)
 
-        # Load DataStores group values
+        # DataStores group
         data_directory = __load_value(
             "DataStores", "DataDirectory", __DataType.STRING)
         camera_directory = __load_value(
             "DataStores", "CameraDirectory", __DataType.STRING)
 
-        # Load DataEndpoints group values
+        # DataEndpoints group
         remote_sql_server = __load_value(
             "DataEndpoints", "RemoteSQLServer", __DataType.STRING)
         remote_ftp_server = __load_value(
@@ -179,13 +184,13 @@ def load():
         remote_ftp_password = __load_value(
             "DataEndpoints", "RemoteFTPPassword", __DataType.STRING)
 
-        # Load Operations group values
+        # Operations group
         envReport_logging = __load_value(
             "Operations", "EnvReportLogging", __DataType.BOOLEAN)
         camera_logging = __load_value(
             "Operations", "CameraLogging", __DataType.BOOLEAN)
-        dayStat_generation = __load_value(
-            "Operations", "DayStatGeneration", __DataType.BOOLEAN)
+        dayStat_logging = __load_value(
+            "Operations", "DayStatLogging", __DataType.BOOLEAN)
         report_uploading = __load_value(
             "Operations", "ReportUploading", __DataType.BOOLEAN)
         envReport_uploading = __load_value(
@@ -195,7 +200,11 @@ def load():
         camera_uploading = __load_value(
             "Operations", "CameraUploading", __DataType.BOOLEAN)
 
-        # Load Sensors group values
+        # Sensors group
+        shutdown_pin = __load_value(
+            "Sensors", "ShutdownPin", __DataType.INTEGER)
+        restart_pin = __load_value(
+            "Sensors", "RestartPin", __DataType.INTEGER)
         AirT = __load_value("Sensors", "AirT", __DataType.BOOLEAN)
         ExpT = __load_value("Sensors", "ExpT", __DataType.BOOLEAN)
         ExpT_address = (
@@ -224,7 +233,7 @@ def load():
         EncT_address = (
             __load_value("Sensors", "EncTAddress", __DataType.STRING))
 
-        # Load Derived group values
+        # Derived group
         log_DewP = __load_value("Derived", "LogDewP", __DataType.BOOLEAN)
         log_WGst = __load_value("Derived", "LogWGst", __DataType.BOOLEAN)
         log_MSLP = __load_value("Derived", "LogMSLP", __DataType.BOOLEAN)

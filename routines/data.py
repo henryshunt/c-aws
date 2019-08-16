@@ -10,6 +10,8 @@ import routines.helpers as helpers
 
 
 def create_database(file_path):
+    """ Creates a new database and inserts the empty tables
+    """
     with sqlite3.connect(file_path) as database:
         cursor = database.cursor()
 
@@ -19,8 +21,9 @@ def create_database(file_path):
             + "REAL, ST10 REAL, ST30 REAL, ST00 REAL)")
         cursor.execute("CREATE TABLE envReports (Time TEXT PRIMARY KEY NOT "
             + "NULL, EncT REAL, CPUT REAL)")
-        cursor.execute("CREATE TABLE dayStats (Date TEXT PRIMARY KEY NOT NULL, "
-            + "AirT_Avg REAL, AirT_Min REAL, AirT_Max REAL, RelH_Avg REAL, "
+
+        QUERY = ("CREATE TABLE dayStats (Date TEXT PRIMARY KEY NOT NULL, "
+            + "{0}AirT_Avg REAL, AirT_Min REAL, AirT_Max REAL, RelH_Avg REAL, "
             + "RelH_Min REAL, RelH_Max REAL, DewP_Avg REAL, DewP_Min REAL, "
             + "DewP_Max REAL, WSpd_Avg REAL, WSpd_Min REAL, WSpd_Max REAL, "
             + "WDir_Avg INTEGER, WDir_Min INTEGER, WDir_Max INTEGER, WGst_Avg "
@@ -30,179 +33,47 @@ def create_database(file_path):
             + "REAL, ST30_Max REAL, ST00_Avg REAL, ST00_Min REAL, ST00_Max "
             + "REAL)")
 
+        # Upload database needs to discern every dayStat record update
+        if file_path == config.upload_db_path:
+            cursor.execute(QUERY.format("Signature TEXT NOT NULL, "))
+        else: cursor.execute(QUERY.format(""))
+
+        # Upload database needs to keep track of uploaded camera images
+        if file_path == config.upload_db_path:
+            cursor.execute("CREATE TABLE camReports (Time TEXT PRIMARY KEY NOT "
+            + "NULL)")
+
         database.commit()
 
-def read_record(table, time):
-    """ Query the database for a record in the specified table matching the
-        specified time
+def query_database(db_path, query, values):
+    """ Runs a query on the database using a prepared statement with the
+        specified values
     """
-    if not os.path.isfile(config.database_path): return False
+    if not os.path.isfile(db_path): return False
+
+    # Check space before performing any write queries
+    if (query.startswith("INSERT") or query.startswith("UPDATE")
+        or query.startswith("DELETE")):
+
+        free_space = helpers.remaining_space(config.data_directory)
+        if free_space == None or free_space < 0.1: return False
+
+    if values == None: values = ()
 
     try:
-        with sqlite3.connect(config.database_path) as database:
+        with sqlite3.connect(db_path) as database:
             database.row_factory = sqlite3.Row
             cursor = database.cursor()
+            cursor.execute(query, values)
 
-            if table == DbTable.REPORTS:
-                cursor.execute("SELECT * FROM reports WHERE Time = ?",
-                                (time.strftime("%Y-%m-%d %H:%M:%S"),))
-            elif table == DbTable.ENVREPORTS:
-                cursor.execute("SELECT * FROM envReports WHERE Time = ?",
-                                (time.strftime("%Y-%m-%d %H:%M:%S"),))
-            elif table == DbTable.DAYSTATS:
-                cursor.execute("SELECT * FROM dayStats WHERE Date = ?",
-                                (time.strftime("%Y-%m-%d"),))
+            if (query.startswith("INSERT") or query.startswith("UPDATE")
+                or query.startswith("DELETE")):
+                return True
 
-            return cursor.fetchone()
-    except: return False
+            result = cursor.fetchall()
+            if len(result) == 0: return None
+            return result
 
-def write_record(table, data):
-    """ Writes the specified data tuple to the specified table
-    """
-    if not os.path.isfile(config.database_path): return False
-    free_space = helpers.remaining_space("/")
-    if free_space == None or free_space < 0.1: return False
-
-    if table == DbTable.REPORTS:
-        query = ("INSERT INTO reports VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, "
-            + "?, ?, ?, ?)")
-    elif table == DbTable.ENVREPORTS:
-        query = "INSERT INTO envReports VALUES (?, ?, ?)"
-    elif table == DbTable.DAYSTATS:
-        query = ("INSERT INTO dayStats (Date, AirT_Avg, AirT_Min, AirT_Max, "
-            + "RelH_Avg, RelH_Min, RelH_Max, DewP_Avg, DewP_Min, DewP_Max, "
-            + "WSpd_Avg, WSpd_Min, WSpd_Max, WDir_Avg, WDir_Min, WDir_Max, "
-            + "WGst_Avg, WGst_Min, WGst_Max, SunD_Ttl, Rain_Ttl, MSLP_Avg, "
-            + "MSLP_Min, MSLP_Max, ST10_Avg, ST10_Min, ST10_Max, ST30_Avg, "
-            + "ST30_Min, ST30_Max, ST00_Avg, ST00_Min, ST00_Max) VALUES (?, ?, "
-            + "?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, "
-            + "?, ?, ?, ?, ?, ?, ?, ?, ?, ?)")
-        
-    try:
-        with sqlite3.connect(config.database_path) as database:
-            cursor = database.cursor()
-            cursor.execute(query, data)
-            database.commit()
-    except: return False
-    return True
-
-def update_statistics(data):
-    """ Updates the specified dayStats record with the specified data
-    """
-    if not os.path.isfile(config.database_path): return False
-    free_space = helpers.remaining_space("/")
-    if free_space == None or free_space < 0.1: return False
-        
-    try:
-        with sqlite3.connect(config.database_path) as database:
-            cursor = database.cursor()
-            cursor.execute("UPDATE dayStats SET AirT_Avg = ?, AirT_Min = ?, "
-                + "AirT_Max = ?, RelH_Avg = ?, RelH_Min = ?, RelH_Max = ?, "
-                + "DewP_Avg = ?, DewP_Min = ?, DewP_Max = ?, WSpd_Avg = ?, "
-                + "WSpd_Min = ?, WSpd_Max = ?, WDir_Avg = ?, WDir_Min = ?, "
-                + "WDir_Max = ?, WGst_Avg = ?, WGst_Min = ?, WGst_Max = ?, "
-                + "SunD_Ttl = ?, Rain_Ttl = ?, MSLP_Avg = ?, MSLP_Min = ?, "
-                + "MSLP_Max = ?, ST10_Avg = ?, ST10_Min = ?, ST10_Max = ?, "
-                + "ST30_Avg = ?, ST30_Min = ?, ST30_Max = ?, ST00_Avg = ?, "
-                + "ST00_Min = ?, ST00_Max = ? WHERE Date = ?", data)
-            database.commit()
-    except: return False
-    return True
-
-def generate_write_stats(utc):
-    """ Calculates and writes/updates statistics for the specified local day to
-        the database
-    """
-    new_stats = calculate_statistics(utc)
-    if new_stats == False or new_stats == None:
-        helpers.data_error(32)
-        return
-
-    local_time = helpers.utc_to_local(utc)
-
-    # Get current stats to decide whether to update existing or insert
-    cur_stats = read_record(DbTable.DAYSTATS, local_time)
-    if cur_stats == False:
-        helpers.data_error(33)
-        return
-
-    if cur_stats == None:
-        write = write_record(DbTable.DAYSTATS,
-            (local_time.strftime("%Y-%m-%d"),
-             new_stats["AirT_Avg"], new_stats["AirT_Min"],
-             new_stats["AirT_Max"], new_stats["RelH_Avg"],
-             new_stats["RelH_Min"], new_stats["RelH_Max"],
-             new_stats["DewP_Avg"], new_stats["DewP_Min"],
-             new_stats["DewP_Max"], new_stats["WSpd_Avg"],
-             new_stats["WSpd_Min"], new_stats["WSpd_Max"],
-             new_stats["WDir_Avg"], new_stats["WDir_Min"],
-             new_stats["WDir_Max"], new_stats["WGst_Avg"],
-             new_stats["WGst_Min"], new_stats["WGst_Max"],
-             new_stats["SunD_Ttl"], new_stats["Rain_Ttl"],
-             new_stats["MSLP_Avg"], new_stats["MSLP_Min"],
-             new_stats["MSLP_Max"], new_stats["ST10_Avg"],
-             new_stats["ST10_Min"], new_stats["ST10_Max"],
-             new_stats["ST30_Avg"], new_stats["ST30_Min"],
-             new_stats["ST30_Max"], new_stats["ST00_Avg"],
-             new_stats["ST00_Min"], new_stats["ST00_Max"]))
-        if write == False: helpers.data_error(34)
-
-    else:
-        write = update_statistics((new_stats["AirT_Avg"],
-             new_stats["AirT_Min"], new_stats["AirT_Max"],
-             new_stats["RelH_Avg"], new_stats["RelH_Min"],
-             new_stats["RelH_Max"], new_stats["DewP_Avg"],
-             new_stats["DewP_Min"], new_stats["DewP_Max"],
-             new_stats["WSpd_Avg"], new_stats["WSpd_Min"],
-             new_stats["WSpd_Max"], new_stats["WDir_Avg"],
-             new_stats["WDir_Min"], new_stats["WDir_Max"],
-             new_stats["WGst_Avg"], new_stats["WGst_Min"],
-             new_stats["WGst_Max"], new_stats["SunD_Ttl"],
-             new_stats["Rain_Ttl"], new_stats["MSLP_Avg"],
-             new_stats["MSLP_Min"], new_stats["MSLP_Max"],
-             new_stats["ST10_Avg"], new_stats["ST10_Min"],
-             new_stats["ST10_Max"], new_stats["ST30_Avg"],
-             new_stats["ST30_Min"], new_stats["ST30_Max"],
-             new_stats["ST00_Avg"], new_stats["ST00_Min"],
-             new_stats["ST00_Max"], local_time.strftime("%Y-%m-%d")))
-        if write == False: helpers.data_error(35)
-
-def calculate_statistics(utc):
-    """ Calculate reports table statistics for the day in the local time zone
-        corresponding to the specified utc time
-    """
-    bounds = helpers.day_bounds_utc(helpers.utc_to_local(utc), False)
-
-    try:
-        with sqlite3.connect(config.database_path) as database:
-            database.row_factory = sqlite3.Row
-            cursor = database.cursor()
-
-            # Generate the statistics
-            one_min = timedelta(minutes=1)
-            cursor.execute("SELECT * FROM (SELECT ROUND(AVG(ST10), 3) AS "
-                + "ST10_Avg, MIN(ST10) AS ST10_Min, MAX(ST10) AS ST10_Max, "
-                + "ROUND(AVG(ST30), 3) AS ST30_Avg, MIN(ST30) AS ST30_Min, MAX("
-                + "ST30) AS ST30_Max, ROUND(AVG(ST00), 3) AS ST00_Avg, MIN("
-                + "ST00) AS ST00_Min, MAX(ST00) AS ST00_Max FROM reports WHERE "
-                + "Time BETWEEN ? AND ?) AS A INNER JOIN (SELECT ROUND(AVG(AirT"
-                + "), 3) AS AirT_Avg, MIN(AirT) AS AirT_Min, MAX(AirT) AS "
-                + "AirT_Max, ROUND(AVG(RelH), 3) AS RelH_Avg, MIN(RelH) AS "
-                + "RelH_Min, MAX(RelH) AS RelH_Max, ROUND(AVG(DewP), 3) AS "
-                + "DewP_Avg, MIN(DewP) AS DewP_Min, MAX(DewP) AS DewP_Max, "
-                + "ROUND(AVG(WSpd), 3) AS WSpd_Avg, MIN(WSpd) AS WSpd_Min, MAX("
-                + "WSpd) AS WSpd_Max, ROUND(AVG(WDir), 3) AS WDir_Avg, MIN(WDir"
-                + ") AS WDir_Min, MAX(WDir) AS WDir_Max, ROUND(AVG(WGst), 3) AS"
-                + " WGst_Avg, MIN(WGst) AS WGst_Min, MAX(WGst) AS WGst_Max, "
-                + "SUM(SunD) AS SunD_Ttl, ROUND(SUM(Rain), 3) AS Rain_Ttl, "
-                + "ROUND(AVG(MSLP), 3) AS MSLP_Avg, MIN(MSLP) AS MSLP_Min, MAX("
-                + "MSLP) AS MSLP_Max FROM reports WHERE Time BETWEEN ? AND ?) "
-                + "AS B", (bounds[0].strftime("%Y-%m-%d %H:%M:%S"),
-                           bounds[1].strftime("%Y-%m-%d %H:%M:%S"),
-                           (bounds[0] + one_min).strftime("%Y-%m-%d %H:%M:%S"),
-                           (bounds[1] + one_min).strftime("%Y-%m-%d %H:%M:%S")))
-                            
-            return cursor.fetchone()
     except: return False
 
 def calculate_dew_point(AirT, RelH):
