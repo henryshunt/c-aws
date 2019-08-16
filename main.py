@@ -50,7 +50,7 @@ if config.load() == True:
         # Create upload queue database
         if (config.report_uploading == True or
             config.envReport_uploading == True or
-            config.camReport_uploading == True or
+            config.camera_uploading == True or
             config.dayStat_uploading == True):
 
             if not os.path.isfile(config.upload_db_path):

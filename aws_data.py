@@ -538,8 +538,8 @@ if __name__ == "__main__":
     current_dir = os.path.dirname(os.path.realpath(__file__))
 
     with daemon.DaemonContext(working_directory=current_dir):
-        helpers.write_log("data", "Data subsystem daemon started")
         config.load()
+        helpers.write_log("data", "Data subsystem daemon started")
 
         # Set up and reset data and error indicator LEDs
         gpio.setmode(gpio.BCM)

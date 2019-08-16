@@ -294,8 +294,8 @@ if __name__ == "__main__":
     current_dir = os.path.dirname(os.path.realpath(__file__))
     
     with daemon.DaemonContext(working_directory=current_dir):
-        helpers.write_log("supp", "Support subsystem daemon started")
         config.load()
+        helpers.write_log("supp", "Support subsystem daemon started")
 
         # Remove any temporary power command trigger files
         try:
