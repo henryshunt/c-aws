@@ -44,6 +44,7 @@ WSpd = None
 WSpd_pin = None
 WDir = None
 WDir_channel = None
+WDir_offset = None
 SunD = None
 SunD_pin = None
 Rain = None
@@ -121,6 +122,9 @@ def __validate():
         SunD_pin == None) or (Rain == True and Rain_pin == None)):
         return False
 
+    if WDir_channel != None and (WDir_channel < 0 or WDir_channel > 7):
+        return False
+
     # Derived group
     if log_DewP == True and (AirT == False or RelH == False): return False
     if log_WGst == True and WSpd == False: return False
@@ -155,9 +159,9 @@ def load():
     global envReport_logging, camera_logging, dayStat_logging, report_uploading
     global envReport_uploading, camera_uploading, dayStat_uploading
     global shutdown_pin, restart_pin, AirT, ExpT, ExpT_address, RelH, WSpd
-    global WSpd_pin, WDir, WDir_channel, SunD, SunD_pin, Rain, Rain_pin, StaP
-    global ST10, ST10_address, ST30, ST30_address, ST00, ST00_address, EncT
-    global EncT_address, log_DewP, log_WGst, log_MSLP
+    global WSpd_pin, WDir, WDir_channel, WDir_offset, SunD, SunD_pin, Rain
+    global Rain_pin, StaP, ST10, ST10_address, ST30, ST30_address, ST00
+    global ST00_address, EncT, EncT_address, log_DewP, log_WGst, log_MSLP
 
     try:
         __parser.read("config.ini")
@@ -215,6 +219,8 @@ def load():
         WDir = __load_value("Sensors", "WDir", __DataType.BOOLEAN)
         WDir_channel = (
             __load_value("Sensors", "WDirChannel", __DataType.INTEGER))
+        WDir_offset = (
+            __load_value("Sensors", "WDirOffset", __DataType.INTEGER))
         SunD = __load_value("Sensors", "SunD", __DataType.BOOLEAN)
         SunD_pin = __load_value("Sensors", "SunDPin", __DataType.INTEGER)
         Rain = __load_value("Sensors", "Rain", __DataType.BOOLEAN)

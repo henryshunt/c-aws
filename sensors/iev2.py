@@ -19,16 +19,18 @@ class IEV2(Sensor):
 
     def __init__(self):
         super().__init__()
+        self.offset = None
         self.start_time = None
         self.utc = None
 
-    def setup(self, adc_channel):
+    def setup(self, adc_channel, offset):
         super().setup(LogType.ARRAY)
         self.address = adc_channel
+        self.offset = offset
         
         spi = busio.SPI(clock=board.SCK, MISO=board.MISO, MOSI=board.MOSI)
-        mcp3008 = mcp3008.MCP3008(spi, digitalio.DigitalInOut(board.D5))
-        self.bridge = AnalogIn(mcp3008, mcp3008.MCP["P" + str(adc_channel)])
+        mcp3008_a = mcp3008.MCP3008(spi, digitalio.DigitalInOut(board.D8))
+        self.bridge = AnalogIn(mcp3008_a, adc_channel)
 
     def sample(self, timestamp):
         """ Samples the sensor and stores the value in the primary data store
@@ -47,21 +49,22 @@ class IEV2(Sensor):
             else: self.secondary.extend(self.primary)
 
     def read_value(self):
-        adc_value = self.bridge.value
+        adc_voltage = self.bridge.voltage
+        if adc_voltage < 0.165: adc_voltage = 0.165
+        if adc_voltage > 3.135: adc_voltage = 3.135
 
-        if adc_value >= 52 and adc_value <= 976:
-            degrees = (adc_value - 52) / (976 - 52) * (360 - 0)
+        degrees = (adc_voltage - 0.165) / (3.135 - 0.165) * (360 - 0)
 
-            # Modify value to account for non-zero-degrees at north
-            degrees -= 148
+        # Modify value to account for non-zero-degrees at north
+        if self.offset != None:
+            degrees += self.offset
             if degrees >= 360: degrees -= 360
             elif degrees < 0: degrees += 360
 
-            if degrees >= 359.5: degrees = 0
-            return degrees
-        else: raise Exception()
+        if degrees == 360: degrees = 0
+        return degrees
 
-    def prepare_store(self, utc):
+    def prepare_secondary(self, utc):
         """ Prepares the secondary data store for reading a final value
         """
         self.utc = utc
@@ -79,7 +82,6 @@ class IEV2(Sensor):
 
         total = 0
         for sample in array: total += sample[1]
-        average = total / len(array)
-
-        if average >= 359.5: average = 0
+        average = total / len(array)        
+        if average == 360: average = 0
         return average
