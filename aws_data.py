@@ -225,11 +225,11 @@ def operation_log_report(utc):
 
     # Process exposed air temperature
     if config.ExpT == True:
-        if ExpT_sensor.get_error() == False: 
+        if ExpT_sensor.error == False: 
             ExpT_value = ExpT_sensor.get_primary()
 
             if ExpT_value != None:
-                frame.exposed_temperature = round(ExpT_value, 2)
+                frame.exposed_temperature = round(ExpT_value, 1)
                 ExpT_sensor.reset_primary()
         else: helpers.data_error("operation_log_report() 0")
 
@@ -244,18 +244,20 @@ def operation_log_report(utc):
     # Process wind speed
     if config.WSpd == True:
         WSpd_sensor.prepare_secondary(utc)
-
         WSpd_value = WSpd_sensor.get_secondary()
+
         if WSpd_value != None:
             frame.wind_speed = round(WSpd_value, 2)
 
     # Process wind direction
     if config.WDir == True:
         WDir_sensor.prepare_secondary(utc)
-
         WDir_value = WDir_sensor.get_secondary()
+
         if WDir_value != None:
-            frame.wind_direction = int(round(WDir_value, 0))
+            WDir_value = int(round(WDir_value, 0))
+            if WDir_value == 360: WDir_value = 0
+            frame.wind_direction = WDir_value
 
     # Process sunshine duration
     if config.SunD == True:
@@ -283,31 +285,31 @@ def operation_log_report(utc):
     
     # Process soil temperature at 10cm
     if config.ST10 == True:
-        if ST10_sensor.get_error() == False:
+        if ST10_sensor.error == False:
             ST10_value = ST10_sensor.get_primary()
 
             if ST10_value != None:
-                frame.soil_temperature_10 = round(ST10_value, 2)
+                frame.soil_temperature_10 = round(ST10_value, 1)
                 ST10_sensor.reset_primary()
         else: helpers.data_error("operation_log_report() 1")
 
     # Process soil temperature at 30cm
     if config.ST30 == True:
-        if ST30_sensor.get_error() == True:
+        if ST30_sensor.error == False:
             ST30_value = ST30_sensor.get_primary()
 
             if ST30_value != None:
-                frame.soil_temperature_30 = round(ST30_value, 2)
+                frame.soil_temperature_30 = round(ST30_value, 1)
                 ST30_sensor.reset_primary()
         else: helpers.data_error("operation_log_report() 2")
 
     # Process soil temperature at 1m
     if config.ST00 == True:
-        if ST00_sensor.get_error() == True:
+        if ST00_sensor.error == False:
             ST00_value = ST00_sensor.get_primary()
 
             if ST00_value != None:
-                frame.soil_temperature_00 = round(ST00_value, 2)
+                frame.soil_temperature_00 = round(ST00_value, 1)
                 ST00_sensor.reset_primary()
         else: helpers.data_error("operation_log_report() 3")
 
@@ -322,7 +324,8 @@ def operation_log_report(utc):
 
     # Derive wind gust
     if config.log_WGst == True:
-        WGst_value = WSpd_sensor.get_wind_gust()
+        WGst_value = WSpd_sensor.get_secondary_gust()
+
         if WGst_value != None:
             frame.wind_gust = round(WGst_value, 2)
 
@@ -369,7 +372,7 @@ def operation_log_environment(utc):
             EncT_value = EncT_sensor.get_primary()
 
             if EncT_value != None:
-                frame.enclosure_temperature = round(EncT_value, 2)
+                frame.enclosure_temperature = round(EncT_value, 1)
                 EncT_sensor.reset_primary()
         else: helpers.data_error("operation_log_environment() 0")
 
@@ -378,7 +381,7 @@ def operation_log_environment(utc):
         CPUT_value = CPUT_sensor.get_primary()
 
         if CPUT_value != None:
-            frame.cpu_temperature = round(CPUT_value, 2)
+            frame.cpu_temperature = round(CPUT_value, 1)
             CPUT_sensor.reset_primary()
 
 
@@ -573,12 +576,12 @@ if __name__ == "__main__":
 
         if config.WDir == True:
             try:
-                WDir_sensor.setup(config.WDir_channel)
+                WDir_sensor.setup(config.WDir_channel, config.WDir_offset)
             except: helpers.data_error("__main__() 4")
 
         if config.SunD == True:
             try:
-                SunD_sensor.setup(config.SunD_pin)
+                SunD_sensor.setup(LogType.ARRAY, config.SunD_pin)
             except: helpers.data_error("__main__() 5")
 
         if config.Rain == True:
@@ -632,7 +635,7 @@ if __name__ == "__main__":
         # Start data logging
         start_time = datetime.utcnow().replace(microsecond=0)
         WSpd_sensor.start_time = start_time
-        Rain_sensor.start_time = start_time
+        WDir_sensor.start_time = start_time
 
         event_scheduler = BlockingScheduler()
         event_scheduler.add_job(schedule_minute, "cron", minute="0-59")
