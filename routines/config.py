@@ -92,7 +92,7 @@ def __validate():
 
     # DataStores group
     if data_directory == None: return False
-    main_db_path = os.path.join(data_directory, "records.sq3")
+    main_db_path = os.path.join(data_directory, "data.sq3")
     upload_db_path = os.path.join(data_directory, "upload.sq3")
 
     if camera_logging == True and camera_directory == None: return False
