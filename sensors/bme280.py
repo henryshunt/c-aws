@@ -2,7 +2,7 @@ import statistics
 
 import board
 import busio
-import adafruit_bme280
+import adafruit_bmp280
 
 from sensors.sensor import Sensor
 
@@ -12,7 +12,7 @@ class BME280(Sensor):
         super().setup(log_type)
 
         i2c = busio.I2C(board.SCL, board.SDA)
-        self.bridge = adafruit_bme280.Adafruit_BME280_I2C(i2c)
+        self.bridge = adafruit_bmp280.Adafruit_BMP280_I2C(i2c)
 
     def read_value(self):
         return self.bridge.pressure
