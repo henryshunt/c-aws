@@ -63,9 +63,9 @@ def post_request(data):
         request = Request(config.remote_sql_server,
             urllib.parse.urlencode(data).encode("utf-8"))
         response = urllib.request.urlopen(request, timeout=10)
+
         if response.read().decode() != "0": raise Exception()
     except: return False
-
     return True
 
 def upload_report(report):
@@ -186,7 +186,7 @@ def schedule_minute():
     reports = []
     if config.report_uploading == True:
         reportsQuery = data.query_database(
-            config.upload_db_path, "SELECT * FROM reports LIMIT 60", None)
+            config.upload_db_path, "SELECT * FROM reports LIMIT 200", None)
 
         if reportsQuery == False:
             helpers.support_error("schedule_minute() 0")
@@ -195,7 +195,7 @@ def schedule_minute():
     envReports = []
     if config.envReport_uploading == True:
         envReportsQuery = data.query_database(
-            config.upload_db_path, "SELECT * FROM envReports LIMIT 60", None)
+            config.upload_db_path, "SELECT * FROM envReports LIMIT 200", None)
 
         if envReportsQuery == False:
             helpers.support_error("schedule_minute() 1")
@@ -204,7 +204,7 @@ def schedule_minute():
     dayStats = []
     if config.dayStat_uploading == True:
         dayStatsQuery = data.query_database(
-            config.upload_db_path, "SELECT * FROM dayStats LIMIT 20", None)
+            config.upload_db_path, "SELECT * FROM dayStats LIMIT 200", None)
 
         if dayStatsQuery == False:
             helpers.support_error("schedule_minute() 2")
@@ -213,7 +213,7 @@ def schedule_minute():
     camReports = []
     if config.camera_uploading == True:
         camReportsQuery = data.query_database(
-            config.upload_db_path, "SELECT * FROM camReports LIMIT 10", None)
+            config.upload_db_path, "SELECT * FROM camReports LIMIT 200", None)
 
         if camReportsQuery == False: 
             helpers.support_error("schedule_minute() 3")
