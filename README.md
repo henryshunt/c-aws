@@ -21,53 +21,53 @@ This software was designed to work with a combination of hardware that produces 
 - Restart the computer to run the software
 
 # Configuration
-`TimeZone` (Required): Local time zone of the station. Must be a valid name in the "tz database"
-`Latitude` (Required): Latitude of the station in decimal degrees
-`Longitude` (Required): Longitude of the station in decimal degrees
-`Elevation` (Required): Elevation of the station above sea level in metres
+- `TimeZone` (Required): Local time zone of the station. Must be a valid name in the "tz database"
+- `Latitude` (Required): Latitude of the station in decimal degrees
+- `Longitude` (Required): Longitude of the station in decimal degrees
+- `Elevation` (Required): Elevation of the station above sea level in metres
 
-`DataDirectory` (Required): Absolute path to directory for writing data to
-`CameraDirectory`: Absolute path to directory for storing images taken by the camera
+- `DataDirectory` (Required): Absolute path to directory for writing data to
+- `CameraDirectory`: Absolute path to directory for storing images taken by the camera
 
-`RemoteSQLServer`: URL of the `upload.php` file to receive data on a remote server hosting [C-AWS Server](https://github.com/henryshunt/c-aws-server). Add `&pass=PASSWORD` to use a password
-`RemoteFTPServer`: URL of the FTP server that will be used to upload camera images
-`RemoteFTPUsername`: Username of the FTP server account to upload camera images to. Images will upload to the account's default directory
-`RemoteFTPPassword`: Password of the above FTP user
+- `RemoteSQLServer`: URL of the `upload.php` file to receive data on a remote server hosting [C-AWS Server](https://github.com/henryshunt/c-aws-server). Add `&pass=PASSWORD` to use a password
+- `RemoteFTPServer`: URL of the FTP server that will be used to upload camera images
+- `RemoteFTPUsername`: Username of the FTP server account to upload camera images to. Images will upload to the account's default directory
+- `RemoteFTPPassword`: Password of the above FTP user
 
-`EnvReportLogging` (Required): Should computer environment data (e.g. CPU and enclosure temperature) be logged?
-`CameraLogging` (Required): Should images be logged from a camera?
-`DayStatLogging` (Required): Should statistics (averages, minimums, maximums, totals) be logged for each date in the local time zone?
-`ReportUploading` (Required): Should the data reports be uploaded to the remote SQL server?
-`EnvReportUploading` (Required): Should the computer environment reports be uploaded to the remote SQL server?
-`CameraUploading` (Required): Should the camera images be uploaded to the remote FTP server?
-`DayStatUploading` (Required): Should the statistics be uploaded to the remote SQL database?
+- `EnvReportLogging` (Required): Should computer environment data (e.g. CPU and enclosure temperature) be logged?
+- `CameraLogging` (Required): Should images be logged from a camera?
+- `DayStatLogging` (Required): Should statistics (averages, minimums, maximums, totals) be logged for each date in the local time zone?
+- `ReportUploading` (Required): Should the data reports be uploaded to the remote SQL server?
+- `EnvReportUploading` (Required): Should the computer environment reports be uploaded to the remote SQL server?
+- `CameraUploading` (Required): Should the camera images be uploaded to the remote FTP server?
+- `DayStatUploading` (Required): Should the statistics be uploaded to the remote SQL database?
 
-`AirT` (Required): Is a sensor (MCP9808) connected to measure air temperature? This should be inside a radiation shield
-`ExpT` (Required): Is a sensor (DS18B20) connected to measure exposed temperature? This is not a conventional parameter but it provides an interesting indicator of the general weather conditions. This should not be inside a radiation shield
-`ExpTAddress`: Address of the `ExpT` sensor
-`RelH` (Required): Is a sensor (HTU21D) connected to measure relative humidity?
-`WSpd` (Required): Is a sensor (Inspeed Classic Anemometer) connected to measure wind speed?
-`WSpdPin`: Pin number of the `WSpd` sensor
-`WDir` (Required): Is a sensor (Inspeed E-Vane II via MCP3008 ADC) connected to measure wind direction?
-`WDirChannel`: ADC channel number of the `WDir` sensor
-`WDirOffset`: A correction to add to measured wind directions to compensate for non-north sensor mounting
-`SunD` (Required): Is a sensor (Instromet Mini Sun Board with binary output) connected to measure sunshine duration?
-`SunDPin`: Pin number of the `SunD` sensor
-`Rain` (Required): Is a sensor (Rainwise Rainew 111) connected to measure rainfall?
-`RainPin`: Pin number of the `Rain` sensor
-`StaP` (Required): Is a sensor (BMP280) connected to measure barometric pressure at station elevation?
-`ST10` (Required): Is a sensor (DS18B20) connected to measure soil temperature at 10CM down?
-`ST10Address`: Address of the `ST10` sensor
-`ST30` (Required): Is a sensor (DS18B20) connected to measure soil temperature at 30CM down?
-`ST30Address`: Address of the `ST30` sensor
-`ST00` (Required): Is a sensor (DS18B20) connected to measure soil temperature at 1M down?
-`ST00Address`: Address of the `ST00` sensor
-`EncT` (Required): Is a sensor (DS18B20) connected to measure enclosure temperature? This should be inside the station's electronics box
-`EncTAddress`: Address of the `EncT` sensor
+- `AirT` (Required): Is a sensor (MCP9808) connected to measure air temperature? This should be inside a radiation shield
+- `ExpT` (Required): Is a sensor (DS18B20) connected to measure exposed temperature? This is not a conventional parameter but it provides an interesting indicator of the general weather conditions. This should not be - inside a radiation shield
+- `ExpTAddress`: Address of the `ExpT` sensor
+- `RelH` (Required): Is a sensor (HTU21D) connected to measure relative humidity?
+- `WSpd` (Required): Is a sensor (Inspeed Classic Anemometer) connected to measure wind speed?
+- `WSpdPin`: Pin number of the `WSpd` sensor
+- `WDir` (Required): Is a sensor (Inspeed E-Vane II via MCP3008 ADC) connected to measure wind direction?
+- `WDirChannel`: ADC channel number of the `WDir` sensor
+- `WDirOffset`: A correction to add to measured wind directions to compensate for non-north sensor mounting
+- `SunD` (Required): Is a sensor (Instromet Mini Sun Board with binary output) connected to measure sunshine duration?
+- `SunDPin`: Pin number of the `SunD` sensor
+- `Rain` (Required): Is a sensor (Rainwise Rainew 111) connected to measure rainfall?
+- `RainPin`: Pin number of the `Rain` sensor
+- `StaP` (Required): Is a sensor (BMP280) connected to measure barometric pressure at station elevation?
+- `ST10` (Required): Is a sensor (DS18B20) connected to measure soil temperature at 10CM down?
+- `ST10Address`: Address of the `ST10` sensor
+- `ST30` (Required): Is a sensor (DS18B20) connected to measure soil temperature at 30CM down?
+- `ST30Address`: Address of the `ST30` sensor
+- `ST00` (Required): Is a sensor (DS18B20) connected to measure soil temperature at 1M down?
+- `ST00Address`: Address of the `ST00` sensor
+- `EncT` (Required): Is a sensor (DS18B20) connected to measure enclosure temperature? This should be inside the station's electronics box
+- `EncTAddress`: Address of the `EncT` sensor
 
-`LogDewP`: Should dew point be calculated and logged? Requires `AirT` and `RelH` sensors
-`LogWGst`: Should wind gust be calculated and logged? Requires `WSpd` sensor
-`LogMSLP`: Should mean sea level pressure be calculated and logged? Requires `StaP`, `AirT` and `DewP` sensors
+- `LogDewP`: Should dew point be calculated and logged? Requires `AirT` and `RelH` sensors
+- `LogWGst`: Should wind gust be calculated and logged? Requires `WSpd` sensor
+- `LogMSLP`: Should mean sea level pressure be calculated and logged? Requires `StaP`, `AirT` and `DewP` sensors
 
 # Error Codes
 Any errors that occur during operation are logged to `log.txt` in the specified `DataDirectory`. Errors from the data subsystem illuminate the error LED.
