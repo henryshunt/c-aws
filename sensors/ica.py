@@ -68,7 +68,7 @@ class ICA(Sensor):
                 if tick >= start and tick < end: ticks_in_sample += 1
 
             values.append((ticks_in_sample * 2.5) / 3)
-        return statistics.mean(values)
+        return 0 if len(values) == 0 else statistics.mean(values)
 
     def get_secondary_gust(self):
         """ Calculates maximum 3 second wind gust over past 10 minutes for the
