@@ -4,6 +4,7 @@ import time
 from threading import Thread
 import string
 import random
+import sys
 
 import daemon
 import RPi.GPIO as gpio
@@ -539,8 +540,9 @@ if __name__ == "__main__":
     current_dir = os.path.dirname(os.path.realpath(__file__))
 
     with daemon.DaemonContext(working_directory=current_dir):
-        config.load()
-        helpers.write_log("data", "Data subsystem daemon started")
+        if config.load() == False: sys.exit(1)
+        helpers.write_log("data",
+            "Data subsystem daemon started and configuration loaded")
 
         # Set up and reset data and error indicator LEDs
         gpio.setmode(gpio.BCM)

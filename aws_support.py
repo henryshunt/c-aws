@@ -4,6 +4,7 @@ import urllib.request
 from urllib.request import Request
 import ftplib
 import time
+import sys
 
 import daemon
 from apscheduler.schedulers.blocking import BlockingScheduler
@@ -293,8 +294,9 @@ if __name__ == "__main__":
     current_dir = os.path.dirname(os.path.realpath(__file__))
     
     with daemon.DaemonContext(working_directory=current_dir):
-        config.load()
-        helpers.write_log("supp", "Support subsystem daemon started")
+        if config.load() == False: sys.exit(1)
+        helpers.write_log("supp",
+            "Support subsystem daemon started and loaded configuration")
 
         # Remove any temporary power command trigger files
         try:

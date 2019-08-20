@@ -67,7 +67,7 @@ if config.camera_logging == True:
     if not os.path.ismount(config.camera_directory): helpers.init_error(7)
 
     free_space = helpers.remaining_space(config.camera_directory)
-    if free_space == None or free_space < 5: helpers.init_error(8)
+    if free_space == None or free_space < 0.1: helpers.init_error(8)
 
 
 # Start support subsystem
