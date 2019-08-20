@@ -20,7 +20,7 @@ from sensors.ica import ICA
 from sensors.iev2 import IEV2
 from sensors.imsbb import IMSBB
 from sensors.rr111 import RR111
-from sensors.bme280 import BME280
+from sensors.bmp280 import BMP280
 from sensors.cpu import CPU
 import routines.data as data
 
@@ -32,7 +32,7 @@ WSpd_sensor = ICA()
 WDir_sensor = IEV2()
 SunD_sensor = IMSBB()
 Rain_sensor = RR111()
-StaP_sensor = BME280()
+StaP_sensor = BMP280()
 ST10_sensor = DS18B20()
 ST30_sensor = DS18B20()
 ST00_sensor = DS18B20()

@@ -6,7 +6,7 @@ import adafruit_bmp280
 
 from sensors.sensor import Sensor
 
-class BME280(Sensor):
+class BMP280(Sensor):
 
     def setup(self, log_type):
         super().setup(log_type)
