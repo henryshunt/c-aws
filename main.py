@@ -35,7 +35,7 @@ if config.load() == True:
         if not os.path.isdir(config.data_directory):
             try:
                 os.makedirs(config.data_directory)
-            except: helpers.init_error(2)
+            except: helpers.init_error(3)
 
         helpers.write_log("init",
             "Configuration valid. Remaining data drive space: "
@@ -45,7 +45,7 @@ if config.load() == True:
         if not os.path.isfile(config.main_db_path):
             try:
                 data.create_database(config.main_db_path)
-            except: helpers.init_error(3)
+            except: helpers.init_error(4)
 
         # Create upload queue database
         if (config.report_uploading == True or
@@ -56,18 +56,18 @@ if config.load() == True:
             if not os.path.isfile(config.upload_db_path):
                 try:
                     data.create_database(config.upload_db_path)
-                except: helpers.init_error(4)
-    else: helpers.init_error(1)
-else: helpers.init_error(0)
+                except: helpers.init_error(5)
+    else: helpers.init_error(2)
+else: helpers.init_error(1)
 
 
 # Check camera storage drive is ready for use
 if config.camera_logging == True:
-    if not os.path.isdir(config.camera_directory): helpers.init_error(5)
-    if not os.path.ismount(config.camera_directory): helpers.init_error(6)
+    if not os.path.isdir(config.camera_directory): helpers.init_error(6)
+    if not os.path.ismount(config.camera_directory): helpers.init_error(7)
 
     free_space = helpers.remaining_space(config.camera_directory)
-    if free_space == None or free_space < 5: helpers.init_error(7)
+    if free_space == None or free_space < 5: helpers.init_error(8)
 
 
 # Start support subsystem
@@ -75,7 +75,7 @@ try:
     with open(os.devnull, "w") as devnull:
         proc_support = subprocess.Popen(["python3", "aws_support.py"],
             stdout=devnull, stderr=devnull)
-except: helpers.init_error(8)
+except: helpers.init_error(9)
 
 gpio.output(helpers.DATALEDPIN, gpio.HIGH)
 gpio.output(helpers.ERRORLEDPIN, gpio.HIGH)
@@ -88,4 +88,4 @@ try:
 
 except:
     proc_support.terminate()
-    helpers.init_error(9)
+    helpers.init_error(10)
