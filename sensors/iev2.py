@@ -1,5 +1,4 @@
-import statistics
-from datetime import datetime, timedelta
+from datetime import timedelta
 
 import busio
 import digitalio

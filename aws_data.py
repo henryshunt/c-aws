@@ -2,7 +2,6 @@ import os
 from datetime import datetime, timedelta
 import time
 from threading import Thread
-import sys
 import string
 import random
 
@@ -24,7 +23,6 @@ from sensors.rr111 import RR111
 from sensors.bme280 import BME280
 from sensors.cpu import CPU
 import routines.data as data
-from routines.data import DbTable
 
 
 AirT_sensor = MCP9808()

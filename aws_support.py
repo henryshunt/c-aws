@@ -4,7 +4,6 @@ import urllib.request
 from urllib.request import Request
 import ftplib
 import time
-import sys
 
 import daemon
 from apscheduler.schedulers.blocking import BlockingScheduler
