@@ -67,16 +67,16 @@ class IEV2(Sensor):
         """ Prepares the secondary data store for reading a final value
         """
         self.utc = utc
-        two_mins_ago = self.utc - timedelta(minutes=2)
+        ten_mins_ago = self.utc - timedelta(minutes=10)
 
         if self.secondary != None:
             for sample in list(self.secondary):
-                if sample[0] < two_mins_ago: self.secondary.remove(sample)
+                if sample[0] < ten_mins_ago: self.secondary.remove(sample)
             if len(self.secondary) == 0: self.secondary = None
             
     def array_format(self, array):
-        two_mins_ago = self.utc - timedelta(minutes=2)
-        if not two_mins_ago >= self.start_time: return None
+        ten_mins_ago = self.utc - timedelta(minutes=10)
+        if not ten_mins_ago >= self.start_time: return None
         if array == None: return None
 
         total = 0
