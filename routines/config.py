@@ -4,6 +4,7 @@ from enum import Enum
 
 import pytz
 
+
 __parser = ConfigParser()
 
 # AWSInfo group
@@ -59,10 +60,6 @@ ST00_address = None
 EncT = None
 EncT_address = None
 
-# Derived group
-log_DewP = None
-log_WGst = None
-log_MSLP = None
 
 def __validate():
     """ Checks and verifies the loaded configuration values
@@ -75,8 +72,7 @@ def __validate():
     global camera_uploading, dayStat_uploading, shutdown_pin, restart_pin
     global AirT, ExpT, ExpT_address, RelH, WSpd, WSpd_pin, WDir, WDir_channel
     global SunD, SunD_pin, Rain, Rain_pin, StaP, ST10, ST10_address, ST30
-    global ST30_address, ST00, ST00_address, EncT, EncT_address, log_DewP
-    global log_WGst, log_MSLP
+    global ST30_address, ST00, ST00_address, EncT, EncT_address
 
     # AWSInfo group
     if (aws_time_zone == None or aws_latitude == None or
@@ -125,12 +121,6 @@ def __validate():
     if WDir_channel != None and (WDir_channel < 0 or WDir_channel > 7):
         return False
 
-    # Derived group
-    if log_DewP == True and (AirT == False or RelH == False): return False
-    if log_WGst == True and WSpd == False: return False
-    if log_MSLP == True and (StaP == False or AirT == False or
-        log_DewP == False): return False
-
     return True
 
 def __load_value(group, key, data_type):
@@ -161,7 +151,7 @@ def load():
     global shutdown_pin, restart_pin, AirT, ExpT, ExpT_address, RelH, WSpd
     global WSpd_pin, WDir, WDir_channel, WDir_offset, SunD, SunD_pin, Rain
     global Rain_pin, StaP, ST10, ST10_address, ST30, ST30_address, ST00
-    global ST00_address, EncT, EncT_address, log_DewP, log_WGst, log_MSLP
+    global ST00_address, EncT, EncT_address
 
     try:
         __parser.read("config.ini")
@@ -238,11 +228,6 @@ def load():
         EncT = __load_value("Sensors", "EncT", __DataType.BOOLEAN)
         EncT_address = (
             __load_value("Sensors", "EncTAddress", __DataType.STRING))
-
-        # Derived group
-        log_DewP = __load_value("Derived", "LogDewP", __DataType.BOOLEAN)
-        log_WGst = __load_value("Derived", "LogWGst", __DataType.BOOLEAN)
-        log_MSLP = __load_value("Derived", "LogMSLP", __DataType.BOOLEAN)
     except: return False
 
     return False if __validate() == False else True

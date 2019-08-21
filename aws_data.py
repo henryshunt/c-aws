@@ -248,6 +248,11 @@ def operation_log_report(utc):
         if WSpd_value != None:
             frame.wind_speed = round(WSpd_value, 2)
 
+        # Derive wind gust
+        WGst_value = WSpd_sensor.get_secondary_gust()
+        if WGst_value != None:
+            frame.wind_gust = round(WGst_value, 2)
+
     # Process wind direction
     if config.WDir == True:
         WDir_sensor.prepare_secondary(utc)
@@ -312,29 +317,19 @@ def operation_log_report(utc):
                 ST00_sensor.reset_primary()
         else: helpers.data_error("operation_log_report() 3")
 
-
     # Derive dew point
-    if config.log_DewP == True:
-        DewP_value = data.calculate_dew_point(frame.air_temperature,
-            frame.relative_humidity)
+    DewP_value = data.calculate_dew_point(frame.air_temperature,
+        frame.relative_humidity)
 
-        if DewP_value != None:
-            frame.dew_point = round(DewP_value, 2)
-
-    # Derive wind gust
-    if config.log_WGst == True:
-        WGst_value = WSpd_sensor.get_secondary_gust()
-
-        if WGst_value != None:
-            frame.wind_gust = round(WGst_value, 2)
+    if DewP_value != None:
+        frame.dew_point = round(DewP_value, 2)
 
     # Derive mean sea level pressure
-    if config.log_MSLP == True:
-        MSLP_value = data.calculate_mslp(frame.station_pressure,
-            frame.air_temperature, frame.dew_point)
+    MSLP_value = data.calculate_mslp(frame.station_pressure,
+        frame.air_temperature, frame.dew_point)
 
-        if MSLP_value != None:
-            frame.mean_sea_level_pressure = round(MSLP_value, 2)
+    if MSLP_value != None:
+        frame.mean_sea_level_pressure = round(MSLP_value, 2)
 
 
     # Write data to database
