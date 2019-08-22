@@ -49,7 +49,7 @@ class ICA(Sensor):
             else: self.secondary.extend(self.primary)
             
     def array_format(self, array):
-        ten_mins_ago = self.utc - timedelta(minutes=2)
+        ten_mins_ago = self.utc - timedelta(minutes=10)
         if not ten_mins_ago >= self.start_time: return None
 
         if array == None: return 0        
