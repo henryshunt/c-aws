@@ -56,7 +56,7 @@ class ICA(Sensor):
         values = []
 
         # Iterate over data in three second samples
-        for second in range(0, 118, 3):
+        for second in range(0, 598, 3):
             start = ten_mins_ago + timedelta(seconds=second)
             end = start + timedelta(seconds=3)
             ticks_in_sample = 0
