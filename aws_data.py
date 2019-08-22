@@ -314,15 +314,15 @@ def operation_log_report(utc):
         else: helpers.data_error("operation_log_report() 3")
 
     # Derive dew point
-    DewP_value = data.calculate_dew_point(frame.air_temperature,
+    DewP_value = data.calculate_DewP(frame.air_temperature,
         frame.relative_humidity)
 
     if DewP_value != None:
         frame.dew_point = round(DewP_value, 2)
 
     # Derive mean sea level pressure
-    MSLP_value = data.calculate_mslp(frame.station_pressure,
-        frame.air_temperature, frame.dew_point)
+    MSLP_value = data.calculate_MSLP(frame.station_pressure,
+        frame.air_temperature)
 
     if MSLP_value != None:
         frame.mean_sea_level_pressure = round(MSLP_value, 2)

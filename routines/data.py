@@ -74,29 +74,25 @@ def query_database(db_path, query, values):
 
     except: return False
 
-def calculate_dew_point(AirT, RelH):
+def calculate_DewP(AirT, RelH):
     """ Calculates dew point using the same formula the Met Office uses
     """
     if AirT == None or RelH == None: return None
 
-    DewP_a = 0.4343 * math.log(RelH / 100)
-    DewP_b = ((8.082 - AirT / 556.0) * AirT)
-    DewP_c = DewP_a + (DewP_b) / (256.1 + AirT)
-    DewP_d = math.sqrt((8.0813 - DewP_c) ** 2 - (1.842 * DewP_c))
+    ea = (8.082 - AirT / 556.0) * AirT
+    e = 0.4343 * math.log(RelH / 100) + ea / (256.1 + AirT)
+    sr = math.sqrt(((8.0813 - e) ** 2) - (1.842 * e))
+    return 278.04 * ((8.0813 - e) - sr)
 
-    return 278.04 * ((8.0813 - DewP_c) - DewP_d)
-
-def calculate_mslp(StaP, AirT, DewP):
-    """ Reduces station pressure to mean sea level using the WMO formula
+def calculate_MSLP(StaP, AirT):
+    """ Reduces station pressure to mean sea level using the formula at
+        https://keisan.casio.com/exec/system/1224575267
     """
-    if StaP == None or AirT == None or DewP == None: return None
+    if StaP == None or AirT == None: return None
 
-    MSLP_a = 6.11 * 10 ** ((7.5 * DewP) / (237.3 + DewP))
-    MSLP_b = (9.80665 / 287.3) * config.aws_elevation
-    MSLP_c = ((0.0065 * config.aws_elevation) / 2) 
-    MSLP_d = AirT + 273.15 + MSLP_c + MSLP_a * 0.12
-    
-    return StaP * math.exp(MSLP_b / MSLP_d)
+    a = ((0.0065 * config.aws_elevation)
+        / (AirT + (0.0065 * config.aws_elevation) + 273.15))
+    return StaP * ((1 - a) ** -5.257)
 
 
 class ReportFrame():
