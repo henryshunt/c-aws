@@ -49,16 +49,16 @@ class ICA(Sensor):
             else: self.secondary.extend(self.primary)
             
     def array_format(self, array):
-        two_mins_ago = self.utc - timedelta(minutes=2)
-        if not two_mins_ago >= self.start_time: return None
+        ten_mins_ago = self.utc - timedelta(minutes=2)
+        if not ten_mins_ago >= self.start_time: return None
 
         if array == None: return 0        
         values = []
 
         # Iterate over data in three second samples
         for second in range(0, 118, 3):
-            start = two_mins_ago + timedelta(seconds = second)
-            end = start + timedelta(seconds = 3)
+            start = ten_mins_ago + timedelta(seconds=second)
+            end = start + timedelta(seconds=3)
             ticks_in_sample = 0
 
             # Calculate three second average wind speed
@@ -66,7 +66,7 @@ class ICA(Sensor):
                 if tick >= start and tick < end: ticks_in_sample += 1
 
             values.append((ticks_in_sample * 2.5) / 3)
-        return 0 if len(values) == 0 else statistics.mean(values)
+        return statistics.mean(values)
 
     def get_secondary_gust(self):
         """ Calculates maximum 3 second wind gust over past 10 minutes for the
@@ -79,8 +79,8 @@ class ICA(Sensor):
 
         # Iterate over each second in three second samples
         for second in range(0, 598):
-            start = ten_mins_ago + timedelta(seconds = second)
-            end = start + timedelta(seconds = 3)
+            start = ten_mins_ago + timedelta(seconds=second)
+            end = start + timedelta(seconds=3)
             ticks_in_sample = 0
 
             # Calculate 3 second average wind speed, check if highest
