@@ -8,6 +8,8 @@ class Sensor():
         self.secondary = None
     
     def setup(self, log_type):
+        """ Sets up the sensor interface and sensor connection
+        """
         self.log_type = log_type
 
     def sample(self):
@@ -31,6 +33,8 @@ class Sensor():
             return self.array_format(self.primary)
 
     def reset_primary(self):
+        """ Resets the primary data store
+        """
         self.primary = None
 
     def get_secondary(self):
@@ -42,6 +46,8 @@ class Sensor():
             return self.array_format(self.secondary)
 
     def reset_secondary(self):
+        """ Resets the secondary data store
+        """
         self.secondary = None
 
     def shift(self):

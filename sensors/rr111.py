@@ -19,6 +19,8 @@ class RR111(Sensor):
             callback=self.interrupt, bouncetime=150)
 
     def interrupt(self, channel):
+        """ Runs whenever an interrupt is triggered from the sensor
+        """
         if self.pause == True: return
         if self.primary == None: self.primary = []
         self.primary.append(1)

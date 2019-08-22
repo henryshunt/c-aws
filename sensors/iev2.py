@@ -32,16 +32,11 @@ class IEV2(Sensor):
         self.bridge = AnalogIn(mcp3008_a, adc_channel)
 
     def sample(self, timestamp):
-        """ Samples the sensor and stores the value in the primary data store
-            along with a specified timestamp
-        """
         value = self.read_value()
         if self.primary == None: self.primary = []
         self.primary.append((timestamp, value))
 
     def shift(self):
-        """ Shifts the primary data store into the secondary data store
-        """
         if self.primary != None:
             if self.secondary == None:
                 self.secondary = self.primary[:]

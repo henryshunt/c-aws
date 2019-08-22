@@ -14,13 +14,11 @@ class DS18B20(Sensor):
         super().setup(log_type)
         self.address = address
         
-        # Check a probe with that address exists
+        # Check a sensor with that address exists
         if not os.path.isdir("/sys/bus/w1/devices/" + address):
-            raise Exception()
+            raise Exception("Address does not exist")
 
     def sample(self):
-        """ Samples the sensor and stores the value in the primary data store
-        """
         self.error = False
 
         try:
@@ -36,12 +34,13 @@ class DS18B20(Sensor):
 
     def read_value(self):
         with open("/sys/bus/w1/devices/"
-            + self.address + "/w1_slave", "r") as probe:
-            data = probe.readlines()
+            + self.address + "/w1_slave", "r") as sensor:
+            data = sensor.readlines()
 
             # Convert value to degrees C and check for error values
             temp = int(data[1][data[1].find("t=") + 2:]) / 1000
-            if temp == -127 or temp == 85: raise Exception()
+            if temp == -127 or temp == 85:
+                raise Exception("Received sensor error code")
             return temp
 
     def array_format(self, array):

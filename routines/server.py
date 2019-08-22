@@ -5,8 +5,7 @@ import routines.config as config
 import routines.helpers as helpers
 
 def get_static_info():
-    """ Outputs system startup time, and internal and camera drive remaining
-        space values
+    """ Outputs data concerning the computer in the C-AWS station
     """
     startup_time = None
     data_drive_space = None

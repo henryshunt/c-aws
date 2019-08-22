@@ -15,6 +15,8 @@ ERRORLEDPIN = 24
 
 
 def write_log(source, entry):
+    """ Writes an entry to the log file along with an indicator of its source
+    """
     if config.data_directory != None and os.path.isdir(config.data_directory):
         try:
             with open(os.path.join(
@@ -92,6 +94,8 @@ def day_bounds_utc(local, inclusive):
     return local_to_utc(start), local_to_utc(end)
 
 def solar_times(local):
+    """ Returns the sunrise and sunset times for the current local date
+    """
     local = local.replace(hour=12, minute=0)
     
     location = astral.Location(("", "", config.aws_latitude,

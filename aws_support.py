@@ -59,16 +59,21 @@ def operation_restart(channel):
 
 
 def post_request(data):
+    """ POSTs the specified data to the remote SQL database endpoint
+    """
     try:
         request = Request(config.remote_sql_server,
             urllib.parse.urlencode(data).encode("utf-8"))
         response = urllib.request.urlopen(request, timeout=10)
 
-        if response.read().decode() != "0": raise Exception()
+        if response.read().decode() != "0":
+            raise Exception("Success exit code not received")
     except: return False
     return True
 
 def upload_report(report):
+    """ Uploads a report
+    """
     post_data = {
         "has_report": 1, "has_envReport": 0, "has_dayStat": 0
     }
@@ -92,6 +97,8 @@ def upload_report(report):
     return True if post_request(post_data) == True else False
 
 def upload_envReport(envReport):
+    """ Uploads an envReport
+    """
     post_data = {
         "has_report": 0, "has_envReport": 1, "has_dayStat": 0
     }
@@ -103,6 +110,8 @@ def upload_envReport(envReport):
     return True if post_request(post_data) == True else False
 
 def upload_dayStat(dayStat):
+    """ Uploads a dayStat
+    """
     post_data = {
         "has_report": 0, "has_envReport": 0, "has_dayStat": 1
     }
@@ -144,6 +153,8 @@ def upload_dayStat(dayStat):
     return True if post_request(post_data) == True else False
 
 def upload_camReport(camReport):
+    """ Uploads a camera image
+    """
     image_path = os.path.join(config.camera_directory,
         camReport["Time"].strftime("%Y/%m/%d/%Y-%m-%dT%H-%M-%S") + ".jpg")
 

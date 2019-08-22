@@ -27,13 +27,13 @@ class ICA(Sensor):
             callback=self.interrupt, bouncetime=1)
 
     def interrupt(self, channel):
+        """ Runs whenever an interrupt is triggered from the sensor
+        """
         if self.pause == True: return
         if self.primary == None: self.primary = []
         self.primary.append(datetime.utcnow())
         
     def prepare_secondary(self, utc):
-        """ Prepares the secondary data store for reading a final value
-        """
         self.utc = utc
         ten_mins_ago = self.utc - timedelta(minutes=10)
 
@@ -43,8 +43,6 @@ class ICA(Sensor):
             if len(self.secondary) == 0: self.secondary = None
 
     def shift(self):
-        """ Shifts the primary data store into the secondary data store
-        """
         if self.primary != None:
             if self.secondary == None:
                 self.secondary = self.primary[:]

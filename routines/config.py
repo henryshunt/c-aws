@@ -120,7 +120,7 @@ def __load_value(group, key, data_type, none_ok):
     if value == "" and none_ok == True:
         return None
     elif value == "" and none_ok == False:
-        raise Exception()
+        raise Exception("None value cannot be None")
 
     if data_type == __DataType.STRING:
         return __parser.get(group, key)
@@ -160,7 +160,6 @@ def load():
         # DataStores group
         data_directory = __load_value(
             "DataStores", "DataDirectory", __DataType.STRING, False)
-        print(data_directory)
         main_db_path = os.path.join(data_directory, "data.sq3")
         upload_db_path = os.path.join(data_directory, "upload.sq3")
         camera_directory = __load_value(
