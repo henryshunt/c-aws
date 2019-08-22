@@ -55,10 +55,9 @@ class IEV2(Sensor):
         degrees = (adc_voltage - 0.165) / (3.135 - 0.165) * (360 - 0)
 
         # Modify value to account for non-zero-degrees at north
-        if self.offset != None:
-            degrees += self.offset
-            if degrees >= 360: degrees -= 360
-            elif degrees < 0: degrees += 360
+        degrees += self.offset
+        if degrees >= 360: degrees -= 360
+        elif degrees < 0: degrees += 360
 
         if degrees == 360: degrees = 0
         return degrees
