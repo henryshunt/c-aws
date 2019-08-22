@@ -25,12 +25,11 @@ def create_database(file_path):
             + "{0}AirT_Avg REAL, AirT_Min REAL, AirT_Max REAL, RelH_Avg REAL, "
             + "RelH_Min REAL, RelH_Max REAL, DewP_Avg REAL, DewP_Min REAL, "
             + "DewP_Max REAL, WSpd_Avg REAL, WSpd_Min REAL, WSpd_Max REAL, "
-            + "WDir_Avg INTEGER, WDir_Min INTEGER, WDir_Max INTEGER, WGst_Avg "
-            + "REAL, WGst_Min REAL, WGst_Max REAL, SunD_Ttl INTEGER, Rain_Ttl "
-            + "REAL, MSLP_Avg REAL, MSLP_Min REAL, MSLP_Max REAL, ST10_Avg "
-            + "REAL, ST10_Min REAL, ST10_Max REAL, ST30_Avg REAL, ST30_Min "
-            + "REAL, ST30_Max REAL, ST00_Avg REAL, ST00_Min REAL, ST00_Max "
-            + "REAL)")
+            + "WDir_Avg INTEGER, WGst_Avg REAL, WGst_Min REAL, WGst_Max REAL, "
+            + "SunD_Ttl INTEGER, Rain_Ttl REAL, MSLP_Avg REAL, MSLP_Min REAL, "
+            + "MSLP_Max REAL, ST10_Avg REAL, ST10_Min REAL, ST10_Max REAL, "
+            + "ST30_Avg REAL, ST30_Min REAL, ST30_Max REAL, ST00_Avg REAL, "
+            + "ST00_Min REAL, ST00_Max REAL)")
 
         # Upload database needs to discern every dayStat record update
         if file_path == config.upload_db_path:
