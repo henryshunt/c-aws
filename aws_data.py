@@ -55,21 +55,23 @@ def generate_write_stats(utc):
         + "AS ST10_Min, MAX(ST10) AS ST10_Max, ROUND(AVG(ST30), 3) AS ST30_Avg,"
         + " MIN(ST30) AS ST30_Min, MAX(ST30) AS ST30_Max, ROUND(AVG(ST00), 3) "
         + "AS ST00_Avg, MIN(ST00) AS ST00_Min, MAX(ST00) AS ST00_Max FROM "
-        + "reports WHERE Time BETWEEN ? AND ?) AS A INNER JOIN (SELECT "
+        + "reports WHERE Time BETWEEN ? AND ?) INNER JOIN (SELECT "
         + "ROUND(AVG(AirT), 3) AS AirT_Avg, MIN(AirT) AS AirT_Min, MAX(AirT) AS"
         + " AirT_Max, ROUND(AVG(RelH), 3) AS RelH_Avg, MIN(RelH) AS RelH_Min, "
         + "MAX(RelH) AS RelH_Max, ROUND(AVG(DewP), 3) AS DewP_Avg, MIN(DewP) AS"
         + " DewP_Min, MAX(DewP) AS DewP_Max, ROUND(AVG(WSpd), 3) AS WSpd_Avg, "
-        + "MIN(WSpd) AS WSpd_Min, MAX(WSpd) AS WSpd_Max, ROUND(AVG(WDir)) AS"
-        + " WDir_Avg, ROUND(AVG(WGst), 3) AS WGst_Avg, MIN(WGst) AS WGst_Min, "
-        + "MAX(WGst) AS WGst_Max, SUM(SunD) AS SunD_Ttl, ROUND(SUM(Rain), 3) AS"
-        + " Rain_Ttl, ROUND(AVG(MSLP), 3) AS MSLP_Avg, MIN(MSLP) AS MSLP_Min, "
-        + "MAX(MSLP) AS MSLP_Max FROM reports WHERE Time BETWEEN ? AND ?) AS B")
+        + "MIN(WSpd) AS WSpd_Min, MAX(WSpd) AS WSpd_Max, ROUND(AVG(WGst), 3) AS"
+        + " WGst_Avg, MIN(WGst) AS WGst_Min, MAX(WGst) AS WGst_Max, SUM(SunD) "
+        + "AS SunD_Ttl, ROUND(SUM(Rain), 3) AS Rain_Ttl, ROUND(AVG(MSLP), 3) AS"
+        + " MSLP_Avg, MIN(MSLP) AS MSLP_Min, MAX(MSLP) AS MSLP_Max FROM reports"
+        + " WHERE Time BETWEEN ? AND ?) INNER JOIN (SELECT ROUND(AVG(WDir)) AS"
+        + " WDir_Avg FROM reports WHERE WSpd > 0 AND Time BETWEEN ? AND ?)")
+
+    time_a = (bounds[0] + timedelta(minutes=1)).strftime("%Y-%m-%d %H:%M:%S")
+    time_b = (bounds[1] + timedelta(minutes=1)).strftime("%Y-%m-%d %H:%M:%S")
 
     values = (bounds[0].strftime("%Y-%m-%d %H:%M:%S"),
-        bounds[1].strftime("%Y-%m-%d %H:%M:%S"),
-        (bounds[0] + timedelta(minutes=1)).strftime("%Y-%m-%d %H:%M:%S"),
-        (bounds[1] + timedelta(minutes=1)).strftime("%Y-%m-%d %H:%M:%S"))
+        bounds[1].strftime("%Y-%m-%d %H:%M:%S"), time_a, time_b, time_a, time_b)
 
     query = data.query_database(config.main_db_path, QUERY, values)
     if query == False or query == None:
