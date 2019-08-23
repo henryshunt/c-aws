@@ -129,8 +129,6 @@ def upload_dayStat(dayStat):
     post_data["dayStat_WSpd_Min"] = helpers.none_to_null(dayStat["WSpd_Min"])
     post_data["dayStat_WSpd_Max"] = helpers.none_to_null(dayStat["WSpd_Max"])
     post_data["dayStat_WSpd_Avg"] = helpers.none_to_null(dayStat["WSpd_Avg"])
-    post_data["dayStat_WDir_Min"] = helpers.none_to_null(dayStat["WDir_Min"])
-    post_data["dayStat_WDir_Max"] = helpers.none_to_null(dayStat["WDir_Max"])
     post_data["dayStat_WDir_Avg"] = helpers.none_to_null(dayStat["WDir_Avg"])
     post_data["dayStat_WGst_Min"] = helpers.none_to_null(dayStat["WGst_Min"])
     post_data["dayStat_WGst_Max"] = helpers.none_to_null(dayStat["WGst_Max"])
