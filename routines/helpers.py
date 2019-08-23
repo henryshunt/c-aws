@@ -10,10 +10,6 @@ import routines.config as config
 
 
 # Constants indicating pin numbers of the data and error LEDs
-DATALEDPIN = 23
-ERRORLEDPIN = 24
-
-
 def write_log(source, entry):
     """ Writes an entry to the log file along with an indicator of its source
     """
@@ -31,13 +27,14 @@ def init_error(code):
     """ Logs the initialisation error code, then remains in a loop flashing the
         error LED to indicate the error code
     """
-    write_log("init", code)
-        
+    write_log("init", code)    
+    if config.error_led_pin == None: return
+
     while True:
         for i in range(code):
-            gpio.output(ERRORLEDPIN, gpio.HIGH)
+            gpio.output(config.error_led_pin, gpio.HIGH)
             time.sleep(0.15)
-            gpio.output(ERRORLEDPIN, gpio.LOW)
+            gpio.output(config.error_led_pin, gpio.LOW)
             time.sleep(0.15)
         time.sleep(1)
 
@@ -45,7 +42,9 @@ def data_error(entry):
     """ Logs the data subsystem error code and turns on the error LED
     """
     write_log("data", entry)
-    gpio.output(ERRORLEDPIN, gpio.HIGH)
+
+    if config.error_led_pin != None:
+        gpio.output(config.error_led_pin, gpio.HIGH)
 
 def support_error(entry):
     """ Logs the support subsystem error code

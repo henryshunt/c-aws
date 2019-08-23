@@ -34,9 +34,13 @@ envReport_uploading = None
 camera_uploading = None
 dayStat_uploading = None
 
-# Sensors group
+# Hardware group
+data_led_pin = None
+error_led_pin = None
 shutdown_pin = None
 restart_pin = None
+
+# Sensors group
 AirT = None
 ExpT = None
 ExpT_address = None
@@ -68,11 +72,10 @@ def __validate():
     global data_directory, camera_directory, remote_sql_server
     global remote_ftp_server, remote_ftp_username, remote_ftp_password
     global envReport_logging, camera_logging, dayStat_logging, report_uploading
-    global envReport_uploading, camera_uploading, dayStat_uploading
-    global shutdown_pin, restart_pin, AirT, ExpT, ExpT_address, RelH, WSpd
-    global WSpd_pin, WDir, WDir_channel, SunD, SunD_pin, Rain, Rain_pin, StaP
-    global ST10, ST10_address, ST30, ST30_address, ST00, ST00_address, EncT
-    global EncT_address
+    global envReport_uploading, camera_uploading, dayStat_uploading, AirT, ExpT
+    global ExpT_address, RelH, WSpd, WSpd_pin, WDir, WDir_channel, SunD
+    global SunD_pin, Rain, Rain_pin, StaP, ST10, ST10_address, ST30
+    global ST30_address, ST00, ST00_address, EncT, EncT_address
 
     # AWSInfo group
     if aws_time_zone in pytz.all_timezones:
@@ -139,10 +142,11 @@ def load():
     global remote_sql_server, remote_ftp_server, remote_ftp_username
     global remote_ftp_password, envReport_logging, camera_logging
     global dayStat_logging, report_uploading, envReport_uploading
-    global camera_uploading, dayStat_uploading, shutdown_pin, restart_pin, AirT
-    global ExpT, ExpT_address, RelH, WSpd, WSpd_pin, WDir, WDir_channel
-    global WDir_offset, SunD, SunD_pin, Rain, Rain_pin, StaP, ST10, ST10_address
-    global ST30, ST30_address, ST00, ST00_address, EncT, EncT_address
+    global camera_uploading, dayStat_uploading, data_led_pin, error_led_pin
+    global shutdown_pin, restart_pin, AirT, ExpT, ExpT_address, RelH, WSpd
+    global WSpd_pin, WDir, WDir_channel, WDir_offset, SunD, SunD_pin, Rain
+    global Rain_pin, StaP, ST10, ST10_address, ST30, ST30_address, ST00
+    global ST00_address, EncT, EncT_address
 
     try:
         __parser.read("config.ini")
@@ -191,11 +195,17 @@ def load():
         dayStat_uploading = __load_value(
             "Operations", "DayStatUploading", __DataType.BOOLEAN, False)
 
-        # Sensors group
+        # Hardware group
+        data_led_pin = __load_value(
+            "Hardware", "DataLEDPin", __DataType.INTEGER, True)
+        error_led_pin = __load_value(
+            "Hardware", "ErrorLEDPin", __DataType.INTEGER, True)
         shutdown_pin = __load_value(
-            "Sensors", "ShutdownPin", __DataType.INTEGER, True)
+            "Hardware", "ShutdownPin", __DataType.INTEGER, True)
         restart_pin = __load_value(
-            "Sensors", "RestartPin", __DataType.INTEGER, True)
+            "Hardware", "RestartPin", __DataType.INTEGER, True)
+
+        # Sensors group
         AirT = __load_value("Sensors", "AirT", __DataType.BOOLEAN, False)
         ExpT = __load_value("Sensors", "ExpT", __DataType.BOOLEAN, False)
         ExpT_address = (

@@ -460,8 +460,10 @@ def schedule_minute():
     utc = datetime.utcnow().replace(microsecond=0)
 
     # Reset LEDS and wait to allow schedule_second() to finish
-    gpio.output(helpers.DATALEDPIN, gpio.HIGH)
-    gpio.output(helpers.ERRORLEDPIN, gpio.LOW)
+    if config.data_led_pin != None:
+        gpio.output(config.data_led_pin, gpio.HIGH)
+    if config.error_led_pin != None:
+        gpio.output(config.error_led_pin, gpio.LOW)
     time.sleep(0.25)
 
 
@@ -478,7 +480,8 @@ def schedule_minute():
     if config.camera_logging == True: operation_log_camera(utc)
     if config.dayStat_logging == True: operation_generate_stats(utc)
 
-    gpio.output(helpers.DATALEDPIN, gpio.LOW)
+    if config.data_led_pin != None:
+        gpio.output(config.data_led_pin, gpio.LOW)
 
 def schedule_second():
     """ Triggered every second to read sensor values into a list for averaging
@@ -540,10 +543,12 @@ if __name__ == "__main__":
         # Set up and reset data and error indicator LEDs
         gpio.setmode(gpio.BCM)
 
-        gpio.setup(helpers.DATALEDPIN, gpio.OUT)
-        gpio.output(helpers.DATALEDPIN, gpio.LOW)
-        gpio.setup(helpers.ERRORLEDPIN, gpio.OUT)
-        gpio.output(helpers.ERRORLEDPIN, gpio.LOW)
+        if config.data_led_pin != None:
+            gpio.setup(config.data_led_pin, gpio.OUT)
+            gpio.output(config.data_led_pin, gpio.LOW)
+        if config.error_led_pin != None:
+            gpio.setup(config.error_led_pin, gpio.OUT)
+            gpio.output(config.error_led_pin, gpio.LOW)
 
 
         # Set up sensor interfaces
@@ -619,11 +624,16 @@ if __name__ == "__main__":
 
 
         # Wait for the next minute to start before starting logging
-        while datetime.utcnow().second != 0:
-            gpio.output(helpers.DATALEDPIN, gpio.HIGH)
-            time.sleep(0.1)
-            gpio.output(helpers.DATALEDPIN, gpio.LOW)
-            time.sleep(0.1)
+        if config.data_led_pin == None:
+            while datetime.utcnow().second != 0:
+                time.sleep(0.2)
+
+        else:
+            while datetime.utcnow().second != 0:
+                gpio.output(config.data_led_pin, gpio.HIGH)
+                time.sleep(0.1)
+                gpio.output(config.data_led_pin, gpio.LOW)
+                time.sleep(0.1)
 
         # Start data logging
         start_time = datetime.utcnow().replace(microsecond=0)

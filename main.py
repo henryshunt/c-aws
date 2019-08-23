@@ -9,25 +9,26 @@ import routines.helpers as helpers
 import routines.data as data
 
 
-# Set up and reset data and error indicator LEDs
 gpio.setwarnings(False)
 gpio.setmode(gpio.BCM)
 
-gpio.setup(helpers.DATALEDPIN, gpio.OUT)
-gpio.output(helpers.DATALEDPIN, gpio.LOW)
-gpio.setup(helpers.ERRORLEDPIN, gpio.OUT)
-gpio.output(helpers.ERRORLEDPIN, gpio.LOW)
-
-# Illuminate both LEDs for 2.5 seconds to indicate startup
-gpio.output(helpers.DATALEDPIN, gpio.HIGH)
-gpio.output(helpers.ERRORLEDPIN, gpio.HIGH)
-time.sleep(2.5)
-gpio.output(helpers.DATALEDPIN, gpio.LOW)
-gpio.output(helpers.ERRORLEDPIN, gpio.LOW)
-
-
 # Load configuration file and check validity
 if config.load() == True:
+    if config.data_led_pin != None:
+        gpio.setup(config.data_led_pin, gpio.OUT)
+        gpio.output(config.data_led_pin, gpio.HIGH)
+    if config.error_led_pin != None:
+        gpio.setup(config.error_led_pin, gpio.OUT)
+        gpio.output(config.error_led_pin, gpio.HIGH)
+
+    # Illuminate both LEDs for 2.5 seconds to indicate startup
+    time.sleep(2.5)
+    if config.data_led_pin != None:
+        gpio.output(config.data_led_pin, gpio.LOW)
+    if config.error_led_pin != None:
+        gpio.output(config.error_led_pin, gpio.LOW)
+
+
     free_space = helpers.remaining_space(config.data_directory)
 
     # Perform all filesystem based initialisation
@@ -77,8 +78,10 @@ try:
             stdout=devnull, stderr=devnull)
 except: helpers.init_error(9)
 
-gpio.output(helpers.DATALEDPIN, gpio.HIGH)
-gpio.output(helpers.ERRORLEDPIN, gpio.HIGH)
+if config.data_led_pin != None:
+    gpio.output(config.data_led_pin, gpio.HIGH)
+if config.error_led_pin != None:
+    gpio.output(config.error_led_pin, gpio.HIGH)
 
 # Start data subsystem
 try:
