@@ -1,6 +1,7 @@
 import os
 from datetime import datetime, timedelta
 import time
+import sys
 
 import RPi.GPIO as gpio
 import pytz
@@ -9,34 +10,33 @@ import astral
 import routines.config as config
 
 
-# Constants indicating pin numbers of the data and error LEDs
 def write_log(source, entry):
     """ Writes an entry to the log file along with an indicator of its source
     """
-    if config.data_directory != None and os.path.isdir(config.data_directory):
-        try:
-            with open(os.path.join(
-                config.data_directory, "log.txt"), "a") as log:
-                
-                log_time = datetime.utcnow().strftime("%d/%m/%Y %H:%M:%S")
-                log.write("[" + log_time + " UTC] -> " + source + " :: " + 
-                    str(entry) + "\n")
-        except: pass
+    try:
+        with open(os.path.join(
+            config.data_directory, "log.txt"), "a") as log:
+            
+            log_time = datetime.utcnow().strftime("%d/%m/%Y %H:%M:%S")
+            log.write("[" + log_time + " UTC] -> " + source + " :: " + 
+                str(entry) + "\n")
+    except: pass
 
-def init_error(code):
+def init_error(code, write):
     """ Logs the initialisation error code, then remains in a loop flashing the
         error LED to indicate the error code
     """
-    write_log("init", code)    
-    if config.error_led_pin == None: return
+    if write == True: write_log("init", code)
 
-    while True:
-        for i in range(code):
-            gpio.output(config.error_led_pin, gpio.HIGH)
-            time.sleep(0.15)
-            gpio.output(config.error_led_pin, gpio.LOW)
-            time.sleep(0.15)
-        time.sleep(1)
+    if config.error_led_pin != None:
+        while True:
+            for i in range(code):
+                gpio.output(config.error_led_pin, gpio.HIGH)
+                time.sleep(0.15)
+                gpio.output(config.error_led_pin, gpio.LOW)
+                time.sleep(0.15)
+            time.sleep(1)
+    else: sys.exit(1)
 
 def data_error(entry):
     """ Logs the data subsystem error code and turns on the error LED
@@ -54,7 +54,7 @@ def support_error(entry):
 
 def remaining_space(directory):
     """ Returns the amount of remaining space in gigabytes, for non-root users,
-        for the specified directory to a device
+        for the partition that the specified directory is on
     """
     if not os.path.isdir(directory): return None
 
