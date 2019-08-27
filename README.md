@@ -76,10 +76,6 @@ This software was designed to work with a combination of hardware that produces 
 - `EncT` (Required): Is a sensor (DS18B20) connected to measure enclosure temperature? This should be inside the station's electronics box
 - `EncTAddress`: Address of the `EncT` sensor
 
-- `LogDewP`: Should dew point be calculated and logged? Requires `AirT` and `RelH` sensors
-- `LogWGst`: Should wind gust be calculated and logged? Requires `WSpd` sensor
-- `LogMSLP`: Should mean sea level pressure be calculated and logged? Requires `StaP`, `AirT` and `DewP` sensors
-
 # Error Codes
 Any errors that occur during operation are logged for debudding purposes to `log.txt` in the specified `DataDirectory`. Errors from the data subsystem illuminate the error LED.
 
