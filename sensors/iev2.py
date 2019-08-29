@@ -45,7 +45,7 @@ class IEV2(Sensor):
     def read_value(self):
         adc_voltage = self.bridge.voltage
         if adc_voltage < 0.165: adc_voltage = 0.165
-        if adc_voltage > 3.135: adc_voltage = 3.135
+        elif adc_voltage > 3.135: adc_voltage = 3.135
 
         degrees = (adc_voltage - 0.165) / (3.135 - 0.165) * (360 - 0)
 

@@ -118,4 +118,4 @@ When the data and error LEDs illuminate, turn off, come back on momentarily, the
 - 5.2.0 (Jun 2019): Removed the access subsystem (replaced with separate codebade) and associated routines. Various small changes and fault tolerance improvements. Removed code to mount the camera drive.
 - 5.2.1 (Jun 2019): Server interface now returns remaining camera drive space even if not logging from a camera
 - 6.0.0 (Aug 2019): Rewritten sensor interfaces to be subclasses of `Sensor`. Upgraded AirT and RelH sensor interfaces to new sensors. Rewritten upload routines, now uses a database to store data to upload. Database routines simplified. Large amount of general refactoring and improvements.
-- 6.0.1 (Aug 2019): Added bounds check to RelH sensor to restrict >100% and <0% values
+- 6.0.1 (Aug 2019): Added bounds check to RelH sensor interface to restrict >100% and <0% values. Replaced a second `if` with `elif` in WDir sensor interface
