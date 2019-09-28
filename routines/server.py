@@ -19,19 +19,21 @@ def get_static_info():
 
     # Get data and camera drive space
     if config.load() == True:
-        if os.path.isdir(config.data_directory):
-            free_space = helpers.remaining_space(config.data_directory)
+        try:
+            if os.path.isdir(config.data_directory):
+                free_space = helpers.remaining_space(config.data_directory)
 
-            if free_space != None:
-                data_drive_space = round(free_space, 2)
+                if free_space != None:
+                    data_drive_space = round(free_space, 2)
 
-        if (config.camera_directory != None and os.path.isdir(
-            config.camera_directory) and os.path.ismount(
-            config.camera_directory)):
+            if (config.camera_directory != None and os.path.isdir(
+                config.camera_directory) and os.path.ismount(
+                config.camera_directory)):
 
-            free_space = helpers.remaining_space(config.camera_directory)
-            if free_space != None:
-                camera_drive_space = round(free_space, 2)
+                free_space = helpers.remaining_space(config.camera_directory)
+                if free_space != None:
+                    camera_drive_space = round(free_space, 2)
+        except: pass
 
     print(str(helpers.none_to_null(startup_time)) + "\n"
         + str(helpers.none_to_null(data_drive_space)) + "\n"

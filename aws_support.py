@@ -9,53 +9,66 @@ import sys
 import daemon
 from apscheduler.schedulers.blocking import BlockingScheduler
 import RPi.GPIO as gpio
+from watchdog.observers import Observer
+from watchdog.events import FileSystemEventHandler
 
 import routines.config as config
 import routines.helpers as helpers
 import routines.data as data
 
 
-power_pressed = False
-is_processing = False
+is_uploading = False
+power_command = None
 
+
+def execute_power_command():
+    """ Executes a system shutdown or restart based on the loaded command
+    """
+    global power_command
+
+    try:
+        os.system("shutdown -"
+            + "h" if power_command == "shutdown" else "r" + " now")
+    except: helpers.supp_error("execute_power_command() 0")
+    power_command = None
+
+class PCTFHandler(FileSystemEventHandler):
+    """ Watches for creation and modification of a power command trigger file
+        in the data directory
+    """
+
+    def on_modified(self, event):
+        global power_command
+        if event.is_directory == True or power_command != None: return
+
+        if os.path.basename(event.src_path) == "power":
+            try:
+                with open(event.src_path, "r") as trigger_file:
+                    trigger_val = trigger_file.read()
+                    if trigger_val != "shutdown" and trigger_val != "restart":
+                        return
+
+                    power_command = trigger_val
+                    if config.power_led_pin != None:
+                        gpio.output(config.power_led_pin, gpio.HIGH)
+
+                    second = datetime.utcnow().second
+                    if second >= 30 and second <= 55: execute_power_command()
+            except: helpers.supp_error("on_modified() 0")
 
 def operation_shutdown(channel):
-    """ Performs a system shutdown on press of the shutdown push button
+    """ Triggers a system shutdown on press of the shutdown button
     """
-    global power_pressed
-    if power_pressed == False:
-        power_pressed = True
-    else: return
-    
-    # Wait for safe time window to prevent data and upload corruption
-    second = datetime.utcnow().second
-
-    while second < 40 or second > 55:
-        time.sleep(1)
-        second = datetime.utcnow().second
-
-    try:
-        os.system("shutdown -h now")
-    except: helpers.support_error("operation_shutdown() 0")
+    trigger_path = os.path.join(config.data_directory, "power")
+    with open(trigger_path, "w") as trigger_file:
+        trigger_file.write("shutdown")
 
 def operation_restart(channel):
-    """ Performs a system restart on press of the restart push button
+    """ Triggers a system restart on press of the restart button
     """
-    global power_pressed
-    if power_pressed == False:
-        power_pressed = True
-    else: return
-
-    # Wait for safe time window to prevent data and upload corruption
-    second = datetime.utcnow().second
-
-    while second < 40 or second > 55:
-        time.sleep(1)
-        second = datetime.utcnow().second
-
-    try:
-        os.system("shutdown -r now")
-    except: helpers.support_error("operation_restart() 0")
+    trigger_path = os.path.join(config.data_directory, "power")
+    with open(trigger_path, "w") as trigger_file:
+        trigger_file.write("restart") 
 
 
 def post_request(data):
@@ -156,11 +169,11 @@ def upload_camReport(camReport):
     image_path = os.path.join(config.camera_directory,
         camReport["Time"].strftime("%Y/%m/%d/%Y-%m-%dT%H-%M-%S") + ".jpg")
 
-    if (os.path.isdir(config.camera_directory) and
-        os.path.ismount(config.camera_directory) and
-        os.path.isfile(image_path)):
+    try:
+        if (os.path.isdir(config.camera_directory) and
+            os.path.ismount(config.camera_directory) and
+            os.path.isfile(image_path)):
 
-        try:
             ftp = ftplib.FTP(config.remote_ftp_server,
                 config.remote_ftp_username, config.remote_ftp_password,
                 timeout=45)
@@ -180,16 +193,16 @@ def upload_camReport(camReport):
                 ftp.storbinary("STOR " + os.path.basename(image_path), file)
             return True
 
-        except: return False
-    else: return False
+        else: return False
+    except: return False
 
 
 def schedule_minute():
     """ Triggered every minute to begin uploading of any non-uploaded data
     """
-    global is_processing
-    if is_processing: return
-    is_processing = True
+    global is_uploading
+    if is_uploading: return
+    is_uploading = True
 
     # Retrieve each set of records from upload database
     reports = []
@@ -198,7 +211,7 @@ def schedule_minute():
             config.upload_db_path, "SELECT * FROM reports LIMIT 200", None)
 
         if reportsQuery == False:
-            helpers.support_error("schedule_minute() 0")
+            helpers.supp_error("schedule_minute() 0")
         elif reportsQuery != None: reports = reportsQuery
 
     envReports = []
@@ -207,7 +220,7 @@ def schedule_minute():
             config.upload_db_path, "SELECT * FROM envReports LIMIT 200", None)
 
         if envReportsQuery == False:
-            helpers.support_error("schedule_minute() 1")
+            helpers.supp_error("schedule_minute() 1")
         elif envReportsQuery != None: envReports = envReportsQuery
 
     dayStats = []
@@ -216,7 +229,7 @@ def schedule_minute():
             config.upload_db_path, "SELECT * FROM dayStats LIMIT 200", None)
 
         if dayStatsQuery == False:
-            helpers.support_error("schedule_minute() 2")
+            helpers.supp_error("schedule_minute() 2")
         elif dayStats != None: dayStats = dayStatsQuery
 
     camReports = []
@@ -225,7 +238,7 @@ def schedule_minute():
             config.upload_db_path, "SELECT * FROM camReports LIMIT 200", None)
 
         if camReportsQuery == False: 
-            helpers.support_error("schedule_minute() 3")
+            helpers.supp_error("schedule_minute() 3")
         elif camReports != None: camReports = camReportsQuery
 
     
@@ -235,68 +248,57 @@ def schedule_minute():
 
         if len(reports) > 0:
             if upload_report(reports[0]) == False:
-                helpers.support_error("schedule_minute() 4")
+                helpers.supp_error("schedule_minute() 4")
                 break
             
             else:
                 query = data.query_database(config.upload_db_path,
                     "DELETE FROM reports WHERE Time = ?", (reports[0]["Time"],))
-                if query == False: helpers.support_error("schedule_minute() 5")
+                if query == False: helpers.supp_error("schedule_minute() 5")
                 reports.pop(0)
 
         if len(envReports) > 0:
             if upload_envReport(envReports[0]) == False:
-                helpers.support_error("schedule_minute() 6")
+                helpers.supp_error("schedule_minute() 6")
                 break
             
             else:
                 query = data.query_database(config.upload_db_path,
                     "DELETE FROM envReports WHERE Time = ?",
                     (envReports[0]["Time"],))
-                if query == False: helpers.support_error("schedule_minute() 7")
+                if query == False: helpers.supp_error("schedule_minute() 7")
                 envReports.pop(0)
 
         if len(dayStats) > 0:
             if upload_dayStat(dayStats[0]) == False:
-                helpers.support_error("schedule_minute() 8")
+                helpers.supp_error("schedule_minute() 8")
                 break
             
             else:
                 query = data.query_database(config.upload_db_path,
                     "DELETE FROM dayStats WHERE Date = ? AND Signature = ?",
                     (dayStats[0]["Date"], dayStats[0]["Signature"]))
-                if query == False: helpers.support_error("schedule_minute() 9")
+                if query == False: helpers.supp_error("schedule_minute() 9")
                 dayStats.pop(0)
 
         if len(camReports) > 0:
             if upload_camReport(camReports[0]) == False:
-                helpers.support_error("schedule_minute() 10")
+                helpers.supp_error("schedule_minute() 10")
                 break
             
             else:
                 query = data.query_database(config.upload_db_path,
                     "DELETE FROM camReports WHERE Time = ?",
                     (camReports[0]["Time"],))
-                if query == False: helpers.support_error("schedule_minute() 11")
+                if query == False: helpers.supp_error("schedule_minute() 11")
                 camReports.pop(0)
 
-    is_processing = False
+    is_uploading = False
 
-def schedule_second():
-    """ Triggered during a certain part of each minute to check for shutdown
-        and restart commands
+def schedule_power_command():
+    """ Triggered once per minute to execute a power command if requested
     """
-    shutdown_cmd = os.path.join(config.data_directory, "shutdown.cmd")
-    restart_cmd = os.path.join(config.data_directory, "restart.cmd")
-
-    try:
-        if os.path.isfile(shutdown_cmd):
-            os.remove(shutdown_cmd)
-            os.system("shutdown -h now")
-        elif os.path.isfile(restart_cmd):
-            os.remove(restart_cmd)
-            os.system("shutdown -r now")
-    except: helpers.support_error("schedule_second() 0")
+    if power_command != None: execute_power_command()
 
 
 if __name__ == "__main__":
@@ -307,31 +309,40 @@ if __name__ == "__main__":
         helpers.write_log("supp",
             "Support subsystem daemon started and loaded configuration")
 
-        # Remove any temporary power command trigger files
-        try:
-            shutdown_cmd = os.path.join(config.data_directory, "shutdown.cmd")
-            if os.path.isfile(shutdown_cmd): os.remove(shutdown_cmd)
-            
-            restart_cmd = os.path.join(config.data_directory, "restart.cmd")
-            if os.path.isfile(restart_cmd): os.remove(restart_cmd)
-        except: helpers.support_error("__main__() 0")
-
-        # Set up power buttons
+        # Set up and reset power command indicator LED
         gpio.setmode(gpio.BCM)
-
+        if config.power_led_pin != None:
+            gpio.setup(config.power_led_pin, gpio.OUT)
+            gpio.output(config.power_led_pin, gpio.LOW)
+        
+        # Set up power command buttons
         if config.shutdown_pin != None:
             gpio.setup(config.shutdown_pin, gpio.IN, gpio.PUD_UP)
             gpio.add_event_detect(config.shutdown_pin, gpio.FALLING,
-                callback=operation_shutdown, bouncetime=300)
-
+                callback=operation_shutdown, bouncetime=1000)
+                
         if config.restart_pin != None:
             gpio.setup(config.restart_pin, gpio.IN, gpio.PUD_UP)
             gpio.add_event_detect(config.restart_pin, gpio.FALLING,
-                callback=operation_restart, bouncetime=300)
+                callback=operation_restart, bouncetime=1000)
+
+        # Remove power command trigger file
+        trigger_path = os.path.join(config.data_directory, "power")
+
+        try:
+            if os.path.isfile(trigger_path): os.remove(trigger_path)
+        except: helpers.supp_error("__main__() 0")
+
+
+        # Start power command trigger file watcher
+        power_command_watcher = Observer()
+        power_command_watcher.schedule(
+            PCTFHandler(), path=config.data_directory, recursive=False)
+        power_command_watcher.start()
 
         # Start scheduler
         event_scheduler = BlockingScheduler()
-        
+
         if (config.report_uploading == True or
             config.envReport_uploading == True or
             config.camera_uploading == True or
@@ -340,5 +351,5 @@ if __name__ == "__main__":
             event_scheduler.add_job(schedule_minute, "cron", minute="0-59",
                 second=6)
 
-        event_scheduler.add_job(schedule_second, "cron", second="40-55")
+        event_scheduler.add_job(schedule_power_command, "cron", second="30")
         event_scheduler.start()

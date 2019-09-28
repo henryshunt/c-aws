@@ -37,6 +37,7 @@ dayStat_uploading = None
 # Hardware group
 data_led_pin = None
 error_led_pin = None
+power_led_pin = None
 shutdown_pin = None
 restart_pin = None
 
@@ -143,9 +144,9 @@ def load():
     global remote_ftp_password, envReport_logging, camera_logging
     global dayStat_logging, report_uploading, envReport_uploading
     global camera_uploading, dayStat_uploading, data_led_pin, error_led_pin
-    global shutdown_pin, restart_pin, AirT, ExpT, ExpT_address, RelH, WSpd
-    global WSpd_pin, WDir, WDir_channel, WDir_offset, SunD, SunD_pin, Rain
-    global Rain_pin, StaP, ST10, ST10_address, ST30, ST30_address, ST00
+    global power_led_pin, shutdown_pin, restart_pin, AirT, ExpT, ExpT_address
+    global RelH, WSpd, WSpd_pin, WDir, WDir_channel, WDir_offset, SunD, SunD_pin
+    global Rain, Rain_pin, StaP, ST10, ST10_address, ST30, ST30_address, ST00
     global ST00_address, EncT, EncT_address
 
     try:
@@ -200,6 +201,8 @@ def load():
             "Hardware", "DataLEDPin", __DataType.INTEGER, True)
         error_led_pin = __load_value(
             "Hardware", "ErrorLEDPin", __DataType.INTEGER, True)
+        power_led_pin = __load_value(
+            "Hardware", "PowerLEDPin", __DataType.INTEGER, True)
         shutdown_pin = __load_value(
             "Hardware", "ShutdownPin", __DataType.INTEGER, True)
         restart_pin = __load_value(

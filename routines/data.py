@@ -47,7 +47,9 @@ def query_database(db_path, query, values):
     """ Runs a query on the database using a prepared statement with the
         specified values
     """
-    if not os.path.isfile(db_path): return False
+    try:
+        if not os.path.isfile(db_path): return False
+    except: return False
 
     # Check space before performing any write queries
     if (query.startswith("INSERT") or query.startswith("UPDATE")

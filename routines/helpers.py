@@ -14,20 +14,20 @@ def write_log(source, entry):
     """ Writes an entry to the log file along with an indicator of its source
     """
     try:
-        with open(os.path.join(
-            config.data_directory, "log.txt"), "a") as log:
+        with open(os.path.join(config.data_directory, "log.txt"), "a") as log:
             
             log_time = datetime.utcnow().strftime("%d/%m/%Y %H:%M:%S")
             log.write("[" + log_time + " UTC] -> " + source + " :: " + 
                 str(entry) + "\n")
     except: pass
 
-def init_error(code, write):
+def init_error(code, write, show):
     """ Logs the initialisation error code, then remains in a loop flashing the
-        error LED to indicate the error code
+        error LED to indicate the error code if desired
     """
     if write == True: write_log("init", code)
-
+    if show == False: sys.exit(1)
+    
     if config.error_led_pin != None:
         while True:
             for i in range(code):
@@ -46,7 +46,7 @@ def data_error(entry):
     if config.error_led_pin != None:
         gpio.output(config.error_led_pin, gpio.HIGH)
 
-def support_error(entry):
+def supp_error(entry):
     """ Logs the support subsystem error code
     """
     write_log("supp", entry)
@@ -56,9 +56,8 @@ def remaining_space(directory):
     """ Returns the amount of remaining space in gigabytes, for non-root users,
         for the partition that the specified directory is on
     """
-    if not os.path.isdir(directory): return None
-
     try:
+        if not os.path.isdir(directory): return None
         disk = os.statvfs(directory)
 
         # Number of blocks * block size, then convert to GB
