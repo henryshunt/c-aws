@@ -8,7 +8,7 @@ Supported sensors: MCP9808 (temperature), DS18B20 (temperature), HTU21D (humidit
 This software was designed to work with a combination of hardware that produces a fully field-ready AWS unit:
 - A Raspberry Pi with any or all of the above sensors connected, running Linux.
 - Two push buttons for power controls (shutdown and restart)
-- Two LEDs (one to indicate errors and another to indicate data being logged to the database)
+- Three LEDs (one to indicate errors, another to indicate data being logged to the database, and another to indicate an activated power command)
 - A real time clock should be connected
 - Images from a camera should be saved to a USB drive which should auto-mount at startup
 
@@ -49,6 +49,7 @@ This software was designed to work with a combination of hardware that produces 
 `Hardware` Group:
 - `DataLEDPin`: Pin number of LED to indicate data being logged
 - `ErrorLEDPin`: Pin number of LED to indicate any software errors
+- `PowerLEDPin`: Pin number of LED to indicate an activated power command
 - `ShutdownPin`: Pin number of button to trigger computer shutdown
 - `RestartPin`: Pin number of button to trigger computer restart
 
@@ -79,7 +80,10 @@ This software was designed to work with a combination of hardware that produces 
 # Error Codes
 Any errors that occur during operation are logged for debudding purposes to `log.txt` in the specified `DataDirectory`. Errors from the data subsystem illuminate the error LED.
 
-When the data and error LEDs illuminate, turn off, come back on momentarily, then turn off again, a successful startup of the software has occurred. If the LEDs do not come back on or turn off for the second time then there was an error. These errors flash the error LED continuously a number of times to indicate the number of the error code. See below for a description of the codes.
+When the data, error and power command LEDs illuminate, turn off, come back on momentarily, then turn off again, a successful startup of the software has occurred. If the LEDs do not come back on or turn off for the second time then there was an error. These errors flash the error LED continuously a number of times to indicate the number of the error code. See below for a description of the codes.
+
+- If the data and error LEDs do not turn off for the second time then the data subsystem did not start
+- If the power command LED does not turn off for the second time then the support subsystem did not start
 
 |Flashes|Description|
 |--|--|
@@ -106,6 +110,7 @@ When the data and error LEDs illuminate, turn off, come back on momentarily, the
 - picamera
 - GPIO Zero
 - astral
+- watchdog
 
 # Version History
 - 4.X.X
@@ -119,3 +124,4 @@ When the data and error LEDs illuminate, turn off, come back on momentarily, the
 - 5.2.1 (Jun 2019): Server interface now returns remaining camera drive space even if not logging from a camera
 - 6.0.0 (Aug 2019): Rewritten sensor interfaces to be subclasses of `Sensor`. Upgraded AirT and RelH sensor interfaces to new sensors. Rewritten upload routines, now uses a database to store data to upload. Database routines simplified. Large amount of general refactoring and improvements.
 - 6.0.1 (Aug 2019): Added bounds check to RelH sensor interface to restrict >100% and <0% values. Replaced a second `if` with `elif` in WDir sensor interface
+- 6.0.2: Added support for the power command LED

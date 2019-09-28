@@ -15,5 +15,6 @@ pip3 install adafruit-circuitpython-htu21d
 pip3 install adafruit-circuitpython-bme280
 pip3 install adafruit-circuitpython-mcp3xxx
 pip3 install astral
+pip3 install watchdog
 
 echo "Finished installing C-AWS software dependencies"
