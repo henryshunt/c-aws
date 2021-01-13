@@ -3,7 +3,8 @@ from datetime import datetime, timezone
 import busio
 import board
 import adafruit_ds3231
-import RPi.GPIO as gpio
+from RPi import GPIO as gpio
+
 
 class Clock:
     def __init__(self, sqwPin):

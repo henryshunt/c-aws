@@ -1,20 +1,17 @@
-import time
 import os
-import subprocess
-import sys
 from datetime import datetime, timezone
+from RPi import GPIO as gpio
+import time
 
-import RPi.GPIO as gpio
-
-import routines.config as config
-import routines.helpers as helpers
-import routines.data as data
-import aws_data
+from routines import config
+from routines import helpers
+from aws_data import AWSData
+#from aws_support import AWSSupport
+from clock import Clock
 
 import busio
 import adafruit_ds3231
 import board
-from clock import Clock
 
 
 class Coordinator():
@@ -50,7 +47,7 @@ class Coordinator():
 
         # self.camera()
 
-        self.subsys_data = aws_data.AWSData()
+        self.subsys_data = AWSData()
         self.subsys_data.open()
 
         time.sleep(1.5)

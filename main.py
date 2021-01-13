@@ -1,4 +1,4 @@
-import coordinator
+from coordinator import Coordinator
 
-coordinator.Coordinator().startup()
+Coordinator().startup()
 input("")
