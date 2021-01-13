@@ -150,7 +150,7 @@ def load():
     global ST00_address, EncT, EncT_address
 
     try:
-        __parser.read("config.ini")
+        __parser.read("/etc/aws.ini")
 
         # AWSInfo group
         aws_time_zone = __load_value("AWSInfo", "TimeZone", __DataType.STRING,
