@@ -10,15 +10,21 @@ import astral
 import routines.config as config
 
 
-def write_log(source, entry):
+def log(time, source, entry):
     """ Writes an entry to the log file along with an indicator of its source
     """
+    message = ""
+
+    if time != None:
+        message += "[" + time.strftime("%Y-%m-%d %H:%M:%S") + "]"
+    else: message += "[      NO TIME      ]"
+
+    message += " -> " + source + " : " + str(entry)
+    print(message)
+
     try:
         with open(os.path.join(config.data_directory, "log.txt"), "a") as log:
-            
-            log_time = datetime.utcnow().strftime("%d/%m/%Y %H:%M:%S")
-            log.write("[" + log_time + " UTC] -> " + source + " :: " + 
-                str(entry) + "\n")
+            log.write(message + "\n")
     except: pass
 
 def init_error(code, write, show):

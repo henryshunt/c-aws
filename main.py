@@ -2,109 +2,127 @@ import time
 import os
 import subprocess
 import sys
+from datetime import datetime, timezone
 
 import RPi.GPIO as gpio
 
 import routines.config as config
 import routines.helpers as helpers
 import routines.data as data
+import aws_data
+
+import busio
+import adafruit_ds3231
+import board
+from clock import Clock
 
 
-# Configuration must be loaded and valid before anything else happens
-if config.load() == False: sys.exit(1)
+class Main():
+    def __init__(self):
+        self.clock = None
+        self.subsys_data = None
+        self.subsys_support = None
 
+    def main(self):
+        helpers.log(None, "main", "Startup.")
 
-gpio.setwarnings(False)
-gpio.setmode(gpio.BCM)
+        if config.load() == False:
+            helpers.log(None, "main", "Failed to load configuration.")
+            return
 
-# Illuminate LEDs to indicate startup has begun
-if config.data_led_pin != None:
-    gpio.setup(config.data_led_pin, gpio.OUT)
-    gpio.output(config.data_led_pin, gpio.HIGH)
+        gpio.setwarnings(False)
+        gpio.setmode(gpio.BCM)
 
-if config.error_led_pin != None:
-    gpio.setup(config.error_led_pin, gpio.OUT)
-    gpio.output(config.error_led_pin, gpio.HIGH)
+        gpio.setup(config.data_led_pin, gpio.OUT)
+        gpio.output(config.data_led_pin, gpio.LOW)
+        gpio.setup(config.error_led_pin, gpio.OUT)
+        gpio.output(config.error_led_pin, gpio.LOW)
 
-if config.power_led_pin != None:
-    gpio.setup(config.power_led_pin, gpio.OUT)
-    gpio.output(config.power_led_pin, gpio.HIGH)
+        self.clock = Clock(14)
+        self.clock.open()
+        self.clock.on_tick = self.on_clock_tick
 
-time.sleep(2.5)
-if config.data_led_pin != None:
-    gpio.output(config.data_led_pin, gpio.LOW)
-if config.error_led_pin != None:
-    gpio.output(config.error_led_pin, gpio.LOW)
-if config.power_led_pin != None:
-    gpio.output(config.power_led_pin, gpio.LOW)
-time.sleep(0.5)
+        helpers.log(self.clock.get_time(), "main", "Opened connection to clock.")
 
+        if not self.file_system():
+            gpio.output(config.error_led_pin, gpio.HIGH)
+            return
 
-# Main filesystem initialisation checks
-free_space = helpers.remaining_space(config.data_directory)
+        # self.camera()
 
-if free_space != None and free_space >= 0.1:
-    try:
-        if not os.path.isdir(config.data_directory):
-            os.makedirs(config.data_directory)
-    except: helpers.init_error(2, False, True)
+        self.subsys_data = aws_data.AWSData()
+        self.subsys_data.open()
 
-    helpers.write_log("init",
-        "Configuration valid. Remaining data drive space: "
-        + str(round(free_space, 2)) + " GB")
+        time.sleep(1.5)
+        gpio.output(config.data_led_pin, gpio.HIGH)
+        gpio.output(config.error_led_pin, gpio.HIGH)
+        time.sleep(1.5)
+        gpio.output(config.data_led_pin, gpio.LOW)
+        gpio.output(config.error_led_pin, gpio.LOW)
 
-    # Create main database
-    try:
-        if not os.path.isfile(config.main_db_path):
-            data.create_database(config.main_db_path)
-    except: helpers.init_error(3, True, True)
+        self.clock.start()
 
-    # Create upload database
-    if (config.report_uploading == True or
-        config.envReport_uploading == True or
-        config.camera_uploading == True or
-        config.dayStat_uploading == True):
+    def file_system(self):
+        free_space = helpers.remaining_space(config.data_directory)
+
+        if free_space == None or free_space < 0.1:
+            helpers.log(self.clock.get_time(), "main", "Not enough free space.")
+            return False
 
         try:
-            if not os.path.isfile(config.upload_db_path):
-                data.create_database(config.upload_db_path)
-        except: helpers.init_error(4, True, True)
-else: helpers.init_error(1, False, True)
+            if not os.path.isdir(config.data_directory):
+                os.makedirs(config.data_directory)
+        except:
+            helpers.log(self.clock.get_time(), "main", "Failed to create directory.")
+            return False
 
+        helpers.log(self.clock.get_time(),
+            "main", "Free space: " + str(round(free_space, 2)) + " GB.")
 
-# Check camera storage drive is ready for use
-if config.camera_logging == True:
-    try:
-        if not os.path.isdir(config.camera_directory):
-            raise Exception("Directory does not exist")
-    except: helpers.init_error(5, True, True)
+        try:
+            if not os.path.isfile(config.main_db_path):
+                data.create_database(config.main_db_path)
+                helpers.log(self.clock.get_time(), "main", "Created main database.")
+        except:
+            helpers.log(self.clock.get_time(), "main", "Failed to create main database.")
+            return False
 
-    try:
-        if not os.path.ismount(config.camera_directory):
-            raise Exception("Directory not a mount point")
-    except: helpers.init_error(6, True, True)
+        if (config.report_uploading == True or
+            config.envReport_uploading == True or
+            config.camera_uploading == True or
+            config.dayStat_uploading == True):
 
-    free_space = helpers.remaining_space(config.camera_directory)
-    if free_space == None or free_space < 0.1:
-        helpers.init_error(7, True, True)
+            try:
+                if not os.path.isfile(config.upload_db_path):
+                    data.create_database(config.upload_db_path)
+                    helpers.log(self.clock.get_time(), "main", "Created transmit database.")
+            except:
+                helpers.log(self.clock.get_time(), 
+                    "main", "Failed to create transmit database.")
+                return False
 
+        return True
 
-# Start data and support subsystems
-if config.data_led_pin != None:
-    gpio.output(config.data_led_pin, gpio.HIGH)
-if config.error_led_pin != None:
-    gpio.output(config.error_led_pin, gpio.HIGH)
-if config.power_led_pin != None:
-    gpio.output(config.power_led_pin, gpio.HIGH)
+    def camera(self):
+        # Check camera storage drive is ready for use
+        if config.camera_logging == True:
+            try:
+                if not os.path.isdir(config.camera_directory):
+                    raise Exception("Directory does not exist")
+            except: helpers.init_error(5, True, True)
 
-try:
-    with open(os.devnull, "w") as devnull:
-        subprocess.Popen(["python3", "aws_data.py"], stdout=devnull,
-            stderr=devnull)
-except: helpers.init_error(8, True, False)
+            try:
+                if not os.path.ismount(config.camera_directory):
+                    raise Exception("Directory not a mount point")
+            except: helpers.init_error(6, True, True)
 
-try:
-    with open(os.devnull, "w") as devnull:
-        subprocess.Popen(["python3", "aws_support.py"], stdout=devnull,
-            stderr=devnull)
-except: helpers.init_error(9, True, False)
+            free_space = helpers.remaining_space(config.camera_directory)
+            if free_space == None or free_space < 0.1:
+                helpers.init_error(7, True, True)
+    
+    def on_clock_tick(self, time):
+        #helpers.log(time, "main", "Tick.")
+        self.subsys_data.schedule_second(time)
+
+Main().main()
+input("")

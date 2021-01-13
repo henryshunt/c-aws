@@ -4,11 +4,9 @@ import time
 from threading import Thread
 import string
 import random
-import sys
 
 import daemon
 import RPi.GPIO as gpio
-from apscheduler.schedulers.blocking import BlockingScheduler
 import picamera
 
 import routines.config as config
@@ -26,21 +24,181 @@ from sensors.cpu import CPU
 import routines.data as data
 
 
-AirT_sensor = MCP9808()
-ExpT_sensor = DS18B20()
-RelH_sensor = HTU21D()
-WSpd_sensor = ICA()
-WDir_sensor = IEV2()
-SunD_sensor = IMSBB()
-Rain_sensor = RR111()
-StaP_sensor = BMP280()
-ST10_sensor = DS18B20()
-ST30_sensor = DS18B20()
-ST00_sensor = DS18B20()
-EncT_sensor = DS18B20()
-CPUT_sensor = CPU()
+class AWSData:
+    def __init__(self):
+        self.AirT_sensor = MCP9808()
+        self.ExpT_sensor = DS18B20()
+        self.RelH_sensor = HTU21D()
+        self.WSpd_sensor = ICA()
+        self.WDir_sensor = IEV2()
+        self.SunD_sensor = IMSBB()
+        self.Rain_sensor = RR111()
+        self.StaP_sensor = BMP280()
+        self.ST10_sensor = DS18B20()
+        self.ST30_sensor = DS18B20()
+        self.ST00_sensor = DS18B20()
+        self.EncT_sensor = DS18B20()
+        self.CPUT_sensor = CPU()
+        self.disable_sampling = True
 
-disable_sampling = True
+    def open(self):
+        helpers.log(None, "data",
+            "Data subsystem daemon started and configuration loaded")
+
+        # Set up and reset data and error indicator LEDs
+        if config.data_led_pin != None:
+            gpio.setup(config.data_led_pin, gpio.OUT)
+            gpio.output(config.data_led_pin, gpio.LOW)
+            
+        if config.error_led_pin != None:
+            gpio.setup(config.error_led_pin, gpio.OUT)
+            gpio.output(config.error_led_pin, gpio.LOW)
+
+
+        # Set up sensor interfaces
+        if config.AirT == True:
+            try:
+                self.AirT_sensor.setup(LogType.ARRAY)
+            except: helpers.data_error("__main__() 0")
+
+        if config.ExpT == True:
+            try:
+                self.ExpT_sensor.setup(LogType.VALUE, config.ExpT_address)
+            except: helpers.data_error("__main__() 1")
+
+        if config.RelH == True:
+            try:
+                self.RelH_sensor.setup(LogType.ARRAY)
+            except: helpers.data_error("__main__() 2")
+
+        if config.WSpd == True:
+            try:
+                self.WSpd_sensor.setup(config.WSpd_pin)
+            except: helpers.data_error("__main__() 3")
+
+        if config.WDir == True:
+            try:
+                self.WDir_sensor.setup(config.WDir_channel, config.WDir_offset)
+            except: helpers.data_error("__main__() 4")
+
+        if config.SunD == True:
+            try:
+                self.SunD_sensor.setup(LogType.ARRAY, config.SunD_pin)
+            except: helpers.data_error("__main__() 5")
+
+        if config.Rain == True:
+            try:
+                self.Rain_sensor.setup(config.Rain_pin)
+            except: helpers.data_error("__main__() 6")
+
+        if config.StaP == True:
+            try:
+                self.StaP_sensor.setup(LogType.ARRAY)
+            except: helpers.data_error("__main__() 7")
+
+        if config.ST10 == True:
+            try:
+                self.ST10_sensor.setup(LogType.VALUE, config.ST10_address)
+            except: helpers.data_error("__main__() 8")
+
+        if config.ST30 == True:
+            try:
+                self.ST30_sensor.setup(LogType.VALUE, config.ST30_address)
+            except: helpers.data_error("__main__() 9")
+
+        if config.ST00 == True:
+            try:
+                self.ST00_sensor.setup(LogType.VALUE, config.ST00_address)
+            except: helpers.data_error("__main__() 10")
+
+        if config.envReport_logging == True:
+            try:
+                self.CPUT_sensor.setup(LogType.ARRAY)
+            except: helpers.data_error("__main__() 11")
+
+        if config.EncT == True:
+            try:
+                self.EncT_sensor.setup(LogType.VALUE, config.EncT_address)
+            except: helpers.data_error("__main__() 12")
+
+        if config.camera_logging == True:
+            try:
+                with picamera.PiCamera() as camera: pass
+            except: helpers.data_error("__main__() 13")
+
+
+        # Wait for the next minute to start before starting logging
+        # if config.data_led_pin == None:
+        #     while datetime.utcnow().second != 0:
+        #         time.sleep(0.2)
+
+        # else:
+        #     while datetime.utcnow().second != 0:
+        #         gpio.output(config.data_led_pin, gpio.HIGH)
+        #         time.sleep(0.1)
+        #         gpio.output(config.data_led_pin, gpio.LOW)
+        #         time.sleep(0.1)
+        
+
+        # Start data logging
+        self.start_time = datetime.utcnow().replace(microsecond=0)
+        self.WSpd_sensor.start_time = self.start_time
+        self.WDir_sensor.start_time = self.start_time
+
+        self.disable_sampling = False
+        self.WSpd_sensor.pause = False
+        self.Rain_sensor.pause = False
+
+    def schedule_second(self, time):
+        """ Triggered every second to read sensor values into a list for averaging
+        """
+        print(time)
+
+        # No sensor reads if sampling is disabled
+        if self.disable_sampling == True: return
+
+        # Read sunshine duration
+        if config.SunD == True:
+            try:
+                self.SunD_sensor.sample()
+            except: helpers.data_error("schedule_second() 0")
+
+
+        # Prevent reading on 0 second. Previous sensors are totalled, so require the
+        # 0 second for the final value. Following sensors are averaged, so the 0 
+        # second is part of the next minute and must be not be read since the
+        # logging routine runs after the 0 second has passed.
+        if str(time.second) == 0: return
+
+
+        # Read air temperature
+        if config.AirT == True:
+            try:
+                self.AirT_sensor.sample()
+            except: helpers.data_error("schedule_second() 1")
+
+        # Read relative humidity
+        if config.RelH == True:
+            try:
+                self.RelH_sensor.sample()
+            except: helpers.data_error("schedule_second() 2")
+
+        # Read wind direction
+        if config.WDir == True:
+            try:
+                self.WDir_sensor.sample(time)
+            except: helpers.data_error("schedule_second() 3")
+
+        # Read station pressure
+        if config.StaP == True:
+            try:
+                self.StaP_sensor.sample()
+            except: helpers.data_error("schedule_second() 4")
+
+        print(self.AirT_sensor.get_primary())
+
+
+
 
 
 def generate_write_stats(utc):
@@ -489,169 +647,3 @@ def schedule_minute():
 
     if config.data_led_pin != None:
         gpio.output(config.data_led_pin, gpio.LOW)
-
-def schedule_second():
-    """ Triggered every second to read sensor values into a list for averaging
-    """
-    global disable_sampling, SunD_sensor, AirT_sensor, RelH_sensor, WDir_sensor
-    global StaP_sensor
-    utc = datetime.utcnow().replace(microsecond=0)
-
-    # No sensor reads if sampling is disabled
-    if disable_sampling == True: return
-
-    # Read sunshine duration
-    if config.SunD == True:
-        try:
-            SunD_sensor.sample()
-        except: helpers.data_error("schedule_second() 0")
-
-
-    # Prevent reading on 0 second. Previous sensors are totalled, so require the
-    # 0 second for the final value. Following sensors are averaged, so the 0 
-    # second is part of the next minute and must be not be read since the
-    # logging routine runs after the 0 second has passed.
-    if str(utc.second) == "0": return
-
-
-    # Read air temperature
-    if config.AirT == True:
-        try:
-            AirT_sensor.sample()
-        except: helpers.data_error("schedule_second() 1")
-
-    # Read relative humidity
-    if config.RelH == True:
-        try:
-            RelH_sensor.sample()
-        except: helpers.data_error("schedule_second() 2")
-
-    # Read wind direction
-    if config.WDir == True:
-        try:
-            WDir_sensor.sample(utc)
-        except: helpers.data_error("schedule_second() 3")
-
-    # Read station pressure
-    if config.StaP == True:
-        try:
-            StaP_sensor.sample()
-        except: helpers.data_error("schedule_second() 4")
-
-
-if __name__ == "__main__":
-    current_dir = os.path.dirname(os.path.realpath(__file__))
-
-    with daemon.DaemonContext(working_directory=current_dir):
-        if config.load() == False: sys.exit(1)
-        helpers.write_log("data",
-            "Data subsystem daemon started and configuration loaded")
-
-        # Set up and reset data and error indicator LEDs
-        gpio.setmode(gpio.BCM)
-        if config.data_led_pin != None:
-            gpio.setup(config.data_led_pin, gpio.OUT)
-            gpio.output(config.data_led_pin, gpio.LOW)
-            
-        if config.error_led_pin != None:
-            gpio.setup(config.error_led_pin, gpio.OUT)
-            gpio.output(config.error_led_pin, gpio.LOW)
-
-
-        # Set up sensor interfaces
-        if config.AirT == True:
-            try:
-                AirT_sensor.setup(LogType.ARRAY)
-            except: helpers.data_error("__main__() 0")
-
-        if config.ExpT == True:
-            try:
-                ExpT_sensor.setup(LogType.VALUE, config.ExpT_address)
-            except: helpers.data_error("__main__() 1")
-
-        if config.RelH == True:
-            try:
-                RelH_sensor.setup(LogType.ARRAY)
-            except: helpers.data_error("__main__() 2")
-
-        if config.WSpd == True:
-            try:
-                WSpd_sensor.setup(config.WSpd_pin)
-            except: helpers.data_error("__main__() 3")
-
-        if config.WDir == True:
-            try:
-                WDir_sensor.setup(config.WDir_channel, config.WDir_offset)
-            except: helpers.data_error("__main__() 4")
-
-        if config.SunD == True:
-            try:
-                SunD_sensor.setup(LogType.ARRAY, config.SunD_pin)
-            except: helpers.data_error("__main__() 5")
-
-        if config.Rain == True:
-            try:
-                Rain_sensor.setup(config.Rain_pin)
-            except: helpers.data_error("__main__() 6")
-
-        if config.StaP == True:
-            try:
-                StaP_sensor.setup(LogType.ARRAY)
-            except: helpers.data_error("__main__() 7")
-
-        if config.ST10 == True:
-            try:
-                ST10_sensor.setup(LogType.VALUE, config.ST10_address)
-            except: helpers.data_error("__main__() 8")
-
-        if config.ST30 == True:
-            try:
-                ST30_sensor.setup(LogType.VALUE, config.ST30_address)
-            except: helpers.data_error("__main__() 9")
-
-        if config.ST00 == True:
-            try:
-                ST00_sensor.setup(LogType.VALUE, config.ST00_address)
-            except: helpers.data_error("__main__() 10")
-
-        if config.envReport_logging == True:
-            try:
-                CPUT_sensor.setup(LogType.ARRAY)
-            except: helpers.data_error("__main__() 11")
-
-            if config.EncT == True:
-                try:
-                    EncT_sensor.setup(LogType.VALUE, config.EncT_address)
-                except: helpers.data_error("__main__() 12")
-
-        if config.camera_logging == True:
-            try:
-                with picamera.PiCamera() as camera: pass
-            except: helpers.data_error("__main__() 13")
-
-
-        # Wait for the next minute to start before starting logging
-        if config.data_led_pin == None:
-            while datetime.utcnow().second != 0:
-                time.sleep(0.2)
-
-        else:
-            while datetime.utcnow().second != 0:
-                gpio.output(config.data_led_pin, gpio.HIGH)
-                time.sleep(0.1)
-                gpio.output(config.data_led_pin, gpio.LOW)
-                time.sleep(0.1)
-
-        # Start data logging
-        start_time = datetime.utcnow().replace(microsecond=0)
-        WSpd_sensor.start_time = start_time
-        WDir_sensor.start_time = start_time
-
-        event_scheduler = BlockingScheduler()
-        event_scheduler.add_job(schedule_minute, "cron", minute="0-59")
-        event_scheduler.add_job(schedule_second, "cron", second="0-59")
-
-        disable_sampling = False
-        WSpd_sensor.pause = False
-        Rain_sensor.pause = False
-        event_scheduler.start()
