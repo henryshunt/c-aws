@@ -24,12 +24,12 @@ class Clock:
 
     def start(self):
         gpio.setup(self.sqwPin, gpio.IN)
-        gpio.add_event_detect(self.sqwPin, gpio.FALLING, callback=self.__tick)
+        gpio.add_event_detect(self.sqwPin, gpio.FALLING, callback=self._tick)
 
         self.rtc.alarm1 = (time.struct_time((0, 0, 0, 0, 0, 0, 0, 0, 0)), "secondly")
         self.rtc.alarm1_interrupt = True
 
-    def __tick(self, channel):
+    def _tick(self, channel):
         self.rtc.alarm1_status = False
 
         time = self.rtc.datetime

@@ -5,7 +5,7 @@ import time
 
 from routines import config
 from routines import helpers
-from aws_data import AWSData
+from sampler import Sampler
 #from aws_support import AWSSupport
 from clock import Clock
 
@@ -17,8 +17,9 @@ import board
 class Coordinator():
     def __init__(self):
         self.clock = None
-        self.subsys_data = None
+        self.sampler = None
         self.subsys_support = None
+        self.sampling = False
 
     def startup(self):
         helpers.log(None, "main", "Startup.")
@@ -47,16 +48,17 @@ class Coordinator():
 
         # self.camera()
 
-        self.subsys_data = AWSData()
-        self.subsys_data.open()
+        self.sampler = Sampler()
+        self.sampler.open()
 
-        time.sleep(1.5)
+        time.sleep(1)
         gpio.output(config.data_led_pin, gpio.HIGH)
         gpio.output(config.error_led_pin, gpio.HIGH)
-        time.sleep(1.5)
+        time.sleep(2.5)
         gpio.output(config.data_led_pin, gpio.LOW)
         gpio.output(config.error_led_pin, gpio.LOW)
 
+        helpers.log(self.clock.get_time(), "main", "Starting clock.")
         self.clock.start()
 
     def file_system(self):
@@ -118,5 +120,40 @@ class Coordinator():
                 helpers.init_error(7, True, True)
     
     def on_clock_tick(self, time):
-        #helpers.log(time, "main", "Tick.")
-        self.subsys_data.schedule_second(time)
+        if not self.sampling:
+            if time.second == 0:
+                if self.sampler.start(time):
+                    self.sampling = True
+                    helpers.log(self.clock.get_time(), "main", "Started sampling.")
+                else:
+                    helpers.log(self.clock.get_time(), "main", "Failed to start sampling.")
+                    gpio.output(config.error_led_pin, gpio.HIGH)
+            return
+
+        if not self.sampler.sample(time):
+            gpio.output(config.error_led_pin, gpio.HIGH)
+
+        if time.second == 0:
+            self.sampler.report(time)
+            print("report")
+            # new Thread(() =>
+            # {
+            #     LogReport(e.Time);
+            #     // Transmitter.Transmit();
+            # }).Start()
+
+    # def log_report(time):
+    #     Stopwatch ledStopwatch = new Stopwatch()
+    #     ledStopwatch.Start()
+
+    #     gpio.Write(config.dataLedPin, PinValue.High)
+
+    #     Report report = sampler.Report(time)
+    #     Database.WriteReport(report)
+
+    #     # Ensure the data LED stays on for at least 1.5 seconds
+    #     ledStopwatch.Stop()
+    #     if (ledStopwatch.ElapsedMilliseconds < 1500)
+    #         Thread.Sleep(1500 - (int)ledStopwatch.ElapsedMilliseconds)
+
+    #     gpio.Write(config.dataLedPin, PinValue.Low)
