@@ -18,8 +18,6 @@ def create_database(file_path):
             + "AirT REAL, ExpT REAL, RelH REAL, DewP REAL, WSpd REAL, WDir "
             + "INTEGER, WGst REAL, SunD INTEGER, Rain REAL, StaP REAL, MSLP "
             + "REAL, ST10 REAL, ST30 REAL, ST00 REAL)")
-        cursor.execute("CREATE TABLE envReports (Time TEXT PRIMARY KEY NOT "
-            + "NULL, EncT REAL, CPUT REAL)")
 
         QUERY = ("CREATE TABLE dayStats (Date TEXT PRIMARY KEY NOT NULL, "
             + "{0}AirT_Avg REAL, AirT_Min REAL, AirT_Max REAL, RelH_Avg REAL, "

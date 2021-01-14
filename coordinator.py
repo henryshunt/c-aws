@@ -8,6 +8,7 @@ from routines import helpers
 from sampler import Sampler
 #from aws_support import AWSSupport
 from clock import Clock
+from routines import data
 
 import busio
 import adafruit_ds3231
@@ -65,7 +66,7 @@ class Coordinator():
         self.clock.start()
 
     def file_system(self):
-        free_space = helpers.remaining_space(config.data_directory)
+        free_space = helpers.remaining_space("/")
 
         if free_space == None or free_space < 0.1:
             helpers.log(self.clock.get_time(), "main", "Not enough free space.")
@@ -90,7 +91,6 @@ class Coordinator():
             return False
 
         if (config.report_uploading == True or
-            config.envReport_uploading == True or
             config.camera_uploading == True or
             config.dayStat_uploading == True):
 
@@ -137,8 +137,11 @@ class Coordinator():
             gpio.output(config.error_led_pin, gpio.HIGH)
 
         if time.second == 0:
+            gpio.output(config.data_led_pin, gpio.HIGH)
+            gpio.output(config.error_led_pin, gpio.LOW)
             self.sampler.report(time)
-            print("report")
+            gpio.output(config.data_led_pin, gpio.LOW)
+
             # new Thread(() =>
             # {
             #     LogReport(e.Time);

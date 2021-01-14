@@ -1,11 +1,8 @@
 import os
-from configparser import ConfigParser
-from enum import Enum
+import json
 
 import pytz
 
-
-__parser = ConfigParser()
 
 # AWSInfo group
 aws_time_zone = None
@@ -37,33 +34,10 @@ dayStat_uploading = None
 # Hardware group
 data_led_pin = None
 error_led_pin = None
-power_led_pin = None
 shutdown_pin = None
 restart_pin = None
 
-# Sensors group
-AirT = None
-ExpT = None
-ExpT_address = None
-RelH = None
-WSpd = None
-WSpd_pin = None
-WDir = None
-WDir_channel = None
-WDir_offset = None
-SunD = None
-SunD_pin = None
-Rain = None
-Rain_pin = None
-StaP = None
-ST10 = None
-ST10_address = None
-ST30 = None
-ST30_address = None
-ST00 = None
-ST00_address = None
-EncT = None
-EncT_address = None
+sensors = None
 
 
 def __validate():
@@ -76,7 +50,7 @@ def __validate():
     global envReport_uploading, camera_uploading, dayStat_uploading, AirT, ExpT
     global ExpT_address, RelH, WSpd, WSpd_pin, WDir, WDir_channel, SunD
     global SunD_pin, Rain, Rain_pin, StaP, ST10, ST10_address, ST30
-    global ST30_address, ST00, ST00_address, EncT, EncT_address
+    global ST30_address, ST00, ST00_address
 
     # AWSInfo group
     if aws_time_zone in pytz.all_timezones:
@@ -115,135 +89,65 @@ def __validate():
 
     return True
 
-def __load_value(group, key, data_type, none_ok):
-    """ Returns the value of the specified key, in the specified type
-    """
-    global __parser
-
-    value = __parser.get(group, key)
-    if value == "" and none_ok == True:
-        return None
-    elif value == "" and none_ok == False:
-        raise Exception("None value cannot be None")
-
-    if data_type == __DataType.STRING:
-        return __parser.get(group, key)
-    elif data_type == __DataType.BOOLEAN:
-        return __parser.getboolean(group, key)
-    elif data_type == __DataType.INTEGER:
-        return __parser.getint(group, key)
-    elif data_type == __DataType.FLOAT:
-        return __parser.getfloat(group, key)
-
 def load():
     """ Loads data from the config.ini file in the project root directory
     """
-    global __parser, aws_time_zone, aws_latitude, aws_longitude, aws_elevation
+    global aws_time_zone, aws_latitude, aws_longitude, aws_elevation
     global data_directory, main_db_path, upload_db_path, camera_directory
     global remote_sql_server, remote_ftp_server, remote_ftp_username
     global remote_ftp_password, envReport_logging, camera_logging
     global dayStat_logging, report_uploading, envReport_uploading
     global camera_uploading, dayStat_uploading, data_led_pin, error_led_pin
-    global power_led_pin, shutdown_pin, restart_pin, AirT, ExpT, ExpT_address
-    global RelH, WSpd, WSpd_pin, WDir, WDir_channel, WDir_offset, SunD, SunD_pin
-    global Rain, Rain_pin, StaP, ST10, ST10_address, ST30, ST30_address, ST00
-    global ST00_address, EncT, EncT_address
+    global power_led_pin, shutdown_pin, restart_pin, sensors
 
-    try:
-        __parser.read("/etc/aws.ini")
+    #try:
+    with open("/etc/aws.json") as file:
+        config = json.load(file)
 
-        # AWSInfo group
-        aws_time_zone = __load_value("AWSInfo", "TimeZone", __DataType.STRING,
-            False)
-        aws_latitude = __load_value("AWSInfo", "Latitude", __DataType.FLOAT,
-            False)
-        aws_longitude = __load_value("AWSInfo", "Longitude", __DataType.FLOAT,
-            False)
-        aws_elevation = __load_value("AWSInfo", "Elevation", __DataType.INTEGER,
-            False)
+        # aws_time_zone = __load_value("AWSInfo", "TimeZone", __DataType.STRING, False)
+        # aws_latitude = __load_value("AWSInfo", "Latitude", __DataType.FLOAT, False)
+        # aws_longitude = __load_value("AWSInfo", "Longitude", __DataType.FLOAT, False)
+        # aws_elevation = __load_value("AWSInfo", "Elevation", __DataType.INTEGER, False)
 
-        # DataStores group
-        data_directory = __load_value(
-            "DataStores", "DataDirectory", __DataType.STRING, False)
+        data_directory = "/var/c-aws"
         main_db_path = os.path.join(data_directory, "data.sq3")
         upload_db_path = os.path.join(data_directory, "upload.sq3")
-        camera_directory = __load_value(
-            "DataStores", "CameraDirectory", __DataType.STRING, True)
+        # camera_directory = __load_value("DataStores", "CameraDirectory", __DataType.STRING, True)
 
         # DataEndpoints group
-        remote_sql_server = __load_value(
-            "DataEndpoints", "RemoteSQLServer", __DataType.STRING, True)
-        remote_ftp_server = __load_value(
-            "DataEndpoints", "RemoteFTPServer", __DataType.STRING, True)
-        remote_ftp_username = __load_value(
-            "DataEndpoints", "RemoteFTPUsername", __DataType.STRING, True)
-        remote_ftp_password = __load_value(
-            "DataEndpoints", "RemoteFTPPassword", __DataType.STRING, True)
+        # remote_sql_server = __load_value(
+        #     "DataEndpoints", "RemoteSQLServer", __DataType.STRING, True)
+        # remote_ftp_server = __load_value(
+        #     "DataEndpoints", "RemoteFTPServer", __DataType.STRING, True)
+        # remote_ftp_username = __load_value(
+        #     "DataEndpoints", "RemoteFTPUsername", __DataType.STRING, True)
+        # remote_ftp_password = __load_value(
+        #     "DataEndpoints", "RemoteFTPPassword", __DataType.STRING, True)
 
         # Operations group
-        envReport_logging = __load_value(
-            "Operations", "EnvReportLogging", __DataType.BOOLEAN, False)
-        camera_logging = __load_value(
-            "Operations", "CameraLogging", __DataType.BOOLEAN, False)
-        dayStat_logging = __load_value(
-            "Operations", "DayStatLogging", __DataType.BOOLEAN, False)
-        report_uploading = __load_value(
-            "Operations", "ReportUploading", __DataType.BOOLEAN, False)
-        envReport_uploading = __load_value(
-            "Operations", "EnvReportUploading", __DataType.BOOLEAN, False)
-        camera_uploading = __load_value(
-            "Operations", "CameraUploading", __DataType.BOOLEAN, False)
-        dayStat_uploading = __load_value(
-            "Operations", "DayStatUploading", __DataType.BOOLEAN, False)
+        # envReport_logging = __load_value(
+        #     "Operations", "EnvReportLogging", __DataType.BOOLEAN, False)
+        # camera_logging = __load_value(
+        #     "Operations", "CameraLogging", __DataType.BOOLEAN, False)
+        # dayStat_logging = __load_value(
+        #     "Operations", "DayStatLogging", __DataType.BOOLEAN, False)
+        # report_uploading = __load_value(
+        #     "Operations", "ReportUploading", __DataType.BOOLEAN, False)
+        # envReport_uploading = __load_value(
+        #     "Operations", "EnvReportUploading", __DataType.BOOLEAN, False)
+        # camera_uploading = __load_value(
+        #     "Operations", "CameraUploading", __DataType.BOOLEAN, False)
+        # dayStat_uploading = __load_value(
+        #     "Operations", "DayStatUploading", __DataType.BOOLEAN, False)
 
-        # Hardware group
-        data_led_pin = __load_value(
-            "Hardware", "DataLEDPin", __DataType.INTEGER, True)
-        error_led_pin = __load_value(
-            "Hardware", "ErrorLEDPin", __DataType.INTEGER, True)
-        power_led_pin = __load_value(
-            "Hardware", "PowerLEDPin", __DataType.INTEGER, True)
-        shutdown_pin = __load_value(
-            "Hardware", "ShutdownPin", __DataType.INTEGER, True)
-        restart_pin = __load_value(
-            "Hardware", "RestartPin", __DataType.INTEGER, True)
+        
+        data_led_pin = config["data_led_pin"]
+        error_led_pin = config["error_led_pin"]
+        # shutdown_pin = config["shutdown_pin"]
+        # restart_pin = config["restart_pin"]
 
-        # Sensors group
-        AirT = __load_value("Sensors", "AirT", __DataType.BOOLEAN, False)
-        ExpT = __load_value("Sensors", "ExpT", __DataType.BOOLEAN, False)
-        ExpT_address = (
-            __load_value("Sensors", "ExpTAddress", __DataType.STRING, True))
-        RelH = __load_value("Sensors", "RelH", __DataType.BOOLEAN, False)
-        WSpd = __load_value("Sensors", "WSpd", __DataType.BOOLEAN, False)
-        WSpd_pin = __load_value("Sensors", "WSpdPin", __DataType.INTEGER, True)
-        WDir = __load_value("Sensors", "WDir", __DataType.BOOLEAN, False)
-        WDir_channel = (
-            __load_value("Sensors", "WDirChannel", __DataType.INTEGER, True))
-        WDir_offset = (
-            __load_value("Sensors", "WDirOffset", __DataType.INTEGER, True))
-        SunD = __load_value("Sensors", "SunD", __DataType.BOOLEAN, False)
-        SunD_pin = __load_value("Sensors", "SunDPin", __DataType.INTEGER, True)
-        Rain = __load_value("Sensors", "Rain", __DataType.BOOLEAN, False)
-        Rain_pin = __load_value("Sensors", "RainPin", __DataType.INTEGER, True)
-        StaP = __load_value("Sensors", "StaP", __DataType.BOOLEAN, False)
-        ST10 = __load_value("Sensors", "ST10", __DataType.BOOLEAN, False)
-        ST10_address = (
-            __load_value("Sensors", "ST10Address", __DataType.STRING, True))
-        ST30 = __load_value("Sensors", "ST30", __DataType.BOOLEAN, False)
-        ST30_address = (
-            __load_value("Sensors", "ST30Address", __DataType.STRING, True))
-        ST00 = __load_value("Sensors", "ST00", __DataType.BOOLEAN, False)
-        ST00_address = (
-            __load_value("Sensors", "ST00Address", __DataType.STRING, True))
-        EncT = __load_value("Sensors", "EncT", __DataType.BOOLEAN, False)
-        EncT_address = (
-            __load_value("Sensors", "EncTAddress", __DataType.STRING, True))
-    except: return False
+        sensors = config["sensors"]
+    #except: return False
 
-    return False if __validate() == False else True
-
-class __DataType(Enum):
-    BOOLEAN = 1
-    FLOAT = 2
-    STRING = 3
-    INTEGER = 4
+    #return False if __validate() == False else True
+    return True
