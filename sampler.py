@@ -30,7 +30,7 @@ class Sampler:
         self.WDir_sensor = IEV2()
         self.sun_dur = None
         self.rain = None
-        self.baro_pres = None
+        self.pressure = None
         self.start_time = None
 
     def open(self):
@@ -76,12 +76,12 @@ class Sampler:
                 helpers.log(None, "sampler", "Failed to open rain sensor.")
                 return False
 
-        if config.sensors["baro_pres"]["enabled"] == True:
+        if config.sensors["pressure"]["enabled"] == True:
             try:
-                self.baro_pres = BMP280()
-                self.baro_pres.open()
+                self.pressure = BMP280()
+                self.pressure.open()
             except:
-                helpers.log(None, "sampler", "Failed to open baro_pres sensor.")
+                helpers.log(None, "sampler", "Failed to open pressure sensor.")
                 return False
 
         if config.camera_logging == True:
@@ -136,11 +136,11 @@ class Sampler:
                 helpers.log(time, "sampler", "Failed to sample rain sensor.")
                 return False
 
-        if config.sensors["baro_pres"]["enabled"] == True:
+        if config.sensors["pressure"]["enabled"] == True:
             try:
-                self.baro_pres.sample()
+                self.pressure.sample()
             except:
-                helpers.log(time, "sampler", "Failed to sample baro_pres sensor.")
+                helpers.log(time, "sampler", "Failed to sample pressure sensor.")
                 return False
 
         return True
@@ -149,33 +149,27 @@ class Sampler:
         """ Reads all sensors, calculates derived and averaged parameters, and
             saves the data to the database
         """
-        frame = data.ReportFrame(time)
+        report = data.ReportFrame(time)
 
         if config.sensors["air_temp"]["enabled"] == True:
             self.air_temp.store.switch_store()
-            value = self.air_temp.get_average()
-
-            if value != None:
-                frame.air_temperature = round(value, 2)
+            report.air_temperature = self.air_temp.get_average()
 
         if config.sensors["rel_hum"]["enabled"] == True:
             self.rel_hum.store.switch_store()
-            value = self.rel_hum.get_average()
-
-            if value != None:
-                frame.relative_humidity = round(value, 2)
+            report.relative_humidity = self.rel_hum.get_average()
         
         # if config.WSpd == True:
         #     WSpd_sensor.prepare_secondary(time)
         #     WSpd_value = WSpd_sensor.get_secondary()
 
         #     if WSpd_value != None:
-        #         frame.wind_speed = round(WSpd_value, 2)
+        #         report.wind_speed = round(WSpd_value, 2)
 
         #     # Derive wind gust
         #     WGst_value = WSpd_sensor.get_secondary_gust()
         #     if WGst_value != None:
-        #         frame.wind_gust = round(WGst_value, 2)
+        #         report.wind_gust = round(WGst_value, 2)
 
         # if config.WDir == True:
         #     WDir_sensor.prepare_secondary(time)
@@ -184,67 +178,29 @@ class Sampler:
         #     if WDir_value != None:
         #         WDir_value = int(round(WDir_value, 0))
         #         if WDir_value == 360: WDir_value = 0
-        #         frame.wind_direction = WDir_value
+        #         report.wind_direction = WDir_value
 
         if config.sensors["sun_dur"]["enabled"] == True:
             self.sun_dur.store.switch_store()
-            value = self.sun_dur.get_total()
-
-            if value != None:
-                frame.sunshine_duration = value
+            report.sunshine_duration = self.sun_dur.get_total()
 
         if config.sensors["rain"]["enabled"] == True:
             self.rain.store.switch_store()
-            value = self.rain.get_total()
+            report.rainfall = self.rain.get_total()
 
-            if value != None:
-                frame.rainfall = round(value, 3)
-
-        if config.sensors["baro_pres"]["enabled"] == True:
-            self.baro_pres.store.switch_store()
-            value = self.baro_pres.get_average()
-
-            if value != None:
-                frame.station_pressure = round(value, 2)
+        if config.sensors["pressure"]["enabled"] == True:
+            self.pressure.store.switch_store()
+            report.station_pressure = self.pressure.get_average()
         
+        report.dew_point = data.calculate_DewP(
+            report.air_temperature, report.relative_humidity)
 
-        # Derive dew point
-        DewP_value = data.calculate_DewP(frame.air_temperature,
-            frame.relative_humidity)
+        report.mean_sea_level_pressure = data.calculate_MSLP(
+            report.station_pressure, report.air_temperature)
 
-        if DewP_value != None:
-            frame.dew_point = round(DewP_value, 2)
-
-        # Derive mean sea level pressure
-        MSLP_value = data.calculate_MSLP(frame.station_pressure,
-            frame.air_temperature)
-
-        if MSLP_value != None:
-            frame.mean_sea_level_pressure = round(MSLP_value, 2)
-
-
-        # Write data to database
-        QUERY = ("INSERT INTO reports VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, "
-                + "?, ?, ?, ?)")
-        values = (frame.time.strftime("%Y-%m-%d %H:%M:%S"), frame.air_temperature,
-            frame.exposed_temperature, frame.relative_humidity, frame.dew_point,
-            frame.wind_speed, frame.wind_direction, frame.wind_gust, 
-            frame.sunshine_duration, frame.rainfall, frame.station_pressure,
-            frame.mean_sea_level_pressure, frame.soil_temperature_10,
-            frame.soil_temperature_30, frame.soil_temperature_00)
-
-        query = data.query_database(config.main_db_path, QUERY, values)
-        
-        if query == True:
-            if config.report_uploading == True:
-                query = data.query_database(config.upload_db_path, QUERY, values)
-
-                if query == False:
-                    helpers.data_error("operation_log_report() 5")
-        else: helpers.data_error("operation_log_report() 4")
-
-        print(frame.air_temperature)
-        print(frame.rainfall)
+        print(report.air_temperature)
+        print(report.rainfall)
+        return report
 
 
 def operation_log_camera(utc):

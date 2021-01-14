@@ -139,7 +139,8 @@ class Coordinator():
         if time.second == 0:
             gpio.output(config.data_led_pin, gpio.HIGH)
             gpio.output(config.error_led_pin, gpio.LOW)
-            self.sampler.report(time)
+            report = self.sampler.report(time)
+            self.write_report(report)
             gpio.output(config.data_led_pin, gpio.LOW)
 
             # new Thread(() =>
@@ -163,3 +164,24 @@ class Coordinator():
     #         Thread.Sleep(1500 - (int)ledStopwatch.ElapsedMilliseconds)
 
     #     gpio.Write(config.dataLedPin, PinValue.Low)
+
+    def write_report(self, frame):
+        QUERY = ("INSERT INTO reports VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, "
+                + "?, ?, ?, ?)")
+
+        values = (frame.time.strftime("%Y-%m-%d %H:%M:%S"), frame.air_temperature,
+            frame.exposed_temperature, frame.relative_humidity, frame.dew_point,
+            frame.wind_speed, frame.wind_direction, frame.wind_gust, 
+            frame.sunshine_duration, frame.rainfall, frame.station_pressure,
+            frame.mean_sea_level_pressure, frame.soil_temperature_10,
+            frame.soil_temperature_30, frame.soil_temperature_00)
+
+        query = data.query_database(config.main_db_path, QUERY, values)
+        
+        if query == True:
+            if config.report_uploading == True:
+                query = data.query_database(config.upload_db_path, QUERY, values)
+
+                if query == False:
+                    helpers.log(None, "main", "operation_log_report() 5")
+        else: helpers.log(None, "main", "operation_log_report() 4")
