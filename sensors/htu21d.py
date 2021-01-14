@@ -5,23 +5,27 @@ import busio
 import adafruit_htu21d
 
 from sensors.sensor import Sensor
+from sensors.store import SampleStore
 
-class HTU21D(Sensor):
+class HTU21D():
+    def __init__(self):
+        self._device = None
+        self.store = SampleStore()
 
-    def setup(self, log_type):
-        super().setup(log_type)
+    def open(self):
+        self._device = adafruit_htu21d.HTU21D(busio.I2C(board.SCL, board.SDA))
 
-        i2c = busio.I2C(board.SCL, board.SDA)
-        self.bridge = adafruit_htu21d.HTU21D(i2c)
+    def sample(self):
+        value = self._device.relative_humidity
 
-    def read_value(self):
-        value = self.bridge.relative_humidity
-        
-        if value > 100: value = 100
-        elif value < 0: value = 0
-        return value
+        if value > 100:
+            value = 100
+        elif value < 0:
+            value = 0
 
-    def array_format(self, array):
-        if array != None:
-            return statistics.mean(array)
+        self.store.active_store.append(value)
+
+    def get_average(self):
+        if len(self.store.inactive_store) != 0:
+            return statistics.mean(self.store.inactive_store)
         else: return None

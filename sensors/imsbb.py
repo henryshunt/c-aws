@@ -1,20 +1,20 @@
 import RPi.GPIO as gpio
 
 from sensors.sensor import Sensor
+from sensors.store import SampleStore
 
-# Instromet Mini Sun Board with binary output
-class IMSBB(Sensor):  
+# Instromet Mini Sun Board, binary output
+class IMSBB():  
+    def __init__(self, pin):
+        self._pin = pin
+        self.store = SampleStore()
 
-    def setup(self, log_type, pin):
-        super().setup(log_type)
-        self.address = pin
-        
-        gpio.setup(self.address, gpio.IN, pull_up_down=gpio.PUD_DOWN)
+    def open(self):        
+        gpio.setup(self.pin, gpio.IN, pull_up_down=gpio.PUD_DOWN)
 
-    def read_value(self):
-        return 1 if gpio.input(self.address) == True else 0
+    def sample(self):
+        value = 1 if gpio.input(self._pin) == True else 0
+        self.store.active_store.append(value)
 
-    def array_format(self, array):
-        if array != None:
-            return sum(array)
-        else: return None
+    def get_total(self):
+        return sum(self.store.inactive_store)

@@ -49,7 +49,10 @@ class Coordinator():
         # self.camera()
 
         self.sampler = Sampler()
-        self.sampler.open()
+        
+        if not self.sampler.open():
+            gpio.output(config.error_led_pin, gpio.HIGH)
+            return
 
         time.sleep(1)
         gpio.output(config.data_led_pin, gpio.HIGH)

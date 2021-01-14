@@ -9,14 +9,14 @@ from sensors.store import SampleStore
 
 class MCP9808():
     def __init__(self):
-        self.device = None
+        self._device = None
         self.store = SampleStore()
 
     def open(self):
-        self.device = adafruit_mcp9808.MCP9808(busio.I2C(board.SCL, board.SDA))
+        self._device = adafruit_mcp9808.MCP9808(busio.I2C(board.SCL, board.SDA))
 
     def sample(self):
-        self.store.active_store.append(self.device.temperature)
+        self.store.active_store.append(self._device.temperature)
 
     def get_average(self):
         if len(self.store.inactive_store) != 0:

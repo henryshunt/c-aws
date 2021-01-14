@@ -5,19 +5,21 @@ import busio
 import adafruit_bmp280
 
 from sensors.sensor import Sensor
+from sensors.store import SampleStore
 
-class BMP280(Sensor):
+class BMP280():
+    def __init__(self):
+        self._device = None
+        self.store = SampleStore()
 
-    def setup(self, log_type):
-        super().setup(log_type)
+    def open(self):
+        self._device = adafruit_bmp280.Adafruit_BMP280_I2C(
+            busio.I2C(board.SCL, board.SDA))
 
-        i2c = busio.I2C(board.SCL, board.SDA)
-        self.bridge = adafruit_bmp280.Adafruit_BMP280_I2C(i2c)
+    def sample(self):
+        self.store.active_store.append(self._device.pressure)
 
-    def read_value(self):
-        return self.bridge.pressure
-
-    def array_format(self, array):
-        if array != None:
-            return statistics.mean(array)
+    def get_average(self):
+        if len(self.store.inactive_store) != 0:
+            return statistics.mean(self.store.inactive_store)
         else: return None

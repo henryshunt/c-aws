@@ -26,16 +26,13 @@ import routines.data as data
 
 class Sampler:
     def __init__(self):
-        self.AirT_sensor = MCP9808()
-        self.RelH_sensor = HTU21D()
+        self.air_temp = None
+        self.rel_hum = None
         self.WSpd_sensor = ICA()
         self.WDir_sensor = IEV2()
-        self.SunD_sensor = IMSBB()
-        self.Rain_sensor = RR111()
-        self.StaP_sensor = BMP280()
-        self.ST10_sensor = DS18B20()
-        self.ST30_sensor = DS18B20()
-        self.ST00_sensor = DS18B20()
+        self.sun_dur = None
+        self.rain = None
+        self.sta_pres = None
         self.EncT_sensor = DS18B20()
         self.CPUT_sensor = CPU()
         self.start_time = None
@@ -43,13 +40,19 @@ class Sampler:
     def open(self):
         if config.AirT == True:
             try:
-                self.AirT_sensor.open()
-            except: helpers.data_error("__main__() 0")
+                self.air_temp = MCP9808()
+                self.air_temp.open()
+            except:
+                helpers.log(None, "sampler", "Failed to open air_temp sensor.")
+                return False
 
         if config.RelH == True:
             try:
-                self.RelH_sensor.setup(LogType.ARRAY)
-            except: helpers.data_error("__main__() 2")
+                self.rel_hum = HTU21D()
+                self.rel_hum.open()
+            except:
+                helpers.log(None, "sampler", "Failed to open rel_hum sensor.")
+                return False
 
         if config.WSpd == True:
             try:
@@ -63,33 +66,27 @@ class Sampler:
 
         if config.SunD == True:
             try:
-                self.SunD_sensor.setup(LogType.ARRAY, config.SunD_pin)
-            except: helpers.data_error("__main__() 5")
+                self.sun_dur = IMSBB(config.SunD_pin)
+                self.sun_dur.open()
+            except:
+                helpers.log(None, "sampler", "Failed to open sun_dur sensor.")
+                return False
 
         if config.Rain == True:
             try:
-                self.Rain_sensor.setup(config.Rain_pin)
-            except: helpers.data_error("__main__() 6")
+                self.rain = RR111(config.Rain_pin)
+                self.rain.open()
+            except:
+                helpers.log(None, "sampler", "Failed to open rain sensor.")
+                return False
 
         if config.StaP == True:
             try:
-                self.StaP_sensor.setup(LogType.ARRAY)
-            except: helpers.data_error("__main__() 7")
-
-        if config.ST10 == True:
-            try:
-                self.ST10_sensor.setup(LogType.VALUE, config.ST10_address)
-            except: helpers.data_error("__main__() 8")
-
-        if config.ST30 == True:
-            try:
-                self.ST30_sensor.setup(LogType.VALUE, config.ST30_address)
-            except: helpers.data_error("__main__() 9")
-
-        if config.ST00 == True:
-            try:
-                self.ST00_sensor.setup(LogType.VALUE, config.ST00_address)
-            except: helpers.data_error("__main__() 10")
+                self.sta_pres = BMP280()
+                self.sta_pres.open()
+            except:
+                helpers.log(None, "sampler", "Failed to open sta_pres sensor.")
+                return False
 
         if config.envReport_logging == True:
             try:
@@ -106,57 +103,59 @@ class Sampler:
                 with picamera.PiCamera() as camera: pass
             except: helpers.data_error("__main__() 13")
 
+        return True
+
     def start(self, time):
         self.start_time = time
         self.WSpd_sensor.pause = False
-        self.Rain_sensor.pause = False
+
+        if config.Rain == True:
+            self.rain.pause = False
+
         return True
 
     def sample(self, time):
         """ Triggered every second to read sensor values into a list for averaging
         """
-        # print(time)
-
-        # No sensor reads if sampling is disabled
-        #if self.disable_sampling == True: return
-
-        # Read sunshine duration
-        if config.SunD == True:
-            try:
-                self.SunD_sensor.sample()
-            except: helpers.data_error("schedule_second() 0")
-
-
-        # Prevent reading on 0 second. Previous sensors are totalled, so require the
-        # 0 second for the final value. Following sensors are averaged, so the 0 
-        # second is part of the next minute and must be not be read since the
-        # logging routine runs after the 0 second has passed.
-        if str(time.second) == 0: return
-
-
-        # Read air temperature
         if config.AirT == True:
             try:
-                self.AirT_sensor.sample()
-            except: helpers.data_error("schedule_second() 1")
+                self.air_temp.sample()
+            except:
+                helpers.log(time, "sampler", "Failed to sample air_temp sensor.")
+                return False
 
-        # Read relative humidity
         if config.RelH == True:
             try:
-                self.RelH_sensor.sample()
-            except: helpers.data_error("schedule_second() 2")
+                self.rel_hum.sample()
+            except:
+                helpers.log(time, "sampler", "Failed to sample rel_hum sensor.")
+                return False
 
-        # Read wind direction
         if config.WDir == True:
             try:
                 self.WDir_sensor.sample(time)
             except: helpers.data_error("schedule_second() 3")
 
-        # Read station pressure
+        if config.SunD == True:
+            try:
+                self.sun_dur.sample()
+            except:
+                helpers.log(time, "sampler", "Failed to sample sun_dur sensor.")
+                return False
+
+        if config.Rain == True:
+            try:
+                self.rain.sample()
+            except:
+                helpers.log(time, "sampler", "Failed to sample rain sensor.")
+                return False
+
         if config.StaP == True:
             try:
-                self.StaP_sensor.sample()
-            except: helpers.data_error("schedule_second() 4")
+                self.sta_pres.sample()
+            except:
+                helpers.log(time, "sampler", "Failed to sample sta_pres sensor.")
+                return False
 
         return True
 
@@ -168,10 +167,9 @@ class Sampler:
 
         # Shift and reset sensor stores to allow data collection to continue
         if config.AirT == True:
-            self.AirT_sensor.store.switch_store()
+            self.air_temp.store.switch_store()
         if config.RelH == True:
-            self.RelH_sensor.shift()
-            self.RelH_sensor.reset_primary()
+            self.rel_hum.store.switch_store()
         if config.WSpd == True:
             self.WSpd_sensor.shift()
             self.WSpd_sensor.reset_primary()
@@ -179,51 +177,27 @@ class Sampler:
             self.WDir_sensor.shift()
             self.WDir_sensor.reset_primary()
         if config.SunD == True:
-            self.SunD_sensor.shift()
-            self.SunD_sensor.reset_primary()
+            self.sun_dur.store.switch_store()
         if config.Rain == True:
-            self.Rain_sensor.shift()
-            self.Rain_sensor.reset_primary()
+            self.rain.store.switch_store()
         if config.StaP == True:
-            self.StaP_sensor.shift()
-            self.StaP_sensor.reset_primary()
+            self.sta_pres.store.switch_store()
 
         if config.WSpd == True: self.WSpd_sensor.pause = False
-        if config.Rain == True: self.Rain_sensor.pause = False
-
-
-        # Read exposed air temperature, soil temperature at 10, 30, 100cm in
-        # separate threads since DS18B20 sensors each take 0.75s to read
-        if config.ST10 == True:
-            ST10_thread = Thread(target=ST10_sensor.sample, args=())
-            ST10_thread.start()
-        if config.ST30 == True:
-            ST30_thread = Thread(target=ST30_sensor.sample, args=())
-            ST30_thread.start()
-        if config.ST00 == True:
-            ST00_thread = Thread(target=ST00_sensor.sample, args=())
-            ST00_thread.start()
-
-        # Wait for all sensors to finish reading
-        if config.ST10 == True: ST10_thread.join()
-        if config.ST30 == True: ST30_thread.join()
-        if config.ST00 == True: ST00_thread.join()
-
 
         # Process air temperature
         if config.AirT == True:
-            AirT_value = self.AirT_sensor.get_average()
+            value = self.air_temp.get_average()
 
-            if AirT_value != None:
-                frame.air_temperature = round(AirT_value, 2)
+            if value != None:
+                frame.air_temperature = round(value, 2)
 
         # Process relative humidity
         if config.RelH == True:
-            RelH_value = RelH_sensor.get_secondary()
+            value = self.rel_hum.get_average()
 
-            if RelH_value != None:
-                frame.relative_humidity = round(RelH_value, 2)
-                RelH_sensor.reset_secondary()
+            if value != None:
+                frame.relative_humidity = round(value, 2)
         
         # Process wind speed
         if config.WSpd == True:
@@ -250,58 +224,25 @@ class Sampler:
 
         # Process sunshine duration
         if config.SunD == True:
-            SunD_value = SunD_sensor.get_secondary()
+            value = self.sun_dur.get_total()
 
-            if SunD_value != None:
-                frame.sunshine_duration = SunD_value
-                SunD_sensor.reset_secondary()
+            if value != None:
+                frame.sunshine_duration = value
 
         # Process rainfall
         if config.Rain == True:
-            Rain_value = Rain_sensor.get_secondary()
+            value = self.rain.get_total()
 
-            if Rain_value != None:
-                frame.rainfall = round(Rain_value, 3)
-                Rain_sensor.reset_secondary()
+            if value != None:
+                frame.rainfall = round(value, 3)
 
         # Process station pressure
         if config.StaP == True:
-            StaP_value = StaP_sensor.get_secondary()
+            value = self.sta_pres.get_average()
 
-            if StaP_value != None:
-                frame.station_pressure = round(StaP_value, 2)
-                StaP_sensor.reset_secondary()
+            if value != None:
+                frame.station_pressure = round(value, 2)
         
-        # Process soil temperature at 10cm
-        if config.ST10 == True:
-            if ST10_sensor.error == False:
-                ST10_value = ST10_sensor.get_primary()
-
-                if ST10_value != None:
-                    frame.soil_temperature_10 = round(ST10_value, 1)
-                    ST10_sensor.reset_primary()
-            else: helpers.data_error("operation_log_report() 1")
-
-        # Process soil temperature at 30cm
-        if config.ST30 == True:
-            if ST30_sensor.error == False:
-                ST30_value = ST30_sensor.get_primary()
-
-                if ST30_value != None:
-                    frame.soil_temperature_30 = round(ST30_value, 1)
-                    ST30_sensor.reset_primary()
-            else: helpers.data_error("operation_log_report() 2")
-
-        # Process soil temperature at 1m
-        if config.ST00 == True:
-            if ST00_sensor.error == False:
-                ST00_value = ST00_sensor.get_primary()
-
-                if ST00_value != None:
-                    frame.soil_temperature_00 = round(ST00_value, 1)
-                    ST00_sensor.reset_primary()
-            else: helpers.data_error("operation_log_report() 3")
-
         # Derive dew point
         DewP_value = data.calculate_DewP(frame.air_temperature,
             frame.relative_humidity)
@@ -338,6 +279,7 @@ class Sampler:
         else: helpers.data_error("operation_log_report() 4")
 
         print(frame.air_temperature)
+        print(frame.rainfall)
 
 
 def operation_log_environment(utc):
