@@ -1,6 +1,5 @@
 import RPi.GPIO as gpio
 
-from sensors.sensor import Sensor
 from sensors.store import SampleStore
 
 # Rainwise Rainew 111

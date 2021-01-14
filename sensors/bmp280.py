@@ -4,7 +4,6 @@ import board
 import busio
 import adafruit_bmp280
 
-from sensors.sensor import Sensor
 from sensors.store import SampleStore
 
 class BMP280():

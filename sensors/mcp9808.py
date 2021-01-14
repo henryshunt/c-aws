@@ -4,7 +4,6 @@ import board
 import busio
 import adafruit_mcp9808
 
-from sensors.sensor import Sensor
 from sensors.store import SampleStore
 
 class MCP9808():

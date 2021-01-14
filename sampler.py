@@ -11,7 +11,6 @@ import picamera
 
 import routines.config as config
 import routines.helpers as helpers
-from sensors.sensor import LogType
 from sensors.mcp9808 import MCP9808
 from sensors.htu21d import HTU21D
 from sensors.ica import ICA
@@ -19,15 +18,18 @@ from sensors.iev2 import IEV2
 from sensors.imsbb import IMSBB
 from sensors.rr111 import RR111
 from sensors.bmp280 import BMP280
+from sensors.satellite import Satellite
 import routines.data as data
+from sensors.store import SampleStore
 
 
 class Sampler:
     def __init__(self):
         self.air_temp = None
         self.rel_hum = None
-        self.WSpd_sensor = ICA()
-        self.WDir_sensor = IEV2()
+        self.satellite = None
+        self.wind_spd_10 = []
+        self.wind_dir_10 = []
         self.sun_dur = None
         self.rain = None
         self.pressure = None
@@ -50,15 +52,11 @@ class Sampler:
                 helpers.log(None, "sampler", "Failed to open rel_hum sensor.")
                 return False
 
-        # if config.sensors["wind_spd"]["enabled"] == True:
-        #     try:
-        #         self.WSpd_sensor.setup(config.WSpd_pin)
-        #     except: helpers.data_error("__main__() 3")
-
-        # if config.sensors["wind_dir"]["enabled"] == True:
-        #     try:
-        #         self.WDir_sensor.setup(config.WDir_channel, config.WDir_offset)
-        #     except: helpers.data_error("__main__() 4")
+        if (config.sensors["satellite"]["wind_spd"]["enabled"] == True or
+            config.sensors["satellite"]["wind_dir"]["enabled"] == True):
+            
+            self.satellite = Satellite()
+            self.satellite.open()
 
         if config.sensors["sun_dur"]["enabled"] == True:
             try:
@@ -93,7 +91,7 @@ class Sampler:
 
     def start(self, time):
         self.start_time = time
-        self.WSpd_sensor.pause = False
+        self.satellite.start()
 
         if config.sensors["rain"]["enabled"] == True:
             self.rain.pause = False
@@ -103,6 +101,10 @@ class Sampler:
     def sample(self, time):
         """ Triggered every second to read sensor values into a list for averaging
         """
+        # if (config.sensors["satellite"]["wind_spd"]["enabled"] == True or
+        #     config.sensors["satellite"]["wind_dir"]["enabled"] == True):
+        self.satellite.sample(time)
+
         if config.sensors["air_temp"]["enabled"] == True:
             try:
                 self.air_temp.sample()
@@ -116,11 +118,6 @@ class Sampler:
             except:
                 helpers.log(time, "sampler", "Failed to sample rel_hum sensor.")
                 return False
-
-        # if config.WDir == True:
-        #     try:
-        #         self.WDir_sensor.sample(time)
-        #     except: helpers.data_error("schedule_second() 3")
 
         if config.sensors["sun_dur"]["enabled"] == True:
             try:
@@ -159,26 +156,13 @@ class Sampler:
             self.rel_hum.store.switch_store()
             report.relative_humidity = self.rel_hum.get_average()
         
-        # if config.WSpd == True:
-        #     WSpd_sensor.prepare_secondary(time)
-        #     WSpd_value = WSpd_sensor.get_secondary()
+        if (config.sensors["satellite"]["wind_spd"]["enabled"] == True or
+            config.sensors["satellite"]["wind_dir"]["enabled"] == True):
 
-        #     if WSpd_value != None:
-        #         report.wind_speed = round(WSpd_value, 2)
-
-        #     # Derive wind gust
-        #     WGst_value = WSpd_sensor.get_secondary_gust()
-        #     if WGst_value != None:
-        #         report.wind_gust = round(WGst_value, 2)
-
-        # if config.WDir == True:
-        #     WDir_sensor.prepare_secondary(time)
-        #     WDir_value = WDir_sensor.get_secondary()
-
-        #     if WDir_value != None:
-        #         WDir_value = int(round(WDir_value, 0))
-        #         if WDir_value == 360: WDir_value = 0
-        #         report.wind_direction = WDir_value
+            self.satellite.store.switch_store()
+            self.update_wind_stores(time)
+            wind = self.calculate_wind_values(time)
+            print(wind)
 
         if config.sensors["sun_dur"]["enabled"] == True:
             self.sun_dur.store.switch_store()
@@ -201,6 +185,26 @@ class Sampler:
         print(report.air_temperature)
         print(report.rainfall)
         return report
+
+    def update_wind_stores(self, time):
+        ten_min_start = time - timedelta(minutes=10)
+
+        for sample in self.satellite.store.inactive_store:
+            self.wind_spd_10.append((sample[0], sample[1]["windSpeed"] * 0.31))
+            self.wind_dir_10.append(sample[1]["windDirection"])
+
+    def calculate_wind_values(self, ten_minute_end):
+        return self.tuple_average(self.wind_spd_10, 1)
+
+    def tuple_average(self, listt, column):
+        total = 0
+        count = 0
+
+        for i in listt:
+            total += i[column]
+            count += 1
+        
+        return total / count
 
 
 def operation_log_camera(utc):
