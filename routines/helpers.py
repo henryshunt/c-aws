@@ -19,7 +19,7 @@ def log(time, source, entry):
         message += "[" + time.strftime("%Y-%m-%d %H:%M:%S") + "]"
     else: message += "[      NO TIME      ]"
 
-    message += " -> " + source + " : " + str(entry)
+    message += " -> " + source + ": " + str(entry)
     print(message)
 
     try:
@@ -114,3 +114,10 @@ def none_to_null(value):
     """ Returns None if the specified value is null, else returns the value
     """
     return "null" if value == None else value
+
+
+class InvalidOpError(Exception):
+    pass
+
+class SensorError(Exception):
+    pass

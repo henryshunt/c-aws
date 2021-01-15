@@ -23,10 +23,10 @@ class Coordinator():
         self.sampling = False
 
     def startup(self):
-        helpers.log(None, "main", "Startup.")
+        helpers.log(None, "coord", "Startup")
 
         if config.load() == False:
-            helpers.log(None, "main", "Failed to load configuration.")
+            helpers.log(None, "coord", "Failed to load configuration")
             return
 
         gpio.setwarnings(False)
@@ -41,7 +41,7 @@ class Coordinator():
         self.clock.open()
         self.clock.on_tick = self.on_clock_tick
 
-        helpers.log(self.clock.get_time(), "main", "Opened connection to clock.")
+        helpers.log(self.clock.get_time(), "coord", "Opened connection to clock")
 
         if not self.file_system():
             gpio.output(config.error_led_pin, gpio.HIGH)
@@ -51,7 +51,9 @@ class Coordinator():
 
         self.sampler = Sampler()
         
-        if not self.sampler.open():
+        try:
+            self.sampler.open()
+        except:
             gpio.output(config.error_led_pin, gpio.HIGH)
             return
 
@@ -62,32 +64,32 @@ class Coordinator():
         gpio.output(config.data_led_pin, gpio.LOW)
         gpio.output(config.error_led_pin, gpio.LOW)
 
-        helpers.log(self.clock.get_time(), "main", "Starting clock.")
+        helpers.log(self.clock.get_time(), "coord", "Starting clock")
         self.clock.start()
 
     def file_system(self):
         free_space = helpers.remaining_space("/")
 
         if free_space == None or free_space < 0.1:
-            helpers.log(self.clock.get_time(), "main", "Not enough free space.")
+            helpers.log(self.clock.get_time(), "coord", "Not enough free space")
             return False
 
         try:
             if not os.path.isdir(config.data_directory):
                 os.makedirs(config.data_directory)
         except:
-            helpers.log(self.clock.get_time(), "main", "Failed to create directory.")
+            helpers.log(self.clock.get_time(), "coord", "Failed to create directory")
             return False
 
         helpers.log(self.clock.get_time(),
-            "main", "Free space: " + str(round(free_space, 2)) + " GB.")
+            "coord", "Free space: " + str(round(free_space, 2)) + " GB")
 
         try:
             if not os.path.isfile(config.main_db_path):
                 data.create_database(config.main_db_path)
-                helpers.log(self.clock.get_time(), "main", "Created main database.")
+                helpers.log(self.clock.get_time(), "coord", "Created main database")
         except:
-            helpers.log(self.clock.get_time(), "main", "Failed to create main database.")
+            helpers.log(self.clock.get_time(), "coord", "Failed to create main database")
             return False
 
         if (config.report_uploading == True or
@@ -97,10 +99,10 @@ class Coordinator():
             try:
                 if not os.path.isfile(config.upload_db_path):
                     data.create_database(config.upload_db_path)
-                    helpers.log(self.clock.get_time(), "main", "Created transmit database.")
+                    helpers.log(self.clock.get_time(), "coord", "Created transmit database")
             except:
                 helpers.log(self.clock.get_time(), 
-                    "main", "Failed to create transmit database.")
+                    "coord", "Failed to create transmit database")
                 return False
 
         return True
@@ -125,20 +127,28 @@ class Coordinator():
     def on_clock_tick(self, time):
         if not self.sampling:
             if time.second == 0:
-                if self.sampler.start(time):
+                try:
+                    self.sampler.start(time)
                     self.sampling = True
-                    helpers.log(self.clock.get_time(), "main", "Started sampling.")
-                else:
-                    helpers.log(self.clock.get_time(), "main", "Failed to start sampling.")
+                    helpers.log(self.clock.get_time(), "coord", "Started sampling")
+                except:
+                    helpers.log(self.clock.get_time(), "coord", "Failed to start sampling")
                     gpio.output(config.error_led_pin, gpio.HIGH)
             return
 
-        if not self.sampler.sample(time):
+        try:
+            self.sampler.sample(time)
+
+            if config.sensors["camera"]["enabled"] == True:
+                pass
+        except:
             gpio.output(config.error_led_pin, gpio.HIGH)
+            return
 
         if time.second == 0:
             gpio.output(config.data_led_pin, gpio.HIGH)
             gpio.output(config.error_led_pin, gpio.LOW)
+            self.sampler.cache_samples()
             report = self.sampler.report(time)
             self.write_report(report)
             gpio.output(config.data_led_pin, gpio.LOW)
@@ -169,12 +179,12 @@ class Coordinator():
         QUERY = ("INSERT INTO reports VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, "
                 + "?, ?, ?, ?)")
 
-        values = (frame.time.strftime("%Y-%m-%d %H:%M:%S"), frame.air_temperature,
-            frame.exposed_temperature, frame.relative_humidity, frame.dew_point,
-            frame.wind_speed, frame.wind_direction, frame.wind_gust, 
-            frame.sunshine_duration, frame.rainfall, frame.station_pressure,
-            frame.mean_sea_level_pressure, frame.soil_temperature_10,
-            frame.soil_temperature_30, frame.soil_temperature_00)
+        values = (frame.time.strftime("%Y-%m-%d %H:%M:%S"), frame.air_temp,
+            None, frame.rel_hum, frame.dew_point,
+            frame.wind_speed, frame.wind_dir, frame.wind_gust, 
+            frame.sun_dur, frame.rainfall, frame.sta_pres,
+            frame.msl_pres, frame.soil_temp_10,
+            frame.soil_temp_30, frame.soil_temp_00)
 
         query = data.query_database(config.main_db_path, QUERY, values)
         
@@ -183,5 +193,5 @@ class Coordinator():
                 query = data.query_database(config.upload_db_path, QUERY, values)
 
                 if query == False:
-                    helpers.log(None, "main", "operation_log_report() 5")
-        else: helpers.log(None, "main", "operation_log_report() 4")
+                    helpers.log(None, "coord", "operation_log_report() 5")
+        else: helpers.log(None, "coord", "operation_log_report() 4")

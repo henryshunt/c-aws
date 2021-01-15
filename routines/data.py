@@ -95,29 +95,22 @@ def calculate_MSLP(StaP, AirT):
     return StaP * ((1 - a) ** -5.257)
 
 
-class ReportFrame():
+class Report():
     def __init__(self, time):
         self.time = time
-        self.air_temperature = None
-        self.exposed_temperature = None
-        self.relative_humidity = None
+        self.air_temp = None
+        self.rel_hum = None
         self.dew_point = None
         self.wind_speed = None
-        self.wind_direction = None
+        self.wind_dir = None
         self.wind_gust = None
-        self.sunshine_duration = None
+        self.sun_dur = None
         self.rainfall = None
-        self.station_pressure = None
-        self.mean_sea_level_pressure = None
-        self.soil_temperature_10 = None
-        self.soil_temperature_30 = None
-        self.soil_temperature_00 = None
-
-class EnvReportFrame():
-    def __init__(self, time):
-        self.time = time
-        self.enclosure_temperature = None
-        self.cpu_temperature = None
+        self.sta_pres = None
+        self.msl_pres = None
+        self.soil_temp_10 = None
+        self.soil_temp_30 = None
+        self.soil_temp_00 = None
 
 class DbTable(Enum):
     REPORTS = 1
