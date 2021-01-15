@@ -150,6 +150,9 @@ class Coordinator():
             gpio.output(config.error_led_pin, gpio.LOW)
             self.sampler.cache_samples()
             report = self.sampler.report(time)
+            from pprint import pprint
+            pprint(vars(report))
+            print("")
             self.write_report(report)
             gpio.output(config.data_led_pin, gpio.LOW)
 
@@ -183,8 +186,7 @@ class Coordinator():
             None, frame.rel_hum, frame.dew_point,
             frame.wind_speed, frame.wind_dir, frame.wind_gust, 
             frame.sun_dur, frame.rainfall, frame.sta_pres,
-            frame.msl_pres, frame.soil_temp_10,
-            frame.soil_temp_30, frame.soil_temp_00)
+            frame.msl_pres, None, None, None)
 
         query = data.query_database(config.main_db_path, QUERY, values)
         

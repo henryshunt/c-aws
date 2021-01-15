@@ -74,7 +74,7 @@ def query_database(db_path, query, values):
 
     except: return False
 
-def calculate_DewP(AirT, RelH):
+def dew_point(AirT, RelH):
     """ Calculates dew point using the same formula the Met Office uses
     """
     if AirT == None or RelH == None: return None
@@ -84,7 +84,7 @@ def calculate_DewP(AirT, RelH):
     sr = math.sqrt(((8.0813 - e) ** 2) - (1.842 * e))
     return 278.04 * ((8.0813 - e) - sr)
 
-def calculate_MSLP(StaP, AirT):
+def mslp(StaP, AirT):
     """ Reduces station pressure to mean sea level using the formula at
         https://keisan.casio.com/exec/system/1224575267
     """
@@ -108,11 +108,3 @@ class Report():
         self.rainfall = None
         self.sta_pres = None
         self.msl_pres = None
-        self.soil_temp_10 = None
-        self.soil_temp_30 = None
-        self.soil_temp_00 = None
-
-class DbTable(Enum):
-    REPORTS = 1
-    ENVREPORTS = 2
-    DAYSTATS = 3

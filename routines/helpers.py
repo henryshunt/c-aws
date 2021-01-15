@@ -2,6 +2,7 @@ import os
 from datetime import datetime, timedelta
 import time
 import sys
+import math
 
 import RPi.GPIO as gpio
 import pytz
@@ -121,3 +122,31 @@ class InvalidOpError(Exception):
 
 class SensorError(Exception):
     pass
+
+def tuple_average(listt, column):
+    if len(listt) == 0:
+        return
+        
+    total = 0
+    count = 0
+
+    for i in listt:
+        total += i[column]
+        count += 1
+    
+    return total / count
+
+def vector_average(vectors):
+    V_east = []
+    V_north = []
+
+    for vector in vectors:
+        V_east.append(vector[0] * math.sin(vector[1] * math.pi / 180))
+        V_north.append(vector[0] * math.cos(vector[1] * math.pi / 180))
+
+    ve = sum(V_east) / len(vectors)
+    vn = sum(V_north) / len(vectors)
+
+    mean_WD = math.atan2(ve, vn) * 180 / math.pi
+    mean_WD = (360 + mean_WD) % 360
+    return mean_WD

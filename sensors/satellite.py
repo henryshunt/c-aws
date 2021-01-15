@@ -43,8 +43,9 @@ class Satellite():
         self.command("START\n")
 
     def sample(self, time):
-        self.store.active_store.append(
-            (time, json.loads(self.command("SAMPLE\n"))))
+        sample = json.loads(self.command("SAMPLE\n"))
+        sample["time"] = time
+        self.store.active_store.append(sample)
 
     def command(self, command):
         self._device.write(command.encode("utf-8"))

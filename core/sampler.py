@@ -4,6 +4,7 @@ import time
 from threading import Thread
 import string
 import random
+import statistics
 
 import daemon
 import RPi.GPIO as gpio
@@ -14,7 +15,6 @@ import routines.helpers as helpers
 from sensors.mcp9808 import MCP9808
 from sensors.htu21d import HTU21D
 from sensors.ica import ICA
-from sensors.iev2 import IEV2
 from sensors.imsbb import IMSBB
 from sensors.rr111 import RR111
 from sensors.bmp280 import BMP280
@@ -178,8 +178,13 @@ class Sampler:
         
         if (config.sensors["satellite"]["wind_spd"]["enabled"] == True or
             config.sensors["satellite"]["wind_dir"]["enabled"] == True):
-            self.update_wind_stores(time)
-            wind = self.calculate_wind_values(time)
+            self._update_wind_stores(time)
+
+            if time - timedelta(minutes=10) >= self._start_time:
+                wind = self._calc_wind_values(time)
+                report.wind_speed = wind[0]
+                report.wind_gust = wind[1]
+                report.wind_dir = wind[2]
 
         if config.sensors["sun_dur"]["enabled"] == True:
             report.sun_dur = self._sun_dur.get_total()
@@ -188,30 +193,82 @@ class Sampler:
         if config.sensors["pressure"]["enabled"] == True:
             report.sta_pres = self._pressure.get_average()
         
-        report.dew_point = data.calculate_DewP(report.air_temp, report.rel_hum)
-        report.msl_pres = data.calculate_MSLP(report.sta_pres, report.air_temp)
-
+        report.dew_point = data.dew_point(report.air_temp, report.rel_hum)
+        report.msl_pres = data.mslp(report.sta_pres, report.air_temp)
         return report
 
-    def update_wind_stores(self, time):
-        ten_min_start = time - timedelta(minutes=10)
+    def _update_wind_stores(self, ten_min_end):
+        ten_min_start = ten_min_end - timedelta(minutes=10)
 
-        for sample in self._satellite.store.inactive_store:
-            self._wind_speed_10.append((sample[0], sample[1]["windSpeed"] * 0.31))
-            self._wind_dir_10.append(sample[1]["windDirection"])
+        if config.sensors["satellite"]["wind_spd"]["enabled"] == True:
+            for sample in self._satellite.store.inactive_store:
+                self._wind_speed_10.append(
+                    (sample["time"], sample["windSpeed"] * ICA.WIND_SPEED_MPH_PER_HZ))
 
-    def calculate_wind_values(self, ten_minute_end):
-        return self.tuple_average(self._wind_speed_10, 1)
+            # Remove samples older than 10 minutes
+            new_speed_10 = []
+            for sample in self._wind_speed_10:
+                if sample[0] > ten_min_start:
+                    new_speed_10.append(sample)
+            self._wind_speed_10 = new_speed_10
 
-    def tuple_average(self, listt, column):
-        total = 0
-        count = 0
+        if config.sensors["satellite"]["wind_dir"]["enabled"] == True:
+            for sample in self._satellite.store.inactive_store:
+                self._wind_dir_10.append((sample["time"], sample["windDirection"]))
 
-        for i in listt:
-            total += i[column]
-            count += 1
-        
-        return total / count
+            # Remove samples older than 10 minutes
+            new_dir_10 = []
+            for sample in self._wind_dir_10:
+                if sample[0] > ten_min_start:
+                    new_dir_10.append(sample)
+            self._wind_dir_10 = new_dir_10
+
+    def _calc_wind_values(self, ten_min_end):
+        speed = None
+        gust = None
+        direction = None
+
+        if (config.sensors["satellite"]["wind_spd"]["enabled"] == True and
+            len(self._wind_speed_10) > 0):
+            speed = helpers.tuple_average(self._wind_speed_10, 1)
+            gust = 0
+
+            # Find the highest 3-second average in the previous 10 minutes. A
+            # 3-second average includes the samples <= second T and > second T-3
+            i = ten_min_end - timedelta(minutes=10)
+            while i <= ten_min_end - timedelta(seconds=3):
+                samples = []
+                for sample in self._wind_speed_10:
+                    if sample[0] > i and sample[0] <= i + timedelta(seconds=3):
+                        samples.append(sample[1])
+
+                if len(samples) > 0:
+                    sample = statistics.mean(samples)
+                    if sample > gust:
+                        gust = sample
+
+                i += timedelta(seconds=1)
+
+            if (config.sensors["satellite"]["wind_dir"]["enabled"] == True and
+                len(self._wind_dir_10) > 0 and speed > 0):
+                vectors = []
+                
+                # Create a vector (speed and direction pair) for each second in
+                # the previous 10 minutes
+                i = ten_min_end - timedelta(seconds=599)
+                while i <= ten_min_end:
+                    s = next((x[1] for x in self._wind_speed_10 if x[0] == i), None)
+                    d = next((x[1] for x in self._wind_dir_10 if x[0] == i), None)
+
+                    if s != None and d != None:
+                        vectors.append((s, d))
+
+                    i += timedelta(seconds=1)
+
+                if len(vectors) > 0:
+                    direction = helpers.vector_average(vectors)
+
+        return (speed, gust, direction)
 
     def camera_report(self, time):
         utc_minute = str(utc.minute)
