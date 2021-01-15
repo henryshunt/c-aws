@@ -5,9 +5,9 @@ import time
 
 from routines import config
 from routines import helpers
-from sampler import Sampler
+from core.sampler import Sampler
 #from aws_support import AWSSupport
-from clock import Clock
+from core.clock import Clock
 from routines import data
 
 import busio
