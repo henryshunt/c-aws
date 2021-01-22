@@ -150,3 +150,7 @@ def vector_average(vectors):
     mean_WD = math.atan2(ve, vn) * 180 / math.pi
     mean_WD = (360 + mean_WD) % 360
     return mean_WD
+
+def date_range(start, end):
+    for n in range(int((end - start).seconds + 1)):
+        yield start + timedelta(seconds=n)

@@ -4,61 +4,72 @@ import json
 import serial
 from serial.tools.list_ports import comports
 
-from sensors.store import SampleStore
+from routines.helpers import SensorError
 
 class Satellite():
     def __init__(self):
         self._device = None
-        self.store = SampleStore()
 
     def open(self):
         for port in comports():
             if not port.name.startswith("ttyUSB"):
                 continue
 
-            self._device = serial.Serial(port="/dev/" + port.name, baudrate=115200)
+            device = serial.Serial(port="/dev/" + port.name, baudrate=115200)
+            if device.isOpen:
+                device.close()
 
-            if self._device.isOpen:
-                self._device.close()
-
-            self._device.open()
-
+            device.open()
             time.sleep(2) # Wait for the Arduino to reset after connecting
-            response = self.command("PING\n")
+            response = self.command(device, "PING\n")
 
             # We use in because the first transmission from the device sometimes has
             # extra characters at the ends
-            if "AWS Satellite Device" in response:
-                response = self.command("ID\n")
+            if response != None and "AWS Satellite Device" in response:
+                response = self.command(device, "ID\n")
 
-                if int(response) == 1:
+                if response != None and int(response) == 1:
                     cmd = "CONFIG { windSpeedEnabled:true,windSpeedPin:2,windDirectionEnabled:true,windDirectionPin:7}\n"
+                    response = self.command(device, cmd)
                     
-                    if self.command(cmd) == "OK":
+                    if response != None and response == "OK":
+                        self._device = device
                         return
             
-            self._device.close()
+            device.close()
+
+        if self._device == None:
+            raise SensorError("Satellite not found")
 
     def start(self):
-        self.command("START\n")
+        response = self.command(self._device, "START\n")
+        if response == None or response == "ERROR":
+            raise SensorError("Error response while starting satellite")
 
-    def sample(self, time):
-        sample = json.loads(self.command("SAMPLE\n"))
-        sample["time"] = time
-        self.store.active_store.append(sample)
+    def sample(self):
+        response = self.command(self._device, "SAMPLE\n")
+        if response == None or response == "ERROR":
+            raise SensorError("Error response while sampling satellite")
 
-    def command(self, command):
-        self._device.write(command.encode("utf-8"))
+        sample = json.loads(response)
+        return sample
+
+    def command(self, device, command):
+        device.write(command.encode("utf-8"))
 
         response = ""
-        responseEnded = False
+        resp_ended = False
+        start = time.perf_counter()
 
-        while not responseEnded:
-            if self._device.in_waiting > 0:
-                readChar = self._device.read(1).decode("utf-8")
+        while not resp_ended:
+            if device.in_waiting > 0:
+                char = device.read(1).decode("utf-8")
 
-                if readChar != "\n":
-                    response += readChar
-                else: responseEnded = True
+                if char != "\n":
+                    response += char
+                else: resp_ended = True
+
+            if time.perf_counter() - start > 0.1:
+                return None
 
         return response

@@ -2,6 +2,7 @@ import os
 from datetime import datetime, timezone
 from RPi import GPIO as gpio
 import time
+from threading import Thread
 
 from routines import config
 from routines import helpers
@@ -146,21 +147,25 @@ class Coordinator():
             return
 
         if time.second == 0:
-            gpio.output(config.data_led_pin, gpio.HIGH)
-            gpio.output(config.error_led_pin, gpio.LOW)
-            self.sampler.cache_samples()
-            report = self.sampler.report(time)
-            from pprint import pprint
-            pprint(vars(report))
-            print("")
-            self.write_report(report)
-            gpio.output(config.data_led_pin, gpio.LOW)
+            Thread(target=self.top_of_minute, args=(time,)).start()
 
             # new Thread(() =>
             # {
             #     LogReport(e.Time);
             #     // Transmitter.Transmit();
             # }).Start()
+
+    def top_of_minute(self, time):
+        gpio.output(config.data_led_pin, gpio.HIGH)
+        gpio.output(config.error_led_pin, gpio.LOW)
+
+        report = self.sampler.report(time)
+        from pprint import pprint
+        pprint(vars(report))
+        print("")
+
+        self.write_report(report)
+        gpio.output(config.data_led_pin, gpio.LOW)
 
     # def log_report(time):
     #     Stopwatch ledStopwatch = new Stopwatch()

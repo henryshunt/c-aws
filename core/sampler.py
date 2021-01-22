@@ -20,7 +20,6 @@ from sensors.rr111 import RR111
 from sensors.bmp280 import BMP280
 from sensors.satellite import Satellite
 import routines.data as data
-from sensors.store import SampleStore
 from routines.helpers import SensorError
 from routines.data import Report
 
@@ -29,13 +28,18 @@ class Sampler:
     def __init__(self):
         self._start_time = None
         self._air_temp = None
+        self._air_temp_samples = {}
         self._rel_hum = None
+        self._rel_hum_samples = {}
         self._satellite = None
-        self._wind_speed_10 = []
-        self._wind_dir_10 = []
+        self._wind_speed_samples = {}
+        self._wind_dir_samples = {}
         self._sun_dur = None
+        self._sun_dur_samples = {}
         self._rainfall = None
+        self._rainfall_samples = {}
         self._pressure = None
+        self._pressure_samples = {}
 
     def open(self):
         if config.sensors["air_temp"]["enabled"] == True:
@@ -54,8 +58,7 @@ class Sampler:
                 helpers.log(None, "sampler", "Failed to open rel_hum sensor")
                 raise SensorError("Failed to open rel_hum sensor", e)
 
-        if (config.sensors["satellite"]["wind_spd"]["enabled"] == True or
-            config.sensors["satellite"]["wind_dir"]["enabled"] == True):
+        if config.sensors["satellite"]["enabled"] == True:
             try:
                 self._satellite = Satellite()
                 self._satellite.open()
@@ -71,9 +74,9 @@ class Sampler:
                 helpers.log(None, "sampler", "Failed to open sun_dur sensor")
                 raise SensorError("Failed to open sun_dur sensor", e)
 
-        if config.sensors["rain"]["enabled"] == True:
+        if config.sensors["rainfall"]["enabled"] == True:
             try:
-                self._rainfall = RR111(config.sensors["rain"]["pin"])
+                self._rainfall = RR111(config.sensors["rainfall"]["pin"])
                 self._rainfall.open()
             except Exception as e:
                 helpers.log(None, "sampler", "Failed to open rain sensor")
@@ -98,175 +101,160 @@ class Sampler:
     def start(self, time):
         self._start_time = time
 
-        if (config.sensors["satellite"]["wind_spd"]["enabled"] == True or
-            config.sensors["satellite"]["wind_dir"]["enabled"] == True):
+        if config.sensors["satellite"]["enabled"] == True:
             try:
                 self._satellite.start()
             except Exception as e:
                 helpers.log(None, "sampler", "Failed to start satellite")
                 raise SensorError("Failed to start satellite", e)
 
-        if config.sensors["rain"]["enabled"] == True:
+        if config.sensors["rainfall"]["enabled"] == True:
             self._rainfall.pause = False
 
     def sample(self, time):
-        if (config.sensors["satellite"]["wind_spd"]["enabled"] == True or
-            config.sensors["satellite"]["wind_dir"]["enabled"] == True):
-            try:
-                self._satellite.sample(time)
-            except Exception as e:
-                helpers.log(time, "sampler", "Failed to sample satellite")
-                raise SensorError("Failed to sample satellite", e)
-
         if config.sensors["air_temp"]["enabled"] == True:
             try:
-                self._air_temp.sample()
+                self._air_temp_samples[time] = self._air_temp.sample()
             except:
                 helpers.log(time, "sampler", "Failed to sample air_temp sensor")
                 raise SensorError("Failed to sample air_temp sensor", e)
 
         if config.sensors["rel_hum"]["enabled"] == True:
             try:
-                self._rel_hum.sample()
+                self._rel_hum_samples[time] = self._rel_hum.sample()
             except:
                 helpers.log(time, "sampler", "Failed to sample rel_hum sensor")
                 raise SensorError("Failed to sample rel_hum sensor", e)
 
+        if config.sensors["satellite"]["enabled"] == True:
+            try:
+                sample = self._satellite.sample()
+                if config.sensors["satellite"]["wind_speed"]["enabled"] == True:
+                    self._wind_speed_samples[time] = (sample["windSpeed"]
+                        * ICA.WIND_SPEED_MPH_PER_HZ)
+                if config.sensors["satellite"]["wind_dir"]["enabled"] == True:
+                    self._wind_dir_samples[time] = sample["windDirection"]
+            except Exception as e:
+                helpers.log(time, "sampler", "Failed to sample satellite")
+                raise SensorError("Failed to sample satellite", e)
+
         if config.sensors["sun_dur"]["enabled"] == True:
             try:
-                self._sun_dur.sample()
+                self._sun_dur_samples[time] = self._sun_dur.sample()
             except:
                 helpers.log(time, "sampler", "Failed to sample sun_dur sensor")
                 raise SensorError("Failed to sample sun_dur sensor", e)
 
-        if config.sensors["rain"]["enabled"] == True:
+        if config.sensors["rainfall"]["enabled"] == True:
             try:
-                self._rainfall.sample()
+                self._rainfall_samples[time] = self._rainfall.sample()
             except:
                 helpers.log(time, "sampler", "Failed to sample rain sensor")
                 raise SensorError("Failed to sample rain sensor", e)
 
         if config.sensors["pressure"]["enabled"] == True:
             try:
-                self._pressure.sample()
+                self._pressure_samples[time] = self._pressure.sample()
             except:
                 helpers.log(time, "sampler", "Failed to sample pressure sensor")
                 raise SensorError("Failed to sample pressure sensor", e)
-
-    def cache_samples(self):
-        if config.sensors["air_temp"]["enabled"] == True:
-            self._air_temp.store.switch_store()
-        if config.sensors["rel_hum"]["enabled"] == True:
-            self._rel_hum.store.switch_store()
-        if (config.sensors["satellite"]["wind_spd"]["enabled"] == True or
-            config.sensors["satellite"]["wind_dir"]["enabled"] == True):
-            self._satellite.store.switch_store()
-        if config.sensors["sun_dur"]["enabled"] == True:
-            self._sun_dur.store.switch_store()
-        if config.sensors["rain"]["enabled"] == True:
-            self._rainfall.store.switch_store()
-        if config.sensors["pressure"]["enabled"] == True:
-            self._pressure.store.switch_store()
 
     def report(self, time):
         report = Report(time)
 
         if config.sensors["air_temp"]["enabled"] == True:
-            report.air_temp = self._air_temp.get_average()
-        if config.sensors["rel_hum"]["enabled"] == True:
-            report.rel_hum = self._rel_hum.get_average()
-        
-        if (config.sensors["satellite"]["wind_spd"]["enabled"] == True or
-            config.sensors["satellite"]["wind_dir"]["enabled"] == True):
-            self._update_wind_stores(time)
+            samples = []
+            for i in helpers.date_range(time - timedelta(seconds=59), time):
+                samples.append(self._air_temp_samples[i])
+                del self._air_temp_samples[i]
+            report.air_temp = statistics.mean(samples)
 
-            if time - timedelta(minutes=10) >= self._start_time:
-                wind = self._calc_wind_values(time)
-                report.wind_speed = wind[0]
-                report.wind_gust = wind[1]
-                report.wind_dir = wind[2]
+        if config.sensors["rel_hum"]["enabled"] == True:
+            samples = []
+            for i in helpers.date_range(time - timedelta(seconds=59), time):
+                samples.append(self._rel_hum_samples[i])
+                del self._rel_hum_samples[i]
+            report.rel_hum = statistics.mean(samples)
+        
+        if config.sensors["satellite"]["enabled"] == True:
+            # if time - timedelta(minutes=10) >= self._start_time:
+            wind = self._calc_wind_values(time)
+            report.wind_speed = wind[0]
+            report.wind_gust = wind[1]
+            report.wind_dir = wind[2]
 
         if config.sensors["sun_dur"]["enabled"] == True:
-            report.sun_dur = self._sun_dur.get_total()
-        if config.sensors["rain"]["enabled"] == True:
-            report.rainfall = self._rainfall.get_total()
+            samples = []
+            for i in helpers.date_range(time - timedelta(seconds=59), time):
+                samples.append(self._sun_dur_samples[i])
+                del self._sun_dur_samples[i]
+            report.sun_dur = sum(samples)
+
+        if config.sensors["rainfall"]["enabled"] == True:
+            samples = []
+            for i in helpers.date_range(time - timedelta(seconds=59), time):
+                samples.append(self._rainfall_samples[i])
+                del self._rainfall_samples[i]
+            report.rainfall = sum(samples)
+            
         if config.sensors["pressure"]["enabled"] == True:
-            report.sta_pres = self._pressure.get_average()
+            samples = []
+            for i in helpers.date_range(time - timedelta(seconds=59), time):
+                samples.append(self._sta_pres_samples[i])
+                del self._sta_pres_samples[i]
+            report.sta_pres = statistics.mean(samples)
         
         report.dew_point = data.dew_point(report.air_temp, report.rel_hum)
         report.msl_pres = data.mslp(report.sta_pres, report.air_temp)
         return report
-
-    def _update_wind_stores(self, ten_min_end):
-        ten_min_start = ten_min_end - timedelta(minutes=10)
-
-        if config.sensors["satellite"]["wind_spd"]["enabled"] == True:
-            for sample in self._satellite.store.inactive_store:
-                self._wind_speed_10.append(
-                    (sample["time"], sample["windSpeed"] * ICA.WIND_SPEED_MPH_PER_HZ))
-
-            # Remove samples older than 10 minutes
-            new_speed_10 = []
-            for sample in self._wind_speed_10:
-                if sample[0] > ten_min_start:
-                    new_speed_10.append(sample)
-            self._wind_speed_10 = new_speed_10
-
-        if config.sensors["satellite"]["wind_dir"]["enabled"] == True:
-            for sample in self._satellite.store.inactive_store:
-                self._wind_dir_10.append((sample["time"], sample["windDirection"]))
-
-            # Remove samples older than 10 minutes
-            new_dir_10 = []
-            for sample in self._wind_dir_10:
-                if sample[0] > ten_min_start:
-                    new_dir_10.append(sample)
-            self._wind_dir_10 = new_dir_10
 
     def _calc_wind_values(self, ten_min_end):
         speed = None
         gust = None
         direction = None
 
-        if (config.sensors["satellite"]["wind_spd"]["enabled"] == True and
-            len(self._wind_speed_10) > 0):
-            speed = helpers.tuple_average(self._wind_speed_10, 1)
-            gust = 0
+        if config.sensors["satellite"]["wind_speed"]["enabled"] == True:
+            samples = []
+            for i in helpers.date_range(ten_min_end - timedelta(seconds=599), ten_min_end):
+                if i in self._wind_speed_samples:
+                    samples.append(self._wind_speed_samples[i])
+            if len(samples) > 0:
+                speed = statistics.mean(samples)
 
             # Find the highest 3-second average in the previous 10 minutes. A
             # 3-second average includes the samples <= second T and > second T-3
-            i = ten_min_end - timedelta(minutes=10)
-            while i <= ten_min_end - timedelta(seconds=3):
+            for i in helpers.date_range(ten_min_end - timedelta(minutes=10),
+                ten_min_end - timedelta(seconds=3)):
+
                 samples = []
-                for sample in self._wind_speed_10:
-                    if sample[0] > i and sample[0] <= i + timedelta(seconds=3):
-                        samples.append(sample[1])
+                for j in helpers.date_range(i + timedelta(seconds=1), i + timedelta(seconds=3)):
+                    if j in self._wind_speed_samples:
+                        samples.append(self._wind_speed_samples[j])
 
                 if len(samples) > 0:
                     sample = statistics.mean(samples)
-                    if sample > gust:
+                    if gust == None or sample > gust:
                         gust = sample
 
-                i += timedelta(seconds=1)
-
             if (config.sensors["satellite"]["wind_dir"]["enabled"] == True and
-                len(self._wind_dir_10) > 0 and speed > 0):
+                speed != None and speed > 0):
                 vectors = []
                 
                 # Create a vector (speed and direction pair) for each second in
                 # the previous 10 minutes
-                i = ten_min_end - timedelta(seconds=599)
-                while i <= ten_min_end:
-                    s = next((x[1] for x in self._wind_speed_10 if x[0] == i), None)
-                    d = next((x[1] for x in self._wind_dir_10 if x[0] == i), None)
-
-                    if s != None and d != None:
-                        vectors.append((s, d))
-
-                    i += timedelta(seconds=1)
+                for i in helpers.date_range(ten_min_end - timedelta(seconds=599), ten_min_end):
+                    if i in self._wind_speed_samples and i in self._wind_dir_samples:
+                        vectors.append((self._wind_speed_samples[i], self._wind_dir_samples[i]))
 
                 if len(vectors) > 0:
                     direction = helpers.vector_average(vectors)
+
+        for i in helpers.date_range(ten_min_end - timedelta(minutes=10, seconds=59),
+            ten_min_end - timedelta(minutes=10)):
+            if i in self._wind_speed_samples:
+                del self._wind_speed_samples[i]
+            if i in self._wind_dir_samples:
+                del self._wind_dir_samples[i]
 
         return (speed, gust, direction)
 

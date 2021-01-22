@@ -147,6 +147,11 @@ def load():
         # restart_pin = config["restart_pin"]
 
         sensors = config["sensors"]
+
+        if (sensors["satellite"]["wind_speed"]["enabled"] == True or
+            sensors["satellite"]["wind_dir"]["enabled"] == True):
+            sensors["satellite"]["enabled"] = True
+        else: sensors["satellite"]["enabled"] = False
     #except: return False
 
     #return False if __validate() == False else True
