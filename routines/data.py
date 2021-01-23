@@ -74,6 +74,26 @@ def query_database(db_path, query, values):
 
     except: return False
 
+def write_report(report):
+    QUERY = ("INSERT INTO reports VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, "
+            + "?, ?, ?, ?)")
+
+    values = (report.time.strftime("%Y-%m-%d %H:%M:%S"), report.air_temp,
+        None, report.rel_hum, report.dew_point,
+        report.wind_speed, report.wind_dir, report.wind_gust, 
+        report.sun_dur, report.rainfall, report.sta_pres,
+        report.msl_pres, None, None, None)
+
+    query = query_database(config.main_db_path, QUERY, values)
+    
+    if query == True:
+        if config.report_uploading == True:
+            query = query_database(config.upload_db_path, QUERY, values)
+
+            if query == False:
+                helpers.log(None, "coord", "operation_log_report() 5")
+    else: helpers.log(None, "coord", "operation_log_report() 4")
+
 def dew_point(AirT, RelH):
     """ Calculates dew point using the same formula the Met Office uses
     """

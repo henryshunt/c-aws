@@ -2,7 +2,6 @@ import os
 from datetime import datetime, timezone
 from RPi import GPIO as gpio
 import time
-from threading import Thread
 
 from routines import config
 from routines import helpers
@@ -21,7 +20,6 @@ class Coordinator():
         self.clock = None
         self.sampler = None
         self.subsys_support = None
-        self.sampling = False
 
     def startup(self):
         helpers.log(None, "coord", "Startup")
@@ -40,15 +38,13 @@ class Coordinator():
 
         self.clock = Clock(14)
         self.clock.open()
-        self.clock.on_tick = self.on_clock_tick
+        self.clock.on_tick = self.on_tick
 
         helpers.log(self.clock.get_time(), "coord", "Opened connection to clock")
 
         if not self.file_system():
             gpio.output(config.error_led_pin, gpio.HIGH)
             return
-
-        # self.camera()
 
         self.sampler = Sampler()
         
@@ -125,80 +121,5 @@ class Coordinator():
             if free_space == None or free_space < 0.1:
                 helpers.init_error(7, True, True)
     
-    def on_clock_tick(self, time):
-        if not self.sampling:
-            if time.second == 0:
-                try:
-                    self.sampler.start(time)
-                    self.sampling = True
-                    helpers.log(self.clock.get_time(), "coord", "Started sampling")
-                except:
-                    helpers.log(self.clock.get_time(), "coord", "Failed to start sampling")
-                    gpio.output(config.error_led_pin, gpio.HIGH)
-            return
-
-        try:
-            self.sampler.sample(time)
-
-            if config.sensors["camera"]["enabled"] == True:
-                pass
-        except:
-            gpio.output(config.error_led_pin, gpio.HIGH)
-            return
-
-        if time.second == 0:
-            Thread(target=self.top_of_minute, args=(time,)).start()
-
-            # new Thread(() =>
-            # {
-            #     LogReport(e.Time);
-            #     // Transmitter.Transmit();
-            # }).Start()
-
-    def top_of_minute(self, time):
-        gpio.output(config.data_led_pin, gpio.HIGH)
-        gpio.output(config.error_led_pin, gpio.LOW)
-
-        report = self.sampler.report(time)
-        from pprint import pprint
-        pprint(vars(report))
-        print("")
-
-        self.write_report(report)
-        gpio.output(config.data_led_pin, gpio.LOW)
-
-    # def log_report(time):
-    #     Stopwatch ledStopwatch = new Stopwatch()
-    #     ledStopwatch.Start()
-
-    #     gpio.Write(config.dataLedPin, PinValue.High)
-
-    #     Report report = sampler.Report(time)
-    #     Database.WriteReport(report)
-
-    #     # Ensure the data LED stays on for at least 1.5 seconds
-    #     ledStopwatch.Stop()
-    #     if (ledStopwatch.ElapsedMilliseconds < 1500)
-    #         Thread.Sleep(1500 - (int)ledStopwatch.ElapsedMilliseconds)
-
-    #     gpio.Write(config.dataLedPin, PinValue.Low)
-
-    def write_report(self, frame):
-        QUERY = ("INSERT INTO reports VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, "
-                + "?, ?, ?, ?)")
-
-        values = (frame.time.strftime("%Y-%m-%d %H:%M:%S"), frame.air_temp,
-            None, frame.rel_hum, frame.dew_point,
-            frame.wind_speed, frame.wind_dir, frame.wind_gust, 
-            frame.sun_dur, frame.rainfall, frame.sta_pres,
-            frame.msl_pres, None, None, None)
-
-        query = data.query_database(config.main_db_path, QUERY, values)
-        
-        if query == True:
-            if config.report_uploading == True:
-                query = data.query_database(config.upload_db_path, QUERY, values)
-
-                if query == False:
-                    helpers.log(None, "coord", "operation_log_report() 5")
-        else: helpers.log(None, "coord", "operation_log_report() 4")
+    def on_tick(self, time):
+        self.sampler.tick(time)

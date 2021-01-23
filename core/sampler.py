@@ -5,6 +5,7 @@ from threading import Thread
 import string
 import random
 import statistics
+from pprint import pprint
 
 import daemon
 import RPi.GPIO as gpio
@@ -25,6 +26,7 @@ from routines.data import Report
 
 class Sampler:
     def __init__(self):
+        self._is_sampling = False
         self._start_time = None
         self._air_temp = None
         self._air_temp_samples = {}
@@ -89,7 +91,7 @@ class Sampler:
                 helpers.log(None, "sampler", "Failed to open pressure sensor")
                 raise SensorError("Failed to open pressure sensor", e)
 
-    def start(self, time):
+    def _start(self, time):
         self._start_time = time
 
         if config.sensors["satellite"]["enabled"] == True:
@@ -102,7 +104,7 @@ class Sampler:
         if config.sensors["rainfall"]["enabled"] == True:
             self._rainfall.pause = False
 
-    def sample(self, time):
+    def _sample(self, time):
         if config.sensors["air_temp"]["enabled"] == True:
             try:
                 self._air_temp_samples[time] = self._air_temp.sample()
@@ -150,7 +152,7 @@ class Sampler:
                 helpers.log(time, "sampler", "Failed to sample pressure sensor")
                 raise SensorError("Failed to sample pressure sensor", e)
 
-    def report(self, time):
+    def _gen_report(self, time):
         report = Report(time)
 
         if config.sensors["air_temp"]["enabled"] == True:
@@ -168,11 +170,11 @@ class Sampler:
             report.rel_hum = statistics.mean(samples)
         
         if config.sensors["satellite"]["enabled"] == True:
-            # if time - timedelta(minutes=10) >= self._start_time:
-            wind = self._calc_wind_values(time)
-            report.wind_speed = wind[0]
-            report.wind_gust = wind[1]
-            report.wind_dir = wind[2]
+            if time - timedelta(minutes=10) >= self._start_time:
+                wind = self._calc_wind_values(time)
+                report.wind_speed = wind[0]
+                report.wind_gust = wind[1]
+                report.wind_dir = wind[2]
 
         if config.sensors["sun_dur"]["enabled"] == True:
             samples = []
@@ -248,3 +250,41 @@ class Sampler:
                 del self._wind_dir_samples[i]
 
         return (speed, gust, direction)
+
+    def tick(self, time):
+        if not self._is_sampling:
+            if time.second == 0:
+                try:
+                    self._start(time)
+                    self._is_sampling = True
+                    helpers.log(time, "coord", "Started sampling")
+                except:
+                    helpers.log(time, "coord", "Failed to start sampling")
+                    gpio.output(config.error_led_pin, gpio.HIGH)
+            return
+
+        try:
+            self._sample(time)
+            if config.sensors["camera"]["enabled"] == True:
+                pass
+        except:
+            gpio.output(config.error_led_pin, gpio.HIGH)
+            return
+
+        if time.second == 0:
+            Thread(target=self._report, args=(time,)).start()
+
+    def _report(self, timestamp):
+        gpio.output(config.data_led_pin, gpio.HIGH)
+        gpio.output(config.error_led_pin, gpio.LOW)
+        start = time.perf_counter()
+
+        report = self._gen_report(timestamp)
+        data.write_report(report)
+        pprint(vars(report))
+        print("")
+
+        end = time.perf_counter()
+        if end - start < 1.5:
+            time.sleep(1.5 - (end - start))
+        gpio.output(config.data_led_pin, gpio.LOW)
