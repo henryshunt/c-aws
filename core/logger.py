@@ -24,7 +24,7 @@ from routines.helpers import SensorError
 from routines.data import Report
 
 
-class Sampler:
+class Logger:
     def __init__(self):
         self._is_sampling = False
         self._start_time = None
