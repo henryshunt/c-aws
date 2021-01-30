@@ -26,8 +26,9 @@ from routines.data import Report
 
 class Logger:
     def __init__(self):
-        self._is_sampling = False
         self._start_time = None
+        self._is_sampling = False
+
         self._air_temp = None
         self._air_temp_samples = {}
         self._rel_hum = None
@@ -48,7 +49,7 @@ class Logger:
                 self._air_temp = MCP9808()
                 self._air_temp.open()
             except Exception as e:
-                helpers.log(None, "sampler", "Failed to open air_temp sensor")
+                helpers.log(None, "logger", "Failed to open air_temp sensor")
                 raise SensorError("Failed to open air_temp sensor", e)
 
         if config.sensors["rel_hum"]["enabled"] == True:
@@ -56,7 +57,7 @@ class Logger:
                 self._rel_hum = HTU21D()
                 self._rel_hum.open()
             except Exception as e:
-                helpers.log(None, "sampler", "Failed to open rel_hum sensor")
+                helpers.log(None, "logger", "Failed to open rel_hum sensor")
                 raise SensorError("Failed to open rel_hum sensor", e)
 
         if config.sensors["satellite"]["enabled"] == True:
@@ -64,7 +65,7 @@ class Logger:
                 self._satellite = Satellite()
                 self._satellite.open()
             except Exception as e:
-                helpers.log(None, "sampler", "Failed to open connection to satellite")
+                helpers.log(None, "logger", "Failed to open connection to satellite")
                 raise SensorError("Failed to open connection to satellite", e)
 
         if config.sensors["sun_dur"]["enabled"] == True:
@@ -72,7 +73,7 @@ class Logger:
                 self._sun_dur = IMSBB(config.sensors["sun_dur"]["pin"])
                 self._sun_dur.open()
             except Exception as e:
-                helpers.log(None, "sampler", "Failed to open sun_dur sensor")
+                helpers.log(None, "logger", "Failed to open sun_dur sensor")
                 raise SensorError("Failed to open sun_dur sensor", e)
 
         if config.sensors["rainfall"]["enabled"] == True:
@@ -80,7 +81,7 @@ class Logger:
                 self._rainfall = RR111(config.sensors["rainfall"]["pin"])
                 self._rainfall.open()
             except Exception as e:
-                helpers.log(None, "sampler", "Failed to open rain sensor")
+                helpers.log(None, "logger", "Failed to open rain sensor")
                 raise SensorError("Failed to open rain sensor", e)
 
         if config.sensors["pressure"]["enabled"] == True:
@@ -88,7 +89,7 @@ class Logger:
                 self._pressure = BMP280()
                 self._pressure.open()
             except Exception as e:
-                helpers.log(None, "sampler", "Failed to open pressure sensor")
+                helpers.log(None, "logger", "Failed to open pressure sensor")
                 raise SensorError("Failed to open pressure sensor", e)
 
     def _start(self, time):
@@ -98,7 +99,7 @@ class Logger:
             try:
                 self._satellite.start()
             except Exception as e:
-                helpers.log(None, "sampler", "Failed to start satellite")
+                helpers.log(None, "logger", "Failed to start satellite")
                 raise SensorError("Failed to start satellite", e)
 
         if config.sensors["rainfall"]["enabled"] == True:
@@ -109,14 +110,14 @@ class Logger:
             try:
                 self._air_temp_samples[time] = self._air_temp.sample()
             except:
-                helpers.log(time, "sampler", "Failed to sample air_temp sensor")
+                helpers.log(time, "logger", "Failed to sample air_temp sensor")
                 raise SensorError("Failed to sample air_temp sensor", e)
 
         if config.sensors["rel_hum"]["enabled"] == True:
             try:
                 self._rel_hum_samples[time] = self._rel_hum.sample()
             except:
-                helpers.log(time, "sampler", "Failed to sample rel_hum sensor")
+                helpers.log(time, "logger", "Failed to sample rel_hum sensor")
                 raise SensorError("Failed to sample rel_hum sensor", e)
 
         if config.sensors["satellite"]["enabled"] == True:
@@ -128,31 +129,31 @@ class Logger:
                 if config.sensors["satellite"]["wind_dir"]["enabled"] == True:
                     self._wind_dir_samples[time] = sample["windDirection"]
             except Exception as e:
-                helpers.log(time, "sampler", "Failed to sample satellite")
+                helpers.log(time, "logger", "Failed to sample satellite")
                 raise SensorError("Failed to sample satellite", e)
 
         if config.sensors["sun_dur"]["enabled"] == True:
             try:
                 self._sun_dur_samples[time] = self._sun_dur.sample()
             except:
-                helpers.log(time, "sampler", "Failed to sample sun_dur sensor")
+                helpers.log(time, "logger", "Failed to sample sun_dur sensor")
                 raise SensorError("Failed to sample sun_dur sensor", e)
 
         if config.sensors["rainfall"]["enabled"] == True:
             try:
                 self._rainfall_samples[time] = self._rainfall.sample()
             except:
-                helpers.log(time, "sampler", "Failed to sample rain sensor")
+                helpers.log(time, "logger", "Failed to sample rain sensor")
                 raise SensorError("Failed to sample rain sensor", e)
 
         if config.sensors["pressure"]["enabled"] == True:
             try:
                 self._pressure_samples[time] = self._pressure.sample()
             except:
-                helpers.log(time, "sampler", "Failed to sample pressure sensor")
+                helpers.log(time, "logger", "Failed to sample pressure sensor")
                 raise SensorError("Failed to sample pressure sensor", e)
 
-    def _gen_report(self, time):
+    def _report(self, time):
         report = Report(time)
 
         if config.sensors["air_temp"]["enabled"] == True:
@@ -251,40 +252,41 @@ class Logger:
 
         return (speed, gust, direction)
 
-    def tick(self, time):
+    def tick(self, timestamp):
         if not self._is_sampling:
-            if time.second == 0:
+            if timestamp.second == 0:
                 try:
-                    self._start(time)
+                    self._start(timestamp)
                     self._is_sampling = True
-                    helpers.log(time, "coord", "Started sampling")
+                    helpers.log(timestamp, "logger", "Started sampling")
                 except:
-                    helpers.log(time, "coord", "Failed to start sampling")
+                    helpers.log(timestamp, "logger", "Failed to start sampling")
                     gpio.output(config.error_led_pin, gpio.HIGH)
+            else:
+                gpio.output(config.data_led_pin, gpio.HIGH)
+                time.sleep(0.25)
+                gpio.output(config.data_led_pin, gpio.LOW)
+                time.sleep(0.25)
+                gpio.output(config.data_led_pin, gpio.HIGH)
+                time.sleep(0.25)
+                gpio.output(config.data_led_pin, gpio.LOW)
             return
 
         try:
-            self._sample(time)
+            self._sample(timestamp)
             if config.sensors["camera"]["enabled"] == True:
                 pass
+
+            if timestamp.second == 0:
+                gpio.output(config.data_led_pin, gpio.HIGH)
+                gpio.output(config.error_led_pin, gpio.LOW)
+
+                report = self._report(timestamp)
+                data.write_report(report)
+                pprint(vars(report))
+                print("")
+
+                gpio.output(config.data_led_pin, gpio.LOW)
         except:
             gpio.output(config.error_led_pin, gpio.HIGH)
             return
-
-        if time.second == 0:
-            Thread(target=self._report, args=(time,)).start()
-
-    def _report(self, timestamp):
-        gpio.output(config.data_led_pin, gpio.HIGH)
-        gpio.output(config.error_led_pin, gpio.LOW)
-        start = time.perf_counter()
-
-        report = self._gen_report(timestamp)
-        data.write_report(report)
-        pprint(vars(report))
-        print("")
-
-        end = time.perf_counter()
-        if end - start < 1.5:
-            time.sleep(1.5 - (end - start))
-        gpio.output(config.data_led_pin, gpio.LOW)

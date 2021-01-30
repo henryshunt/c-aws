@@ -43,10 +43,9 @@ class Coordinator():
         if not self.file_system():
             gpio.output(config.error_led_pin, gpio.HIGH)
             return
-
-        self._logger = Logger()
         
         try:
+            self._logger = Logger()
             self._logger.open()
         except:
             gpio.output(config.error_led_pin, gpio.HIGH)
@@ -58,6 +57,7 @@ class Coordinator():
         time.sleep(2.5)
         gpio.output(config.data_led_pin, gpio.LOW)
         gpio.output(config.error_led_pin, gpio.LOW)
+        time.sleep(0.5)
 
         helpers.log(self._clock.get_time(), "coord", "Starting clock")
         self._clock.start()
